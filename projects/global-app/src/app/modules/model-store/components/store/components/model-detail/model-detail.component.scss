@@ -1,0 +1,62 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.model-detail-content {
+  &--header {
+    margin-block: 20px;
+    display: flex;
+
+    img {
+      width: 300px;
+      object-fit: contain;
+    }
+
+    .detail-column {
+      margin-inline-start: 20px;
+
+      &--author {
+        display: flex;
+        align-items: center;
+
+        mat-icon, h4 {
+          margin-block: 20px;
+          margin-inline-end: 5px;
+        }
+      }
+    }
+
+    &.header-container-size-xs{
+      flex-direction: column;
+
+      .detail-column {
+        margin-inline: 0;
+      }
+    }
+  }
+
+  &--description {
+    div {
+      padding-block: 5px;
+      white-space: pre-line;
+    }
+
+    h3 {
+      margin-block-end: 10px;
+    }
+
+    p {
+      margin-block-start: 0;
+    }
+  }
+
+  &--predict-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}

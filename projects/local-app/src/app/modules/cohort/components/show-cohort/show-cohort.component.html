@@ -1,0 +1,19 @@
+<div class="container">
+    <mat-stepper #stepper class="stepper" [selectedIndex]="selectedStepIndex">
+        <mat-step state="cohort">
+            <ng-template matStepLabel><span [innerHTML]="getCohortName()"></span></ng-template>
+            <app-cohort-detail
+                    [cohortDetailFormGroup]="cohortDetailForm"
+            />
+        </mat-step>
+
+        <mat-step label="Patients" state="patients" [editable]="true">
+            <app-cohort-confirmation
+                    [cohortPatients]="this.cohortPatients"
+                    (confirmCohort)="closeCohort()"
+                    [confirmButtonLabel]="'Close'"
+                    [cohortQueriabilityForm]="this.cohortQueriabilityForm"
+            />
+        </mat-step>
+    </mat-stepper>
+</div>

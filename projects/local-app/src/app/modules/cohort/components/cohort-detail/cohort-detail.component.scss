@@ -1,0 +1,24 @@
+.cohort-detail-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  margin-top: 20px;
+
+  mat-form-field {
+    display: block;
+  }
+
+  .cohort-detail-form-xs,
+  .cohort-detail-form-sm,
+  .cohort-detail-form-md {
+    width: 80%;
+  }
+
+  .cohort-detail-form-lg,
+  .cohort-detail-form-xl {
+    width: 50%;
+  }
+}
+

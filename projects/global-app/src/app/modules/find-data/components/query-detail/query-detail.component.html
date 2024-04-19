@@ -1,0 +1,54 @@
+<div class="dialog">
+    <h1 mat-dialog-title class="dialog--header">
+        Query builder
+    </h1>
+
+    <mat-divider />
+
+    <div mat-dialog-content class="dialog--content">
+        <div class="query-detail">
+            <form [formGroup]="queryDetailForm">
+                <mat-form-field>
+                    <mat-label>Name of the query</mat-label>
+                    <input matInput placeholder="Name of the query" formControlName="name" required>
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label>Description</mat-label>
+                    <textarea matInput placeholder="Description" rows="3" formControlName="description" required></textarea>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="query-builder--container">
+            <ng-container *ngFor="let queryListItem of queryList">
+                <app-query-builder-item
+                    [queryItem]="queryListItem"
+                    (removeQueryItem)="removeQueryItem($event)"
+                >
+                </app-query-builder-item>
+            </ng-container>
+
+            <button mat-icon-button (click)="onAddQueryItem()">
+                <mat-icon>add_circle_outline</mat-icon>
+            </button>
+
+        </div>
+
+        <div *ngIf="queryList.length !== 0" class="query-execution--container">
+            <button mat-raised-button color="primary" type="submit" (click)="onRunQuery()">Run query</button>
+
+            <div *ngIf="isQueryExecuted" class="query-result">
+                Result: {{ getResultLabel() }}
+            </div>
+        </div>
+
+    </div>
+
+    <mat-divider />
+
+    <div mat-dialog-actions class="dialog--footer">
+        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">{{ getSubmitButtonLabel() }}</button>
+    </div>
+</div>

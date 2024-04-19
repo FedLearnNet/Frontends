@@ -1,0 +1,17 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.header-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.action-buttons-row {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+.applications {
+  white-space: pre-line;
+  padding-block: 10px;
+}

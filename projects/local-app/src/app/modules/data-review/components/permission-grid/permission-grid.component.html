@@ -1,0 +1,51 @@
+<div class="permission-container">
+    <h2>Permissions</h2>
+
+    <div class="action-buttons-row">
+        <button mat-raised-button color="primary" (click)="addPermission()">
+            Add another permission
+        </button>
+    </div>
+
+    <mat-table [dataSource]="permissions" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+                <button mat-icon-button color="primary" (click)="editRow(element)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteRow(element)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="cohort">
+            <mat-header-cell *matHeaderCellDef>Cohort</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Cohort:</span>
+                <span>{{ element.cohort }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="groupOrUser">
+            <mat-header-cell *matHeaderCellDef>Group/ User</mat-header-cell>
+            <mat-cell *matCellDef="let element" class="group-or-user" [class.is-x-small-screen]="isXSmallScreen">
+                <span *ngIf="isXSmallScreen" class="column-name">Group/ User:</span>
+                <span>{{ element.groupOrUser }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="permissions">
+            <mat-header-cell *matHeaderCellDef>Permissions</mat-header-cell>
+            <mat-cell *matCellDef="let element" class="permissions" [class.is-x-small-screen]="isXSmallScreen">
+                <span *ngIf="isXSmallScreen" class="column-name">Permissions:</span>
+                <span [innerHTML]="getPermissions(element.permissions)"></span>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+</div>

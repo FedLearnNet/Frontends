@@ -1,0 +1,7 @@
+@use "@angular/material" as mat;
+
+@import "./styles";
+
+$primary-color: mat.get-color-from-palette($mb-frontend-primary);
+$secondary-color: mat.get-color-from-palette($mb-frontend-accent);
+$warn-color: mat.get-color-from-palette($mb-frontend-warn);

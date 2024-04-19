@@ -1,0 +1,17 @@
+<div class="cohort-detail-container">
+    <form [formGroup]="cohortDetailFormGroup" [ngClass]="'cohort-detail-form-' + screenSize">
+        <mat-form-field>
+            <mat-label>Name of the cohort</mat-label>
+            <input matInput placeholder="Name of the cohort" formControlName="name" required>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput placeholder="Description" formControlName="description" required rows="5"></textarea>
+        </mat-form-field>
+
+        <div>
+            <button mat-raised-button color="primary" matStepperNext>Next</button>
+        </div>
+    </form>
+</div>

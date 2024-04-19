@@ -1,0 +1,20 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+table {
+  .mat-column-actions {
+    width: 10%;
+  }
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.pending {
+  color: $warn-color;
+}
+
+.requested-data {
+  white-space: pre-line;
+  padding-block: 10px;
+}

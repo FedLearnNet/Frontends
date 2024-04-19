@@ -1,0 +1,40 @@
+<div class="container">
+    <mat-table [dataSource]="predictions" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+                <button mat-icon-button color="primary" (click)="showPredictionResult(element.id)">
+                    <mat-icon>preview</mat-icon>
+                </button>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>AI</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">AI:</span>
+                <span>{{ element.model.name }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Status:</span>
+                <span>{{element.status}}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Date:</span>
+                <span>{{ element.date.toISOString().substring(0, 10) }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+</div>

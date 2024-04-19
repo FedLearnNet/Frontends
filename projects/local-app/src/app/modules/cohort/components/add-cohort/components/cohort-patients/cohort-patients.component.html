@@ -1,0 +1,97 @@
+<div class="cohort-patients-container">
+    <div class="action-buttons-row--header">
+        <button mat-raised-button color="primary" (click)="openPatientDetailModal()">Add patient</button>
+    </div>
+
+    <div class="queriability-buttons-row" [class.is-x-small-screen]="isXSmallScreen">
+        <form [formGroup]="cohortQueriabilityForm" class="queriability-buttons-row--form">
+            <div class="queriability-buttons-row--form--title">
+                Queriability
+            </div>
+
+            <mat-form-field class="queriability-buttons-row--form--files">
+                <mat-label>Files</mat-label>
+                <mat-select formControlName="files">
+                    <mat-option *ngFor="let queriability of queriabilityOptions" [value]="queriability.value">
+                        {{ queriability.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="queriability-buttons-row--form--dietary-score">
+                <mat-label>Dietary score</mat-label>
+                <mat-select formControlName="dietaryScore">
+                    <mat-option *ngFor="let queriability of queriabilityOptions" [value]="queriability.value">
+                        {{ queriability.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="queriability-buttons-row--form--colorectal-cancer">
+                <mat-label>Colorectal cancer</mat-label>
+                <mat-select formControlName="colorectalCancer">
+                    <mat-option *ngFor="let queriability of queriabilityOptions" [value]="queriability.value">
+                        {{ queriability.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <mat-table [dataSource]="getCohortPatients()" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+                <div>
+                    <button mat-icon-button color="primary" (click)="editRow(element)">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteRow(element)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="id">
+            <mat-header-cell *matHeaderCellDef>Patient id</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Patient id:</span>
+                <span>{{ element.patientId }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="files">
+            <mat-header-cell *matHeaderCellDef>Microbiome file</mat-header-cell>
+            <mat-cell *matCellDef="let element" class="file-names">
+                <span *ngIf="isXSmallScreen" class="column-name">Microbiome file:</span>
+                <span>{{ getFilesName(element.files) }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="dietaryScore">
+            <mat-header-cell *matHeaderCellDef>Dietary score</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Dietary score:</span>
+                <span>{{ element.dietaryScore }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="colorectalCancer">
+            <mat-header-cell *matHeaderCellDef>Colorectal cancer</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Colorectal cancer:</span>
+                <span>{{ element.colorectalCancer ? "True" : "False" }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <div class="action-buttons-row">
+        <button mat-raised-button color="primary" matStepperPrevious>Previous</button>
+        <button mat-raised-button color="primary" matStepperNext>Next</button>
+    </div>
+</div>

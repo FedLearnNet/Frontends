@@ -1,0 +1,47 @@
+<div class="dialog">
+    <h1 mat-dialog-title class="dialog--header">
+        {{ getDialogTitle() }}
+    </h1>
+
+    <mat-divider />
+
+    <div mat-dialog-content class="dialog--content">
+        <form [formGroup]="patientData">
+            <mat-form-field>
+                <mat-label>Patient id</mat-label>
+                <input matInput placeholder="Patient id" formControlName="patientId" required readonly>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Age</mat-label>
+                <input matInput type="number" placeholder="Age" formControlName="age" required>
+            </mat-form-field>
+
+            <lib-drag-and-drop-file
+                [files]="patientData.get('files')"
+                (filesChange)="filesChanged($event)"
+            />
+
+            <mat-form-field>
+                <mat-label>Dietary score</mat-label>
+                <input matInput  type="number" placeholder="Dietary score" formControlName="dietaryScore" required>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Colorectal cancer</mat-label>
+                <mat-select formControlName="colorectalCancer">
+                    <mat-option *ngFor="let colorectalCancerValue of colorectalCancerOptions" [value]="colorectalCancerValue.value">
+                        {{ colorectalCancerValue.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <mat-divider />
+
+    <div mat-dialog-actions class="dialog--footer">
+        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" (click)="onAdd()">{{ getSubmitButtonLabel() }}</button>
+    </div>
+</div>

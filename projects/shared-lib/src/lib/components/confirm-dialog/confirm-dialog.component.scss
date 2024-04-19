@@ -1,0 +1,12 @@
+.dialog {
+  &--content {
+    align-items: start;
+    text-align: start;
+  }
+
+  &--footer {
+    button:first-child {
+      margin-right: 20px;
+    }
+  }
+}
