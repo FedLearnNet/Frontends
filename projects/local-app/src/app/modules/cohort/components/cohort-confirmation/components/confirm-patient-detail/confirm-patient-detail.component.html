@@ -1,0 +1,41 @@
+<div class="dialog">
+    <h1 mat-dialog-title class="dialog--header">
+        Show patient
+    </h1>
+
+    <mat-divider />
+
+    <div mat-dialog-content class="dialog--content">
+        <form [formGroup]="patientDetailForm">
+            <mat-form-field>
+                <mat-label>Age</mat-label>
+                <input matInput type="number" placeholder="Age" formControlName="age" required>
+            </mat-form-field>
+
+            <lib-drag-and-drop-file
+                    [files]="patientDetailForm.get('files')"
+                    [disabled]="true"
+            />
+
+            <mat-form-field>
+                <mat-label>Dietary score</mat-label>
+                <input matInput  type="number" placeholder="Dietary score" formControlName="dietaryScore" required>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Colorectal cancer</mat-label>
+                <mat-select formControlName="colorectalCancer">
+                    <mat-option *ngFor="let colorectalCancerValue of colorectalCancerOptions" [value]="colorectalCancerValue.value">
+                        {{ colorectalCancerValue.label }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </form>
+    </div>
+
+    <mat-divider />
+
+    <div mat-dialog-actions class="dialog--footer">
+        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+    </div>
+</div>

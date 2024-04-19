@@ -1,0 +1,72 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "paths": {
+      // global-app paths
+      "@global-app/find-data/*": [
+        "projects/global-app/src/app/modules/find-data/*"
+      ],
+      "@global-app/model-store/*": [
+        "projects/global-app/src/app/modules/model-store/*"
+      ],
+      "@global-app/env/*": [
+        "projects/global-app/src/environments/*"
+      ],
+      "@global-app/utils/*": [
+        "projects/global-app/src/app/utils/*"
+      ],
+
+      // local-app paths
+      "@local-app/cohort/*": [
+        "projects/local-app/src/app/modules/cohort/*"
+      ],
+      "@local-app/data-review/*": [
+        "projects/local-app/src/app/modules/data-review/*"
+      ],
+      "@local-app/env/*": [
+        "projects/local-app/src/environments/*"
+      ],
+      "@local-app/utils/*": [
+        "projects/local-app/src/app/utils/*"
+      ],
+
+      // shared-lib paths
+      "@shared-lib/*": [
+        "projects/shared-lib/src/lib/*"
+      ],
+      "shared-lib": [
+        "./dist/shared-lib"
+      ]
+    },
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom",
+      "esnext.asynciterable",
+    ],
+    "strictPropertyInitialization": false
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}

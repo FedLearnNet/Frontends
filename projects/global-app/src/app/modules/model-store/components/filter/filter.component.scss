@@ -1,0 +1,23 @@
+.filter {
+  &--card-header {
+    padding-bottom: 16px;
+
+    h2 {
+      margin-block: 0;
+    }
+  }
+
+  &--card-content {
+    padding-top: 16px;
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    .search-prefix,
+    .search-suffix {
+      color: #b5b5b5;
+      padding-inline: 5px;
+    }
+  }
+}

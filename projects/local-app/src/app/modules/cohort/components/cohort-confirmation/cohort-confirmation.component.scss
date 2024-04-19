@@ -1,0 +1,30 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.cohort-confirmation-container {
+  margin-top: 20px;
+
+  .action-buttons-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    text-align: center;
+
+    button {
+      margin: 20px 10px 20px 0;
+    }
+
+    &--header {
+      margin-bottom: 20px;
+    }
+  }
+
+  //mat-form-field {
+  //  display: block;
+  //}
+  //
+  //.file-names {
+  //  white-space: pre-line;
+  //}
+}
+

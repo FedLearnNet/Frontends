@@ -1,0 +1,27 @@
+<div class="container">
+    <mat-stepper linear #stepper class="stepper" (selectionChange)="onStepChange($event)" [labelPosition]="isLargeScreen ? 'end' : 'bottom'">
+        <mat-step [stepControl]="cohortDetailForm" state="cohort">
+            <ng-template matStepLabel><span [innerHTML]="getCohortName()"></span></ng-template>
+            <app-cohort-detail
+                    [cohortDetailFormGroup]="cohortDetailForm"
+            />
+        </mat-step>
+
+        <mat-step [completed]="isAddPatientStepCompleted()" label="Patients" state="patients">
+            <app-cohort-patients
+                    [(cohortPatients)]="this.cohortPatients"
+                    [cohortQueriabilityForm]="this.cohortQueriabilityForm"
+            />
+        </mat-step>
+
+        <mat-step label="Confirm" state="confirm">
+            <ng-template matStepContent>
+                <app-cohort-confirmation
+                        [cohortPatients]="this.cohortPatients"
+                        (confirmCohort)="submitCohort()"
+                        [cohortQueriabilityForm]="this.cohortQueriabilityForm"
+                />
+            </ng-template>
+        </mat-step>
+    </mat-stepper>
+</div>

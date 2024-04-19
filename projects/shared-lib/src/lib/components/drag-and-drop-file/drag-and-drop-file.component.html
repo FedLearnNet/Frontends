@@ -1,0 +1,25 @@
+<div class="drag-and-drop">
+    <div class="drag-and-drop--container" [ngClass]="{'invalid': isInvalid(), 'disabled': disabled }" drag-and-drop (fileDropped)="onFileDropped($event)">
+        <input type="file" id="fileDropRef" multiple (change)="fileBrowseHandler($event.target)"/>
+
+        <mat-icon aria-hidden="false" aria-label="Upload" fontIcon="upload" />
+
+        <label>
+            Drag and drop or browse and chose the file you want to upload from your computer{{ isRequired() ? '*' : '' }}
+        </label>
+    </div>
+
+    <div class="drag-and-drop--files-list" [ngClass]="{'disabled': disabled}">
+        <div class="single-file" *ngFor="let file of uploadedFiles; let i = index">
+            <div class="info">
+                <h4 class="name">{{ file?.name }}</h4>
+                <p class="size">{{ formatBytes(file?.size) }}</p>
+            </div>
+
+            <div class="delete" (click)="deleteFile(i)">
+                <mat-icon aria-hidden="false" aria-label="Delete" fontIcon="delete" />
+            </div>
+        </div>
+    </div>
+
+</div>

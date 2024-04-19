@@ -1,0 +1,69 @@
+<div>
+    <h2>Trainings</h2>
+
+    <mat-table [dataSource]="trainings" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+                <button mat-icon-button color="primary" [class.hide]="!isTrainingPending(element.status)" (click)="acceptTraining(element)">
+                    <mat-icon>check</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" [class.hide]="!isTrainingPending(element.status)" (click)="rejectTraining(element)">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="user">
+            <mat-header-cell *matHeaderCellDef>User</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">User:</span>
+                <span>{{ element.user }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="requestedData">
+            <mat-header-cell *matHeaderCellDef>Requested Data</mat-header-cell>
+            <mat-cell *matCellDef="let element" class="requested-data">
+                <span *ngIf="isXSmallScreen" class="column-name">Requested Data:</span>
+                <span [innerHTML]="getRequestedDataLabel(element.requestedData)"></span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="workflow">
+            <mat-header-cell *matHeaderCellDef>Workflow</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Workflow:</span>
+                <span [innerHTML]="getWorkflowLabel(element.workflow)"></span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+            <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Description:</span>
+                <span>{{ element.description }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Date:</span>
+                <span>{{ getDateLabel(element.date) }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+                <span *ngIf="isXSmallScreen" class="column-name">Status:</span>
+                <span [class.pending]="isTrainingPending(element.status)">{{ element.status }}</span>
+            </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+</div>

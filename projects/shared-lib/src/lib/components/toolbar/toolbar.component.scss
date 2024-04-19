@@ -1,0 +1,12 @@
+@use "@angular/material" as mat;
+
+@import "../../styles/styles";
+
+mat-toolbar,
+mat-drawer {
+  background-color: mat.get-color-from-palette($mb-frontend-primary, 100);
+
+  button {
+    font-size: large;
+  }
+}

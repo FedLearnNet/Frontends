@@ -1,0 +1,32 @@
+<div class="dialog">
+    <h1 mat-dialog-title class="dialog--header">
+        Prediction result
+    </h1>
+
+    <mat-divider />
+
+    <div mat-dialog-content class="dialog--content">
+        <div class="prediction-result-grid">
+            <mat-table [dataSource]="predictionResults" class="mat-elevation-z8">
+                <ng-container matColumnDef="id">
+                    <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.id}} </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="value">
+                    <mat-header-cell *matHeaderCellDef>prediction_CRC</mat-header-cell>
+                    <mat-cell *matCellDef="let element"> {{element.value}} </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+        </div>
+    </div>
+
+    <mat-divider />
+
+    <div mat-dialog-actions class="dialog--footer">
+        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+    </div>
+</div>
