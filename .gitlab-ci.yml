@@ -1,0 +1,82 @@
+
+stages:
+  - check
+  - build
+  - deploy
+
+variables:
+  CI_MAIN_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/data-importer-api
+  CI_MAIN_IMAGE_STAGING: $CI_MAIN_IMAGE:staging
+  CI_MAIN_IMAGE_PROD: $CI_MAIN_IMAGE:prod
+  CI_MAIN_IMAGE_LATEST: $CI_MAIN_IMAGE:latest
+
+  TAR_FILE_DIR: ".images/"
+  TAR_FILE_NAME_MAIN: "main-image.tar"
+
+  TRIVY_IMAGE: trivy:latest
+  TRIVY_TAR: trivy_latest.tar
+
+  CI_TEMPLATE_PROJECT: 'cosybio/federated-learning/federated_db/meta'
+# include:
+#   - project: $CI_TEMPLATE_PROJECT
+#     ref: 'main'
+#     file: 'templates/ci/.gitlab-ci-security.yml'
+#   - project: $CI_TEMPLATE_PROJECT
+#     ref: 'main'
+#     file: 'templates/ci/.gitlab-ci-deploy.yml'
+
+.docker_login: &docker_login
+  - docker info
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+.load_target_image: &load_target_image
+  - docker image load -i $TAR_FILE_DIR$TAG-$TAR_FILE_NAME
+
+cache:
+  key:
+    files:
+      - package.json
+  paths:
+    - node_modules
+
+check:audit:
+  image: node:20-alpine
+  stage: check
+  script:
+    - npm install
+    - npm audit --production
+
+check:lint:
+  image: node:20-alpine
+  stage: check
+  script:
+    - npm run lint
+
+check:test:
+  stage: check
+  image: node:20-alpine
+  before_script:
+    # Download Chrome
+    - apk add chromium
+    - export CHROME_BIN=/usr/bin/chromium-browser
+    - export CHROME_PATH=/usr/lib/chromium/
+  script:
+    - npm test
+    - npm rebuild
+
+.check:build:
+  stage: check
+  image: node:20-alpine
+  script:
+    - npm run build -- --configuration=$TAG --base-href=/
+
+check:build:staging:
+  extends: .check:build
+  variables:
+    TAG: staging
+
+check:build:production:
+  extends: .check:build
+  variables:
+    TAG: production
+
