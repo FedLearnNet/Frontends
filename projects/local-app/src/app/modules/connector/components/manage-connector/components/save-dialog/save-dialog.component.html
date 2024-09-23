@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Save Connector</h2>
+<mat-dialog-content>
+  <p>What's your Name and your Description for your Connector</p>
+  <mat-form-field>
+    <mat-label>Name</mat-label>
+    <input matInput [(ngModel)]="name"/>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Description</mat-label>
+    <textarea matInput [(ngModel)]="description" placeholder="This connector is used for ..."></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="save()">Ok</button>
+</mat-dialog-actions>

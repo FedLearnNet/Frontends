@@ -1,7 +1,7 @@
-import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Application, Group, Permission } from '@local-app/data-review/models';
+import { Component, ViewChild, ViewEncapsulation, OnInit } from '@angular/core';
+import { Application, Permission } from '@local-app/data-review/models';
 import { MatDialog } from '@angular/material/dialog';
-import { PermissionDetailComponent } from '@local-app/data-review/components/permission-grid/components/permission-detail/permission-detail.component';
+import { PermissionDetailComponent } from '@local-app/data-review/components/permission-detail/permission-detail.component';
 import { PermissionService } from '@local-app/data-review/services/permission.service';
 import { isNull } from 'lodash';
 import { MatTable } from '@angular/material/table';
@@ -16,9 +16,9 @@ import { XSMALL } from '@shared-lib/constants';
   styleUrl: './permission-grid.component.scss',
   encapsulation: ViewEncapsulation.None,
 })
-export class PermissionGridComponent {
+export class PermissionGridComponent implements OnInit {
   isXSmallScreen: boolean = false;
-  groupsAndUsers: Group[];
+  //groupsAndUsers: Group[]; //TODO needed?
   permissions: Permission[];
   applications: Application[];
 
@@ -76,7 +76,7 @@ export class PermissionGridComponent {
     });
   }
 
-  getPermissions(permissions: {}): string {
+  getPermissions(permissions: Record<string, any>): string {
     let permissionLabel = '';
     const permissionLabels: any = {
       querySampleThreshold: 'Query must include at least {{input}} samples',

@@ -1,0 +1,51 @@
+<div class="dialog">
+  <h1 mat-dialog-title class="dialog--header">
+    Schemas
+  </h1>
+
+  <mat-divider/>
+
+  <div mat-dialog-content class="dialog--content schema-list-content">
+    <div *ngIf="schemaList.length === 0">
+      NO AVAILABLE SCHEMAS
+    </div>
+
+    <div class="schema-list-container">
+      <mat-grid-list [cols]="cols" [rowHeight]="rowHeight" gutterSize="10px"
+                     class="schema-list-container--grid-list">
+        <mat-grid-tile *ngFor="let schema of schemaList" class="mat-elevation-z6">
+
+          <mat-card
+            class="schema-list-container--card"
+            [class.selected-schema-card]="isSchemaSelected(schema)"
+            (click)="onChooseSchema(schema)"
+          >
+            <mat-card-header>
+              <mat-card-title class="schema-list-container--card-title">{{ schema.name }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="schema-list-container--card-content">
+              <p [ngClass]="'schema-list-description-' + screenSize">{{ schema.description }}</p>
+              <button mat-raised-button color="primary" *ngIf="!isSchemaSelected(schema); else elseBlock"
+                      (click)="onChooseSchema(schema)">
+                Select
+              </button>
+              <ng-template #elseBlock>
+                <div>
+                  <mat-icon>check_outlined</mat-icon>
+                </div>
+              </ng-template>
+            </mat-card-content>
+          </mat-card>
+
+        </mat-grid-tile>
+      </mat-grid-list>
+    </div>
+  </div>
+
+  <mat-divider/>
+
+  <div mat-dialog-actions class="dialog--footer">
+    <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" type="submit" (click)="onSubscribe()"> Subscribe to schema</button>
+  </div>
+</div>

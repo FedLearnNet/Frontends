@@ -1,0 +1,24 @@
+<div class="container model-store" [ngClass]="'model-store-size-' + screenSize">
+    <div class="model-store--filter">
+        <app-filter
+                (filterChange)="onFilterChange($event)"
+        />
+    </div>
+    <div class="model-store--applications">
+        <mat-tab-group mat-stretch-tabs mat-align-tabs="center"
+                       [selectedIndex]="selectedTabIndex.value"
+                       (selectedIndexChange)="selectedTabIndex.setValue($event)"
+        >
+            <mat-tab label="AI Store">
+                <app-store
+                        [filterChangeEvent]="eventSubject.asObservable()"
+                />
+            </mat-tab>
+            <mat-tab label="Predictions">
+                <app-prediction-grid
+                        [filterChangeEvent]="eventSubject.asObservable()"
+                />
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

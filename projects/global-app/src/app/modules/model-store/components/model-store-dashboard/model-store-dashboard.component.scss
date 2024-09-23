@@ -1,0 +1,30 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.model-store {
+  display: flex;
+
+  &.model-store-size-xs,
+  &.model-store-size-sm {
+    flex-direction: column;
+
+    .model-store--filter,
+    .model-store--applications {
+      width: 100%;
+      margin-inline: 0;
+      margin-bottom: 10px;
+    }
+  }
+
+  &--filter {
+    width: 20%;
+  }
+
+  &--applications {
+    width: 80%;
+    margin-inline-start: 20px;
+  }
+
+  ::ng-deep .mat-mdc-tab-header {
+    border-bottom: 1px solid #c5c5c6 !important;
+  }
+}

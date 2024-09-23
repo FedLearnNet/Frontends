@@ -15,14 +15,17 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { FindDataDashboardComponent } from '@global-app/find-data/components/dashboard/dashboard.component';
+import { FindDataDashboardComponent } from '@global-app/find-data/components/find-data-dashboard/find-data-dashboard.component';
 import { FindDataComponent } from '@global-app/find-data/find-data.component';
 import { FindDataRoutingModule } from '@global-app/find-data/find-data-routing.module';
 import { WorkflowDashboardComponent } from '@global-app/find-data/components/workflow-dashboard/workflow-dashboard.component';
-import { WorkflowDetailComponent } from '@global-app/find-data/components/workflow-dashboard/components/workflow-detail/workflow-detail.component';
+import { WorkflowDetailComponent } from '@global-app/find-data/components/workflow-detail/workflow-detail.component';
 import { QueryDetailComponent } from '@global-app/find-data/components/query-detail/query-detail.component';
-import { QueryBuilderItemComponent } from '@global-app/find-data/components/query-detail/components/query-builder-item/query-builder-item.component';
-import { ApplicationGridComponent } from '@global-app/find-data/components/workflow-dashboard/components/workflow-detail/components/application-grid/application-grid.component';
+import { QueryBuilderItemComponent } from '@global-app/find-data/components/query-builder-item/query-builder-item.component';
+import { ApplicationGridComponent } from '@global-app/find-data/components/application-grid/application-grid.component';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -53,6 +56,9 @@ import { ApplicationGridComponent } from '@global-app/find-data/components/workf
     MatCardModule,
     MatTooltipModule,
     MatMenuModule,
+    MatAutocompleteModule,
+    MatRadioModule,
+    MatProgressSpinnerModule,
   ],
   providers: [],
 })

@@ -5,8 +5,8 @@ $dietary-score-col-width: 20%;
 $colorectal-cancer-col-width: 20%;
 $title-col-width: $actions-col-width + $id-col-width;
 
-.queriability-buttons-row.is-x-small-screen {
-  .queriability-buttons-row--form {
+.queryability-buttons-row.is-x-small-screen {
+  .queryability-buttons-row--form {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -26,7 +26,7 @@ $title-col-width: $actions-col-width + $id-col-width;
   }
 }
 
-.queriability-buttons-row--form {
+.queryability-buttons-row--form {
   width: 100%;
   display: flex;
   justify-content: flex-start;

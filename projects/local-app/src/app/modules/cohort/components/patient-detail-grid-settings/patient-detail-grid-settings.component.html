@@ -1,0 +1,52 @@
+<div class="dialog">
+    <h1 mat-dialog-title class="dialog--header">
+        Grid settings
+    </h1>
+
+    <mat-divider />
+
+    <div mat-dialog-content class="dialog--content">
+        <form>
+            <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+                <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
+                    <button mat-icon-button disabled></button>
+                    <mat-checkbox
+                            color="primary"
+                            [disabled]="isDisabled(node)"
+                            [checked]="checklistSelection.isSelected(node)"
+                            (change)="dynamicColumnLeafItemSelectionToggle(node);"
+                    >
+                        {{ node.name }}
+                    </mat-checkbox>
+                </mat-tree-node>
+
+                <mat-tree-node *matTreeNodeDef="let node; when: hasNoContent" matTreeNodePadding>
+                </mat-tree-node>
+
+                <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding [disabled]="true">
+                    <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'toggle ' + node.filename">
+                        <mat-icon class="mat-icon-rtl-mirror">
+                            {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+                        </mat-icon>
+                    </button>
+                    <mat-checkbox
+                            color="primary"
+                            [disabled]="isDisabled(node)"
+                            [checked]="descendantsAllSelected(node)"
+                            [indeterminate]="descendantsPartiallySelected(node)"
+                            (change)="dynamicColumnSelectionToggle(node)"
+                    >
+                        {{ node.name }}
+                    </mat-checkbox>
+                </mat-tree-node>
+            </mat-tree>
+        </form>
+    </div>
+
+    <mat-divider />
+
+    <div mat-dialog-actions class="dialog--footer">
+        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">Submit grid settings</button>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+.selectors {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  .selector{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    .spacer{
+      width: 24px;
+    }
+    mat-form-field{
+      margin-bottom: -1.5em;
+    }
+  }
+}
+
+
+

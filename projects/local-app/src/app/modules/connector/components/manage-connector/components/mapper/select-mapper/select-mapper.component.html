@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>MAP {{ column }} TO FIELD</h2>
+<mat-dialog-content>
+
+  <div class="selectors">
+    @for (level of levels; track level; let i = $index) {
+      @if (i === 0 || selectedValues[i - 1]) {
+        <div class="selector">
+          @if (i > 1) {
+            <ng-container *ngFor="let _ of [].constructor(levels.length - 2);">
+              <div class="spacer"></div>
+            </ng-container>
+          }
+          @if (i > 0) {
+            <mat-icon>subdirectory_arrow_right</mat-icon>
+          }
+          <mat-form-field>
+            <mat-label>Search Level {{ i + 1 }}</mat-label>
+            <input type="text"
+                   placeholder="Select value"
+                   aria-label="Number"
+                   matInput
+                   [(ngModel)]="searchTexts[i]"
+                   (ngModelChange)="updateFilteredOptions(i)"
+                   [matAutocomplete]="auto">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelection(i, $event.option.value)">
+              @for (option of filteredOptions[i]; track option; let j = $index) {
+                <mat-option [value]="option.value">
+                  {{ option.viewValue }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+            @if (searchTexts[i]) {
+              <button matSuffix mat-icon-button aria-label="Clear" (click)="clearFilteredOptions(i)">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+      }
+    }
+  </div>
+  <mat-divider></mat-divider>
+  <mat-slide-toggle [(ngModel)]="clearValueIfBlank">
+    Clear Value if Blank
+    <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+  </mat-slide-toggle>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button (click)="clear()">Clear</button>
+  <button mat-button [disabled]="!isApplyEnabled()" (click)="apply()">Apply</button>
+</mat-dialog-actions>

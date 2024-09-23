@@ -1,0 +1,56 @@
+<div class="cohort-patients-container">
+    <div class="action-buttons-row--header">
+        <div class="action-buttons-row--start">
+            <button mat-raised-button color="primary" (click)="openSchemaDataDynamicFormModal()">Add patient</button>
+
+            <button mat-raised-button color="primary" (click)="onClickConnector()">Connectors</button>
+
+            <button mat-raised-button color="primary" (click)="openCohortQueryabilityModal()">Queryability</button>
+        </div>
+
+        <div class="action-buttons-row--end">
+            <button mat-raised-button color="primary" (click)="openPatientDetailGridSettingsModal()">Settings</button>
+        </div>
+    </div>
+
+    <div class="cohort-patients-container--table-wrapper">
+        <div class="cohort-patients-container--table-wrapper--table">
+            <mat-table [dataSource]="schemaDataList.results" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+                <ng-container matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                        <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+                        <div>
+                            <button mat-icon-button color="primary" (click)="editRow(element)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="deleteRow(element)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container *ngFor="let column of patientTableColumns" [matColumnDef]="column.path">
+                    <mat-header-cell *matHeaderCellDef>{{ getColumnName(column) }}</mat-header-cell>
+                    <mat-cell *matCellDef="let element">
+                        <span *ngIf="isXSmallScreen" class="column-name">{{ getColumnName(column) }}:</span>
+                        <span>{{ getRowValue(element, column ) }}</span>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+
+
+        </div>
+
+        <app-lib-mat-paginator
+            #paginator
+            tableName="cohort-patients"
+            [length]="schemaDataList.count"
+            (page)="onPageChange($event)">
+        </app-lib-mat-paginator>
+    </div>
+</div>

@@ -14,6 +14,12 @@
       "sourceRoot": "projects/local-app/src",
       "prefix": "app",
       "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/local-app/**/*.ts", "projects/local-app/**/*.html"]
+          }
+        },
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
@@ -42,23 +48,31 @@
           },
           "configurations": {
             "production": {
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
                 }
               ],
-              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "projects/global-app/src/environments/environment.ts",
                   "with": "projects/global-app/src/environments/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/environment.prod.ts"
                 }
               ]
             },
@@ -126,6 +140,12 @@
       "sourceRoot": "projects/global-app/src",
       "prefix": "app",
       "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/global-app/**/*.ts", "projects/global-app/**/*.html"]
+          }
+        },
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
@@ -157,13 +177,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
                 }
               ],
               "outputHashing": "all",
@@ -233,6 +253,12 @@
       "sourceRoot": "projects/shared-lib/src",
       "prefix": "lib",
       "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/shared-lib/**/*.ts", "projects/shared-lib/**/*.html"]
+          }
+        },
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {

@@ -1,0 +1,54 @@
+<h2 mat-dialog-title class="run-mode-title">Run {{ connector.name }}</h2>
+<mat-divider></mat-divider>
+<mat-dialog-content>
+  <mat-radio-group
+    aria-labelledby="example-radio-group-label"
+    class="run-mode-radio-group"
+    [(ngModel)]="runMode">
+    <mat-radio-button class="run-mode-radio" value="default">
+      <div class="run-mode-radio-label">
+        <strong> Run in Default Mode</strong>
+        <span>Every entity supplied in the run will be added or updated.</span>
+      </div>
+    </mat-radio-button>
+    <mat-radio-button class="run-mode-radio" value="comprehensive">
+      <div class="run-mode-radio-label">
+        <strong> Run in Comprehensive Mode</strong>
+        <span>Using default Comprehensive Mode Settings, any entities that were created in a previous run but missing
+          from the current run will be deleted. If you haven’t already, we recommend adding a Run Breaker.
+          Optionally, redefine the comprehensive set to be entities in a saved filter, and you can perform an update
+          on missing entities rather than deletion.</span>
+        @if (runMode === 'comprehensive') {
+          <span class="warning"> Are you sure? This run may delete content in the platform.</span>
+        }
+      </div>
+    </mat-radio-button>
+    <mat-radio-button class="run-mode-radio" value="delete">
+      <div class="run-mode-radio-label">
+        <strong>
+          Run in Deletion Mode</strong>
+        <span>Every entity supplied in the run will be deleted.</span>
+        @if (runMode === 'delete') {
+          <span class="warning"> Are you sure? This run may delete content in the platform.</span>
+        }
+      </div>
+    </mat-radio-button>
+  </mat-radio-group>
+
+  <mat-divider></mat-divider>
+  <mat-checkbox [(ngModel)]="dryRun" class="run-mode-radio">
+    <div class="run-mode-radio-label">
+      <strong>Make this a Dry Run</strong>
+      <span>  A Dry Run will run the connector without applying the updates to Content.
+        You can then review the results and optionally choose to apply the changes to Content
+        or abandon the results.</span>
+    </div>
+  </mat-checkbox>
+
+</mat-dialog-content>
+<mat-divider></mat-divider>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onRunClick()">Run</button>
+</mat-dialog-actions>

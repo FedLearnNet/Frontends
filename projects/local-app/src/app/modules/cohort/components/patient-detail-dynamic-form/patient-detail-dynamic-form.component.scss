@@ -1,0 +1,6 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.dynamic-form-component,
+::ng-deep mat-form-field {
+  width: 100%;
+}

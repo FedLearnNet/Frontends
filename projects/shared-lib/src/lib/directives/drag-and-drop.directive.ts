@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 
 @Directive({
-    selector: '[drag-and-drop]'
+    selector: '[appDragAndDrop]'
 })
 export class DragAndDropDirective {
     @Output() fileDropped = new EventEmitter<any>();
@@ -15,7 +15,7 @@ export class DragAndDropDirective {
         event.preventDefault();
         event.stopPropagation();
 
-        let files = event.dataTransfer.files;
+        const files = event.dataTransfer.files;
         if (files.length > 0) {
             this.fileDropped.emit(files);
         }

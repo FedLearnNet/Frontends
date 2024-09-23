@@ -1,0 +1,49 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.cohort-patients-container {
+  margin-top: 20px;
+
+  .action-buttons-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    text-align: center;
+
+    &--header {
+      display: flex;
+      margin-bottom: 20px;
+      justify-content: space-between;
+
+      button {
+        margin: 20px 10px 20px 0;
+      }
+    }
+
+    button {
+      margin: 20px 10px 20px 0;
+    }
+  }
+
+  &--table-wrapper {
+    overflow: hidden;
+    padding: 10px;
+
+    &--table {
+      overflow-x: auto;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+
+      .mat-elevation-z8 {
+        width: 100%;
+        display: block;
+        table-layout: fixed;
+      }
+
+      mat-header-cell, mat-cell {
+        min-width: 150px;
+      }
+    }
+  }
+}
+

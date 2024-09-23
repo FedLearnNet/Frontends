@@ -1,0 +1,15 @@
+.action-buttons-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 15px;
+}
+
+mat-table {
+  .mat-column-actions {
+    max-width: 15%;
+  }
+
+  mat-row {
+    padding-block: 10px;
+  }
+}

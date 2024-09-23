@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { Model } from '../../models';
 import { ModelService } from '../../services/model.service';
 import { Observable, Subscription } from 'rxjs';
@@ -11,11 +11,11 @@ import { LARGE, MEDIUM, SMALL, XLARGE, XSMALL } from '@shared-lib/constants';
   templateUrl: './store.component.html',
   styleUrl: './store.component.scss',
 })
-export class StoreComponent {
+export class StoreComponent implements OnInit, OnDestroy {
   models: Model[];
   gridBreakpoint: number = 4;
 
-  @Input() filterChangeEvent: Observable<{}>;
+  @Input() filterChangeEvent: Observable<object>;
 
   private filterChangeEventSubscription: Subscription;
 
@@ -62,7 +62,7 @@ export class StoreComponent {
         });
   }
 
-  getModels(filterData: {} = {}): void {
+  getModels(filterData: object = {}): void {
     this.modelService
         .getModels(filterData)
         .subscribe(models => this.models = models);

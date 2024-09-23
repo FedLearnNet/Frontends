@@ -4,7 +4,7 @@
 
 mat-toolbar,
 mat-drawer {
-  background-color: mat.get-color-from-palette($mb-frontend-primary, 100);
+  background-color: mat.m2-get-color-from-palette($mb-frontend-primary, 100);
 
   button {
     font-size: large;

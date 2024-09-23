@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { QueryService } from '@global-app/find-data/services/query.service';
 import { ActivatedRoute } from '@angular/router';
@@ -14,7 +14,7 @@ import { XSMALL } from '@shared-lib/constants';
   templateUrl: './workflow-dashboard.component.html',
   styleUrl: './workflow-dashboard.component.scss',
 })
-export class WorkflowDashboardComponent {
+export class WorkflowDashboardComponent implements OnInit {
   isXSmallScreen: boolean = false;
   query: Query;
   workflowList: Workflow[] = [];
@@ -32,10 +32,10 @@ export class WorkflowDashboardComponent {
   ) { }
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({query}) => {
-      this.query = query;
-      this.workflowList = query.workflows;
-    });
+    // this.activatedRoute.data.subscribe(({query}) => {
+      // this.query = query;
+      // this.workflowList = query.workflows;
+    // });
 
     this.checkAndAdjustResponsiveLayout();
   }

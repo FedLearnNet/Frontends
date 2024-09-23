@@ -1,1 +1,1 @@
-export * from './patient-data-status';
+export * from './queryability-option';

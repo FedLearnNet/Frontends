@@ -1,0 +1,16 @@
+.dynamic-form {
+  &--component {
+    padding-inline: 10px;
+    margin-bottom: 10px;
+
+    ::ng-deep .mat-expansion-panel-body {
+      margin-top: 10px;
+    }
+
+    .radio-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+}

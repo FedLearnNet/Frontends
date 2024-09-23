@@ -1,0 +1,88 @@
+@if (connectors.length === 0) {
+  <div class="empty-view">
+    <img src="assets/images/connector_empty_view.png" alt="Empty State"/>
+    <h1>Connectors</h1>
+    <p>Connectors extract and transform data from a source to be loaded as entities into Content.</p>
+    <div class="add-btn-group">
+      <button (click)="onAddClick()" mat-raised-button>
+        <mat-icon>add</mat-icon>
+        Add a Connector
+      </button>
+      <a mat-button href="https://www.google.com/" target="_blank">
+        <mat-icon>import_contacts</mat-icon>
+        Learn About Connectors
+      </a>
+
+    </div>
+  </div>
+} @else {
+
+  <div class="table-view connector-content">
+    <div class="add-btn-group">
+      <h1>Connectors</h1>
+      <button (click)="onAddClick()" mat-raised-button>
+        <mat-icon>add</mat-icon>
+        Add a Connector
+      </button>
+    </div>
+    <div>
+      <table mat-table [dataSource]="dataSource">
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Name</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="name-group">
+              <a [routerLink]="getViewRoute(element.id)">
+                    {{ element.name }}
+              </a>
+              <span>
+                ID: {{ element.id }}
+              </span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="source">
+          <th mat-header-cell *matHeaderCellDef> Source</th>
+          <td mat-cell *matCellDef="let element"> Source</td>
+        </ng-container>
+
+        <ng-container matColumnDef="schedule">
+          <th mat-header-cell *matHeaderCellDef> Schedule</th>
+          <td mat-cell *matCellDef="let element"> Schedule</td>
+        </ng-container>
+
+        <ng-container matColumnDef="last">
+          <th mat-header-cell *matHeaderCellDef> Last Run</th>
+          <td mat-cell *matCellDef="let element"> Last Run</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="action-group-header"></th>
+          <td mat-cell *matCellDef="let element" class="action-group">
+            <button mat-raised-button [routerLink]="getViewRoute(element.id)">View</button>
+            <button class="menu" mat-raised-button [matMenuTriggerFor]="menu">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="onEditClick(element.id)">Edit configuration</button>
+              <button mat-menu-item (click)="onDuplicateClick(element.id)">Duplicate</button>
+              <button mat-menu-item (click)="onDeleteClick(element.id)">Delete</button>
+              <button mat-menu-item (click)="onRunClick(element.id)">Run</button>
+
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      @if (connectors.length > 5) {
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                       showFirstLastButtons
+                       aria-label="Select page of periodic elements">
+        </mat-paginator>
+      }
+    </div>
+  </div>
+}

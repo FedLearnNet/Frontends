@@ -1,6 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { PredictionResultDetailComponent } from './components/prediction-result-detail/prediction-result-detail.component';
+import { PredictionResultDetailComponent } from '../prediction-result-detail/prediction-result-detail.component';
 import { Observable, Subscription } from 'rxjs';
 import { Prediction } from '../../models';
 import { ModelService } from '../../services/model.service';
@@ -13,12 +13,12 @@ import { XSMALL } from '@shared-lib/constants';
   templateUrl: './prediction-grid.component.html',
   styleUrl: './prediction-grid.component.scss',
 })
-export class PredictionGridComponent {
+export class PredictionGridComponent implements OnInit, OnDestroy {
   isXSmallScreen: boolean = false;
   predictions: Prediction[] = [];
   displayedColumns: string[] = ['actions', 'name', 'status', 'date'];
 
-  @Input() filterChangeEvent: Observable<{}>;
+  @Input() filterChangeEvent: Observable<object>;
 
   private filterChangeEventSubscription: Subscription;
 
@@ -49,7 +49,7 @@ export class PredictionGridComponent {
         .subscribe(screenSize => this.isXSmallScreen = screenSize === XSMALL);
   }
 
-  getPredictions(filterData: {} = {}): void {
+  getPredictions(filterData: object = {}): void {
     this.modelService
         .getPredictions(filterData)
         .subscribe(predictions => this.predictions = predictions);

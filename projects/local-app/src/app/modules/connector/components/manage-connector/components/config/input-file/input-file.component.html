@@ -1,0 +1,132 @@
+<h2> File Upload Settings </h2>
+
+<mat-card class="file-upload">
+
+  <div class="input-row">
+    <div class="input-row-label">
+      <span>File Type</span>
+      <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+    </div>
+    <input class="file-upload-input" type="file" (change)="onFileSelected($event)" #fileInput>
+    <button mat-raised-button color="primary" (click)="fileInput.click()"
+            matTooltip="File containing Patient ID">
+      <mat-icon class="input-row-label-icon">cloud_upload</mat-icon>
+      Main Upload
+    </button>
+    @if (settings.hasSupportFile) {
+      <button mat-raised-button color="primary" (click)="openUploadDialog()"
+              matTooltip="File containing different Data, regarding to PatientID">
+        <mat-icon class="input-row-label-icon">publish</mat-icon>
+        Multi Supporting Upload
+      </button>
+    }
+  </div>
+  <mat-card-footer class="file-upload-preview">
+    <p><strong>Last Upload</strong>: &nbsp;</p>
+    @if (settings.filePath && settings.file) {
+      <a [href]="settings.filePath">{{ settings.file.name }}</a>
+    } @else {
+      <p>Waiting to Receive a File</p>
+    }
+    @if (settings.file) {
+      <p>&nbsp;| <strong>Last Uploaded</strong>:&nbsp;</p>
+      <p>{{ settings.file.lastModified  | date }}</p>
+    }
+  </mat-card-footer>
+  <mat-card-footer *ngIf="isUploading">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </mat-card-footer>
+</mat-card>
+
+<h3>File Settings</h3>
+
+<mat-card class="file-upload-settings-file-settings">
+
+
+  <div class="input-row">
+    <div class="input-row-label">
+      <span>File Type</span>
+      <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+    </div>
+    <mat-radio-group [(ngModel)]="settings.fileType">
+      <mat-radio-button value="EXCEL">Excel (.xlsx)</mat-radio-button>
+      <mat-radio-button value="CSV">CSV (.csv, .tsv, .txt, .psv, or any delimited file)</mat-radio-button>
+      <mat-radio-button value="JSON">JSON</mat-radio-button>
+    </mat-radio-group>
+  </div>
+  <div class="input-row">
+    <div class="input-row-label">
+      <span>Additional Patient data</span>
+      <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+    </div>
+    <mat-slide-toggle
+      [(ngModel)]="settings.hasSupportFile">
+      Has Supporting File
+    </mat-slide-toggle>
+  </div>
+  <div class="input-row" *ngIf="settings.fileType === 'CSV'">
+    <div class="input-row-label">
+      <span>Specify Delimiter</span>
+      <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+    </div>
+    <mat-form-field>
+      <mat-select [(value)]="settings.delimiter">
+        <mat-option value=",">Comma</mat-option>
+        <mat-option value="|">Pipe</mat-option>
+        <mat-option value=";">Semicolon</mat-option>
+        <mat-option value="s">Space</mat-option>
+        <mat-option value="\t">Tab</mat-option>
+        <mat-option value="CUSTOM">Custom</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="settings.delimiter === 'CUSTOM'">
+      <input matInput placeholder=";" [(ngModel)]="settings.customDelimiter">
+    </mat-form-field>
+  </div>
+  <ng-container *ngIf="settings.fileType === 'EXCEL'">
+    <div class="input-row">
+      <div class="input-row-label">
+        <span>Extract Sheets</span>
+        <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+      </div>
+      <div class="w-100">
+        <mat-radio-group [(ngModel)]="settings.extractSheets">
+          <mat-radio-button value="ENTIRE">Entire Workbook</mat-radio-button>
+          <mat-radio-button value="SPECIFIC">
+            Specific Sheet(s)
+            <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+          </mat-radio-button>
+        </mat-radio-group>
+
+        <mat-form-field *ngIf="settings.extractSheets === 'SPECIFIC'" class="w-100">
+          <input matInput placeholder="Specify individual sheets or ranges (e.g. 0, 1, 3-5)."
+                 [(ngModel)]="settings.specificSheets">
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-row-label">
+        <span>Merge Sheets</span>
+        <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+      </div>
+      <mat-radio-group [(ngModel)]="settings.mergeType">
+        <mat-radio-button value="HORIZONTALLY">
+          Horizontally
+          <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+        </mat-radio-button>
+        <mat-radio-button value="VERTICALLY">
+          Vertically
+          <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  </ng-container>
+  <div class="input-row" *ngIf="settings.fileType === 'EXCEL' || settings.fileType === 'CSV'">
+    <div class="input-row-label">
+      <span>Has Header</span>
+      <mat-icon class="material-icons" matTooltip="Info about the action">info_i</mat-icon>
+    </div>
+    <mat-slide-toggle [(ngModel)]="settings.hasHeader">Has Header</mat-slide-toggle>
+  </div>
+</mat-card>
+

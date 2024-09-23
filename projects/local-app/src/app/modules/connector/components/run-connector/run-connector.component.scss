@@ -1,0 +1,42 @@
+
+.run-overview {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 5%;
+
+  margin-bottom: 50px;
+
+  mat-card-header {
+    padding: 0;
+    margin: 10px;
+    mat-card-title {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  }
+
+  &-summary {
+    width: 60%;
+  }
+
+  &-overview{
+    width: 35%;
+  }
+}
+
+
+.run-summary {
+  &-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &-name {
+      font-weight: 500;
+    }
+  }
+}

@@ -1,0 +1,13 @@
+services:
+  local-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - "4002:80"
+  global-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.global
+    ports:
+      - "4003:80"

@@ -1,0 +1,17 @@
+<h2>Specify Header to Load Preview</h2>
+
+@if (config.fileInfo && config.fileInfo.data) {
+  <app-dynamic-table [data]="config.fileInfo.data"
+                     [renamedColumns]="config.fileInfo.renamedColumns"
+                     [columns]="config.fileInfo.columns"
+                     [deletedColumns]="config.fileInfo.deletedColumns"
+                     (headerClicked)="headerClick($event)">
+  </app-dynamic-table>
+} @else {
+
+  <button mat-raised-button color="primary" (click)="load_columns()">Add Default Selectors</button>
+  <p>
+    Default header extract paths that are found within the first page of the response, with at least one non-null
+    value.
+  </p>
+}
