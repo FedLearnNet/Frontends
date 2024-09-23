@@ -1,0 +1,86 @@
+@if (loadingErrorLogs) {
+  <h3>Error, try later</h3>
+} @else {
+
+
+  <div class="log-table">
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"></mat-paginator>
+
+    <div class="filter-box">
+      <p class="filter-box-name">Filters</p>
+
+      <mat-form-field class="filter-box-input filter-box-search">
+        <mat-label>Search</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" #input>
+      </mat-form-field>
+
+      <mat-form-field class="filter-box-input">
+        <mat-label>Log-Type</mat-label>
+        <mat-select multiple (selectionChange)="applySelectionFilter($event, 'logType')">
+          @for (type of typesVariants; track type) {
+            <mat-option [value]="type">{{ type | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (showPatientId) {
+        <mat-form-field class="filter-box-input">
+          <mat-label>Fields</mat-label>
+          <mat-select multiple (selectionChange)="applySelectionFilter($event, 'field')">
+            @for (field of fieldsVariants; track field) {
+              <mat-option [value]="field">{{ field | titlecase }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      } @else {
+        <mat-form-field class="filter-box-input">
+          <mat-label>Severity</mat-label>
+          <mat-select multiple (selectionChange)="applySelectionFilter($event, 'level')">
+            @for (level of levelVariants; track level) {
+              <mat-option [value]="level">{{ level | titlecase }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+      }
+    </div>
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" matSort>
+
+      <ng-container matColumnDef="patientId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Patient ID</th>
+        <td mat-cell *matCellDef="let element"> {{ element.patientId }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="field">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Field</th>
+        <td mat-cell *matCellDef="let element"> {{ element.field }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="message">
+        <th mat-header-cell *matHeaderCellDef> Message</th>
+        <td mat-cell *matCellDef="let element"> {{ element.message }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="level">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Severity</th>
+        <td mat-cell *matCellDef="let element"> {{ element.level }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="logType">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Log-Type</th>
+        <td mat-cell *matCellDef="let element"> {{ element.logType }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      @if (data.length > 0) {
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" colspan="4">No data matching the filter "{{ dataSource.filter }}"</td>
+        </tr>
+      }
+    </table>
+  </div>
+
+}

@@ -1,17 +1,18 @@
 <mat-toolbar class="toolbar-container">
-    <mat-toolbar-row>
-        <button mat-button color="primary" routerLink="/" style="height: 3.2em">
-            <img src="../../../assets/images/Logo%20Microb-AI-ome/Logo%20Microb-AI-ome/2%20Horizontal%20Version/Microb-AI-ome_Logo_white.png"
-                 height="48" alt="Microb·AI·ome" loading="lazy"/>
-        </button>
+  <mat-toolbar-row>
+    <button mat-button color="primary" routerLink="/" style="height: 3.2em">
+      <img
+        [src]="ICON"
+        height="48" alt="Microb·AI·ome" loading="lazy"/>
+    </button>
 
-        <button mat-button
-                *ngFor="let menuItem of menuItems"
-                color="primary"
-                [routerLink]="menuItem.link"
-                routerLinkActive="mat-accent"
-        >
-            {{ menuItem.title }}
-        </button>
-    </mat-toolbar-row>
+    <button mat-button
+            *ngFor="let menuItem of menuItems"
+            color="primary"
+            [routerLink]="menuItem.link"
+            routerLinkActive="mat-accent"
+    >
+      {{ menuItem.title }}
+    </button>
+  </mat-toolbar-row>
 </mat-toolbar>

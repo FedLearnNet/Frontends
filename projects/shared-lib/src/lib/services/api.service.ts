@@ -17,10 +17,10 @@ export class ApiService {
   }
 
   post<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
-    const options = { headers };
-
+    const options = {headers};
     return this.http.post<T>(url, body, options);
   }
+
 
   put<T>(url: string, body: any, headers?: HttpHeaders): Observable<T> {
     const options = { headers };

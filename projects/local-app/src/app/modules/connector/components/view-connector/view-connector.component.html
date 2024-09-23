@@ -1,0 +1,145 @@
+<div class="connector-content">
+  @if (connector) {
+    <div class="header">
+      <h1>{{ connector.name }}</h1>
+
+      <div class="action-group">
+
+        <button class="action-group-edit" mat-raised-button (click)="onEditClick()">Edit configuration</button>
+        <button class="menu" mat-raised-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="onDuplicateClick()">Duplicate</button>
+          <button mat-menu-item (click)="onDeleteClick()">Delete</button>
+        </mat-menu>
+      </div>
+      <button mat-raised-button color="primary" (click)="onRunClick()">Run</button>
+    </div>
+    <h3>Connector Summary</h3>
+    <div class="summary">
+      <div class="summary-group summary-group-action">
+        <span class="summary-group-name">Name</span>
+
+        @if (editModes['name']) {
+          <mat-form-field>
+            <mat-label>Name</mat-label>
+            <input matInput [(ngModel)]="connector.name">
+            <button (click)="save('name')" matSuffix mat-icon-button>
+              <mat-icon>save</mat-icon>
+            </button>
+            <button (click)="toggleEditMode('name')" matSuffix mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+        } @else {
+          <span>{{ connector.name }}</span>
+          <button (click)="toggleEditMode('name')" mat-icon-button class="summary-group-edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+
+
+      </div>
+      <div class="summary-group summary-group-action">
+        <span class="summary-group-name">Description</span>
+        @if (editModes['description']) {
+          <mat-form-field>
+            <mat-label>Description</mat-label>
+            <input matInput [(ngModel)]="connector.description">
+            <button (click)="save('description')" matSuffix mat-icon-button>
+              <mat-icon>save</mat-icon>
+            </button>
+            <button (click)="toggleEditMode('description')" matSuffix mat-icon-button>
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+        } @else {
+          <span>{{ connector.description }}</span>
+          <button (click)="toggleEditMode('description')" mat-icon-button class="summary-group-edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+
+
+      </div>
+      <div class="summary-group">
+        <span class="summary-group-name">Source</span>
+        <span>{{ connector.inputConfig?.mode }}</span>
+      </div>
+      <div class="summary-group summary-group-action">
+        <span class="summary-group-name">Schedule and Trigger Settings</span>
+        @if (editModes['inputSchedule']) {
+          <span>EDIT Schedule Comming soon</span>
+
+          <button (click)="toggleEditMode('inputSchedule')" matSuffix mat-icon-button>
+            <mat-icon>close</mat-icon>
+          </button>
+        } @else {
+          <span>Schedule</span>
+          <button (click)="toggleEditMode('inputSchedule')" mat-icon-button class="summary-group-edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+      </div>
+    </div>
+    <h3>Activity Log</h3>
+    <table mat-table [dataSource]="runDataSource" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> ID</th>
+        <td mat-cell *matCellDef="let element"> {{ element.id }}</td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let element"> {{ element.status }}</td>
+      </ng-container>
+
+      <!-- Weight Column -->
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Run data</th>
+        <td mat-cell *matCellDef="let element"> {{ element.createdAt  | date }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="newEntities">
+        <th mat-header-cell *matHeaderCellDef> New Patients</th>
+        <td mat-cell *matCellDef="let element"> {{ element.newEntities || 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="updatedEntities">
+        <th mat-header-cell *matHeaderCellDef> Updated Patients</th>
+        <td mat-cell *matCellDef="let element"> {{ element.updatedEntities || 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="deletedEntities">
+        <th mat-header-cell *matHeaderCellDef> Deleted Patients</th>
+        <td mat-cell *matCellDef="let element"> {{ element.deletedEntities || 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="failedEntities">
+        <th mat-header-cell *matHeaderCellDef> Failed Patients</th>
+        <td mat-cell *matCellDef="let element"> {{ element.failedEntities || 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="unchangedEntities">
+        <th mat-header-cell *matHeaderCellDef> Unchanged Patients</th>
+        <td mat-cell *matCellDef="let element"> {{ element.unchangedEntities || 0 }}</td>
+      </ng-container>
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-raised-button  (click)="onViewClick(element)">View Details</button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedRunColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedRunColumns;"></tr>
+    </table>
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"></mat-paginator>
+
+
+  } @else {
+    <p>Loading</p>
+  }
+</div>
+
+
+

@@ -1,0 +1,101 @@
+<div class="dynamic-form">
+    <form [formGroup]="dynamicForm">
+        <div class="dynamic-form--component" *ngFor="let formComponent of dynamicFormComponents">
+            <ng-container [ngSwitch]="formComponent.formType">
+                <mat-form-field *ngSwitchCase="'text'">
+                    <mat-label>{{ getSchemaFormName(formComponent.name, formComponent.label) }}</mat-label>
+                    <input matInput
+                           [type]="formComponent.formType"
+                           [placeholder]="getSchemaFormName(formComponent.name, formComponent.label)"
+                           [formControlName]="formComponent.name"
+                    >
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field *ngSwitchCase="'number'">
+                    <mat-label>{{ getSchemaFormName(formComponent.name, formComponent.label) }}</mat-label>
+                    <input matInput
+                           [type]="formComponent.formType"
+                           [placeholder]="getSchemaFormName(formComponent.name, formComponent.label)"
+                           [formControlName]="formComponent.name"
+                    >
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field *ngSwitchCase="'textarea'">
+                    <mat-label>{{ getSchemaFormName(formComponent.name, formComponent.label) }}</mat-label>
+                    <textarea matInput [placeholder]="getSchemaFormName(formComponent.name, formComponent.label)"
+                              [formControlName]="formComponent.name"></textarea>
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </mat-form-field>
+
+                <mat-form-field *ngSwitchCase="'select'">
+                    <mat-label>{{ getSchemaFormName(formComponent.name, formComponent.label) }}</mat-label>
+                    <mat-select [formControlName]="formComponent.name">
+                        <mat-option *ngFor="let selectOption of formComponent.options" [value]="selectOption.value">
+                            {{ selectOption.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </mat-form-field>
+
+                <section *ngSwitchCase="'radio'" class="radio-section">
+                    <mat-label>{{ getSchemaFormName(formComponent.name, formComponent.label) }}</mat-label>
+                    <mat-radio-group [formControlName]="formComponent.name" [value]="">
+                        <mat-radio-button color="primary" *ngFor="let radioOption of formComponent.options" [value]="radioOption.value">
+                            {{ radioOption.label }}
+                        </mat-radio-button>
+                    </mat-radio-group>
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </section>
+
+                <section *ngSwitchCase="'checkbox'">
+                    <mat-checkbox color="primary"
+                                  [checked]="isChecked(formComponent.value)"
+                                  [formControlName]="formComponent.name"
+                    >
+                        {{ formComponent.label }}
+                    </mat-checkbox>
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </section>
+
+                <section *ngSwitchCase="'files'">
+                    <mat-label>{{ formComponent.label }}</mat-label>
+                    <app-lib-drag-and-drop-file
+                            [files]="dynamicForm.get('files')"
+                    />
+                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                </section>
+
+                <section *ngIf="formComponent.nodeType === 'group' || formComponent.nodeType === 'group_list'">
+                    <mat-expansion-panel #matExpansionPanelElement [attr.expansion-name]="formComponent.name">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                {{ getSchemaFormName(formComponent.name, formComponent.label) }}
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+
+                        <app-local-app-dynamic-form
+                                *ngIf="formComponent.nodeType === 'group'; else group_list"
+                                [parentComponent]="this"
+                                [schemaData]="getSchemaData(formComponent.name)"
+                                [nestedFormName]="formComponent.name"
+                                [dynamicFormComponents]="formComponent.fields"
+                                [errors]="getErrors(formComponent.name)"
+                        ></app-local-app-dynamic-form>
+                        <ng-template
+                                #group_list
+                        >
+                            <app-local-app-group-list
+                                    #groupListComponent
+                                    [groupName]="formComponent.name"
+                                    [formComponents]="formComponent.fields"
+                                    [groupListData]="getSchemaData(formComponent.name)"
+                            ></app-local-app-group-list>
+                        </ng-template>
+                    </mat-expansion-panel>
+                </section>
+            </ng-container>
+        </div>
+    </form>
+</div>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'lib-footer',
+  selector: 'app-lib-footer',
   standalone: true,
   imports: [],
   templateUrl: './footer.component.html',

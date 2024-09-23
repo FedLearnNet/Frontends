@@ -9,6 +9,11 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+
+    &--header {
+      display: flex;
+      padding-bottom: 15px;
+    }
   }
 }
 
@@ -16,6 +21,13 @@
   &--container {
     min-height: 50px;
     width: 100%;
+
+    .query-progress-indicator {
+      height: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     .query-result {
       font-weight: bold;

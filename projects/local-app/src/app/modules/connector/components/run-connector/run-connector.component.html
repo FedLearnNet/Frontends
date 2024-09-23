@@ -1,0 +1,79 @@
+<div class="run-content">
+  @if (run) {
+    <h2>Run {{ run.id }}</h2>
+    <div class="run-overview">
+      <mat-card class="run-overview-summary">
+        <mat-card-header>
+          <mat-card-title>Run Summary</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="run-summary">
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Status:</span>
+              <span>{{ run.status }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Run Mode:</span>
+              <span> {{ run.mode }} </span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Trigger:</span>
+              <span>{{ run.trigger || "System" }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Start Time:</span>
+              <span>{{ run.createdAt  | date }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="run-overview-overview">
+        <mat-card-header>
+          <mat-card-title>Entity Overview</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="run-summary">
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">New:</span>
+              <span>{{ run.newEntities }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Updated:</span>
+              <span>{{ run.updatedEntities }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Deleted:</span>
+              <span>{{ run.deletedEntities }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Failed:</span>
+              <span>{{ run.failedEntities }}</span>
+            </div>
+            <div class="run-summary-group">
+              <span class="run-summary-group-name">Unchanged:</span>
+              <span>{{ run.unchangedEntities }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab label="Patient Results">
+        <app-run-change-log  [runId]="run.id" [schemaId]="connector?.schemaId"></app-run-change-log>
+      </mat-tab>
+      <mat-tab label="Patient Errors">
+        <app-run-error-log [showPatientId]="true" [runId]="run.id" [type]="2"></app-run-error-log>
+      </mat-tab>
+      <mat-tab label="Run Errors">
+        <app-run-error-log [runId]="run.id" [type]="1"></app-run-error-log>
+      </mat-tab>
+      <mat-tab label="Run Logs">
+        <app-run-error-log [runId]="run.id" [type]="0"></app-run-error-log>
+      </mat-tab>
+    </mat-tab-group>
+  } @else {
+    <h2>Not found</h2>
+  }
+</div>

@@ -13,12 +13,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ModelStoreComponent } from '@global-app/model-store/model-store.component';
-import { ModelStoreDashboardComponent } from '@global-app/model-store/components/dashboard/dashboard.component';
+import { ModelStoreDashboardComponent } from '@global-app/model-store/components/model-store-dashboard/model-store-dashboard.component';
 import { FilterComponent } from '@global-app/model-store/components/filter/filter.component';
 import { StoreComponent } from '@global-app/model-store/components/store/store.component';
-import { ModelDetailComponent } from '@global-app/model-store/components/store/components/model-detail/model-detail.component';
+import { ModelDetailComponent } from '@global-app/model-store/components/model-detail/model-detail.component';
 import { PredictionGridComponent } from '@global-app/model-store/components/prediction-grid/prediction-grid.component';
-import { PredictionResultDetailComponent } from '@global-app/model-store/components/prediction-grid/components/prediction-result-detail/prediction-result-detail.component';
+import { PredictionResultDetailComponent } from '@global-app/model-store/components/prediction-result-detail/prediction-result-detail.component';
 import { SharedLibModule } from '@shared-lib/shared-lib.module';
 
 @NgModule({

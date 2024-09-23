@@ -12,10 +12,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { PermissionService } from '@local-app/data-review/services/permission.service';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
-import { PermissionDetailComponent } from '@local-app/data-review/components/permission-grid/components/permission-detail/permission-detail.component';
+import { PermissionDetailComponent } from '@local-app/data-review/components/permission-detail/permission-detail.component';
 import { TrainingGridComponent } from '@local-app/data-review/components/training-grid/training-grid.component';
 import { PermissionGridComponent } from '@local-app/data-review/components/permission-grid/permission-grid.component';
-import { DataReviewDashboardComponent } from '@local-app/data-review/components/dashboard/dashboard.component';
+import { DataReviewDashboardComponent } from '@local-app/data-review/components/data-review-dashboard/data-review-dashboard.component';
 import { DataReviewComponent } from '@local-app/data-review/data-review.component';
 import { DataReviewRoutingModule } from '@local-app/data-review/data-review-routing.module';
 

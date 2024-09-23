@@ -1,12 +1,12 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'lib-drag-and-drop-file',
+  selector: 'app-lib-drag-and-drop-file',
   templateUrl: './drag-and-drop-file.component.html',
   styleUrl: './drag-and-drop-file.component.scss'
 })
-export class DragAndDropFileComponent {
+export class DragAndDropFileComponent implements OnInit {
   @Input() files: AbstractControl | null = new FormControl();
   @Input() disabled: boolean | null = false;
   @Output() filesChange = new EventEmitter<any>();

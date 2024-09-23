@@ -1,6 +1,6 @@
 <div class="dialog">
     <h1 mat-dialog-title class="dialog--header">
-        Query builder
+        Query detail
     </h1>
 
     <mat-divider />
@@ -12,19 +12,21 @@
                     <mat-label>Name of the query</mat-label>
                     <input matInput placeholder="Name of the query" formControlName="name" required>
                 </mat-form-field>
-
-                <mat-form-field>
-                    <mat-label>Description</mat-label>
-                    <textarea matInput placeholder="Description" rows="3" formControlName="description" required></textarea>
-                </mat-form-field>
             </form>
         </div>
 
         <div class="query-builder--container">
-            <ng-container *ngFor="let queryListItem of queryList">
+            <div class="query-builder--container--header">
+                Query builder
+            </div>
+
+            <ng-container *ngFor="let queryListItem of queryList; index as queryListItemIndex">
                 <app-query-builder-item
                     [queryItem]="queryListItem"
+                    [queryConfigs]="queryConfigs"
+                    [isLastItem]="queryList.length === queryListItemIndex + 1"
                     (removeQueryItem)="removeQueryItem($event)"
+                    (queryabilityChanged)="handleQueryChange()"
                 >
                 </app-query-builder-item>
             </ng-container>
@@ -32,14 +34,19 @@
             <button mat-icon-button (click)="onAddQueryItem()">
                 <mat-icon>add_circle_outline</mat-icon>
             </button>
-
         </div>
 
         <div *ngIf="queryList.length !== 0" class="query-execution--container">
-            <button mat-raised-button color="primary" type="submit" (click)="onRunQuery()">Run query</button>
+            <button *ngIf="!isQueryRunning && !isQueryExecuted" mat-raised-button color="primary" type="submit" (click)="onRunQuery()">
+                Run query
+            </button>
+
+            <div *ngIf="isQueryRunning" class="query-progress-indicator">
+                <mat-spinner mode="indeterminate"></mat-spinner>
+            </div>
 
             <div *ngIf="isQueryExecuted" class="query-result">
-                Result: {{ getResultLabel() }}
+                Result: {{ queryResults }}
             </div>
         </div>
 

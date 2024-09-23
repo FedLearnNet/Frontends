@@ -1,0 +1,51 @@
+<h2>Select a Data Source</h2>
+<p>Extract data from a pre-built API integration using a Native Source or from one of our Generic Sources to add content
+  to the platform.</p>
+
+<mat-divider></mat-divider>
+<h3>Generic Sources</h3>
+<p>Extract data from a generic source, such as a local file or any
+  API.</p>
+
+
+<div class="source-wrapper">
+  <ng-template ngFor let-card [ngForOf]="genericSource">
+    <mat-card [class.selected]="selected && card.id === selected.id" (click)="toggleSelect(card)">
+      <mat-card-header>
+        @if (selected && card.id === selected.id) {
+          <mat-icon class="material-icons" mat-card-avatar>check</mat-icon>
+        } @else {
+          <mat-icon class="material-icons" mat-card-avatar>{{ card.icon }}</mat-icon>
+        }
+        <mat-card-title>{{ card.title }}</mat-card-title>
+        <mat-card-subtitle> {{ card.description }}</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+
+  </ng-template>
+</div>
+
+<mat-divider></mat-divider>
+<h3>Specific Sources</h3>
+<p>Extract data from a generic source, such as a local file or any
+  API.</p>
+
+<div class="source-wrapper">
+  <ng-template ngFor let-card [ngForOf]="nativeSource">
+
+    <mat-card [class.selected]="selected && card.id === selected.id" (click)="toggleSelect(card)">
+      <mat-card-header>
+        @if (selected && card.id === selected.id) {
+          <mat-icon class="material-icons" mat-card-avatar>check</mat-icon>
+        } @else {
+          <mat-icon class="material-icons" mat-card-avatar>{{ card.icon }}</mat-icon>
+        }
+        <mat-card-title>{{ card.title }}</mat-card-title>
+        <mat-card-subtitle> {{ card.description }}</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+
+  </ng-template>
+
+
+</div>

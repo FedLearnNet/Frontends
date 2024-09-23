@@ -1,0 +1,55 @@
+
+.connector-step-config-wrapper {
+  padding: 20px 30px;
+  margin-bottom: 60px;
+}
+
+
+.add-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  span {
+    order: 1;
+  }
+
+  mat-icon {
+    order: 2;
+  }
+}
+
+.validation-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &-error {
+    color: #f44336;
+  }
+
+  &-success {
+    color: #4caf50;
+  }
+
+  &-sync {
+    color: #ff9800;
+  }
+}
+
+.mat-toolbar{
+  .spacer {
+    flex: 1 1 auto;
+  }
+  mat-button-toggle-group{
+    margin-left: 30px;
+  }
+}
+
+.list-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}

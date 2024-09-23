@@ -1,17 +1,32 @@
 <div class="cohort-detail-container">
-    <form [formGroup]="cohortDetailFormGroup" [ngClass]="'cohort-detail-form-' + screenSize">
-        <mat-form-field>
-            <mat-label>Name of the cohort</mat-label>
-            <input matInput placeholder="Name of the cohort" formControlName="name" required>
-        </mat-form-field>
+    <ng-container *ngIf="!isCohortSubscribed; else elseBlock">
+        <h3>
+            Subscribe to a schema
+        </h3>
 
-        <mat-form-field>
-            <mat-label>Description</mat-label>
-            <textarea matInput placeholder="Description" formControlName="description" required rows="5"></textarea>
-        </mat-form-field>
+        <button
+            mat-raised-button
+            color="primary"
+            (click)="openSchemaListModal()"
+        >Choose a schema</button>
+    </ng-container>
+
+    <ng-template #elseBlock>
+        <form [formGroup]="cohortDetailFormGroup" [ngClass]="'cohort-detail-form-' + screenSize">
+            <mat-form-field>
+                <mat-label>Name of the cohort</mat-label>
+                <input matInput placeholder="Name of the cohort" formControlName="name" required>
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Description</mat-label>
+                <textarea matInput placeholder="Description" formControlName="description" required rows="5"></textarea>
+            </mat-form-field>
+        </form>
 
         <div>
-            <button mat-raised-button color="primary" matStepperNext>Next</button>
+            <button mat-raised-button color="primary" (click)="onUpdateCohort()">Update cohort details</button>
         </div>
-    </form>
+
+    </ng-template>
 </div>

@@ -1,0 +1,16 @@
+<div class="container">
+    <app-lib-breadcrumb></app-lib-breadcrumb>
+
+    <mat-tab-group dynamicHeight [selectedIndex]="selectedTabIndex">
+        <mat-tab label="Cohort details">
+            <app-cohort-detail
+                    [schema]="schema"
+            />
+        </mat-tab>
+        <mat-tab label="Patients" [disabled]="!schema">
+            <div class="patients-container" *ngIf="schema">
+                <app-cohort-patients />
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>

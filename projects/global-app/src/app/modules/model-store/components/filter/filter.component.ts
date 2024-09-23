@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 
 @Component({
@@ -6,14 +6,14 @@ import { FormBuilder } from '@angular/forms';
   templateUrl: './filter.component.html',
   styleUrl: './filter.component.scss',
 })
-export class FilterComponent {
+export class FilterComponent implements OnInit {
   searchByForm = this.formBuilder.group({
     name: [''],
     inputData: [''],
     predictedConcept: [''],
   });
 
-  @Output() onFilterChange = new EventEmitter<any>();
+  @Output() filterChange = new EventEmitter<any>();
 
   constructor(
       private formBuilder: FormBuilder,
@@ -24,7 +24,7 @@ export class FilterComponent {
   }
 
   detectSearchByFormChange(): void {
-    this.searchByForm.valueChanges.subscribe(value => this.onFilterChange.emit(value));
+    this.searchByForm.valueChanges.subscribe(value => this.filterChange.emit(value));
   }
 
   clearFormValue(formControlName: string): void {

@@ -1,0 +1,56 @@
+<div class="container">
+    <div class="action-buttons-row">
+        <button mat-raised-button color="primary" [routerLink]="['new']" routerLinkActive="mat-accent">
+            Add a new cohort
+        </button>
+    </div>
+
+    <mat-table [dataSource]="subscribedSchemaList" class="mat-elevation-z8">
+        <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef [ngClass]="'mat-column-actions-' + screenSize">Action</mat-header-cell>
+            <mat-cell *matCellDef="let element" [ngClass]="'mat-column-actions-' + screenSize">
+                <div *ngIf="isLargeScreen; else showMenu">
+                    <button mat-icon-button color="primary" [routerLink]="['edit/', element.uniqueId]">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="primary" [routerLink]="['edit/', element.uniqueId]" fragment="Patients">
+                        <mat-icon>group</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteRow(element)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+
+                <ng-template #showMenu>
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-icon-button color="primary" [routerLink]="['edit/', element.uniqueId]">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="primary" [routerLink]="['show/', element.uniqueId]">
+                            <mat-icon>visibility</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteRow(element)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </mat-menu>
+                </ng-template>
+            </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+            <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+            <mat-cell *matCellDef="let element">{{element.description}}</mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+</div>

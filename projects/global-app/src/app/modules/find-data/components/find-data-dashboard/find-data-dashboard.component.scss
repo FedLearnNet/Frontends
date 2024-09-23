@@ -1,0 +1,27 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.action-buttons-row {
+  margin-bottom: 10px;
+  margin-right: 10px;
+}
+
+.query-builder-container {
+  width: 100%;
+}
+
+.query-execution-container {
+  height: 20px;
+}
+
+table {
+  .mat-column-actions {
+    min-width: 225px;
+  }
+}
+
+.query-string-column {
+  padding-block: 10px;
+  display: flex;
+  align-items: flex-start;
+  white-space: pre-line;
+}

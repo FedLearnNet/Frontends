@@ -1,0 +1,46 @@
+@if (schema && schema.fields.length) {
+
+  <mat-toolbar>
+    <span><mat-icon>filter_alt</mat-icon> Filter Preview</span>
+    <span class="spacer"></span>
+    <mat-button-toggle-group [(ngModel)]="filterMapped" aria-label="Font Style"
+                             multiple>
+      <mat-button-toggle value="Unmapped">Unmapped</mat-button-toggle>
+      <mat-button-toggle value="Mapped">Mapped</mat-button-toggle>
+    </mat-button-toggle-group>
+    <mat-button-toggle-group [(ngModel)]="filterReq" aria-label="Font Style"
+                             multiple>
+      <mat-button-toggle value="NotRequired">Not Required</mat-button-toggle>
+      <mat-button-toggle value="Required">Required</mat-button-toggle>
+    </mat-button-toggle-group>
+
+  </mat-toolbar>
+
+  <div *ngFor="let field of schema.fields">
+    <div [style.color]="isRequiredField(field) && !field.value ? 'red' : 'black'">
+      <ng-container
+        [ngTemplateOutlet]="renderField"
+        [ngTemplateOutletContext]="{ $implicit: field, indent: 0 }"
+      ></ng-container>
+    </div>
+  </div>
+
+  <ng-template #renderField let-field let-indent="indent">
+    @if (filterFields(field)) {
+      <div [style.marginLeft.px]="indent * 20">
+        <strong>{{ field.name }}:</strong>
+        @if (!field.fields || field.fields?.length === 0) {
+          {{ field.value || 'N/A' }}
+        }
+      </div>
+      <div *ngIf="field.fields?.length">
+        <ng-container *ngFor="let childField of field.fields">
+          <ng-container
+            [ngTemplateOutlet]="renderField"
+            [ngTemplateOutletContext]="{ $implicit: childField, indent: indent + 1 }"
+          ></ng-container>
+        </ng-container>
+      </div>
+    }
+  </ng-template>
+}

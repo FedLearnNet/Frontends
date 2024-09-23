@@ -1,0 +1,101 @@
+<div class="connector-container-wrapper">
+  <mat-drawer-container class="connector-container">
+    <mat-drawer mode="side" opened>
+      <ng-template ngFor let-card [ngForOf]="getConfigCards()">
+
+        <app-connector-cards (click)="onCardClick(card)" [data]="card"
+                             [selected]="card.index === currentStep.index"></app-connector-cards>
+
+      </ng-template>
+      <mat-divider class="divider-mb"></mat-divider>
+      <div class="drop-list">
+
+
+        <div cdkDropListGroup>
+
+
+          <div
+            cdkDropList
+            [cdkDropListData]="cards"
+            class="example-list"
+            (cdkDropListDropped)="drop($event)">
+            <ng-template ngFor let-card [ngForOf]="getTransformCards()">
+              <app-connector-cards cdkDrag (click)="onCardClick(card)" [data]="card"
+                                   [selected]="card.index === currentStep.index"
+                                   [draggable]="true" [editable]="true"
+                                   (edit)="onEditTransformer(card)"></app-connector-cards>
+
+
+            </ng-template>
+          </div>
+        </div>
+        @if (config.fileInfo && config.fileInfo.columns) {
+          <div class="drop-list-add">
+            <button mat-flat-button color="primary" (click)="addTransform()"
+                    [disabled]="disableAddTransformer">
+              <mat-icon>transform</mat-icon>
+              Add Transform
+            </button>
+          </div>
+        }
+      </div>
+      @if (config.fileInfo && config.fileInfo.columns) {
+        <mat-divider class="divider-mb divider-mt"></mat-divider>
+        <ng-template ngFor let-card [ngForOf]="getMappingCards()">
+          <app-connector-cards (click)="onCardClick(card)" [data]="card"
+                               [selected]="card.index === currentStep.index"></app-connector-cards>
+        </ng-template>
+      }
+    </mat-drawer>
+    <mat-drawer-content>
+      @if (currentStep) {
+        @if (currentStep.type === 'CONFIG') {
+          <app-connector-step-config #configComponent
+                                     (save)="configChanged($event)" [componentType]="currentStep.step"
+                                     [(config)]="config"></app-connector-step-config>
+        }
+        @if (currentStep.type === 'TRANSFORM') {
+          <div class="connector-step-config-wrapper">
+            @if (getTransformer()) {
+              <h2>{{ getTransformer()?.methodName }}</h2>
+            } @else {
+              <h2>Transform not yet set</h2>
+            }
+            @if (config.fileInfo && getTransformedData()) {
+              <app-dynamic-table [data]="getTransformedData()"
+                                 [renamedColumns]="config.fileInfo.renamedColumns"
+                                 [columns]="config.fileInfo.columns"
+                                 [deletedColumns]="config.fileInfo.deletedColumns"
+                                 [hideDeleted]="true"
+                                 [headerAction]="false"
+                                 [renewColumns]="true"
+                                 [calledColumns]="getTransformedColumns()">
+              </app-dynamic-table>
+            } @else {
+              <p>Loading</p>
+            }
+          </div>
+        }
+        @if (currentStep.type === 'MAPPING') {
+          <app-edit-mapper [columns]="getLatestColumns()"
+                           [inputData]="getLatestData()"
+                           [changedConfig]="config.schemaMapping"
+                           (changeMapping)="onMappingChange($event)"
+          (cardDetail)="onMappingCardContentChange($event)"></app-edit-mapper>
+        }
+
+      }
+    </mat-drawer-content>
+  </mat-drawer-container>
+
+  <mat-toolbar *ngIf="toolbarManagement.showToolbar">
+    <button mat-button (click)="onClearClick()">Clear</button>
+    <button mat-button (click)="onCancelClick()">Cancel</button>
+
+    <span class="spacer"></span>
+    <button *ngIf="currentStep.index > 0" (click)="onBackClick()" mat-button>Back</button>
+    <button *ngIf="currentStep.index > 1" mat-raised-button (click)="saveConfig()">Save</button>
+    <button *ngIf="!hasContinueElements()" mat-raised-button (click)="saveConfig(true)">Save and Run</button>
+    <button *ngIf="hasContinueElements()" (click)="onContinueClick()" class="continue-button" mat-raised-button>Continue</button>
+  </mat-toolbar>
+</div>

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { MatTable } from '@angular/material/table';
 import { CohortDetail, Training, WorkflowDetail } from '@local-app/data-review/models';
 import { TrainingService } from '@local-app/data-review/services/training.service';
@@ -11,7 +11,7 @@ import { XSMALL } from '@shared-lib/constants';
     templateUrl: './training-grid.component.html',
     styleUrl: './training-grid.component.scss',
 })
-export class TrainingGridComponent {
+export class TrainingGridComponent implements OnInit {
     isXSmallScreen: boolean = false;
     trainings: Training[];
 

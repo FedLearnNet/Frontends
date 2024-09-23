@@ -1,0 +1,77 @@
+<div>
+    <div class="action-buttons-row">
+        <button
+                mat-raised-button
+                color="primary"
+                (click)="onAddNewRow()"
+        >
+            Add new row
+        </button>
+    </div>
+
+    <form [formGroup]="formGroup">
+        <ng-container formArrayName="items">
+            <mat-table
+                class="mat-elevation-z8"
+                [dataSource]="dataSource"
+            >
+                <ng-container *ngFor="let formComponent of formComponents;" [matColumnDef]="formComponent.label">
+                    <mat-header-cell *matHeaderCellDef> {{ formComponent.label }} </mat-header-cell>
+                    <mat-cell *matCellDef="let element; let elementIndex = index" [formGroup]="getFormGroup(elementIndex)">
+                        <div *ngIf="isRowInEditMode(elementIndex); else elseBlock">
+                            <ng-container [ngSwitch]="formComponent.formType">
+                                <mat-form-field *ngSwitchCase="'text'">
+                                    <mat-label>{{ formComponent.label }}</mat-label>
+                                    <input matInput
+                                           [type]="formComponent.formType"
+                                           [placeholder]="getSchemaFormName(formComponent.name, formComponent.label)"
+                                           [formControlName]="formComponent.name"
+                                    >
+                                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field *ngSwitchCase="'number'">
+                                    <mat-label>{{ formComponent.label }}</mat-label>
+                                    <input matInput
+                                           [type]="formComponent.formType"
+                                           [placeholder]="getSchemaFormName(formComponent.name, formComponent.label)"
+                                           [formControlName]="formComponent.name"
+                                    >
+                                    <mat-error>{{ getErrorMessage(formComponent.name) }}</mat-error>
+                                </mat-form-field>
+                            </ng-container>
+                        </div>
+                        <ng-template #elseBlock>
+                            {{ getElementLabel(element, formComponent.name)}}
+                        </ng-template>
+                    </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+                    <mat-cell *matCellDef="let element; let elementIndex = index">
+                        <div *ngIf="isRowInEditMode(elementIndex); else elseBlock">
+                            <button mat-icon-button color="primary" (click)="onSubmitRow(elementIndex)">
+                                <mat-icon>done</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="onCancel(elementIndex)">
+                                <mat-icon>clear</mat-icon>
+                            </button>
+                        </div>
+                        <ng-template #elseBlock>
+                            <button mat-icon-button color="primary" (click)="onEdit(elementIndex)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="onRemove(elementIndex)">
+                                <mat-icon>delete_outline</mat-icon>
+                            </button>
+                        </ng-template>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+            </mat-table>
+        </ng-container>
+    </form>
+</div>

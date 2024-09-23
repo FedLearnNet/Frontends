@@ -1,0 +1,86 @@
+<div class="connector-step-config-wrapper">
+  <h2>Map Fields</h2>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab label="Fields">
+
+      <mat-toolbar>
+        <span><mat-icon>filter_alt</mat-icon> Filter Table</span>
+        <span class="spacer"></span>
+        <mat-button-toggle-group [(ngModel)]="filterMapped" (change)="refreshTableData()" aria-label="Font Style"
+                                 multiple>
+          <mat-button-toggle value="Unmapped">Unmapped</mat-button-toggle>
+          <mat-button-toggle value="Mapped">Mapped</mat-button-toggle>
+        </mat-button-toggle-group>
+        <mat-button-toggle-group [(ngModel)]="filterMappedStatus" (change)="refreshTableData()" aria-label="Font Style"
+                                 multiple>
+          <mat-button-toggle value="Valid">Valid</mat-button-toggle>
+          <mat-button-toggle value="Invalid">Invalid</mat-button-toggle>
+        </mat-button-toggle-group>
+
+      </mat-toolbar>
+
+
+      <table mat-table [dataSource]="tableDataSource" class="mat-elevation-z8 demo-table">
+        <ng-container matColumnDef="column">
+          <th mat-header-cell *matHeaderCellDef>Column Header</th>
+          <td mat-cell *matCellDef="let element">{{ element.column }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="data">
+          <th mat-header-cell *matHeaderCellDef>Sample Data</th>
+          <td mat-cell *matCellDef="let element">
+            @if (isList(element.data)) {
+              <div class="list-view-btn">
+          <span>
+            {{ getValue(element.data) }}
+          </span>
+                <button (click)="openArrayDialog(element.data, element.column)" mat-icon-button>
+                  <mat-icon>view_array</mat-icon>
+                </button>
+              </div>
+            } @else {
+              {{ getValue(element.data) }}
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="mapping">
+          <th mat-header-cell *matHeaderCellDef>Map To Field</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-button class="add-field" (click)="viewSelectedColumn(element)">
+              <span>{{ element.mapping }}</span>
+              <mat-icon>keyboard_arrow_down</mat-icon>
+            </button>
+
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="validation">
+          <th mat-header-cell *matHeaderCellDef>Validation</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="validation-cell">
+              @if (element.validation === 'Sync') {
+                <mat-icon class="validation-cell-sync">sync</mat-icon>
+                <span>Validating Preview Data</span>
+              } @else if (element.validation === 'Valid') {
+                <mat-icon class="validation-cell-success">verified</mat-icon>
+                <span>Validation successfully  <mat-icon
+                  matTooltip="Only for the tested value: '{{element.data}}'">info_i</mat-icon></span>
+              } @else if (element.validation) {
+                <mat-icon class="validation-cell-error">error</mat-icon>
+                <span>{{ element.validation }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-tab>
+    <mat-tab label="Preview">
+      <app-preview-mapper [schema]="schema" [mappingConfig]="dataSource"></app-preview-mapper>
+    </mat-tab>
+  </mat-tab-group>
+</div>

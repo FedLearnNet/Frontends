@@ -1,0 +1,212 @@
+<h1 mat-dialog-title>Transform</h1>
+<mat-dialog-content>
+
+  <div class="module-select-group">
+    <p>
+      Transformer Module
+      <mat-icon class="material-icons" matTooltip="Select a module which you wonna use for this transform the data">
+        info_i
+      </mat-icon>
+    </p>
+    <mat-form-field appearance="fill">
+      <mat-label>Module</mat-label>
+      <mat-select [(ngModel)]="selectedModule">
+        <mat-option *ngFor="let module of modules" [value]="module">
+          {{ module }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div *ngIf="selectedModule" class="module-select-group">
+    <p>
+      Transformer Method
+      <mat-icon class="material-icons"
+                matTooltip="Select a method in the module which you wonna use for this transform the data">
+        info_i
+      </mat-icon>
+    </p>
+    <mat-form-field appearance="fill">
+      <mat-label>Method</mat-label>
+      <mat-select [(ngModel)]="selectedMethod" (selectionChange)="setMethod()">
+        <mat-option *ngFor="let method of methods" [value]="method">
+          {{ method }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div *ngIf="data" class="module-select-group">
+    <p class="module-select-group-no-m">
+      On List values
+      <mat-icon class="material-icons"
+                matTooltip="If you need to process lists in a cell, this must be processed accordingly,
+                which means that it must be marked.">
+        info_i
+      </mat-icon>
+    </p>
+    <mat-slide-toggle
+      [(ngModel)]="data.forList">
+      @if (data.forList) {
+        List Value
+      } @else {
+        Single Value
+      }
+    </mat-slide-toggle>
+  </div>
+
+  @if (data) {
+    @if (!data.onRow) {
+      <div class="module-select-group">
+        <p>
+          Columns
+          <mat-icon class="material-icons"
+                    matTooltip="Select the columns which the function should used">info_i
+          </mat-icon>
+        </p>
+        <mat-form-field>
+          <mat-label>Columns</mat-label>
+          <mat-select multiple [(ngModel)]="selectedColumns">
+            <mat-option *ngFor="let column of columns" [value]="column">{{ column }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    } @else {
+      <p>This function is applied on the whole row</p>
+    }
+    @if (data.doc) {
+      <div>
+        <pre>
+        {{ data.doc }}
+        </pre>
+      </div>
+    }
+  }
+
+
+
+  <ng-container *ngIf="data">
+    <mat-divider></mat-divider>
+    @if (!data.onRow) {
+      <h3>Parameters</h3>
+    } @else {
+      <h3>Inputs</h3>
+    }
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" #formRef>
+      <table mat-table [dataSource]="parametersFormArray.controls" class="mat-elevation-z8">
+        <ng-container matColumnDef="function">
+          <th mat-header-cell *matHeaderCellDef> Function</th>
+          <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+            {{ paramGroup.get('functionName')?.value }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Name</th>
+          <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+            {{ paramGroup.get('key')?.value }}
+            @if (paramGroup.get('doc')?.value) {
+              <mat-icon class="material-icons" [matTooltip]="paramGroup.get('doc')?.value">info_i</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="column">
+          <th mat-header-cell *matHeaderCellDef> Column</th>
+          <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+            <mat-form-field>
+              <mat-select formControlName="column" (selectionChange)="updateControlStates(paramGroup)">
+                <mat-option *ngFor="let column of columns" [value]="column">{{ column }}</mat-option>
+              </mat-select>
+              <button *ngIf="paramGroup.get('column')?.value"
+                      matSuffix mat-icon-button aria-label="Clear"
+                      (click)="clearInput(paramGroup, 'column')">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="value">
+          <th mat-header-cell *matHeaderCellDef> Value</th>
+          <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+            <mat-form-field>
+              @if (!paramGroup.get('choices')?.value || !paramGroup.get('choices')?.value.length) {
+                <input matInput formControlName="value" placeholder="Enter value"
+                       (input)="updateControlStates(paramGroup)">
+              } @else {
+                <mat-select formControlName="value" (selectionChange)="updateControlStates(paramGroup)">
+                  <mat-option *ngFor="let choice of paramGroup.get('choices')?.value" [value]="choice">{{ choice }}
+                  </mat-option>
+                </mat-select>
+              }
+              <button *ngIf="paramGroup.get('value')?.value && !paramGroup.get('value')?.disabled"
+                      matSuffix mat-icon-button aria-label="Clear"
+                      (click)="clearInput(paramGroup, 'value')">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+
+      <ng-container *ngIf="data.onRow">
+        <h3>Outputs</h3>
+        <table mat-table [dataSource]="returnFormArray.controls" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name</th>
+            <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+              {{ paramGroup.get('key')?.value }}
+              @if (paramGroup.get('doc')?.value) {
+                <mat-icon class="material-icons" [matTooltip]="paramGroup.get('doc')?.value">info_i</mat-icon>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="column">
+            <th mat-header-cell *matHeaderCellDef> Column</th>
+            <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+              <mat-form-field>
+                <mat-select formControlName="column" (selectionChange)="updateControlStates(paramGroup)">
+                  <mat-option *ngFor="let column of columns" [value]="column">{{ column }}</mat-option>
+                </mat-select>
+                <button *ngIf="paramGroup.get('column')?.value"
+                        matSuffix mat-icon-button aria-label="Clear"
+                        (click)="clearInput(paramGroup, 'column')">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="new-column">
+            <th mat-header-cell *matHeaderCellDef>New Column</th>
+            <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
+              <mat-form-field>
+                <input matInput formControlName="value" placeholder="Enter value"
+                       (input)="updateControlStates(paramGroup)">
+                <button *ngIf="paramGroup.get('value')?.value"
+                        matSuffix mat-icon-button aria-label="Clear"
+                        (click)="clearInput(paramGroup, 'value')">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedReturnColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedReturnColumns;"></tr>
+        </table>
+      </ng-container>
+    </form>
+  </ng-container>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onDeleteClick()">Delete</button>
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-raised-button (click)="submitForm()" [disabled]="form.invalid || !hasData()">Apply</button>
+</mat-dialog-actions>

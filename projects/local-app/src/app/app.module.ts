@@ -6,6 +6,9 @@ import { DashboardComponent } from './utils/components/dashboard/dashboard.compo
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { CaseConversionInterceptor } from '@shared-lib/interceptors/case-conversion.interceptor';
+import { LoadingInterceptor } from '@shared-lib/interceptors/loading.interceptor';
 
 @NgModule({
     declarations: [
@@ -19,7 +22,18 @@ import { BrowserModule } from '@angular/platform-browser';
         BrowserModule,
         BrowserAnimationsModule,
     ],
-    providers: [],
+    providers: [
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: CaseConversionInterceptor,
+            multi: true,
+        },
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: LoadingInterceptor,
+            multi: true,
+        }
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -1,0 +1,65 @@
+.connector-container-wrapper {
+  height: calc(100vh - 64px - 75px);
+  overflow: hidden;
+
+  width: 100vw;
+  margin-left: -5.55%;
+}
+
+.connector-container {
+  width: auto;
+  height: 100%;
+  margin: 10px;
+  padding-bottom: 80px;
+  background: #f8f9fc;
+}
+
+mat-drawer {
+  width: 300px;
+  padding: 10px;
+  margin-bottom: 80px;
+}
+
+mat-toolbar {
+  position: fixed;
+  bottom: 0;
+  z-index: 11;
+  height: 64px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button {
+    margin-left: 20px;
+  }
+
+  .continue-button {
+    background: #353f4a;
+    color: white;
+  }
+}
+
+.connector-step-config-wrapper{
+  padding: 20px 30px;
+}
+
+.divider-mb{
+  margin-bottom: 20px;
+}
+
+.divider-mt{
+  margin-top: 20px;
+}
+
+.drop-list{
+  background: #f8f9fc;
+  &-add{
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    padding: 10px 0;
+    flex-direction: column;
+  }
+}
