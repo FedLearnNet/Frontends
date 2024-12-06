@@ -1,67 +1,60 @@
-import { Injectable } from '@angular/core';
-import { Training, TrainingStatus } from '@local-app/data-review/models';
-import { Observable, of } from 'rxjs';
-import { GROUPS_AND_USERS, TRAININGS } from '@local-app/data-review/services/mock';
-import { cloneDeep } from 'lodash';
+import {PaginatedResponse} from './../../../../../../shared-lib/src/lib/models/paginated-response';
+import {inject, Injectable} from '@angular/core';
+import {TrainingStatus} from '@local-app/data-review/models';
+import {catchError, Observable} from 'rxjs';
+import {ApiService} from '@shared-lib/services/api.service';
+import {environment} from '@local-app/env/environment';
+import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
+import {
+  FederatedLearningRequestDto,
+  FederatedLearningRequestPatientsDto
+} from "@local-app/data-review/dto/federated-learning-request";
+import {HttpParams} from "@angular/common/http";
 
 @Injectable({
   providedIn: 'root'
 })
 export class TrainingService {
-  protected trainingList: Training[] = [];
+  private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
+  private readonly apiService: ApiService = inject(ApiService);
+  private readonly apiUrl = `${environment.clientMetaApiUrl}/client_meta_api`;
+  private readonly path = 'federated-learning-request/'
 
-  constructor() { }
-
-  getAllTrainings(): Observable<Training[]> {
-    if (this.trainingList.length === 0) {
-      this.trainingList = TRAININGS;
+  getAllTrainings(page?: number, pageSize?: number, status?: TrainingStatus): Observable<PaginatedResponse<FederatedLearningRequestDto>> {
+    let queryParam = new HttpParams();
+    if (page) {
+      queryParam = queryParam.set('page', page);
+    }
+    if (pageSize) {
+      queryParam = queryParam.set('page_size', pageSize);
+    }
+    if (status) {
+      queryParam = queryParam.set('fl_request_status', status);
     }
 
-    return of(this.getReturnableTrainingList());
+    return this.apiService.get<PaginatedResponse<FederatedLearningRequestDto>>(`${this.getBaseUrl()}`, queryParam)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to fetch all training requests'))
+      );
   }
 
-  acceptTraining(trainingId: number): Observable<Training[]> {
-    this.changeTrainingStatus(trainingId, TrainingStatus.Completed);
-
-    return of(this.getReturnableTrainingList());
-  }
-
-  rejectTraining(trainingId: number): Observable<Training[]> {
-    this.changeTrainingStatus(trainingId, TrainingStatus.Rejected);
-
-    return of(this.getReturnableTrainingList());
-  }
-
-  changeTrainingStatus(trainingId: number, status: TrainingStatus): void {
-    const trainingIndex = this.trainingList.findIndex(training => training.id === trainingId);
-
-    this.trainingList[trainingIndex] = {
-      ...this.trainingList[trainingIndex],
+  updateTrainingStatus(
+    id: number,
+    status: TrainingStatus,
+    requestPatients?: FederatedLearningRequestPatientsDto[]
+  ): Observable<FederatedLearningRequestDto> {
+    return this.apiService.patch<FederatedLearningRequestDto>(`${this.getBaseUrl()}${id}/`, {
       status: status,
-    };
+      request_patients: requestPatients
+    }).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to update training status with id: ' + id))
+    );
   }
 
-  private getReturnableTrainingList(): Training[] {
-    const returnableTrainingList = cloneDeep(this.trainingList);
 
-    this.trainingList.forEach((training, index) => {
-      returnableTrainingList[index].user = GROUPS_AND_USERS.find(groupAndUser => groupAndUser.id === this.trainingList[index].user)?.name ?? '';
-      returnableTrainingList[index].status = TrainingService.getTrainingStatusText(returnableTrainingList[index].status);
-    });
-
-    return returnableTrainingList;
-  }
-
-  private static getTrainingStatusText(status: TrainingStatus | string): string {
-    switch (status) {
-      case TrainingStatus.Pending:
-        return 'Pending';
-      case TrainingStatus.Completed:
-        return 'Completed';
-      case TrainingStatus.Rejected:
-        return 'Rejected';
-      default:
-        return '';
-    }
+  private getBaseUrl(): string {
+    return `${this.apiUrl}/${this.path}`;
   }
 }

@@ -1,0 +1,37 @@
+<h2>Leave your review</h2>
+
+<app-app-rating [editMode]="!userHasReviewed"
+                [rating]="usersReview?.rating ?? newUserRating"
+                (ratingUpdated)="updateRating($event)"
+></app-app-rating>
+<form class="review-form">
+  <mat-form-field class="full-width">
+    <mat-label>Review</mat-label>
+    <textarea [formControl]="ratingFormControl" matInput
+              placeholder="Add your comment"></textarea>
+    @if (ratingFormControl.hasError('required')) {
+      <mat-error>Review is <strong>required</strong></mat-error>
+    }
+  </mat-form-field>
+</form>
+@if (!userHasReviewed) {
+  <button mat-raised-button (click)="addReview()" [disabled]="ratingFormControl.invalid">Add your review</button>
+}
+
+<mat-divider></mat-divider>
+<h2>Reviews</h2>
+@for (review of app.reviews; track review.id) {
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <app-app-rating [editMode]="false"
+                        [rating]="review.rating"
+        ></app-app-rating>
+      </mat-card-title>
+      <mat-card-subtitle>{{ review.createdAt | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{ review.reviewText }}</p>
+    </mat-card-content>
+  </mat-card>
+}

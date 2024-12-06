@@ -1,0 +1,32 @@
+<mat-form-field>
+  <mat-label>Select Query</mat-label>
+  <mat-select
+    [(value)]="queryId"
+    [disabled]="!editMode">
+    @for (q of queryList; track q.id) {
+      <mat-option
+        [value]="q.id"
+        [disabled]="(!q.hasResult && q.projectId)"
+      >
+        <span>{{ q.name }} </span>
+        @if (q.hasResult) {
+          <span> ({{ q.result }}) </span>
+        } @else {
+          <span> (No result) </span>
+        }
+        @if (q.projectId) {
+          <span> - (Linked to {{ q.projectId }}) </span>
+        }
+      </mat-option>
+    }
+  </mat-select>
+  @if (!editMode) {
+    <button mat-icon-button matSuffix (click)="onEdit($event)">
+      <mat-icon>edit</mat-icon>
+    </button>
+  } @else {
+    <button mat-icon-button matSuffix (click)="onSave($event)">
+      <mat-icon>save</mat-icon>
+    </button>
+  }
+</mat-form-field>

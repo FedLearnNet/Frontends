@@ -1,0 +1,151 @@
+@if (allowMultiple) {
+  <mat-form-field appearance="fill">
+    <mat-label>{{ label }}</mat-label>
+    <input matInput [formControl]="formControl"/>
+    @if (errorMessages) {
+      @for (message of errorMessages; track message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    }
+    <mat-hint>
+      @switch (hyperparam.type) {
+        @case (FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+          Values needs to be in: {{ hyperparam.options }}.
+          Enter individual values (e.g. {{ hyperparam.options }})
+        }
+        @case (FederatedAppConfigHyperParamDataType.BOOLEAN) {
+          All values which are not 'true' are considered as 'false'.
+          Enter individual values (e.g. true, false)
+        }
+        @case (FederatedAppConfigHyperParamDataType.INTEGER) {
+          Values needs to be bigger than  {{ hyperparam.minValue }} and lower than {{ hyperparam.maxValue }}.
+          Enter individual values (e.g. 1,2,3) or ranges (e.g. 1-5)
+        }
+        @case (FederatedAppConfigHyperParamDataType.FLOAT) {
+          Values needs to be bigger than  {{ hyperparam.minValue }} and lower than {{ hyperparam.maxValue }}.
+          Enter individual values (e.g. 1,2,3) or ranges (e.g. 1-5)
+        }
+        @default {
+          Values needs to fit  {{ hyperparam.pattern }} regex test
+          Enter individual values (e.g. 1,2,3)
+        }
+      }
+    </mat-hint>
+    @if (showTooltip) {
+      <mat-icon matSuffix
+                [matTooltip]="hyperparam.description"
+      >mode_edit
+      </mat-icon>
+    }
+  </mat-form-field>
+} @else {
+  @switch (hyperparam.type) {
+    @case (FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ label }}</mat-label>
+        <mat-select [formControl]="formControl">
+          @for (option of hyperparam.options; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ label }} is <strong>required</strong></mat-error>
+        }
+        <mat-hint>
+          Values needs to be in: {{ hyperparam.options }}
+        </mat-hint>
+        @if (showTooltip) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam.description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.INTEGER) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ label }}</mat-label>
+        <input matInput [formControl]="formControl" type="number" step="1"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ label }} is <strong>required</strong></mat-error>
+        }
+        @if (formControl.hasError('min')) {
+          <mat-error>{{ label }} must be greater than or equal to {{ hyperparam.minValue }}</mat-error>
+        }
+        @if (formControl.hasError('max')) {
+          <mat-error>{{ label }} must be lower than or equal to {{ hyperparam.maxValue }}</mat-error>
+        }
+        @if (formControl.hasError('pattern')) {
+          <mat-error>{{ label }} should not be a float value</mat-error>
+        }
+        <mat-hint>
+          Values needs to be bigger than  {{ hyperparam.minValue }} and lower than {{ hyperparam.maxValue }}
+        </mat-hint>
+        @if (showTooltip) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam.description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.FLOAT) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ label }}</mat-label>
+        <input matInput [formControl]="formControl" type="number" step="0.1"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ label }} is <strong>required</strong></mat-error>
+        }
+        @if (formControl.hasError('min')) {
+          <mat-error>{{ label }} must be greater than or equal to {{ hyperparam.minValue }}</mat-error>
+        }
+        @if (formControl.hasError('max')) {
+          <mat-error>{{ label }} must be lower than or equal to {{ hyperparam.maxValue }}</mat-error>
+        }
+        <mat-hint>
+          Values needs to be bigger than  {{ hyperparam.minValue }} and lower than {{ hyperparam.maxValue }}
+        </mat-hint>
+        @if (showTooltip) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam.description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.BOOLEAN) {
+      <div class="checkbox">
+        <mat-checkbox [formControl]="formControl">
+          {{ label }}
+        </mat-checkbox>
+        @if (showTooltip) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam.description"
+          >mode_edit
+          </mat-icon>
+        }
+      </div>
+    }
+    @default {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ label }}</mat-label>
+        <input matInput [formControl]="formControl"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ label }} is <strong>required</strong></mat-error>
+        }
+        @if (formControl.hasError('patter')) {
+          <mat-error>{{ label }} must match the pattern {{ hyperparam.pattern }}</mat-error>
+        }
+        <mat-hint>
+          Values needs to fit  {{ hyperparam.pattern }} regex test
+        </mat-hint>
+        @if (showTooltip) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam.description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+  }
+}

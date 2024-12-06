@@ -1,0 +1,107 @@
+<h2 mat-dialog-title>
+  @if (data.uniqueId) {
+    Edit {{ data.name }}
+    @if (isDisabled()) {
+      <span
+        [matTooltip]="'Its used by ' + data.schemaIds?.length + ' schemas'"
+      >(Viewing only)</span>
+    }
+  } @else {
+    Add new Datatype
+  }
+</h2>
+<mat-dialog-content>
+  <mat-form-field class="full-width">
+    <mat-label>Name</mat-label>
+    <input matInput placeholder="Name" [(ngModel)]="data.name" [disabled]="isDisabled()">
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput placeholder="Description" [(ngModel)]="data.desc" [disabled]="isDisabled()"></textarea>
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Type</mat-label>
+    <mat-select [(ngModel)]="data.type" (openedChange)="data.validations = []" [disabled]="isDisabled()">
+      @for (type of types; track type) {
+        <mat-option [value]="type.value">{{ type.viewValue }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <h4>Validations</h4>
+
+  @if (data.type !== 'categorical') {
+    @for (validation of data.validations; track validation) {
+      <div class="validator-group">
+        <mat-form-field>
+          <mat-label>Type</mat-label>
+          <mat-select [(ngModel)]="validation.name" [disabled]="isDisabled()">
+            @for (validator of getValidators(); track validator) {
+              <mat-option [value]="validator">{{ validator }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        @if (validation.name && validation.name !== 'required') {
+          <mat-form-field>
+            <mat-label>Check value</mat-label>
+            <input matInput placeholder="Value" [(ngModel)]="validation.validator" [disabled]="isDisabled()">
+          </mat-form-field>
+        }
+        <mat-form-field>
+          <mat-label>Error message</mat-label>
+          <input matInput placeholder="Value" [(ngModel)]="validation.message" [disabled]="isDisabled()">
+        </mat-form-field>
+      </div>
+    }
+    @if (!isDisabled()) {
+      <button mat-button (click)="addValidator()">Add Validator</button>
+    }
+  } @else {
+    <mat-form-field class="full-width">
+      <mat-label>Allowed values</mat-label>
+      <mat-chip-grid #chipGrid aria-label="Add allowed Values">
+        @for (option of data.allowedValues; track option) {
+          <mat-chip-row
+            (removed)="removeOption(option)"
+            [editable]="true"
+            (edited)="editOption(option, $event)"
+            [aria-description]="'press enter to edit ' + option"
+          >
+            {{ option }}
+            <button matChipRemove [attr.aria-label]="'remove ' + option">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+        <input
+          placeholder="New fruit..."
+          [matChipInputFor]="chipGrid"
+          [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+          [matChipInputAddOnBlur]="true"
+          (matChipInputTokenEnd)="addOption($event)"
+          [disabled]="isDisabled()"
+        />
+      </mat-chip-grid>
+    </mat-form-field>
+  }
+  <h4>Check example value</h4>
+
+  <mat-form-field class="full-width">
+    <mat-label>Value</mat-label>
+    <input matInput placeholder="Value" type="text" [(ngModel)]="toCheckValue">
+    @if (toCheckValue) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="checkValidation()">
+        <mat-icon>search_check</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  @if (!isDisabled()) {
+    <button mat-button (click)="save()">Save</button>
+  }
+</mat-dialog-actions>

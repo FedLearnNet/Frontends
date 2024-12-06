@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Join Project</h2>
+
+<mat-dialog-content>
+  <p>Please enter the token to join a project in the field below.
+  </p>
+  <mat-form-field>
+    <mat-label>Token</mat-label>
+    <input matInput [(ngModel)]="token" />
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [disabled]="!token" (click)="joinProject()">Join</button>
+</mat-dialog-actions>

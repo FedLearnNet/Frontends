@@ -1,5 +1,5 @@
 <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
+  <ol class="breadcrumb" [ngClass]="noMargin ? 'breadcrumb--no-margin' : ''">
     <li *ngFor="let item of breadcrumbs; let last = last"
         [ngClass]="{'breadcrumb-item': true, 'active': last}"
         [attr.aria-current]="last ? 'page' : null">

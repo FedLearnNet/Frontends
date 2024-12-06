@@ -1,0 +1,63 @@
+
+.wrapper {
+  margin: 50px;
+  display: flex;
+  gap: 50px;
+
+  .view-datatypes-container {
+    overflow: scroll;
+    width: 100%;
+    max-width: calc(100% - 700px);
+
+    .download-btn {
+      margin-top: 20px;
+      width: 150px;
+      float: right;
+      margin-bottom: 20px;
+    }
+  }
+
+  .select-datatypes-container {
+    width: 600px;
+
+    &--header-save {
+      display: flex;
+      gap: 30px;
+      align-items: baseline;
+
+      mat-form-field {
+        width: calc(100% - 130px);
+      }
+      button{
+        width: 100px
+      }
+    }
+
+
+    tr.detail-row {
+      height: 0;
+    }
+
+    .example-element-detail {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+
+      &--card {
+        padding-bottom: 30px;
+
+        app-ontology-card,
+        app-datatype-card {
+          min-width: calc(50% - 15px);
+        }
+      }
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+
+  }
+
+}
+

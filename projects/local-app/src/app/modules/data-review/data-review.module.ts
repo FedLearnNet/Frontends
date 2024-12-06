@@ -13,36 +13,42 @@ import { PermissionService } from '@local-app/data-review/services/permission.se
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatMenuModule } from '@angular/material/menu';
 import { PermissionDetailComponent } from '@local-app/data-review/components/permission-detail/permission-detail.component';
-import { TrainingGridComponent } from '@local-app/data-review/components/training-grid/training-grid.component';
 import { PermissionGridComponent } from '@local-app/data-review/components/permission-grid/permission-grid.component';
 import { DataReviewDashboardComponent } from '@local-app/data-review/components/data-review-dashboard/data-review-dashboard.component';
 import { DataReviewComponent } from '@local-app/data-review/data-review.component';
 import { DataReviewRoutingModule } from '@local-app/data-review/data-review-routing.module';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTreeModule } from '@angular/material/tree';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import {TrainingGridComponent} from "@local-app/data-review/components/training-grid/training-grid.component";
 
 @NgModule({
     declarations: [
         DataReviewComponent,
         DataReviewDashboardComponent,
         PermissionGridComponent,
-        TrainingGridComponent,
         PermissionDetailComponent,
     ],
-    imports: [
-        CommonModule,
-        DataReviewRoutingModule,
-        MatTableModule,
-        MatButtonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatDialogModule,
-        MatSelectModule,
-        MatDividerModule,
-        MatIconModule,
-        MatSlideToggleModule,
-        MatMenuModule,
-    ],
+  imports: [
+    CommonModule,
+    DataReviewRoutingModule,
+    MatTableModule,
+    MatButtonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDialogModule,
+    MatSelectModule,
+    MatDividerModule,
+    MatIconModule,
+    MatSlideToggleModule,
+    MatMenuModule,
+    MatCheckboxModule,
+    MatTreeModule,
+    ScrollingModule,
+    TrainingGridComponent,
+  ],
     providers: [
         PermissionService,
     ],

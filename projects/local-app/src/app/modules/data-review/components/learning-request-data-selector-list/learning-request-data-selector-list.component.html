@@ -1,0 +1,127 @@
+<h2 mat-dialog-title>Learning Request Selection</h2>
+<mat-dialog-content>
+
+  <div class="project-view">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Project</mat-card-title>
+        <mat-card-subtitle>{{ project.name }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ project.description }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Selected Data</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ project.dataTypeIds }}</p>
+      </mat-card-content>
+
+    </mat-card>
+
+    @if (query) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>Query</mat-card-title>
+          <mat-card-subtitle>{{ query.timestamp |date }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ query.queryString }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+    <div class="apps">
+      @for (app of getApps(); track app.id) {
+
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <img mat-card-avatar [src]="app.icon" alt="Photo of a Shiba Inu">
+            <mat-card-title>{{ app.name }}</mat-card-title>
+            <mat-card-subtitle>{{ app.type }}</mat-card-subtitle>
+            <div class="card-right">
+              <ng-content select="[card-right]"></ng-content>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            {{ app.shortDescription }}
+          </mat-card-content>
+
+          <mat-card-footer class="app-card-footer">
+            <app-app-tags [app]="app"></app-app-tags>
+          </mat-card-footer>
+        </mat-card>}
+    </div>
+  </div>
+
+  <div mat-dialog-content class="dialog--content">
+    <div class="filter-wrapper">
+
+      <mat-form-field class="filter-wrapper--search">
+        <mat-label>Search</mat-label>
+        <input matInput (keyup)="applySearch($event)"
+               placeholder="term">
+      </mat-form-field>
+
+      <div class="filter-wrapper--filter">
+        <p>Filter</p>
+        <mat-chip-listbox>
+          @for (filter of cohorts; track filter) {
+            <mat-chip-option (selectionChange)="applyFilter($event, $index)"
+            >{{ filter }} ({{ getSelectedPatientsPerCoHort(filter) }})
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+        <button mat-raised-button (click)="clearFilters()">Clear</button>
+      </div>
+
+    </div>
+
+    <mat-table [dataSource]="dataSource" class="mat-elevation-z4">
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef [ngClass]="'mat-column-actions-' + screenSize">
+          <mat-checkbox (change)="$event ? onSelectAll() : null"
+                        color="primary"
+                        [checked]="selectedPatients.hasValue() && isAllSelected()"
+                        [indeterminate]="selectedPatients.hasValue() && !isAllSelected()"
+                        [disabled]="patients.length === 0">
+          </mat-checkbox>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" [ngClass]="'mat-column-actions-' + screenSize">
+          <div>
+            <mat-checkbox
+              (click)="$event.stopPropagation()"
+              color="primary"
+              [checked]="selectedPatients.isSelected(element)"
+              (change)="onToggleSelection(element);">
+            </mat-checkbox>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Cohort Name</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.cohort }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="patientId">
+        <mat-header-cell *matHeaderCellDef>PatientId</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+  @if (data.request.status === TrainingStatusPending) {
+    <button mat-raised-button color="primary" type="submit" (click)="onAccept()">Accept</button>
+    <button mat-raised-button color="warn" type="submit" (click)="onReject()">Reject</button>
+  }
+</mat-dialog-actions>

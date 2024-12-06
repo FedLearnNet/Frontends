@@ -1,0 +1,12 @@
+export enum PublishStatus {
+    PUBLISHED = 'PUBLISHED',
+    UNPUBLISHED = 'UNPUBLISHED',
+
+}
+
+export enum FederatedAppType {
+  PRE_PROCESSING = 'PRE_PROCESSING',
+  ANALYSIS = 'ANALYSIS',
+  POST_PROCESSING = 'POST_PROCESSING',
+  EVALUATION = 'EVALUATION',
+}

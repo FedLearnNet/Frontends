@@ -9,6 +9,7 @@ import {ConnectorManagementMode} from "./enum/connector-managment-mode";
 import {RunConnectorViewComponent} from "./components/run-connector/run-connector.component";
 import {runResolver} from "./services/run-resolver.service";
 import {schemaResolver} from "@local-app/cohort/services/schema-resolver.service";
+import {AuthGuard} from "@shared-lib/services/keycloak";
 
 const routes: Routes = [
   {
@@ -20,8 +21,7 @@ const routes: Routes = [
         path: '',
         component: ListConnectorComponent,
         pathMatch: 'full',
-        data: { breadcrumb: (data: any) => data.schema.name },
-
+        data: {breadcrumb: (data: any) => data.schema.name},
       },
       {
         path: 'new',

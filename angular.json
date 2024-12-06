@@ -17,7 +17,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["projects/local-app/**/*.ts", "projects/local-app/**/*.html"]
+            "lintFilePatterns": [
+              "projects/local-app/**/*.ts",
+              "projects/local-app/**/*.html"
+            ]
           }
         },
         "build": {
@@ -42,17 +45,27 @@
             ],
             "styles": [
               "projects/local-app/src/styles.scss",
-              "projects/shared-lib/src/lib/styles/styles.scss"
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/shared-lib/src/lib/styles"
+              ]
+            }
           },
           "configurations": {
-            "production": {
+            "microb-AI-ome-production": {
               "optimization": true,
               "sourceMap": false,
               "aot": true,
               "extractLicenses": true,
               "outputHashing": "all",
+              "outputPath": "dist/app",
               "budgets": [
                 {
                   "type": "initial",
@@ -67,19 +80,217 @@
               ],
               "fileReplacements": [
                 {
-                  "replace": "projects/global-app/src/environments/environment.ts",
-                  "with": "projects/global-app/src/environments/environment.prod.ts"
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.prod.ts"
                 },
                 {
-                  "replace": "projects/local-app/src/environments/environment.ts",
-                  "with": "projects/local-app/src/environments/environment.prod.ts"
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.prod.ts"
                 }
-              ]
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
             },
-            "development": {
+            "microb-AI-ome-development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "dAIbetes-production": {
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
             }
           },
           "defaultConfiguration": "development"
@@ -92,6 +303,12 @@
             },
             "development": {
               "buildTarget": "local-app:build:development"
+            },
+            "microb-AI-ome": {
+              "buildTarget": "local-app:build:microb-AI-ome-development"
+            },
+            "dAIbetes": {
+              "buildTarget": "local-app:build:dAIbetes-development"
             }
           },
           "defaultConfiguration": "development"
@@ -122,7 +339,11 @@
             ],
             "styles": [
               "projects/local-app/src/styles.scss",
-              "projects/shared-lib/src/lib/styles/styles.scss"
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
             ],
             "scripts": []
           }
@@ -143,7 +364,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["projects/global-app/**/*.ts", "projects/global-app/**/*.html"]
+            "lintFilePatterns": [
+              "projects/global-app/**/*.ts",
+              "projects/global-app/**/*.html"
+            ]
           }
         },
         "build": {
@@ -168,17 +392,31 @@
             ],
             "styles": [
               "projects/global-app/src/styles.scss",
-              "projects/shared-lib/src/lib/styles/styles.scss"
+              "projects/shared-lib/src/lib/styles/styles.scss",
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-python.min.js",
+              "node_modules/clipboard/dist/clipboard.min.js",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js"
+            ]
           },
           "configurations": {
-            "production": {
+            "posymed-production": {
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
               "budgets": [
                 {
                   "type": "initial",
                   "maximumWarning": "1mb",
-                  "maximumError": "2mb"
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -186,18 +424,335 @@
                   "maximumError": "400kb"
                 }
               ],
-              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "projects/global-app/src/environments/environment.ts",
-                  "with": "projects/global-app/src/environments/environment.prod.ts"
+                  "with": "projects/global-app/src/environments/posymed/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.prod.ts"
                 }
-              ]
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/posymed",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/posymed/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
             },
-            "development": {
+            "posymed-development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/posymed",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/posymed/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/posymed"
+                ]
+              }
+            },
+            "microb-AI-ome-production": {
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "microb-AI-ome-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "dAIbetes-production": {
+              "optimization": true,
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
             }
           },
           "defaultConfiguration": "development"
@@ -210,6 +765,15 @@
             },
             "development": {
               "buildTarget": "global-app:build:development"
+            },
+            "microb-AI-ome": {
+              "buildTarget": "global-app:build:microb-AI-ome-development"
+            },
+            "dAIbetes": {
+              "buildTarget": "global-app:build:dAIbetes-development"
+            },
+            "posymed": {
+              "buildTarget": "global-app:build:posymed-development"
             }
           },
           "defaultConfiguration": "development"
@@ -240,7 +804,11 @@
             ],
             "styles": [
               "projects/global-app/src/styles.scss",
-              "projects/shared-lib/src/lib/styles/styles.scss"
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
             ],
             "scripts": []
           }
@@ -256,7 +824,10 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["projects/shared-lib/**/*.ts", "projects/shared-lib/**/*.html"]
+            "lintFilePatterns": [
+              "projects/shared-lib/**/*.ts",
+              "projects/shared-lib/**/*.html"
+            ]
           }
         },
         "build": {

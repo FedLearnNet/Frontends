@@ -12,5 +12,5 @@ export const schemaListResolver: ResolveFn<Schema[]> = () => {
 }
 
 export const schemaResolver: ResolveFn<Schema> = (route: ActivatedRouteSnapshot) => {
-  return inject(SchemaService).getSchema(route.paramMap.get('schema-id'));
+  return inject(SchemaService).getSchema(route.paramMap.get('schemaId'));
 }

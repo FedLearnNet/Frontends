@@ -1,0 +1,54 @@
+
+.mode-icon{
+  font-size: 40px;
+  height: 40px;
+  width: 40px;
+}
+
+.no-space {
+  width: 40px;
+
+  ::ng-deep {
+
+    .mat-mdc-text-field-wrapper{
+      padding: 0;
+      font-size: 13px;
+
+      .mdc-floating-label{
+        position: absolute;
+        top: 19px;
+        left: 4px;
+        max-width: 33px;
+      }
+
+      .mat-mdc-select-arrow-wrapper {
+        transform: translateX(-16px);
+      }
+    }
+  }
+}
+
+
+.space {
+  width: 120px;
+
+  ::ng-deep {
+
+    .mat-mdc-text-field-wrapper{
+      padding: 0 0 0 10px;
+      font-size: 13px;
+
+      .mdc-floating-label{
+        position: absolute;
+        top: 19px;
+        left: 0px;
+        max-width: 33px;
+      }
+
+      .mat-mdc-select-arrow-wrapper {
+        transform: translateX(-16px);
+      }
+    }
+  }
+}
+

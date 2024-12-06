@@ -1,0 +1,48 @@
+<button mat-raised-button color="primary" [matMenuTriggerFor]="userMenu" aria-label="User Profile">
+  @if (isLoggedIn) {
+    <mat-icon>account_circle</mat-icon>
+  } @else {
+    <mat-icon>login</mat-icon>
+  }
+</button>
+
+<mat-menu #userMenu="matMenu">
+
+
+  @if (!isLoggedIn) {
+    <button mat-menu-item (click)="login()">
+      <mat-icon>login</mat-icon>
+      <span>Log in</span>
+    </button>
+  }
+
+  @if (userProfile) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>person</mat-icon>
+        <mat-card-title> {{ userProfile.username }} Profile</mat-card-title>
+        @if (userProfile.firstName || userProfile.lastName) {
+          <mat-card-subtitle> {{ userProfile.firstName }} {{ userProfile.lastName }}</mat-card-subtitle>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        @if (userProfile.email) {
+          <p>{{ userProfile.email }} {{ userProfile.emailVerified ? '(Verified)' : '(Not Verified)' }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+  @if (isLoggedIn) {
+    <button mat-menu-item (click)="accountManagement()">
+      <mat-icon>settings</mat-icon>
+      <span>Account management</span>
+    </button>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Log out</span>
+    </button>
+  }
+
+
+</mat-menu>
+

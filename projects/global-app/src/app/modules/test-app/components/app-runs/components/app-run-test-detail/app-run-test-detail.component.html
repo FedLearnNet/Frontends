@@ -1,0 +1,81 @@
+<h2 mat-dialog-title class="run--title" [class.run--fail]="isRunError()" [class.run--success]="isRunSuccess()">
+
+  <p>#{{ data.nr }} Test run for {{ data.app.name }}</p>
+  <p>{{ data.run.status }}</p>
+</h2>
+<mat-dialog-content>
+
+  @if (isRunError()) {
+    <div class="run--fail">
+      <p> Error: {{ data.run.error }}.</p>
+    </div>
+  }
+
+  <mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Hyperparameter</mat-panel-title>
+      </mat-expansion-panel-header>
+      @for (param of getHyperParamNames(); track param) {
+        <p> {{ param }}: {{ data.run.hyperParams[param] }}</p>
+      }
+      @if(getHyperParamNames().length === 0) {
+        <p> No hyperparameters</p>
+      }
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Input</mat-panel-title>
+      </mat-expansion-panel-header>
+      @for (param of getInputNames(); track param) {
+        <p> {{ param }}: {{ data.run.inputData[param] }}</p>
+      }
+      @if(getInputNames().length === 0) {
+        <p> No Input</p>
+      }
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Output</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      @for (param of getOutputNames(); track param) {
+        <p> {{ param }}: {{ data.run.outputData[param] | json }}</p>
+      }
+      @if(getOutputNames().length === 0) {
+        <p> No Output</p>
+      }
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Metric</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      @if (getMetricsNames().length > 0) {
+        @for (name of getMetricsNames(); track name) {
+          <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)">
+          </app-simple-metric-line>
+        }
+      } @else {
+        <p> Loading Metrics ...</p>
+      }
+    </mat-expansion-panel>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Logs</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      @if (logs$ | async; as logs) {
+        <app-app-log-table [logs]="logs"></app-app-log-table>
+      } @else {
+        <p> Loading logs ...</p>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onRunClick()">Run</button>
+</mat-dialog-actions>

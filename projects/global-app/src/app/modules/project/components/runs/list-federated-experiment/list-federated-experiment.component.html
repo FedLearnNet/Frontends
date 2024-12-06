@@ -1,0 +1,76 @@
+<section>
+  <mat-toolbar>
+    <span class="spacer"></span>
+
+    <button mat-raised-button
+            aria-label="Join new Project"
+            (click)="newExperiment()"
+    >
+      <mat-icon>add</mat-icon>
+      <span>Create Experiment</span>
+    </button>
+  </mat-toolbar>
+
+
+  @if (dataSource$) {
+    <table mat-table [dataSource]="(dataSource$ | async)!" class="mat-elevation-z8">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name</th>
+        <td mat-cell *matCellDef="let project">
+          <a [routerLink]="[project.id]">
+            {{ project.name }}
+          </a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef> Created</th>
+        <td mat-cell *matCellDef="let project"> {{ project.createdAt }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef> Description</th>
+        <td mat-cell *matCellDef="let project"> {{ project.description }}</td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Status</th>
+        <td mat-cell *matCellDef="let project"> {{ project.status }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="action" stickyEnd>
+        <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+        <td mat-cell *matCellDef="let project">
+          <button mat-icon-button [matMenuTriggerFor]="projectTableMenu"
+                  [matMenuTriggerData]="{project: project}"
+                  aria-label="Context Menu for each project">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-menu #projectTableMenu="matMenu">
+      <ng-template matMenuContent let-aliasMenuItems="project">
+        <button mat-menu-item>
+          <mat-icon>start</mat-icon>
+          <span>Start Todo</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>cancel</mat-icon>
+          <span>Stop Todo</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>restart_alt</mat-icon>
+          <span>Restart Todo</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  }
+</section>

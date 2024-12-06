@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, Validators } from '@angular/forms';
@@ -10,7 +10,7 @@ import { Cohort, CohortPatient } from '@local-app/cohort/models';
   templateUrl: './show-cohort.component.html',
   styleUrl: './show-cohort.component.scss',
 })
-export class ShowCohortComponent {
+export class ShowCohortComponent implements OnInit {
   selectedStepIndex: number = 0;
   cohort: Cohort = {} as Cohort;
   cohortPatients: CohortPatient[] = [];

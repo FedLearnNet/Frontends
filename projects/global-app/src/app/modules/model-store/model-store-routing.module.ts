@@ -1,41 +1,47 @@
-import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
-import { ModelStoreComponent } from '@global-app/model-store/model-store.component';
-import { ModelStoreDashboardComponent } from '@global-app/model-store/components/model-store-dashboard/model-store-dashboard.component';
+import {RouterModule, Routes} from '@angular/router';
+import {NgModule} from '@angular/core';
+import {ModelStoreComponent} from '@global-app/model-store/model-store.component';
 import {
-    modelListResolver,
-    modelResolver,
-    predictionListResolver
+  modelResolver, modelsResolver,
 } from '@global-app/model-store/services/model-resolver.service';
-import { ModelDetailComponent } from '@global-app/model-store/components/model-detail/model-detail.component';
+import {ModelDetailComponent} from '@global-app/model-store/components/model-detail/model-detail.component';
+import {ModelListComponent} from "@global-app/model-store/components/model-list/model-list.component";
 
 const routes: Routes = [
-    {
+  {
+    path: '',
+    component: ModelStoreComponent,
+    children: [
+      {
         path: '',
-        component: ModelStoreComponent,
+        resolve: {models: modelsResolver},
+        data: {breadcrumb: 'Model Store'},
         children: [
-            {
-                path: '',
-                component: ModelStoreDashboardComponent,
-                pathMatch: 'full',
-                resolve: { models: modelListResolver, predictions: predictionListResolver }
-            },
-            {
-                path: ':model-id',
-                component: ModelDetailComponent,
-                pathMatch: 'full',
-                resolve: { model: modelResolver }
-            },
-        ],
-    }
+          {
+            path: '',
+            component: ModelListComponent,
+            pathMatch: 'full',
+          },
+          {
+            path: ':model-id',
+            component: ModelDetailComponent,
+            pathMatch: 'full',
+            resolve: {model: modelResolver},
+            data: {breadcrumb: (data: any) => data.model.name},
+          },
+        ]
+      },
+    ]
+  },
 ]
 
 @NgModule({
-    imports: [
-        RouterModule.forChild(routes),
-    ],
-    exports: [
-        RouterModule,
-    ],
+  imports: [
+    RouterModule.forChild(routes),
+  ],
+  exports: [
+    RouterModule,
+  ],
 })
-export class ModelStoreRoutingModule {}
+export class ModelStoreRoutingModule {
+}

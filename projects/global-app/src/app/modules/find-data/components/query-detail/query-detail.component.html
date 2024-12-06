@@ -1,61 +1,81 @@
 <div class="dialog">
-    <h1 mat-dialog-title class="dialog--header">
-        Query detail
-    </h1>
+  <h1 mat-dialog-title class="dialog--header">
+    Query detail
+  </h1>
 
-    <mat-divider />
+  <mat-divider/>
 
-    <div mat-dialog-content class="dialog--content">
-        <div class="query-detail">
-            <form [formGroup]="queryDetailForm">
-                <mat-form-field>
-                    <mat-label>Name of the query</mat-label>
-                    <input matInput placeholder="Name of the query" formControlName="name" required>
-                </mat-form-field>
-            </form>
-        </div>
-
-        <div class="query-builder--container">
-            <div class="query-builder--container--header">
-                Query builder
-            </div>
-
-            <ng-container *ngFor="let queryListItem of queryList; index as queryListItemIndex">
-                <app-query-builder-item
-                    [queryItem]="queryListItem"
-                    [queryConfigs]="queryConfigs"
-                    [isLastItem]="queryList.length === queryListItemIndex + 1"
-                    (removeQueryItem)="removeQueryItem($event)"
-                    (queryabilityChanged)="handleQueryChange()"
-                >
-                </app-query-builder-item>
-            </ng-container>
-
-            <button mat-icon-button (click)="onAddQueryItem()">
-                <mat-icon>add_circle_outline</mat-icon>
-            </button>
-        </div>
-
-        <div *ngIf="queryList.length !== 0" class="query-execution--container">
-            <button *ngIf="!isQueryRunning && !isQueryExecuted" mat-raised-button color="primary" type="submit" (click)="onRunQuery()">
-                Run query
-            </button>
-
-            <div *ngIf="isQueryRunning" class="query-progress-indicator">
-                <mat-spinner mode="indeterminate"></mat-spinner>
-            </div>
-
-            <div *ngIf="isQueryExecuted" class="query-result">
-                Result: {{ queryResults }}
-            </div>
-        </div>
-
+  <div mat-dialog-content class="dialog--content">
+    <div class="query-detail">
+      <form [formGroup]="queryDetailForm">
+        <mat-form-field>
+          <mat-label>Name of the query</mat-label>
+          <input matInput placeholder="Name of the query" formControlName="name" required>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Description</mat-label>
+          <input matInput placeholder="Description of the query" formControlName="description" required>
+        </mat-form-field>
+      </form>
     </div>
 
-    <mat-divider />
+    <div class="query-builder--container">
+      <div class="query-builder--container--header">
+        Query builder
+      </div>
 
-    <div mat-dialog-actions class="dialog--footer">
-        <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
-        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">{{ getSubmitButtonLabel() }}</button>
+      @for (_ of queryList; track trackQueryItem) {
+        <app-query-builder-item
+          [(queryItem)]="queryList[$index]"
+          [queryConfigs]="queryConfigs"
+          [isLastItem]="$last"
+          (removeQueryItem)="removeQueryItem($index)"
+          (queryabilityChanged)="handleQueryChange()"
+        >
+        </app-query-builder-item>
+      }
+
+      <button mat-icon-button (click)="onAddQueryItem()">
+        <mat-icon>add_circle_outline</mat-icon>
+      </button>
     </div>
+
+    @if (data.queryData && queryList.length !== 0) {
+      <div class="query-execution--container">
+        @if (isQueryRunning()) {
+          <div class="query-progress-indicator">
+            <mat-spinner mode="indeterminate"></mat-spinner>
+          </div>
+        }
+        @if (data.queryData.hasResult) {
+          <div class="query-result">
+            Result: {{ data.queryData.result }}
+          </div>
+        }
+      </div>
+    }
+    @if (this.changed) {
+      <mat-divider/>
+      <p>You can not change already executed queries.
+        If you save a new Query will be created.</p>
+    }
+  </div>
+
+  <mat-divider/>
+
+  <div mat-dialog-actions class="dialog--footer">
+    <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()"
+            [disabled]="isQueryDetailInvalid()"
+    >{{ getSubmitButtonLabel() }}
+    </button>
+    @if (this.changed  || !(data.queryData && data.queryData.hasFired) ) {
+      <button mat-raised-button color="primary" type="submit"
+              (click)="onRunQuery()"
+              [disabled]="isQueryDetailInvalid()">
+        Save and Run query
+      </button>
+    }
+
+  </div>
 </div>

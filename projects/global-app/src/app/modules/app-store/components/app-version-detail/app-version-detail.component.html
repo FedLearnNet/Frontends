@@ -1,0 +1,24 @@
+<h2 mat-dialog-title>{{ data.app.name }} (v. {{ data.version.appVersion }})</h2>
+<mat-dialog-content>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab label="Detail">
+      <p><b>ImageName: </b>{{ data.version.imageName }}</p>
+      <p><b>Changelog: </b>{{ data.version.changelog }}</p>
+      <p><b>Short Description: </b>{{ data.version.shortDescription }}</p>
+
+      <markdown [data]="data.version.longDescription"></markdown>
+    </mat-tab>
+    <mat-tab label="Config">
+      <app-app-config [config]="data.version.appConfig">
+      </app-app-config>
+
+    </mat-tab>
+
+  </mat-tab-group>
+
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>No</button>
+</mat-dialog-actions>

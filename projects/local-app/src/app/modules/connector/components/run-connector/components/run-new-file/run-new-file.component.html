@@ -1,0 +1,54 @@
+<div class="new-file-upload-container">
+    <mat-checkbox [(ngModel)]="newFile" class="run-mode-radio">
+        <div class="run-mode-radio-label">
+            <strong>Upload a new file</strong>
+            <span>If you want to upload a new file</span>
+        </div>
+    </mat-checkbox>
+    @if (newFile) {
+        <input class="file-upload-input" type="file" (change)="onFileSelected($event)" #fileInput>
+        <button mat-raised-button color="primary" (click)="fileInput.click()"
+                matTooltip="File containing Patient ID">
+            <mat-icon class="input-row-label-icon">cloud_upload</mat-icon>
+            New File
+        </button>
+
+        @if (hasSupportFile()) {
+            <button mat-raised-button color="primary" (click)="openUploadDialog()"
+                    matTooltip="File containing different Data, regarding to PatientID">
+                <mat-icon class="input-row-label-icon">publish</mat-icon>
+                Multi Supporting Upload
+            </button>
+        }
+    }
+</div>
+@if (isUploading) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+}
+
+@if (reUploadInfo.success !== undefined && !reUploadInfo.success) {
+    <p>The file was not uploaded due to the following errors. Delete it and try again.</p>
+
+    <div class="new-file-upload-container new-file-upload-container--errors">
+
+
+        <mat-list>
+            <h4>Not Found columns</h4>
+            @for (item of reUploadInfo.error?.notFoundColumns; track item) {
+                <mat-list-item>{{ item }}</mat-list-item>
+            }
+        </mat-list>
+
+        <mat-list>
+            <h4>Missing columns</h4>
+            @for (item of reUploadInfo.error?.missingColumns; track item) {
+                <mat-list-item> {{ item }}</mat-list-item>
+            }
+        </mat-list>
+
+
+    </div>
+}
+@if(reUploadInfo.success) {
+    <p>File uploaded successfully</p>
+}

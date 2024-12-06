@@ -1,0 +1,14 @@
+.rating-btn {
+  height: 40px;
+  width: 26px;
+  padding: 0;
+
+  &[disabled] {
+    color: black;
+  }
+}
+
+.rating-info {
+  margin-left: 10px;
+  vertical-align: super;
+}

@@ -1,9 +1,8 @@
-import { Component, ViewChild, ViewEncapsulation, OnInit } from '@angular/core';
-import { Application, Permission } from '@local-app/data-review/models';
+import {Component, ViewChild, OnInit, inject} from '@angular/core';
+import { Permission } from '@local-app/data-review/models';
 import { MatDialog } from '@angular/material/dialog';
 import { PermissionDetailComponent } from '@local-app/data-review/components/permission-detail/permission-detail.component';
 import { PermissionService } from '@local-app/data-review/services/permission.service';
-import { isNull } from 'lodash';
 import { MatTable } from '@angular/material/table';
 import { ConfirmDialogComponent } from '@shared-lib/components/confirm-dialog/confirm-dialog.component';
 import { ActivatedRoute } from '@angular/router';
@@ -13,37 +12,45 @@ import { XSMALL } from '@shared-lib/constants';
 @Component({
   selector: 'app-data-review-permission-grid',
   templateUrl: './permission-grid.component.html',
-  styleUrl: './permission-grid.component.scss',
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./permission-grid.component.scss'],
 })
 export class PermissionGridComponent implements OnInit {
-  isXSmallScreen: boolean = false;
-  //groupsAndUsers: Group[]; //TODO needed?
-  permissions: Permission[];
-  applications: Application[];
-
-  displayedColumns: string[] = ['actions', 'cohort', 'groupOrUser', 'permissions'];
+  private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private readonly permissionService: PermissionService = inject(PermissionService);
+  private readonly responsiveService: ResponsiveService = inject(ResponsiveService);
 
   @ViewChild(MatTable) table: MatTable<Permission>;
 
-  constructor(
-      public dialog: MatDialog,
+  isXSmallScreen: boolean = false;
+  permissions: Permission[];
 
-      private activatedRoute: ActivatedRoute,
-      private permissionService: PermissionService,
-      private responsiveService: ResponsiveService,
-  ) { }
+  displayedColumns: string[] = [
+    'actions',
+    'cohortId',
+    'groupOrUser',
+    'isAllowedToQuery',
+    'queryRetryTime',
+    'querySampleThreshold',
+    'autoTrainingAccess',
+    'createdAt',
+    'updatedAt',
+    // 'permissions', // Include this if you want to display the permissions column
+  ];
 
   ngOnInit() {
-    this.activatedRoute.data.subscribe(({permissions}) => this.permissions = permissions);
+    this.activatedRoute.data.subscribe(({ permissions }) => {
+      console.log('Permissions:', permissions);
+      this.permissions = permissions;
+    });
 
     this.checkAndAdjustResponsiveLayout();
   }
 
   checkAndAdjustResponsiveLayout(): void {
-    this.responsiveService
-        .getScreenSize()
-        .subscribe(screenSize => this.isXSmallScreen = screenSize === XSMALL);
+    this.responsiveService.getScreenSize().subscribe(
+      (screenSize) => (this.isXSmallScreen = screenSize === XSMALL)
+    );
   }
 
   addPermission(): void {
@@ -51,11 +58,16 @@ export class PermissionGridComponent implements OnInit {
   }
 
   editRow(permissionRow: Permission): void {
-    this.permissionService.getPermission(permissionRow.id)
-        .subscribe(permission => this.openPermissionDetailDialog(permission));
+    if (!permissionRow.id) return;
+
+    this.permissionService.getPermission(permissionRow.id).subscribe((permission) => {
+      this.openPermissionDetailDialog(permission);
+    });
   }
 
   deleteRow(permission: Permission): void {
+    if (!permission.id) return;
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete permission',
@@ -68,67 +80,57 @@ export class PermissionGridComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
-      this.permissionService.deletePermission(permission.id)
-          .subscribe(permissionList => {
-            this.permissions = permissionList;
-            this.table.renderRows();
-          });
+      this.permissionService.deletePermission(permission.id!).subscribe(() => {
+        this.permissions = this.permissions.filter((p) => p.id !== permission.id);
+        this.table.renderRows();
+      });
     });
-  }
-
-  getPermissions(permissions: Record<string, any>): string {
-    let permissionLabel = '';
-    const permissionLabels: any = {
-      querySampleThreshold: 'Query must include at least {{input}} samples',
-      specificGroupInterval: 'Query every {{input}} seconds by specific group user',
-      anyGroupInterval: 'Query every {{input}} seconds by any group user',
-      maxQueryLimit: 'Between 0 and {{input}} added to any query',
-      accessWith: 'Automatic training access with {{input}}',
-    };
-
-    Object.entries(permissions).forEach(([key, value]) => {
-      if (isNull(value)) return;
-
-      const formattedValue = `<span class="disabled-input">${value}</span>`;
-      permissionLabel += `<div class="permissions-cell">${permissionLabels[key].replace('{{input}}', formattedValue)}</div>\n`;
-    });
-
-    return permissionLabel === '' ? 'None' : permissionLabel;
   }
 
   openPermissionDetailDialog(permission?: Permission | null): void {
     const dialogRef = this.dialog.open(PermissionDetailComponent, {
-      data: {
-        permission: permission,
-      },
+      data: permission || null,
+      minWidth: '600px',
     });
 
-    dialogRef.afterClosed().subscribe((permissionData) => {
-      if (!permissionData) return;
+    dialogRef.afterClosed().subscribe((updatedPermission) => {
+      if (!updatedPermission) return;
 
-      this.submitPermission(permissionData);
+      this.refreshPermissions();
     });
   }
 
-  submitPermission(permission: { id: number | undefined, cohort: number[], groupOrUser: number[], permissions: object }): void {
-    if (permission.id !== undefined) {
-      this.permissionService.updatePermission({
-        ...permission,
-        cohort: permission.cohort[0],
-        groupOrUser: permission.groupOrUser[0],
-      } as Permission)
-          .subscribe(permissionList => {
-            this.permissions = permissionList
-            this.table.renderRows();
-          });
+  refreshPermissions(): void {
+    this.permissionService.getAllPermissions().subscribe((permissions) => {
+      this.permissions = permissions;
+      this.table.renderRows();
+    });
+  }
 
-      return;
+  /**
+   * Generates a HTML string representation of permission properties for display.
+   * @param permission The permission object.
+   * @returns A HTML string representing the permission properties.
+   */
+  getPermissions(permission: Permission): string {
+    let permissionLabel = '';
+
+    if (permission.isAllowedToQuery) {
+      permissionLabel += `<div class="permissions-cell">Is allowed to query</div>\n`;
     }
 
-    this.permissionService.createPermission(permission.cohort, permission.groupOrUser, permission.permissions)
-        .subscribe(permissionList => {
-          this.permissions = permissionList
-          this.table.renderRows();
-        });
+    if (permission.queryRetryTime !== null && permission.queryRetryTime !== undefined) {
+      permissionLabel += `<div class="permissions-cell">Retry time to query: <span class="disabled-input">${permission.queryRetryTime}</span> seconds</div>\n`;
+    }
+
+    if (permission.querySampleThreshold !== null && permission.querySampleThreshold !== undefined) {
+      permissionLabel += `<div class="permissions-cell">Query must include at least <span class="disabled-input">${permission.querySampleThreshold}</span> samples</div>\n`;
+    }
+
+    if (permission.autoTrainingAccess) {
+      permissionLabel += `<div class="permissions-cell">Automatic training access with <span class="disabled-input">${permission.autoTrainingAccess}</span></div>\n`;
+    }
+
+    return permissionLabel === '' ? 'None' : permissionLabel;
   }
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CohortPatient } from '@local-app/cohort/models';
 import { MatDialog } from '@angular/material/dialog';
 import { PatientDetailComponent } from './components/patient-detail/patient-detail.component';
@@ -17,7 +17,7 @@ import { PatientDataStatus } from '@local-app/cohort/enums';
   templateUrl: './cohort-patients.component.html',
   styleUrl: './cohort-patients.component.scss',
 })
-export class CohortPatientsComponent {
+export class CohortPatientsComponent implements OnInit {
   @Input() cohortPatients: CohortPatient[];
   @Input() cohortQueriabilityForm: FormGroup;
   @Output() cohortPatientsChange = new EventEmitter<CohortPatient[]>();

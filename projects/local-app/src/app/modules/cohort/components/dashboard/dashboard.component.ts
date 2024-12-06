@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Cohort } from '@local-app/cohort/models';
 import { CohortService } from '@local-app/cohort/services/cohort.service';
 import { ConfirmDialogComponent } from '@shared-lib/components/confirm-dialog/confirm-dialog.component';
@@ -13,7 +13,7 @@ import { CohortListItem } from '@local-app/utils/models/cohort-list-item';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class CohortDashboardComponent {
+export class CohortDashboardComponent implements OnInit {
   cohortList: CohortListItem[] = [];
   displayedColumns: string[] = ['actions', 'name', 'description'];
   isLargeScreen: boolean = true;
@@ -47,7 +47,9 @@ export class CohortDashboardComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete cohort',
-        message: 'Are you sure you want to delete this cohort?',
+        message: 'All patient data will be deleted.' +
+          'Logs will be still visible.' +
+          'Are you sure you want to delete this cohort?',
         dismissButtonText: 'Cancel',
         confirmButtonText: 'Delete',
       },

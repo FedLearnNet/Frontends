@@ -1,159 +1,125 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {
-    catchError,
-    expand,
-    Observable,
-    of,
-    switchMap,
-    takeWhile,
-    throwError,
-    timer
+  catchError,
+  expand, from,
+  Observable,
+  switchMap,
+  throwError,
+  timer
 } from 'rxjs';
-import {
-    Application,
-    Query,
-    QueryResult,
-    QueryResultResponse,
-    Workflow,
-    WorkflowStatus
-} from '@global-app/find-data/models';
-import { generateRandomNumber } from '@shared-lib/utils';
-import { APPLICATIONS } from '@global-app/find-data/services/mock/applications.mock';
-import { ApiService } from '@shared-lib/services/api.service';
-import { environment } from '@global-app/env/environment';
-import { filter, map } from 'rxjs/operators';
-import { QueryResultStatus } from '@global-app/find-data/enums';
+import {ApiService} from '@shared-lib/services/api.service';
+import {environment} from '@global-app/env/environment';
+import {QueryResultStatus} from '@global-app/find-data/enums';
+import {CreateQueryDTO, QueryDTO} from "@global-app/find-data/dto/query";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {EventSourcePolyfill} from "ng-event-source";
+import {KeycloakService} from "keycloak-angular";
+import {HttpParams} from "@angular/common/http";
+import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class QueryService {
-    private readonly apiUrl;
-    private readonly path = 'query'
+  private readonly keycloakService: KeycloakService = inject(KeycloakService);
+  private readonly apiService: ApiService = inject(ApiService);
+  private readonly snackBar: MatSnackBar = inject(MatSnackBar);
+  private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
+  private readonly apiUrl: string = environment.queryControllerApiUrl!;
+  private readonly path = 'query'
 
-    constructor(
-        private apiService: ApiService,
-    ) {
-        this.apiUrl = environment.queryControllerApiUrl;
-    }
+  createQuery(query: CreateQueryDTO): Observable<QueryDTO> {
+    return this.apiService.post<QueryDTO>(`${this.getBaseUrl()}`, query)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to create query')),
+      );
+  }
 
-    getAllQueries(): Observable<QueryResultResponse> {
-        return this.apiService.get<any>(this.getBaseUrl());
-    }
+  updateQuery(query: QueryDTO): Observable<QueryDTO> {
+    return this.apiService.put<QueryDTO>(`${this.getBaseUrl()}/${query.id}`, query)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to update query')),
+      );
+  }
 
-    startQuery(queryString: string): Observable<any> {
-        return this.apiService.post<any>(`${ this.getBaseUrl() }`, queryString);
-    }
 
-    getQueryResult(queryId: string): Observable<any> {
-        return this.apiService.get<any>(`${ this.getBaseUrl() }?queryid=${ queryId }`);
-    }
+  createAndRunQuery(query: CreateQueryDTO): Observable<QueryDTO> {
+    return this.apiService.post<QueryDTO>(`${this.getBaseUrl()}/fire`, query)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to create and run query')),
+      );
+  }
 
-    pollQueryResult(queryId: string): Observable<QueryResult> {
-        const pollDelay = 2500;
 
-        return timer(pollDelay).pipe(
-            expand((response: any) => {
-                if (response.status !== QueryResultStatus.DONE) {
-                    return timer(pollDelay).pipe(
-                        switchMap(() => this.getQueryResult(queryId).pipe(
-                            map(newResponse => this.getSpecificQueryResult(queryId, newResponse))
-                        ))
-                    );
-                } else {
-                    return throwError('Query completed');
-                }
-            }),
-            filter(response => response.status === QueryResultStatus.DONE, true),
-            takeWhile(response => response.status !== QueryResultStatus.DONE, true),
-            catchError(error => {
-                console.error('Polling error:', error);
-                return throwError(error);
-            })
-        );
-    }
-
-    private getBaseUrl(): string {
-        return `${ this.apiUrl }/${ this.path }`;
-    }
-
-    private getSpecificQueryResult(queryId: string, queryResponse: { queries: QueryResult[] }): QueryResult {
-        return queryResponse.queries.find((result: any) => result.queryId === queryId) as QueryResult;
-    }
-
-    // @TODO Remove the following code block once all find-data related APIs are implemented.
-
-    queryList: Query[] = [];
-
-    deleteQuery(queryId: number): Observable<Query[]> {
-        this.queryList = this.queryList.filter(query => query.id !== queryId);
-
-        return of(this.queryList);
-    }
-
-    deleteQueryWorkflow(queryId: number, workflowId: number): Observable<Workflow[]> {
-        const selectedQuery = this.queryList.find(query => query.id === queryId) as Query;
-        selectedQuery.workflows = selectedQuery.workflows.filter(workflow => workflow.id !== workflowId);
-
-        return of(this.queryList.find(query => query.id === queryId)?.workflows ?? []);
-    }
-
-    getWorkflowApplications(queryId: number, workflowId: number): Observable<Application[]> {
-        const selectedQuery = this.queryList.find(query => query.id === queryId) as Query;
-
-        return of(selectedQuery.workflows.find(workflow => workflow.id === workflowId)?.applications ?? []);
-    }
-
-    getAllApplications(): Observable<Application[]> {
-        return of(APPLICATIONS);
-    }
-
-    createNewWorkflow(queryId: number, workflow: Workflow): Observable<Workflow[]> {
-        const selectedQuery = this.queryList.find(query => query.id === queryId) as Query;
-        selectedQuery.workflows.push({
-            ...workflow,
-            id: selectedQuery.workflows.length,
-            applications: workflow.applications ?? [],
-            status: WorkflowStatus.New,
-            approved: {
-                datasets: null,
-                holders: null,
+  getAllQueriesSSE(): Observable<QueryDTO> {
+    return from(this.keycloakService.getToken()).pipe(
+      switchMap(token => {
+        return new Observable<QueryDTO>((observer) => {
+          const eventSource = new EventSourcePolyfill(this.getBaseUrl() + '/sse', {
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
+          });
+          eventSource.onmessage = (event) => {
+            try {
+              const data: QueryDTO = JSON.parse(event.data);
+              observer.next(data);
+            } catch (error) {
+              observer.error(error);
+            }
+          };
+          eventSource.onerror = (error: any) => {
+            console.error('Failed to enable query update stream', error);
+            observer.error(error);
+            eventSource.close();
+          };
+          return () => {
+            eventSource.close();
+          };
         });
+      })
+    );
+  }
 
-        return of(selectedQuery.workflows);
+  get(id: number): Observable<QueryDTO> {
+    return this.apiService.get<QueryDTO>(`${this.getBaseUrl()}/${id}`).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to get query')),
+    );
+  }
+
+  getAllQueries(hasNoProject?: boolean): Observable<QueryDTO[]> {
+    let queryParam = new HttpParams();
+    if (hasNoProject) {
+      queryParam = queryParam.set('has-no-project', hasNoProject)
     }
+    return this.apiService.get<QueryDTO[]>(this.getBaseUrl(), queryParam) .pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to get all query')),
+    );
+  }
 
-    updateWorkflow(queryId: number, workflowData: Workflow): Observable<Workflow[]> {
-        const selectedQuery = this.queryList.find(query => query.id === queryId) as Query;
-        const selectedWorkflowIndex = selectedQuery.workflows.findIndex(workflow => workflow.id === workflowData.id);
+  fireQuery(queryId: number): Observable<QueryDTO> {
+    return this.apiService.post<QueryDTO>(`${this.getBaseUrl()}/${queryId}/fire`, {})
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to fire query')),
+      );
+  }
 
-        selectedQuery.workflows[selectedWorkflowIndex] = { ...workflowData };
+  private getBaseUrl(): string {
+    return `${this.apiUrl}/${this.path}`;
+  }
 
-        return of(selectedQuery.workflows);
-    }
+  deleteQuery(queryId: number): Observable<any> {
+    return this.apiService.delete<any>(`${this.getBaseUrl()}/${queryId}`)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          'Failed to delete query')),
+      );
+  }
 
-    getWorkflowStatuses(): Observable<string[]> {
-        return of(
-            Object.keys(WorkflowStatus)
-                .map((key: any) => WorkflowStatus[key])
-                .filter(value => typeof value === 'string') as string[]
-        );
-    }
-
-    workflowRequestTraining(queryId: number, workflowId: number): Observable<Workflow> {
-        const selectedQuery = this.queryList.find(query => query.id === queryId) as Query;
-        const selectedWorkflowIndex = selectedQuery.workflows.findIndex(workflow => workflow.id === workflowId);
-
-        selectedQuery.workflows[selectedWorkflowIndex] = {
-            ...selectedQuery.workflows[selectedWorkflowIndex],
-            status: WorkflowStatus.Pending,
-            approved: {
-                datasets: generateRandomNumber(1100, (selectedQuery.result.datasets ?? 10000) - 1000),
-                holders: generateRandomNumber(2, (selectedQuery.result.holders ?? 1) - 1),
-            },
-        }
-
-        return of(selectedQuery.workflows[selectedWorkflowIndex]);
-    }
 }

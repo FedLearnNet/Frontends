@@ -1,0 +1,142 @@
+<div class="config-wrapper">
+  <div class="hyperparams-list">
+
+    @for (param of configs; track param) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <app-app-detail-config-mode-icon mat-card-avatar [mode]="param.mode"
+                                           [editMode]="param.editMode"
+                                           (modeChanged)="param.mode = $event"
+          ></app-app-detail-config-mode-icon>
+          <mat-card-title class="row">
+            @if (param.editMode) {
+              <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput [(ngModel)]="param.name"/>
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Input Datatype</mat-label>
+                <mat-select [(ngModel)]="param.type">
+                  @for (type of getDataTypes(); track type) {
+                    <mat-option [value]="type">{{ federatedAppConfigDataTypeText[type] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            } @else {
+              <p class="config-el">
+                <strong>Name</strong>
+                <span>{{ param.name }}</span>
+              </p>
+
+              <p class="config-el">
+                <strong>Input Datatype</strong>
+                <span>{{ param.type }}</span>
+              </p>
+            }
+            @if (editMode) {
+              <div class="actions">
+                @if (param.editMode) {
+                  <button mat-icon-button (click)="removeParam(param)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="saveParam(param)">
+                    <mat-icon>save</mat-icon>
+                  </button>
+                } @else {
+                  <button mat-icon-button (click)="editParam(param)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+
+
+          @if (param.editMode) {
+            @if (outputRequiresShape(param)) {
+              <mat-form-field class="full-width">
+                <mat-label>Shape (e.g. [None, 28, 28, 1])</mat-label>
+                <input
+                  matInput
+                  placeholder="[None, 28, 28, 1]"
+                  [(ngModel)]="param.shape"
+                />
+              </mat-form-field>
+            }
+            @if (outputRequiresConstraints(param)) {
+              <div class="row">
+                <mat-form-field>
+                  <mat-label>Min Value</mat-label>
+                  <input
+                    matInput
+                    [(ngModel)]="param.minValue"
+                    placeholder="0"
+                    type="number"
+                  />
+                </mat-form-field>
+                <mat-form-field>
+                  <mat-label>Max Value</mat-label>
+                  <input
+                    [(ngModel)]="param.maxValue"
+                    matInput
+                    placeholder="1"
+                    type="number"
+                  />
+                </mat-form-field>
+              </div>
+            }
+
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Description</mat-label>
+              <input matInput [(ngModel)]="param.description"/>
+            </mat-form-field>
+          } @else {
+            <div class="row">
+              <p class="config-el">
+                <strong>Input Datatype</strong>
+                <span>{{ param.type }}</span>
+              </p>
+              @if (outputRequiresShape(param)) {
+                <p class="config-el">
+                  <strong>Shape</strong>
+                  <span>{{ param.shape }}</span>
+                </p>
+              }
+              @if (outputRequiresConstraints(param)) {
+                <p class="config-el">
+                  <strong>min Value</strong>
+                  <span>{{ param.minValue }}</span>
+                </p>
+                <p class="config-el">
+                  <strong>min Value</strong>
+                  <span>{{ param.maxValue }}</span>
+                </p>
+              }
+            </div>
+            <p>{{ param.description }}</p>          }
+        </mat-card-content>
+
+      </mat-card>
+    }
+    @if (editMode) {
+      <button mat-raised-button color="primary" (click)="addParam()">Add Parameter</button>
+    }
+  </div>
+  @if (editMode) {
+    <div class="pydantic">
+      <h3>Pydantic Class</h3>
+      @if (pydanticClass) {
+        <markdown
+          clipboard
+          lineHighlight
+          [data]="getPydanticClass()">
+        </markdown>
+      } @else {
+        <p>Loading...</p>
+      }
+    </div>
+  }
+</div>

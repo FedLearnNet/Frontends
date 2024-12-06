@@ -14,8 +14,10 @@ export interface FileUploadSettingsDTO extends ConnectorInputConfig {
 }
 
 export interface UploadInfoDTO {
+  columns: string[]
   renamedColumns: string[]
   deletedColumns: boolean[]
+  lastUploaded?: string
 }
 
 export interface FunctionsDetailDTO {
@@ -58,6 +60,7 @@ export function configToPreviewDTO(config: ConnectorConfig): ConnectorConfigDTO 
   const file_info = {
     renamedColumns: config.fileInfo.renamedColumns,
     deletedColumns: config.fileInfo.deletedColumns,
+    columns: config.fileInfo.columns,
   }
   return {
     input_config: input_config,

@@ -1,0 +1,12 @@
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start"
+               [(selectedIndex)]="selectedIndex" (selectedTabChange)="onTabChange($event)">
+  <mat-tab label="Patient update">
+    <app-patient-update-log></app-patient-update-log>
+  </mat-tab>
+  <mat-tab label="Query access">
+    <app-patient-query-log></app-patient-query-log>
+  </mat-tab>
+  <mat-tab label="Training access">
+    <app-patient-learning-log></app-patient-learning-log>
+  </mat-tab>
+</mat-tab-group>

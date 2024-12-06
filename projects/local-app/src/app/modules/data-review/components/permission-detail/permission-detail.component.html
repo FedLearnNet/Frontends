@@ -1,93 +1,117 @@
 <div class="dialog">
-  <h1 mat-dialog-title class="dialog--header">
+  <h1 mat-dialog-title class="dialog--header bold-title">
     {{ getDialogTitle() }}
   </h1>
 
-  <mat-divider/>
+  <mat-divider></mat-divider>
 
   <mat-dialog-content class="dialog--content">
+
     <form [formGroup]="permissionForm">
-      <mat-form-field>
+      <!-- Cohort Field -->
+      <mat-form-field appearance="fill">
         <mat-label>Cohort</mat-label>
-        <mat-select formControlName="cohort" multiple (selectionChange)="cohortSelectionChange($event)">
-          <mat-option *ngFor="let cohort of cohortSelectOptions" [value]="cohort.value">
-            {{ cohort.label }}
-          </mat-option>
+        <mat-select formControlName="cohort">
+          @for (cohort of cohortSelectOptions; track cohort) {
+            <mat-option [value]="cohort.value">
+              {{ cohort.label }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Group/User</mat-label>
-        <mat-select formControlName="groupOrUser" multiple>
-          <mat-option *ngFor="let groupOrUser of groupAndUserSelectOptions" [value]="groupOrUser.value">
-            {{ groupOrUser.label }}
-          </mat-option>
-        </mat-select>
+      <mat-form-field appearance="fill">
+        <mat-label>User</mat-label>
+        <input matInput type="email" formControlName="user" placeholder="My partners name">
       </mat-form-field>
 
-      <section class="permissions-section" formGroupName="permissions">
-        <label>Permissions</label>
+      <mat-form-field appearance="fill">
+        <mat-label>Group</mat-label>
+        <input matInput type="email" formControlName="group" placeholder="My partners group">
+        <mat-hint>If no User or Group is specified, the rule applies universally.</mat-hint>
+      </mat-form-field>
 
-        <div class="permissions-section--row" formGroupName="querySampleThreshold">
-          <mat-slide-toggle color="primary" name="querySampleThreshold" formControlName="checked"
-                            (change)="slideToggleChanged($event)"/>
-          Query must include at least
-          <mat-form-field>
-            <input matInput type="number" formControlName="value">
-          </mat-form-field>
-          samples
-        </div>
+      <!-- Settings Section -->
+      <section class="settings-section" formGroupName="permissions">
+        <h3 class="settings-title">Settings</h3>
 
-        <div class="permissions-section--row" formGroupName="specificGroupInterval">
-          <mat-slide-toggle color="primary" name="specificGroupInterval" formControlName="checked"
-                            (change)="slideToggleChanged($event)"/>
-          Query every
-          <mat-form-field>
-            <input matInput type="number" formControlName="value">
-          </mat-form-field>
-          seconds by specific group user
-        </div>
+        <!-- Is Allowed to Query -->
 
-        <div class="permissions-section--row" formGroupName="anyGroupInterval">
-          <mat-slide-toggle color="primary" name="anyGroupInterval" formControlName="checked"
-                            (change)="slideToggleChanged($event)"/>
-          Query every
-          <mat-form-field>
-            <input matInput type="number" formControlName="value">
-          </mat-form-field>
-          seconds by any group user
-        </div>
+        <mat-slide-toggle formControlName="isAllowedToQuery" color="primary">
+          Are the group or user allowed to query
+        </mat-slide-toggle>
 
-        <div class="permissions-section--row" formGroupName="maxQueryLimit">
-          <mat-slide-toggle color="primary" name="maxQueryLimit" formControlName="checked"
-                            (change)="slideToggleChanged($event)"/>
-          Between 0 and
-          <mat-form-field>
-            <input matInput type="number" formControlName="value">
-          </mat-form-field>
-          added to any query
-        </div>
+        <!-- Query Retry Time -->
+        <mat-form-field appearance="fill">
+          <mat-label>Query retry time (in seconds)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="retryTimeToQuery"
+            min="3"
+            max="10"
+            placeholder="3"
+          />
+          @if (permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('min')
+          || permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('max')) {
+            <mat-error>Query retry time has to be between <strong>3-10</strong></mat-error>
+          } @else if (permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('required')) {
+            <mat-error>Query retry time is <strong>required</strong></mat-error>
+          }
+        </mat-form-field>
 
-        <div class="permissions-section--row" formGroupName="accessWith">
-          <mat-slide-toggle color="primary" name="accessWith" formControlName="checked"
-                            (change)="slideToggleChanged($event)"/>
-          Automatic training access with
-          <mat-form-field>
-            <mat-select formControlName="value" class="access-with">
-              <mat-option *ngFor="let application of applications" [value]="application.value">
-                {{ application.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+        <!-- Minimum Samples for Querying -->
+
+        <mat-form-field appearance="fill">
+          <mat-label>Minimum samples for querying</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="querySampleThreshold"
+            min="100"
+          />
+          @if (permissionForm.controls.permissions.controls.querySampleThreshold.hasError('min')
+          || permissionForm.controls.permissions.controls.querySampleThreshold.hasError('max')) {
+            <mat-error>Minimum samples for querying has to be bigger than <strong>100</strong></mat-error>
+          } @else if (permissionForm.controls.permissions.controls.querySampleThreshold.hasError('required')) {
+            <mat-error>Minimum samples for querying is <strong>required</strong></mat-error>
+          }
+        </mat-form-field>
+
+
+        <!-- Automatic Training Access For -->
+        <mat-form-field appearance="fill">
+          <mat-label>Automatic training access for</mat-label>
+          <mat-select formControlName="autoTrainingAccess">
+            <mat-option value="All">All</mat-option>
+            <mat-option value="None">None</mat-option>
+            <mat-option value="Certified Apps">Certified Apps</mat-option>
+          </mat-select>
+          @if (permissionForm.controls.permissions.controls.autoTrainingAccess.hasError('required')) {
+            <mat-error>Automatic training access for is <strong>required</strong></mat-error>
+          }
+        </mat-form-field>
       </section>
     </form>
+    <p class="permissive-hint">
+      If multiple rules apply, the most permissive one takes precedence.
+    </p>
   </mat-dialog-content>
 
-  <mat-divider/>
 
+  <mat-divider></mat-divider>
   <mat-dialog-actions class="dialog--footer">
-    <button mat-raised-button color="secondary" (click)="onCancel()">Cancel</button>
-    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">{{ getSubmitButtonLabel() }}</button>
+
+    <button mat-raised-button color="secondary" (click)="onCancel()">
+      Cancel
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      (click)="onSubmit()"
+    >
+      {{ getSubmitButtonLabel() }}
+    </button>
   </mat-dialog-actions>
 </div>

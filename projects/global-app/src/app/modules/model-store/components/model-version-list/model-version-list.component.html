@@ -1,0 +1,76 @@
+@if (model.modelVersions) {
+  <table mat-table [dataSource]="model.modelVersions" class="mat-elevation-z8">
+
+
+    <ng-container matColumnDef="version">
+      <th mat-header-cell *matHeaderCellDef class="version-column"> Version</th>
+      <td mat-cell *matCellDef="let element" class="version-column"> {{ element.modelVersion }}
+        @if (isSelectedVersion(element)) {
+          <span class="latest-tag">Current</span>
+        }
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef class="version-column"> Created</th>
+      <td mat-cell *matCellDef="let element" class="version-column"> {{ element.createdAt | date }}</td>
+    </ng-container>
+
+    @if (model.createdByUser) {
+      <ng-container matColumnDef="publishStatus">
+        <th mat-header-cell *matHeaderCellDef class="version-column"> Publish Status</th>
+        <td mat-cell *matCellDef="let element" class="version-column"> {{ element.publishStatus }}</td>
+      </ng-container>
+    }
+
+    <ng-container matColumnDef="hasModelSelected">
+      <th mat-header-cell *matHeaderCellDef class="version-column"> Selected Model</th>
+      <td mat-cell *matCellDef="let element" class="version-column">
+        @if (element.selectedSubModel) {
+          {{ element.selectedSubModel.imageName }}
+        } @else {
+          No selected
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="changelog">
+      <th mat-header-cell *matHeaderCellDef> Changelog</th>
+      <td mat-cell *matCellDef="let element"> {{ element.changelog }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions" stickyEnd>
+      <th mat-header-cell *matHeaderCellDef class="action-column"></th>
+      <td mat-cell *matCellDef="let element" class="action-column">
+
+        <button mat-icon-button [matMenuTriggerFor]="modelTableMenu"
+                [matMenuTriggerData]="{modelVersion: element}"
+                aria-label="Context Menu for each app version">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+        [class]="isSelectedVersion(row) ? 'selected-version' : ''"></tr>
+  </table>
+
+
+  <mat-menu #modelTableMenu="matMenu">
+    <ng-template matMenuContent let-modelVersion="modelVersion">
+      @if (model.createdByUser) {
+        <button mat-menu-item (click)="openVersion(modelVersion)">
+          <mat-icon>fullscreen</mat-icon>
+          <span>View</span>
+        </button>
+      }
+      @if (!isSelectedVersion(modelVersion)) {
+        <button mat-menu-item (click)="useSpecificVersion(modelVersion)">
+          <mat-icon>check_box</mat-icon>
+          <span>Select</span>
+        </button>
+      }
+    </ng-template>
+  </mat-menu>
+}

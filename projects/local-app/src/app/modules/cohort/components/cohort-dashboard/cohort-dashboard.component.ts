@@ -47,7 +47,9 @@ export class CohortDashboardComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: 'Delete cohort',
-        message: 'Are you sure you want to delete this cohort?',
+        message: 'All patient data will be deleted.' +
+          'Logs will be still visible.' +
+          'Are you sure you want to delete this cohort?',
         dismissButtonText: 'Cancel',
         confirmButtonText: 'Delete',
       },

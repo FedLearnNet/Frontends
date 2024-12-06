@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CohortPatient } from '@local-app/cohort/models';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmPatientDetailComponent } from './components/confirm-patient-detail/confirm-patient-detail.component';
@@ -15,7 +15,7 @@ import { PatientDataStatus } from '@local-app/cohort/enums';
   templateUrl: './cohort-confirmation.component.html',
   styleUrl: './cohort-confirmation.component.scss',
 })
-export class CohortConfirmationComponent {
+export class CohortConfirmationComponent implements OnInit {
   @Input() confirmButtonLabel: string = 'Confirm';
   @Input() cohortPatients: CohortPatient[];
   @Input() cohortQueriabilityForm: FormGroup;

@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Change of patient {{ data.patientId }}</h2>
+<mat-dialog-content>
+
+  <p><strong>Change at: </strong>{{ data.createdAt }}</p>
+  <p><strong>Dry run: </strong>{{ data.dryRun }}</p>
+  <p><strong>commited: </strong>{{ data.committed }}</p>
+  @if (data.connectorId) {
+    <p><strong>Connector: </strong>{{ data.connectorId }}</p>
+    <p><strong>Run: </strong>{{ data.runId }}</p>
+  } @else {
+    <p><strong>Changed by: </strong>{{ data.userId }}</p>
+  }
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab label="Previous">
+      @for (c of getKeys(previousData); track c) {
+        <p [class]="isEquals(c) ? '': 'equal'"><strong>{{ c }}: </strong>{{ previousData[c] }}</p>
+      }
+    </mat-tab>
+    <mat-tab label="Current">
+      @for (c of getKeys(currentData); track c) {
+        <p [class]="isEquals(c) ? '': 'equal'"><strong>{{ c }}: </strong>{{ currentData[c] }}</p>
+      }
+    </mat-tab>
+  </mat-tab-group>
+
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Close</button>
+</mat-dialog-actions>

@@ -1,0 +1,9 @@
+@import "projects/shared-lib/src/lib/styles/main.scss";
+
+.predictions{
+  padding: 20px;
+
+  mat-form-field{
+    width: 100%;
+  }
+}

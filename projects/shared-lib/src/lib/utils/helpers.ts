@@ -35,8 +35,10 @@ export const concatUnique = (array1: any[], array2: any[]): any => {
 
 export const convertObjectKeysToSnakeCase = (obj: any): any => {
   if (Array.isArray(obj)) {
-    return obj.map(value => convertObjectKeysToSnakeCase(value));
-  } else if (obj !== null && obj.constructor === Object) {
+    return obj.map((value) => convertObjectKeysToSnakeCase(value));
+  } 
+  // Added typeof obj === 'object': This checks if obj is indeed an object and not null or undefined.
+  else if (obj && typeof obj === 'object' && obj.constructor === Object) {
     return Object.keys(obj).reduce((result, key) => {
       const newKey = toSnakeCase(key);
       result[newKey] = convertObjectKeysToSnakeCase(obj[key]);
@@ -44,7 +46,7 @@ export const convertObjectKeysToSnakeCase = (obj: any): any => {
     }, {} as any);
   }
   return obj;
-}
+};
 
 const toSnakeCase = (str: string): string => {
   return splitCaps(str)

@@ -1,24 +1,45 @@
 stages:
+  - dependencies
+  - assemble
   - check
   - security
   - deploy
 
 variables:
-  CI_LOCAL_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/local
-  CI_GLOBAL_IMAGE: $CI_REGISTRY/$CI_PROJECT_PATH/global
 
-  CI_LOCAL_IMAGE_STAGING: CI_LOCAL_IMAGE:staging
-  CI_GLOBAL_IMAGE_STAGING: CI_GLOBAL_IMAGE:staging
+  CI_LOCAL_IMAGE_DIABETES: $CI_REGISTRY/$CI_PROJECT_PATH/local-daibetes
+  CI_LOCAL_IMAGE_MICROBAIOME: $CI_REGISTRY/$CI_PROJECT_PATH/local-microbaiome
 
-  CI_LOCAL_IMAGE_PROD: CI_LOCAL_IMAGE:prod
-  CI_GLOBAL_IMAGE_PROD: CI_GLOBAL_IMAGE:prod
+  CI_GLOBAL_IMAGE_DIABETES: $CI_REGISTRY/$CI_PROJECT_PATH/global-daibetes
+  CI_GLOBAL_IMAGE_MICROBAIOME: $CI_REGISTRY/$CI_PROJECT_PATH/global-microbaiome
+  CI_GLOBAL_IMAGE_POSYMED: $CI_REGISTRY/$CI_PROJECT_PATH/global-posymed
 
-  CI_LOCAL_IMAGE_LATEST: CI_LOCAL_IMAGE:latest
-  CI_GLOBAL_IMAGE_LATEST: CI_GLOBAL_IMAGE:latest
+  CI_LOCAL_IMAGE_DIABETES_STAGING: $CI_LOCAL_IMAGE_DIABETES:staging
+  CI_LOCAL_IMAGE_MICROBAIOME_STAGING: $CI_LOCAL_IMAGE_MICROBAIOME:staging
+  CI_GLOBAL_IMAGE_DIABETES_STAGING: $CI_GLOBAL_IMAGE_DIABETES:staging
+  CI_GLOBAL_IMAGE_MICROBAIOME_STAGING: $CI_GLOBAL_IMAGE_MICROBAIOME:staging
+  CI_GLOBAL_IMAGE_POSYMED_STAGING: $CI_GLOBAL_IMAGE_POSYMED:staging
+
+  CI_LOCAL_IMAGE_DIABETES_PROD: $CI_LOCAL_IMAGE_DIABETES:staging
+  CI_LOCAL_IMAGE_MICROBAIOME_PROD: $CI_LOCAL_IMAGE_MICROBAIOME:staging
+  CI_GLOBAL_IMAGE_DIABETES_PROD: $CI_GLOBAL_IMAGE_DIABETES:staging
+  CI_GLOBAL_IMAGE_MICROBAIOME_PROD: $CI_GLOBAL_IMAGE_MICROBAIOME:staging
+  CI_GLOBAL_IMAGE_POSYMED_PROD: $CI_GLOBAL_IMAGE_POSYMED:staging
+
+  CI_LOCAL_IMAGE_DIABETES_LATEST: $CI_LOCAL_IMAGE_DIABETES:latest
+  CI_LOCAL_IMAGE_MICROBAIOME_LATEST: $CI_LOCAL_IMAGE_MICROBAIOME:latest
+  CI_GLOBAL_IMAGE_DIABETES_LATEST: $CI_GLOBAL_IMAGE_DIABETES:latest
+  CI_GLOBAL_IMAGE_MICROBAIOME_LATEST: $CI_GLOBAL_IMAGE_MICROBAIOME:latest
+  CI_GLOBAL_IMAGE_POSYMED_LATEST: $CI_GLOBAL_IMAGE_POSYMED:latest
+
+
 
   TAR_FILE_DIR: ".images/"
-  TAR_FILE_NAME_LOCAL: "local-image.tar"
-  TAR_FILE_NAME_GLOBAL: "global-image.tar"
+  TAR_FILE_NAME_LOCAL_DIABETES: "local-image-diabetes.tar"
+  TAR_FILE_NAME_LOCAL_MICROBAIOME: "local-image-microbaiome.tar"
+  TAR_FILE_NAME_GLOBAL_DIABETES: "global-image-diabetes.tar"
+  TAR_FILE_NAME_GLOBAL_MICROBAIOME: "global-imagemicrobaiome-.tar"
+  TAR_FILE_NAME_GLOBAL_POSYMED: "global-image-posymed.tar"
 
   TRIVY_IMAGE: trivy:latest
   TRIVY_TAR: trivy-latest.tar
@@ -62,28 +83,95 @@ variables:
     - trivy-$REPORT_NAME-full-report.html
     - trivy-$REPORT_NAME-full-report.json
 
-check:lint:local:
+
+install:
+  image: node:20-alpine
+  stage: dependencies
+  script:
+    # Install dependencies
+    - npm install --prefer-offline
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+
+.assemble:
+  image: node:20-alpine
+  stage: assemble
+  needs:
+   - install
+  script:
+    - npm run $SCRIPT
+  artifacts:
+    paths:
+      - dist
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+    policy: pull
+
+assemble:global-daibetes:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-dAIbetes
+
+assemble:local-daibetes:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-dAIbetes
+
+assemble:posymed:
+  extends: .assemble
+  variables:
+    SCRIPT: build-posymed
+
+assemble:global-microbaiome:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-microbAIome
+
+assemble:local-microbaiome:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-microbAIome
+
+.check:lint:
   stage: check
   image: node:20-alpine
+  needs:
+    - install
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+    policy: pull
   script:
-    - npm i --no-audit
-    - npm run lint-local
+    - npm run $SCRIPT
+
+check:lint:local:
+  extends: .check:lint
+  variables:
+      SCRIPT: lint-local
 
 check:lint:shared:
-  stage: check
-  image: node:20-alpine
-  script:
-    - npm i --no-audit
-    - npm run lint-shared-lib
+  extends: .check:lint
+  variables:
+    SCRIPT: lint-shared-lib
 
 check:lint:global:
-  stage: check
-  image: node:20-alpine
-  script:
-    - npm i --no-audit
-    - npm run lint-global
+  extends: .check:lint
+  variables:
+    SCRIPT: lint-global
 
 # builds api and db images and saves them as tar files
+
 .check:build:
   image: docker:latest
   stage: check
@@ -94,23 +182,68 @@ check:lint:global:
     - mkdir -p $TAR_FILE_DIR
     - *docker_login
   script:
-    - docker build -t $CI_LOCAL_IMAGE:$TAG -f ./Dockerfile.local .
-    - docker save -o $TAR_FILE_DIR$TAG-$TAR_FILE_NAME_LOCAL $CI_LOCAL_IMAGE:$TAG
-    - echo "API image created at $TAR_FILE_DIR$TAG-$TAR_FILE_NAME_LOCAL"
-
-    - docker build -t $CI_GLOBAL_IMAGE:$TAG -f ./Dockerfile.global .
-    - docker save -o $TAR_FILE_DIR$TAG-$TAR_FILE_NAME_GLOBAL $CI_GLOBAL_IMAGE:$TAG
-    - echo "DB image created at $TAR_FILE_DIR$TAG-$TAR_FILE_NAME_GLOBAL"
-
+    - docker build -t $CI_IMAGE -f ./Dockerfile .
+    - docker save -o $TAR_FILE_DIR$TAG-$TAR_FILE_NAME $TAR_IMAGE
+    - echo "API image created at $TAR_FILE_DIR$TAG-$TAR_FILE_NAME"
   artifacts:
     paths:
       - $TAR_FILE_DIR
     expire_in: 1 hour
 
-check:build:staging:
+check:build:local:diabetes-staging:
   extends: .check:build
+  dependencies:
+    - assemble:local-daibetes
+  needs:
+    - assemble:local-daibetes
   variables:
-    TAG: staging
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING
+    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL_DIABETES
+    TAR_IMAGE: $CI_LOCAL_IMAGE_DIABETES
+
+check:build:local:microbaiome-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:local-microbaiome
+  needs:
+    - assemble:local-microbaiome
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_STAGING
+    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL_MICROBAIOME
+    TAR_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME
+
+check:build:global:diabetes-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:global-daibetes
+  needs:
+    - assemble:global-daibetes
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING
+    TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL_DIABETES
+    TAR_IMAGE: $CI_GLOBAL_IMAGE_DIABETES
+
+check:build:global:microbaiome-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:global-microbaiome
+  needs:
+    - assemble:global-microbaiome
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_STAGING
+    TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL_MICROBAIOME
+    TAR_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME
+
+check:build:global:posymed-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:posymed
+  needs:
+    - assemble:posymed
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_STAGING
+    TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL_POSYMED
+    TAR_IMAGE: $CI_GLOBAL_IMAGE_POSYMED
 
 # load the latest trivy image and save as artifact for reuse
 security:prepare:
@@ -118,8 +251,8 @@ security:prepare:
   image: docker:latest
   dependencies: []
   services:
-  - name: registry.blitzhub.io/docker:dind
-    alias: docker
+    - name: registry.blitzhub.io/docker:dind
+      alias: docker
   before_script:
     - mkdir -p $TAR_FILE_DIR
     - *docker_login
@@ -138,16 +271,14 @@ security:prepare:
 .security:licenses:
   stage: security
   dependencies:
-    - check:build:staging
-    - security:prepare
+    - security:prepare #overriden
   needs:
-    - check:build:staging
-    - security:prepare
+    - security:prepare #overriden
   image: docker:latest
   allow_failure: true
   services:
-  - name: registry.blitzhub.io/docker:dind
-    alias: docker
+    - name: registry.blitzhub.io/docker:dind
+      alias: docker
   before_script:
     - *docker_login
     - *load_target_image
@@ -164,21 +295,35 @@ security:prepare:
   artifacts:
     <<: *export_reports
 
-security:licenses:local:staging:
+security:licenses:local:diabetes-staging:
   extends: .security:licenses
+  dependencies:
+    - check:build:local:diabetes-staging
+    - security:prepare
+  needs:
+    - check:build:local:diabetes-staging
+    - security:prepare
   variables:
-    CI_IMAGE: $CI_LOCAL_IMAGE_STAGING
-    REPORT_NAME: license-local-staging
-    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL
+    CI_IMAGE: CI_LOCAL_IMAGE_DIABETES
+    REPORT_NAME: license-local-staging-diabetes
+    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL_DIABETES
     TAG: staging
 
-security:licenses:global:staging:
+
+security:licenses:global:diabetes-staging:
   extends: .security:licenses
+  dependencies:
+    - check:build:global:diabetes-staging
+    - security:prepare
+  needs:
+    - check:build:global:diabetes-staging
+    - security:prepare
   variables:
     CI_IMAGE: $CI_GLOBAL_IMAGE_STAGING
     REPORT_NAME: license-global-staging
     TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL
     TAG: staging
+
 
 security:filesystem:
   stage: security
@@ -191,8 +336,8 @@ security:filesystem:
   image: docker:latest
   allow_failure: true
   services:
-  - name: registry.blitzhub.io/docker:dind
-    alias: docker
+    - name: registry.blitzhub.io/docker:dind
+      alias: docker
   before_script:
     - *docker_login
     - *load_trivy_image
@@ -210,11 +355,9 @@ security:filesystem:
 .security:images:
   stage: security
   dependencies:
-    - check:build:staging
-    - security:prepare
+    - security:prepare #overriden
   needs:
-    - check:build:staging
-    - security:prepare
+    - security:prepare #overriden
   image: docker:latest
   services:
     - name: registry.blitzhub.io/docker:dind
@@ -234,89 +377,142 @@ security:filesystem:
   artifacts:
     <<: *export_reports
 
-security:images:local:staging:
+security:images:local:diabetes-staging:
   extends: .security:images
-  variables:
-    CI_IMAGE: $CI_LOCAL_IMAGE_STAGING
-    REPORT_NAME: image-local-staging
-    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL
-    TAG: staging
-
-security:images:global:staging:
-  extends: .security:images
+  dependencies:
+    - check:build:local:diabetes-staging
+    - security:prepare
+  needs:
+    - check:build:local:diabetes-staging
+    - security:prepare
   allow_failure: true
   variables:
-    CI_IMAGE: $CI_GLOBAL_IMAGE_STAGING
-    REPORT_NAME: image-global-staging
-    TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING
+    REPORT_NAME: image-local-staging-diabetes
+    TAR_FILE_NAME: $TAR_FILE_NAME_LOCAL_DIABETES
     TAG: staging
 
-deploy:gitlab_registry:local:staging:
+
+security:images:global:diabetes-staging:
+  extends: .security:images
+  dependencies:
+    - check:build:global:diabetes-staging
+    - security:prepare
+  needs:
+    - check:build:global:diabetes-staging
+    - security:prepare
+  allow_failure: true
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING
+    REPORT_NAME: image-global-staging-diabetes
+    TAR_FILE_NAME: $TAR_FILE_NAME_GLOBAL-DIABETES
+    TAG: staging
+
+
+.deploy:gitlab_registry:
   image: docker:latest
   stage: deploy
-  only:
-    - develop
-    - master
-    - main
   services:
-    - name: registry.blitzhub.io/docker:dind
+    - name: docker:dind
       alias: docker
   before_script:
     - *docker_login
     - *docker_buildx
   script:
-    # we rebuild and push the database and the API image
-    - docker buildx build --platform linux/amd64,linux/arm64/v8 -t $CI_LOCAL_IMAGE_STAGING -f ./Dockerfile.local --push .
+    - docker buildx build --platform linux/amd64,linux/arm64/v8 --provenance false -t $CI_IMAGE -f ./Dockerfile --push .
 
-deploy:gitlab_registry:global:staging:
-  image: docker:latest
-  stage: deploy
+deploy:gitlab_registry:local:diabetes-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-daibetes
   only:
     - develop
-    - master
-    - main
-  services:
-    - name: registry.blitzhub.io/docker:dind
-      alias: docker
-  before_script:
-    - *docker_login
-    - *docker_buildx
-  script:
-    # we rebuild and push the database and the API image
-    - docker buildx build --platform linux/amd64,linux/arm64/v8 -t $CI_GLOBAL_IMAGE_STAGING -f ./Dockerfile.global --push .
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING
 
-
-deploy:gitlab_registry:local:prod:
-  image: docker:latest
-  stage: deploy
+deploy:gitlab_registry:local:diabetes-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-daibetes
   only:
-    - develop
-    - master
     - main
-  services:
-    - name: registry.blitzhub.io/docker:dind
-      alias: docker
-  before_script:
-    - *docker_login
-    - *docker_buildx
-  script:
-    # we rebuild and push the database and the API image
-    - docker buildx build --platform linux/amd64,linux/arm64/v8 -t $CI_LOCAL_IMAGE_PROD -t $CI_LOCAL_IMAGE_LATEST -f ./Dockerfile.local --push .
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_LATEST
 
-deploy:gitlab_registry:global:prod:
-  image: docker:latest
-  stage: deploy
+
+deploy:gitlab_registry:local:microbaiome-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-microbaiome
+  #only:
+  #  - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_STAGING
+
+
+deploy:gitlab_registry:local:microbaiome-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-microbaiome
   only:
-    - develop
-    - master
     - main
-  services:
-    - name: registry.blitzhub.io/docker:dind
-      alias: docker
-  before_script:
-    - *docker_login
-    - *docker_buildx
-  script:
-    # we rebuild and push the database and the API image
-    - docker buildx build --platform linux/amd64,linux/arm64/v8 -t $CI_GLOBAL_IMAGE_PROD -t $CI_GLOBAL_IMAGE_LATEST -f ./Dockerfile.global --push .
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_LATEST
 
+  #GLOBAL
+
+deploy:gitlab_registry:global:diabetes-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-daibetes
+  #only:
+  #  - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING
+
+deploy:gitlab_registry:global:diabetes-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-daibetes
+  only:
+    - main
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_LATEST
+
+
+deploy:gitlab_registry:global:microbaiome-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-microbaiome
+  #only:
+  #  - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_STAGING
+
+deploy:gitlab_registry:global:microbaiome-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-microbaiome
+  only:
+    - main
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_LATEST
+
+
+deploy:gitlab_registry:global:posymed-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:posymed
+  #only:
+  #  - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_STAGING
+
+deploy:gitlab_registry:global:posymed-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:posymed
+  only:
+    - main
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_LATEST

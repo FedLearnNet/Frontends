@@ -1,0 +1,19 @@
+@if (app) {
+  <mat-card class="example-card" appearance="outlined">
+    <mat-card-header>
+      <img mat-card-avatar [src]="app.icon" alt="Photo of a Shiba Inu">
+      <mat-card-title>{{ app.name }}</mat-card-title>
+      <mat-card-subtitle>{{ app.type }}</mat-card-subtitle>
+      <div class="card-right">
+        <ng-content select="[card-right]"></ng-content>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      {{ app.shortDescription }}
+    </mat-card-content>
+
+    <mat-card-footer class="app-card-footer">
+      <app-app-tags [app]="app"></app-app-tags>
+    </mat-card-footer>
+  </mat-card>
+}

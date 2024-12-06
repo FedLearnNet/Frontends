@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { environment } from '@local-app/env/environment';
+import {Component, OnInit} from '@angular/core';
+import {environment} from '@local-app/env/environment';
 
 @Component({
   selector: 'app-root',
@@ -15,12 +15,20 @@ export class AppComponent implements OnInit {
       link: '/cohort',
     },
     {
-      title: 'Privacy/Data Review',
-      link: '/data-review',
+      title: 'Permissions',
+      link: '/data-review/permissions',
+    },
+    {
+      title: 'Training Review',
+      link: '/data-review/training',
+    },
+    {
+      title: 'Logs',
+      link: '/logs',
     },
   ];
 
   ngOnInit() {
-    document.title = `Microb·AI·ome - ${environment.appTitle}`
+    document.title = environment.appTitle;
   }
 }

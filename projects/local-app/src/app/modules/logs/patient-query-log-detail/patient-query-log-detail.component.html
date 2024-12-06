@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Query {{ data.queryId }}</h2>
+<mat-dialog-content>
+
+  <p><strong>Query: </strong>{{ data.queryString }}</p>
+  <p><strong>Status: </strong>{{ data.status }}</p>
+  <p><strong>Status message: </strong>{{ data.statusMessage }}</p>
+  @if (data.timestamp) {
+    <p><strong>Time: </strong>{{ data.timestamp | date }}</p>
+  }
+
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Close</button>
+</mat-dialog-actions>

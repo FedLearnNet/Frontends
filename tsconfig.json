@@ -20,6 +20,15 @@
       "@global-app/find-data/*": [
         "projects/global-app/src/app/modules/find-data/*"
       ],
+      "@global-app/schema/*": [
+        "projects/global-app/src/app/modules/schema/*"
+      ],
+      "@global-app/project/*": [
+        "projects/global-app/src/app/modules/project/*"
+      ],
+      "@global-app/app-store/*": [
+        "projects/global-app/src/app/modules/app-store/*"
+      ],
       "@global-app/model-store/*": [
         "projects/global-app/src/app/modules/model-store/*"
       ],
@@ -50,6 +59,9 @@
       ],
       "shared-lib": [
         "./dist/shared-lib"
+      ],
+      "@shared-lib/env/*": [
+        "projects/shared-lib/src/environments/*"
       ]
     },
     "importHelpers": true,

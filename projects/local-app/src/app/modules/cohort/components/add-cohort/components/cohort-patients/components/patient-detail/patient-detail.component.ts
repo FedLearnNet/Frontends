@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormGroup } from '@angular/forms';
 import { SelectOption } from '@shared-lib/models';
@@ -11,7 +11,7 @@ import { generateRandomUUID } from '@shared-lib/utils';
   templateUrl: './patient-detail.component.html',
   styleUrl: './patient-detail.component.scss',
 })
-export class PatientDetailComponent {
+export class PatientDetailComponent implements OnInit {
   public patientData: FormGroup;
   colorectalCancerOptions: SelectOption[];
   queriabilityOptions: SelectOption[];

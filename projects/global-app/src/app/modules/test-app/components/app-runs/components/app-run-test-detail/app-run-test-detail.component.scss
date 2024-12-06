@@ -1,0 +1,19 @@
+.run{
+  &--title{
+    display: flex;
+    justify-content: space-between;
+    background-color: #ff9800;
+  }
+  &--fail{
+    background-color: #ff2110;
+  }
+
+  &--success{
+    background-color: #1b981b;
+  }
+}
+
+mat-dialog-content{
+  max-height: 100% !important;
+}
+

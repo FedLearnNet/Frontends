@@ -1,0 +1,47 @@
+<div class="predictions">
+  @if (routeMode) {
+    <h2>Your Predictions</h2>
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia">
+    </mat-form-field>
+  }
+  <mat-table [dataSource]="dataSource" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+        <button mat-icon-button color="primary" (click)="showPredictionResult(element)">
+          <mat-icon>preview</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>AI</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span *ngIf="isXSmallScreen" class="column-name">AI:</span>
+        <a [routerLink]="['/model', element.modelId]">{{ element.modelName }}</a>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span *ngIf="isXSmallScreen" class="column-name">Status:</span>
+        <span>{{ element.status }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <span *ngIf="isXSmallScreen" class="column-name">Date:</span>
+        <span>{{ element.createdAt | date }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+  </mat-table>
+</div>

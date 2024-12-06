@@ -1,42 +1,79 @@
-import {Component, ViewChild, OnInit} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
+import {Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
+import {MatDialog,} from '@angular/material/dialog';
 import {QueryDetailComponent} from '@global-app/find-data/components/query-detail/query-detail.component';
-import {Query, QueryConfig, QueryResult} from '@global-app/find-data/models';
-import {MatTable} from '@angular/material/table';
+import {QueryConfig} from '@global-app/find-data/models';
+import {MatTableDataSource, MatTableModule} from '@angular/material/table';
 import {ConfirmDialogComponent} from '@shared-lib/components/confirm-dialog/confirm-dialog.component';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
 import {SMALL, XSMALL} from '@shared-lib/constants';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
 import {QueryBuilderService} from '@global-app/find-data/services/query-builder.service';
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {QueryService} from "@global-app/find-data/services/query.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {CommonModule} from "@angular/common";
+import {MatButtonModule, MatIconButton} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
+import {MatInputModule} from "@angular/material/input";
+import {MatMenuModule} from "@angular/material/menu";
+import {queryListResolver} from "@global-app/find-data/services/query-resolver.service";
 
 @Component({
   selector: 'app-find-data-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatIconButton,
+    MatInputModule,
+    MatTableModule,
+    MatMenuModule,
+    RouterLink,
+  ],
   templateUrl: './find-data-dashboard.component.html',
   styleUrl: './find-data-dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FindDataDashboardComponent implements OnInit {
+  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly responsiveService: ResponsiveService = inject(ResponsiveService);
+  private readonly queryBuilderService: QueryBuilderService = inject(QueryBuilderService);
+  private readonly queryService: QueryService = inject(QueryService);
+  private readonly snackBar: MatSnackBar = inject(MatSnackBar);
+
   screenSize: string;
   isLargeScreen: boolean = true;
   isXSmallScreen: boolean = false;
 
-  queryList: QueryResult[] = [];
+  dataSource: MatTableDataSource<QueryDTO> = new MatTableDataSource();
+  queryList: QueryDTO[] = [];
   queryConfigs: QueryConfig[] = [];
-  displayedColumns: string[] = ['actions', 'name', 'queryString', 'result'];
+  displayedColumns: string[] = ['name', 'description', 'queryString', 'result', 'actions'];
 
-  @ViewChild(MatTable) table: MatTable<Query>;
-
-  constructor(
-    public dialog: MatDialog,
-    private activatedRoute: ActivatedRoute,
-    private responsiveService: ResponsiveService,
-    private queryBuilderService: QueryBuilderService,
-  ) {
-  }
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({queryList, queryConfigs}) => {
-      this.queryList = queryList.queries;
+
+    this.queryService.getAllQueries().subscribe((queries) => {
+      this.queryList = queries;
+      this.dataSource.data = this.queryList;
+      this.cdr.detectChanges();
+    });
+    this.queryBuilderService.getQueryConfigs().subscribe((queryConfigs) => {
       this.queryConfigs = queryConfigs;
+      this.cdr.detectChanges();
+    });
+
+    this.queryService.getAllQueriesSSE().subscribe((query: QueryDTO) => {
+      const existingQueryIndex = this.queryList.findIndex(q => q.id === query.id);
+      if (existingQueryIndex !== -1) {
+        this.queryList[existingQueryIndex] = query;
+      } else {
+        this.queryList.push(query);
+      }
+      this.dataSource.data = this.queryList;
+      this.cdr.detectChanges();
     });
 
     this.checkAndAdjustResponsiveLayout();
@@ -45,13 +82,17 @@ export class FindDataDashboardComponent implements OnInit {
   checkAndAdjustResponsiveLayout(): void {
     this.responsiveService
       .isScreenSizeGreaterThan(SMALL)
-      .subscribe(isLargeScreen => this.isLargeScreen = isLargeScreen);
+      .subscribe(isLargeScreen => {
+        this.isLargeScreen = isLargeScreen;
+        this.cdr.detectChanges();
+      });
 
     this.responsiveService
       .getScreenSize()
       .subscribe(screenSize => {
         this.screenSize = screenSize;
         this.isXSmallScreen = screenSize === XSMALL;
+        this.cdr.detectChanges();
       });
   }
 
@@ -60,47 +101,40 @@ export class FindDataDashboardComponent implements OnInit {
   }
 
   onRunQuery(queryId: number): void {
-    console.log('Run query', queryId);
-    throw new Error('Method not implemented.');
-    // this.queryService.runQuery(queryId)
-    //     .subscribe(queryList => this.queryList = queryList);
+    this.queryService.fireQuery(queryId).subscribe((firedQuery) => {
+      this.queryList = this.queryList.map(query => query.id === queryId ? firedQuery : query);
+      this.snackBar.open("Query fired", 'Close', {duration: 5000});
+      this.dataSource.data = this.queryList;
+      this.cdr.detectChanges();
+    });
   }
 
-  onEditQuery(queryId: string): void {
+  onEditQuery(queryId: number): void {
     this.openQueryDetailDialog(queryId);
   }
 
-  openQueryDetailDialog(queryId?: string): void {
+  openQueryDetailDialog(queryId?: number): void {
     const dialogRef = this.dialog.open(QueryDetailComponent, {
       minWidth: '60%',
       data: {
-        queryData: queryId ? this.queryList.find(query => query.queryId === queryId) : null,
+        queryData: queryId ? this.queryList.find(query => query.id === queryId) : null,
         queryConfigs: this.queryConfigs,
       },
     });
 
-    dialogRef.afterClosed().subscribe((queryData: Query) => {
+    dialogRef.afterClosed().subscribe((queryData: QueryDTO) => {
       if (!queryData) return;
-
-      if (queryData.id) {
-        // this.queryService.editQuery(queryData)
-        //     .subscribe(queryList => {
-        //       this.queryList = queryList;
-        //       this.table.renderRows();
-        //     });
-
-        return;
+      if (!queryId) {
+        this.queryList.push(queryData);
+      }else{
+        this.queryList = this.queryList.map(query => query.id === queryData.id ? queryData : query);
       }
-
-      //   this.queryService.createQuery(queryData)
-      //       .subscribe(queryList => {
-      //         this.queryList = queryList;
-      //         this.table.renderRows();
-      //       });
+      this.dataSource.data = this.queryList;
+      this.cdr.detectChanges();
     });
   }
 
-  onDeleteQuery(queryId: string): void {
+  onDeleteQuery(queryId: number): void {
     console.log('Delete query', queryId);
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -114,38 +148,16 @@ export class FindDataDashboardComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
 
-      // this.queryService.deleteQuery(queryId)
-      //     .subscribe(queryList => this.queryList = queryList);
+      this.queryService.deleteQuery(queryId)
+        .subscribe(() => {
+          this.queryList = this.queryList.filter(query => query.id !== queryId);
+          this.dataSource.data = this.queryList;
+          this.cdr.detectChanges();
+        });
     });
   }
 
-  isExecuted(queryId: number): boolean {
-    console.log('isExecuted', queryId);
-    throw new Error('Method not implemented.');
-    // const queryResult = this.queryList.find(query => query.id === queryId)?.result;
-    //
-    // if (isUndefined(queryResult?.datasets)) return false;
-    //
-    // return isNotNull(queryResult?.datasets);
-  }
-
-  getResultLabel(result: { datasets: number, holders: number }): string {
-    if (!result?.datasets) return '';
-
-    return `${result.datasets} datasets from ${result.holders} data holders`;
-  }
-
-  hasWorkflowWithRequestedTraining(queryId: number): boolean {
-    console.log('hasWorkflowWithRequestedTraining', queryId);
-    throw new Error('Method not implemented.');
-    // const queryWorkflows = this.queryList.find(query => query.id === queryId)?.workflows as Workflow[];
-    //
-    // if (isUndefined(queryWorkflows) || queryWorkflows.length === 0) return false;
-    //
-    // return queryWorkflows.some(workflow => workflow.status !== WorkflowStatus.New);
-  }
-
-  getQueryString(queryString: string): string {
-    return this.queryBuilderService.getFormattedQueryString(queryString, this.queryConfigs);
+  getQueryString(query: QueryDTO): string {
+    return this.queryBuilderService.getFormattedQueryString(query, this.queryConfigs);
   }
 }

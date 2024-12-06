@@ -7,6 +7,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {catchError} from "rxjs";
 import {MatDialog} from "@angular/material/dialog";
 import {ConnectorStepDataSourceMultiFileUploadComponent} from "./components/multi-file/multi-file.component";
+import {DatePipe} from "@angular/common";
 
 @Component({
   selector: 'app-input-file',
@@ -43,11 +44,49 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
     }
   }
 
+  connectorExist(): boolean {
+    return !!(this.config &&
+      this.config.schemaId &&
+      this.config.createdAt);
+  }
+
+  getLastUploaded(): string {
+    if (this.config.fileInfo && this.config.fileInfo.lastUploaded) {
+      return this.config.fileInfo.lastUploaded;
+    }
+    if (this.config.createdAt) {
+      const datePipe: DatePipe = new DatePipe('en-US');
+      return datePipe.transform(new Date(this.config.createdAt!), 'dd.MM.YYYY') || '';
+    }
+    return '';
+  }
+
+  getFileName(): string {
+    if (this.settings.filePath) {
+      return this.settings.filePath.split('/files/')[1];
+    }
+    return '';
+  }
+
   onFileSelected(event: Event): void {
     this.isUploading = true;
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.settings.file = input.files[0];
+
+      const allowedExtensions = ['.csv', '.txt', '.xls', '.xlsx']; // TODO dynamic
+      const fileExtension = this.settings.file.name.split('.').pop()?.toLowerCase();
+
+      if (!fileExtension || !allowedExtensions.includes(`.${fileExtension}`)) {
+        this.isUploading = false;
+        console.error('Invalid file type');
+        this.snackBar.open('Invalid file type. Please upload a .csv, Excel or .txt file.', 'Close', {
+          duration: 5000,
+          verticalPosition: 'top',
+        });
+        return;
+      }
+
     }
     if (!this.settings.file) {
       this.isUploading = false;

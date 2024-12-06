@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>Test {{ data.app.name }}</h2>
+<mat-dialog-content>
+  <app-app-run-hyperparameter [app]="data.app"
+                              (hyperParamsChanged)="onHyperParamsChanged($event)"
+                              (formsValid)="hyperParamsValid = $event"
+  ></app-app-run-hyperparameter>
+
+  <div class="use-local-files-wrapper">
+    <mat-divider></mat-divider>
+
+    <mat-slide-toggle [(ngModel)]="useLocalFiles">Do you wont to use local files instead of query dummy data?
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+  </div>
+
+  @if (useLocalFiles) {
+    <h3>Input data</h3>
+    <form [formGroup]="testRunControl">
+      @for (input of getInputs(); track input) {
+        <mat-form-field class="example-full-width">
+          <mat-label>{{ input }}</mat-label>
+          <input type="text"
+                 placeholder="Select your experiment file"
+                 matInput
+                 [formControl]="getFormControl(input)"
+                 [matAutocomplete]="auto">
+          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            @for (option of filteredOptions | async; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (getFormControl(input).hasError('required')) {
+            <mat-error>File for {{ input }} is <strong>required</strong></mat-error>
+          }
+        </mat-form-field>
+      }
+    </form>
+  } @else {
+    <mat-form-field>
+      <mat-label>Select Project</mat-label>
+      <mat-select
+        [(value)]="projectId">
+        @for (p of projectList; track p.id) {
+          <mat-option
+            [value]="p.id"
+            [disabled]="(!isProjectValid(p))"
+          >
+            <span>{{ p.name }} </span>
+            @if (isProjectValid(p)) {
+              <span> ({{ p.dataTypeIds.length }} columns) </span>
+            } @else {
+              <span> (No selected Columns) </span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  <mat-divider></mat-divider>
+
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="onRunClick()" [disabled]="!isValid()">Run</button>
+</mat-dialog-actions>

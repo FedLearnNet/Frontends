@@ -1,0 +1,16 @@
+@if (app || version) {
+  @for (param of getHyperParams(); track param) {
+
+    <app-app-hyper-param-input
+      class="full-width"
+      [hyperparam]="param"
+      [value]="getHyperParamValue(param)"
+      [allowMultiple]="allowMultiple"
+      (valuesChanged)="emitMultiHyperParamsChanged(param, $event)"
+      (validChanged)="validateForms(param, $event)"
+      (valueChanged)="emitHyperParamsChanged(param, $event)">
+    </app-app-hyper-param-input>
+  }
+} @else {
+  <p>Loading config ...</p>
+}

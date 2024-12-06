@@ -1,0 +1,26 @@
+@use '@angular/material/index' as mat;
+
+@include mat.core();
+
+@import 'variables';
+
+$microbAiome-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: $mb-frontend-primary,
+      accent: $mb-frontend-accent,
+      warn: $mb-frontend-warn,
+    ),
+  )
+);
+
+@include mat.all-component-themes($microbAiome-theme);
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+}

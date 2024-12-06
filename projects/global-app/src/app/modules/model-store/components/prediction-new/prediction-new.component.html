@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>Predict for {{ model.name }} ({{ model.lastVersion?.modelVersion }})</h2>
+<mat-dialog-content>
+  @if (model.lastVersion) {
+    <h3>
+      Drag input data here to predict
+    </h3>
+    <app-lib-drag-and-drop-file
+      [files]="filesForm.get('files')"
+      (filesChange)="filesChanged($event)"
+    />
+  } @else {
+    <h3>
+      No version selected
+    </h3>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-raised-button color="primary" [disabled]="!hasInputFiles()" (click)="onPredict()">
+    Predict using this AI
+  </button>
+</mat-dialog-actions>

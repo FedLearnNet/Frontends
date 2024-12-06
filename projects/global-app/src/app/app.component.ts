@@ -11,16 +11,46 @@ export class AppComponent implements OnInit {
 
   menuItems = [
     {
-      title: 'Find Data/Train a model',
+      title: 'Find Data',
       link: '/find-data',
     },
     {
       title: 'Model Store',
       link: '/model-store',
     },
+    {
+      title: 'App Store',
+      link: '/app-store',
+    },
+    {
+      title: 'Data Modelling',
+      link: '/data-modelling',
+    },
+    {
+      title: 'Model',
+      link: '/model',
+    },
+    {
+      title: 'Predictions',
+      link: '/predictions',
+    },
+    {
+      title: 'Project',
+      link: '/project',
+    },
+    {
+      title: 'App Development',
+      link: '/app',
+    },
   ];
 
+
   ngOnInit() {
-    document.title = `Microb·AI·ome - ${environment.appTitle}`
+    document.title = environment.appTitle;
+
+    if(!environment.allowGlobalDataModeling) {
+      this.menuItems = this.menuItems.filter(item => item.link !== '/data-modelling')
+        .filter(item => item.link !== '/find-data');
+    }
   }
 }

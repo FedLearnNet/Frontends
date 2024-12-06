@@ -1,0 +1,15 @@
+@if (project && project.queryId) {
+  @if(loaded){
+    <app-dummy-data-list
+      [allowSave]="true"
+      [dataTypeIds]="dataTypesIds"
+      [dataTypes]="dataTypes"
+      [(selectedDataTypeIds)]="project.dataTypeIds"
+      (selectedDataTypeIdsChange)="save()"
+      [showBreadcrumb]="false"></app-dummy-data-list>
+  } @else {
+    <p>Loading...</p>
+  }
+} @else {
+  <p>You need to select a query.</p>
+}

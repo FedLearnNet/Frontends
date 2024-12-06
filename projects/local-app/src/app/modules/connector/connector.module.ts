@@ -60,6 +60,11 @@ import {MatSortModule} from "@angular/material/sort";
 import {
   RunConnectorChangeLogComponent
 } from "./components/run-connector/components/run-change-log/run-change-log.component";
+import {RunNewFileComponent} from "./components/run-connector/components/run-new-file/run-new-file.component";
+import {ConnectorRunDialogComponent} from "./components/run-connector/components/run-dialog/run-dialog.component";
+import {MatDialogActions, MatDialogModule} from "@angular/material/dialog";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+import {MatListModule} from "@angular/material/list";
 
 @NgModule({
   declarations: [
@@ -79,7 +84,9 @@ import {
     ManageConnectorComponent,
     RunConnectorLogComponent,
     ViewConnectorComponent,
-    RunConnectorChangeLogComponent
+    RunConnectorChangeLogComponent,
+    RunNewFileComponent,
+    ConnectorRunDialogComponent
   ],
   imports: [
     CommonModule,
@@ -99,6 +106,7 @@ import {
     MatTable,
     MatRow,
     MatCell,
+    MatListModule,
     MatSidenavModule,
     MatRadioGroup,
     MatRadioButton,
@@ -114,7 +122,9 @@ import {
     CdkDropListGroup,
     CdkDropList,
     CdkDrag,
-    SharedLibModule
+    SharedLibModule,
+    MatDialogModule,
+    MatCheckboxModule
   ]
 })
 export class ConnectorModule {

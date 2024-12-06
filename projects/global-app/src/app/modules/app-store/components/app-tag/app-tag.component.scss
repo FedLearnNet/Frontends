@@ -1,0 +1,21 @@
+mat-chip-set{
+  margin-left: 15px;
+}
+
+.icon-tag{
+  background-color: unset !important;
+}
+
+.is-danger{
+  margin-left: 0 !important;
+  mat-icon{
+    color: red;
+  }
+}
+
+.is-success{
+  margin-left: 0 !important;
+  mat-icon{
+    color: green;
+  }
+}

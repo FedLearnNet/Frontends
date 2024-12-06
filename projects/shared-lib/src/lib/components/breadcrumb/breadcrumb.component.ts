@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { ActivatedRouteSnapshot, Data, Router } from '@angular/router';
 
 type RouteData = Data & { breadcrumb: string | any }
@@ -11,6 +11,8 @@ type ExtendedActivatedRouteSnapshot = ActivatedRouteSnapshot & { data: RouteData
 })
 export class BreadcrumbComponent implements OnInit {
   breadcrumbs: { label: string, url: string }[] = [];
+
+  @Input() noMargin = false;
 
   constructor(
       private router: Router,

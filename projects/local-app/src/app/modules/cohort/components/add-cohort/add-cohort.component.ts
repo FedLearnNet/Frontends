@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, Validators } from '@angular/forms';
 import { cloneDeep } from 'lodash';
@@ -14,7 +14,7 @@ import { Cohort, CohortPatient } from '@local-app/cohort/models';
   templateUrl: './add-cohort.component.html',
   styleUrl: './add-cohort.component.scss',
 })
-export class AddCohortComponent {
+export class AddCohortComponent implements OnInit {
   isLargeScreen: boolean = true;
   cohort: Cohort = {} as Cohort;
   cohortPatients: CohortPatient[] = [];

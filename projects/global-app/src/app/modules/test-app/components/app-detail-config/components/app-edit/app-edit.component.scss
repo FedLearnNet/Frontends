@@ -1,0 +1,37 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 100%;
+  padding-right: 40px;
+  margin-bottom: 80px;
+}
+
+.buttons{
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  flex-direction: row-reverse;
+}
+
+.group {
+  display: flex;
+  gap: 0px 2%;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    min-width: 350px;
+  }
+
+  &--3 {
+    mat-form-field {
+      width: 32%;
+    }
+  }
+
+  &--2 {
+    mat-form-field {
+      width: 49%;
+    }
+  }
+}

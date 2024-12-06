@@ -1,0 +1,101 @@
+@if (data.current) {
+  <h2 mat-dialog-title>
+    @if (data.current.uniqueId) {
+      Edit {{ data.current.name }}
+      @if (isDisabled()) {
+        <span
+          [matTooltip]="'Its used by X clients'"
+        >(Viewing only)</span>
+      }
+    } @else {
+      Add new Schema
+    }
+  </h2>
+  <mat-dialog-content>
+    <mat-form-field class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput placeholder="Name" [(ngModel)]="data.current.name" [disabled]="isDisabled()">
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput placeholder="Description" [(ngModel)]="data.current.desc" [disabled]="isDisabled()"></textarea>
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Type</mat-label>
+      <mat-select [(ngModel)]="data.current.type" [disabled]="isDisabled()">
+        @for (type of schemaTypes; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (data.current.type === 'attribute') {
+
+      <h4>Ontology</h4>
+      @if (getOntology()) {
+        <app-ontology-card [ontology]="getOntology()"></app-ontology-card>
+      }
+
+      <mat-form-field class="full-width">
+        <mat-label>Ontology</mat-label>
+        <input type="text"
+               placeholder="Ontology"
+               matInput
+               [(ngModel)]="ontologyInput"
+               (input)="filterOntology($event)"
+               [matAutocomplete]="autoOntology">
+        @if (ontologyInput) {
+          <button matSuffix mat-icon-button aria-label="Clear" (click)="addOntology()">
+            <mat-icon>add</mat-icon>
+          </button>
+        }
+        <mat-autocomplete requireSelection #autoOntology="matAutocomplete">
+          @for (option of filteredOntologies$ | async; track option) {
+            <mat-option [value]="option.uniqueId">{{ option.name }} ({{ option.uniqueId }})</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      <form>
+        <h4>Datatype</h4>
+
+        @if (getDataType()) {
+          <app-datatype-card [dataType]="getDataType()"></app-datatype-card>
+        }
+        @if (datatypes.length) {
+
+          <mat-form-field class="full-width">
+            <mat-label>Datatype</mat-label>
+            <input type="text"
+                   placeholder="Datatype"
+                   matInput
+                   [formControl]="autoCompleteControlDatatype"
+                   [matAutocomplete]="autoDatatype">
+            @if (autoCompleteControlDatatype.value) {
+              <button matSuffix mat-icon-button aria-label="Clear" (click)="addDatatype()">
+                <mat-icon>add</mat-icon>
+              </button>
+            }
+            <mat-autocomplete requireSelection #autoDatatype="matAutocomplete">
+              @for (option of filteredDatatypes$ | async; track option) {
+                <mat-option [value]="option.uniqueId">{{ option.name }} ({{ option.uniqueId }})</mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+        } @else {
+          <p>No datatypes found. Select one Ontology which has Datatypes.</p>
+        }
+      </form>
+
+    }
+
+
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onNoClick()">No Thanks</button>
+    @if (!isDisabled()) {
+      <button mat-button (click)="save()">Save</button>
+    }
+  </mat-dialog-actions>
+}
