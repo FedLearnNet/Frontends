@@ -1,0 +1,32 @@
+@if (model) {
+  <div class="model-header">
+    <div class="model-header__icon">
+      <img [src]="model.federatedApp.icon" alt="{{ model.federatedApp.name }} Icon">
+    </div>
+
+    <div class="model-header__column">
+      <h1 class="model-header__name">{{ model.name }}</h1>
+      <div class="model-header__description">
+        <p>{{ model.shortDescription }}</p>
+      </div>
+    </div>
+    <div class="model-header__column">
+      <div class="model-header__info">
+        @if (model.lastVersion) {
+          <p>Version: {{ model.lastVersion.modelVersion }}</p>
+          <p>Latest changes: {{ model.lastVersion.changelog }}</p>
+          <p>Model Image: {{ model.lastVersion.selectedSubModel?.imageName }}</p>
+        } @else {
+          <p>No version</p>
+        }
+      </div>
+      <div class="model-header__developers">
+        @if (model.creator) {
+          <span>Author:</span>
+          <app-user-link [id]="model.creator.id" [name]="model.creator.keycloakId"></app-user-link>
+        }
+      </div>
+    </div>
+  </div>
+}
+

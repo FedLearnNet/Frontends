@@ -1,0 +1,33 @@
+<div class="shop">
+  <div class="filter-wrapper" [class.active]="isMobileFilterActive">
+    <div class="filter-content">
+      <div class="filter-header">
+        <h3>Filter</h3>
+        <button mat-icon-button *ngIf="isMobile" (click)="toggleMobileFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <mat-form-field class="full-width">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Search..." [(ngModel)]="searchQuery" (change)="modelFiltered()">
+        <button *ngIf="searchQuery" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearchQuery()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+
+      <div class="filter-section">
+      </div>
+    </div>
+  </div>
+  <div class="main-content">
+    <button mat-raised-button class="filter-toggle-button" *ngIf="isMobile" (click)="toggleMobileFilter()">Open Filter
+    </button>
+    <div class="app-list">
+      @for (model of models; track model.id) {
+        <app-model-card [model]="model"></app-model-card>
+      }
+    </div>
+
+  </div>
+</div>

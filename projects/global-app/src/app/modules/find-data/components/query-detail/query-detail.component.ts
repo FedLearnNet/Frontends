@@ -1,174 +1,185 @@
-import { Component, Inject, QueryList, ViewChildren, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { QueryService } from '@global-app/find-data/services/query.service';
-import { FormBuilder, Validators } from '@angular/forms';
-import { QueryConfig, QueryResult } from '@global-app/find-data/models';
-import { SchemaService } from '@global-app/find-data/services/schema.service';
-import { QueryBuilderService } from '@global-app/find-data/services/query-builder.service';
-import { QueryBuilderItemComponent } from '@global-app/find-data/components/query-builder-item/query-builder-item.component';
-import { switchMap } from 'rxjs';
-import { isEmpty } from 'lodash';
+import {
+  Component,
+  QueryList,
+  ViewChildren,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef
+} from '@angular/core';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle
+} from '@angular/material/dialog';
+import {QueryService} from '@global-app/find-data/services/query.service';
+import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {QueryConfig} from '@global-app/find-data/models';
+import {
+  QueryBuilderItemComponent
+} from '@global-app/find-data/components/query-builder-item/query-builder-item.component';
+import {CreateQueryDTO, QueryDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
+import {CommonModule} from "@angular/common";
+import {MatButtonModule, MatIconButton} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {MatInputModule} from "@angular/material/input";
+import {MatDividerModule} from "@angular/material/divider";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {cloneDeep} from "lodash";
+
+
+interface QueryDetail {
+  queryConfigs: QueryConfig[];
+  queryData?: QueryDTO;
+}
 
 @Component({
-    selector: 'app-query-detail',
-    templateUrl: './query-detail.component.html',
-    styleUrl: './query-detail.component.scss',
+  selector: 'app-query-detail',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatDialogTitle,
+    MatDialogContent,
+    MatDialogActions,
+    MatButtonModule,
+    MatIconModule,
+    MatIconButton,
+    MatDividerModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatProgressSpinnerModule,
+    MatInputModule,
+    QueryBuilderItemComponent
+  ],
+  templateUrl: './query-detail.component.html',
+  styleUrl: './query-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QueryDetailComponent implements OnInit {
-    isQueryRunning: boolean = false;
+  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly formBuilder: FormBuilder = inject(FormBuilder);
+  private readonly queryService: QueryService = inject(QueryService);
+  private readonly dialogRef = inject(MatDialogRef<QueryDetailComponent>);
+  public data = inject<QueryDetail>(MAT_DIALOG_DATA);
 
-    queryResult: QueryResult;
-    queryConfigs: QueryConfig[] = [];
 
-    @ViewChildren(QueryBuilderItemComponent) children!: QueryList<QueryBuilderItemComponent>;
+  @ViewChildren(QueryBuilderItemComponent) children!: QueryList<QueryBuilderItemComponent>;
 
-    queryList: any[] = [];
+  queryConfigs: QueryConfig[] = [];
+  queryList: QueryItemDTO[] = [];
+  queryDetailForm = this.formBuilder.group({
+    name: ['', Validators.required],
+    description: ['', Validators.required],
+  });
 
-    queryDetailForm = this.formBuilder.group({
-        name: ['', Validators.required],
+  changed: boolean = false;
+
+  ngOnInit(): void {
+    this.queryConfigs = this.data.queryConfigs;
+    if (this.data.queryData) {
+      this.queryDetailForm.patchValue({
+        name: this.data.queryData.name,
+        description: this.data.queryData.description,
+      });
+      this.queryList = cloneDeep(this.data.queryData.query);
+    }
+    this.cdr.detectChanges();
+  }
+
+  isQueryRunning(): boolean {
+    if (!this.data.queryData) {
+      return false;
+    }
+    return !this.data.queryData.hasResult && this.data.queryData.hasFired;
+  }
+
+
+  onAddQueryItem(): void {
+    this.queryList.push({
+      ontologyId: '',
+      operator: [],
     });
 
-    get isQueryExecuted(): boolean {
-        return this.queryResult?.result !== undefined;
+    this.handleQueryChange();
+    this.cdr.detectChanges();
+  }
+
+  trackQueryItem(index: number) {
+    return index;
+  }
+
+  removeQueryItem(indexNumber: number): void {
+    this.queryList.splice(indexNumber, 1);
+    this.handleQueryChange();
+    this.cdr.detectChanges();
+  }
+
+  onRunQuery(): void {
+    this.onSubmit(true);
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
+
+  onSubmit(run?: boolean): void {
+    if (this.isQueryDetailInvalid()) return;
+    this.cdr.detectChanges();
+
+    const name = this.queryDetailForm.get('name')!.value!;
+    const description = this.queryDetailForm.get('description')!.value!;
+
+    if (!this.changed && this.data.queryData && this.data.queryData.id) {
+      const dto: QueryDTO = this.data.queryData;
+      dto.description = description;
+      dto.name = name;
+      if(!dto.hasFired){
+        dto.query = this.queryList;
+      }
+
+      this.queryService.updateQuery(dto).subscribe(query => {
+        this.dialogRef.close(query);
+      })
+    } else {
+      const dto: CreateQueryDTO = {
+        name: name,
+        description: description,
+        query: this.queryList,
+      }
+      if (run) {
+        this.queryService.createAndRunQuery(dto).subscribe(query => {
+          this.dialogRef.close(query);
+        })
+      } else {
+        this.queryService.createQuery(dto).subscribe(query => {
+          this.dialogRef.close(query);
+        })
+      }
     }
 
-    get queryResults(): number {
-        return this.queryResult.result;
+  }
+
+  isQueryDetailInvalid(): boolean {
+    this.queryDetailForm.markAllAsTouched();
+    return this.queryDetailForm.invalid;
+  }
+
+  getSubmitButtonLabel(): string {
+    return `${this.data?.queryData ? 'Update' : 'Create'} query`;
+  }
+
+  handleQueryChange(): void {
+    if (!this.data.queryData) {
+      return;
     }
-
-    constructor(
-        public dialogRef: MatDialogRef<QueryDetailComponent>,
-
-        @Inject(MAT_DIALOG_DATA) public data: any,
-
-        private queryService: QueryService,
-        private schemaService: SchemaService,
-        private queryBuilderService: QueryBuilderService,
-
-        private formBuilder: FormBuilder,
-    ) { }
-
-    ngOnInit(): void {
-        this.queryConfigs = this.data.queryConfigs;
-
-        this.loadQueryData();
+    if (!this.data.queryData.hasFired) {
+      return;
     }
-
-    loadQueryData(): void {
-        if (!this.data?.queryData) return;
-
-        const queryData = this.data.queryData;
-
-        console.log("### QUERY DATA", queryData)
-
-        this.loadDataToQueryBuilder(queryData.queryString);
-
-    //     this.queryDetailForm.patchValue({...queryData} as Query);
-    //
-    //     // Add a dummy query item row
-    //     this.onAddQueryItem();
-    //
-    //     if (isNotEmpty(queryData.result)) {
-    //       this.isQueryExecuted = true;
-    //       this.queryResult = queryData.result;
-    //     }
-    }
-
-    onAddQueryItem(queryData= {}): void {
-        this.queryList.push({
-            id: this.queryList.length + 1,
-            ...queryData,
-        });
-
-        this.handleQueryChange();
-    }
-
-    removeQueryItem(itemId: number): void {
-        this.queryList = this.queryList.filter(queryItem => queryItem.id !== itemId);
-
-        this.handleQueryChange();
-    }
-
-    onRunQuery(): void {
-        const queryString = this.queryBuilderService
-            .buildQueryString(
-                this.children
-                    .map(child => child.queryBuilderFormGroup.valid && child.queryBuilderFormGroup.getRawValue())
-                    .filter(queryValue => queryValue)
-            );
-
-        if (isEmpty(queryString)) {
-            return;
-        }
-
-        this.executeQuery(queryString);
-    }
-
-    onCancel(): void {
-        this.dialogRef.close();
-    }
-
-    onSubmit(): void {
-    //     if (this.isQueryDetailInvalid()) return;
-    //
-    //     this.dialogRef.close({
-    //         ...this.data?.queryData,
-    //         ...this.queryDetailForm.getRawValue(),
-    //         result: this.isQueryExecuted ? this.queryResult : null,
-    //     });
-    }
-
-    isQueryDetailInvalid(): boolean {
-        this.queryDetailForm.markAllAsTouched();
-
-        return this.queryDetailForm.invalid;
-    }
-
-    getSubmitButtonLabel(): string {
-        return `${ this.data?.queryData ? 'Update' : 'Create' } query`;
-    }
-
-    handleQueryChange(): void {
-        if (!this.isQueryExecuted) {
-            return;
-        }
-
-        this.queryResult = {} as QueryResult;
-    }
-
-    private executeQuery(queryString: string): void {
-        this.isQueryRunning = true;
-
-        this.queryService.startQuery(queryString).pipe(
-            switchMap(response => {
-                return this.queryService.pollQueryResult(response.queryId);
-            })
-        ).subscribe(
-            result => {
-                this.handleQueryResult(result);
-            },
-            error => {
-                this.isQueryRunning = false;
-
-                console.error('Error:', error);
-            }
-        );
-    }
-
-    private handleQueryResult(queryResult: QueryResult): void {
-        this.isQueryRunning = false;
-        this.queryResult = queryResult;
-    }
-
-    private loadDataToQueryBuilder(queryString: string): void {
-        const queries = JSON.parse(queryString);
-
-        queries.forEach((query: any) => {
-            this.onAddQueryItem({
-                ontologyId: query.ontology_id,
-                operator: query.operator[0].operator,
-                value: query.operator[0].value,
-            });
-        });
-    }
+    this.changed = JSON.stringify(this.data.queryData.query) !== JSON.stringify(this.queryList);
+    this.cdr.detectChanges();
+  }
 }

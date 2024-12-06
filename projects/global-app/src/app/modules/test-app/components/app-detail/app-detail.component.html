@@ -1,0 +1,37 @@
+<app-lib-breadcrumb [noMargin]="true"></app-lib-breadcrumb>
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start"
+               [(selectedIndex)]="selectedIndex" (selectedTabChange)="onTabChange($event)">
+  <mat-tab label="Overview">
+    @if (app) {
+      <app-app-detail-config [app]="app"
+                             [pydanticClass]="configPydantic"
+                             [appConnected]="appConnected"
+                             (configChanged)="configChanged($event)"
+                             [clientConfig]="clientConfig"
+                             [datafiles]="datafiles">
+      </app-app-detail-config>
+    } @else {
+      <p>Loading config ...</p>
+    }
+  </mat-tab>
+  <mat-tab label="Runs">
+    <app-app-runs [app]="app"
+                  [appRunning]="appConnected"
+                  [datafiles]="datafiles"></app-app-runs>
+  </mat-tab>
+  <mat-tab label="Monitor">
+    <app-app-detail-monitor [performance$]="getPerformance$()"></app-app-detail-monitor>
+  </mat-tab>
+  <mat-tab label="Setup">
+    <app-app-detail-setup></app-app-detail-setup>
+  </mat-tab>
+  <mat-tab label="Models">
+    @if (app) {
+      <app-my-model-list [forAppId]="app.id"></app-my-model-list>
+    } @else {
+      <p>Loading models ...</p>
+    }
+  </mat-tab>
+
+</mat-tab-group>
+<app-app-console-log [appConnected]="appConnected" [clientConnected]="connected"></app-app-console-log>

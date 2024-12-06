@@ -1,0 +1,56 @@
+<app-lib-breadcrumb [noMargin]="true"></app-lib-breadcrumb>
+
+@if (run) {
+  <app-experiment-header [app]="app" [experiment]="experiment" [run]="run"></app-experiment-header>
+
+  <div class="detail">
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab label="Overview">
+
+        <div>
+          <h4>Hyperparam</h4>
+          @for (param of getHyperParamNames(); track param) {
+            <p> {{ param }}: {{ run.hyperParams[param] }}</p>
+          }
+        </div>
+
+      </mat-tab>
+      <mat-tab label="Output">
+        @for (param of getOutputNames(); track param) {
+          <p> {{ param }}: {{ run.outputData[param] | json }}</p>
+        }
+        @if(getOutputNames().length === 0) {
+          <p> No Output</p>
+        }
+      </mat-tab>
+      <mat-tab label="Metric">
+        @if (getMetricsNames().length > 0) {
+
+          <div class="metric-group">
+            @for (name of getMetricsNames(); track name) {
+              <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)">
+              </app-simple-metric-line>
+            }
+          </div>
+        } @else {
+          <p> Loading Metrics ...</p>
+        } </mat-tab>
+      <mat-tab label="Logs">
+        @if (logs$ | async; as logs) {
+          <app-app-log-table [logs]="logs"></app-app-log-table>
+        } @else {
+          <p> Loading logs ...</p>
+        }
+      </mat-tab>
+      <mat-tab label="Model">
+        @if (model$ | async; as model) {
+          <p>Status: {{model.status}}</p>
+        } @else {
+          <p> Loading model ...</p>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  <p> Run not found</p>
+}

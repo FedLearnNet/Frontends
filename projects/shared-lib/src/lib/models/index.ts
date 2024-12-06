@@ -3,3 +3,4 @@ export * from './select';
 
 export * from './schema';
 export * from './schema-field-structure';
+export * from './paginated-response';

@@ -1,20 +1,9 @@
 # FederatedDb Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.2.
-
-## Development server
-
-`ng serve --project=local-app`
-`ng serve --project=global-app --port=4201`
-
 ## Code scaffolding
 
 You can then generate applications (`ng generate application my-app`) and libraries (`ng generate library my-lib`) with names that are unique within the workspace. 
 Run `ng generate component component-name --project=my-app ` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project=my-app|my-lib`.
-
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
 ## Running unit tests
 
@@ -24,6 +13,38 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-## Further help
+#
+#
+#
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+# Separate builds and serving configurations for <u>microb-AI-ome</u> and <u>dAIbetes</u>
+
+## Development server
+
+> ### dAIbetes
+> Start local and global apps natively
+> - `npm run start-local-dAIbetes`
+> - `npm run start-global-dAIbetes` (port 4201)
+> 
+> Start local and global apps dockerized
+> - `docker-compose -p frontend-d -f docker-compose.dAIbetes.yml up -d`
+
+
+> ### microb-AI-ome
+> Start local and global apps natively
+> - `npm run start-local-microbAIome`
+> - `npm run start-global-microbAIome` (port 4201)
+> 
+> Start local and global apps dockerized
+> - `docker-compose -p frontend-mb -f docker-compose.microbAIome.yml up -d`
+
+## Build
+The build artifacts will be stored in the `dist/` directory under subdirectories named `[local/global]-app-[dAIbetes/microb-AI-ome]` (e.g., local-app-dAIbetes)
+
+> ### dAIbetes
+> - `npm run build-local-dAIbetes`
+> - `npm run build-global-dAIbetes`
+
+> ### microb-AI-ome
+> - `npm run build-local-microbAIome`
+> - `npm run build-global-microbAIome`

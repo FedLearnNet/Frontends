@@ -1,0 +1,52 @@
+<app-lib-breadcrumb  [noMargin]="true"></app-lib-breadcrumb>
+
+<div class="toolbar-wrapper">
+  <mat-toolbar>
+    @if (this.schema) {
+      <span>{{ this.schema.name }}</span>
+    } @else if (this.schemaId === 'new') {
+      <span>Add new Schema</span>
+    } @else {
+      <span>{{ this.schemaId }}</span>
+    }
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item disabled>
+      <mat-icon>delete</mat-icon>
+      <span>Delete TODO</span>
+    </button>
+    <button mat-menu-item disabled>
+      <mat-icon>share</mat-icon>
+      <span>Share TODO</span>
+    </button>
+  </mat-menu>
+</div>
+
+<div class="wrapper">
+  <div #cy id="cy"></div>
+
+
+  @if (contextMenuVisible) {
+    <div id="contextMenu" class="context-menu"
+         [ngStyle]="{'top.px': contextMenuPosition.y, 'left.px': contextMenuPosition.x}">
+      <ul>
+        <li (click)="editSchema()">Edit</li>
+        <li (click)="addChildren()">Add Child</li>
+        <li (click)="deleteSchema()">Delete</li>
+      </ul>
+    </div>
+  }
+</div>
+@if (this.schemaId === 'new' && !this.schema) {
+  <div class="add-schema-btn">
+    <a mat-fab extended (click)="createRoot()">
+      <mat-icon>add</mat-icon>
+      Start a new Schema
+    </a>
+  </div>
+}

@@ -1,51 +1,113 @@
 <div class="permission-container">
+  <div class="permission-header">
     <h2>Permissions</h2>
+    <button mat-raised-button color="primary" (click)="addPermission()">
+      <mat-icon>add</mat-icon>
+      Add Permission
+    </button>
+  </div>
 
-    <div class="action-buttons-row">
-        <button mat-raised-button color="primary" (click)="addPermission()">
-            Add another permission
-        </button>
-    </div>
+  <div class="table-container">
+    <mat-table
+      [dataSource]="permissions"
+      class="mat-elevation-z8"
+      [class.is-x-small-screen]="isXSmallScreen"
+    >
+      <!-- Action Column -->
+      <ng-container matColumnDef="actions" sticky>
+        <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
+          <button mat-icon-button color="primary" (click)="editRow(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteRow(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
 
-    <mat-table [dataSource]="permissions" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen">
-        <ng-container matColumnDef="actions">
-            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-                <span *ngIf="isXSmallScreen" class="column-name">Action:</span>
-                <button mat-icon-button color="primary" (click)="editRow(element)">
-                    <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="deleteRow(element)">
-                    <mat-icon>delete</mat-icon>
-                </button>
-            </mat-cell>
-        </ng-container>
+      <!-- Cohort ID Column -->
+      <ng-container matColumnDef="cohortId">
+        <mat-header-cell *matHeaderCellDef>Cohort</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Cohort:</span>
+          <span>{{ element.cohortId }}</span>
+        </mat-cell>
+      </ng-container>
 
-        <ng-container matColumnDef="cohort">
-            <mat-header-cell *matHeaderCellDef>Cohort</mat-header-cell>
-            <mat-cell *matCellDef="let element">
-                <span *ngIf="isXSmallScreen" class="column-name">Cohort:</span>
-                <span>{{ element.cohort }}</span>
-            </mat-cell>
-        </ng-container>
+      <!-- Group/User Column -->
+      <ng-container matColumnDef="groupOrUser">
+        <mat-header-cell *matHeaderCellDef>Group/User</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="group-or-user">
+          <span *ngIf="isXSmallScreen" class="column-name">Group/User:</span>
+          <span>{{ element.userId || element.groupId }}</span>
+        </mat-cell>
+      </ng-container>
 
-        <ng-container matColumnDef="groupOrUser">
-            <mat-header-cell *matHeaderCellDef>Group/ User</mat-header-cell>
-            <mat-cell *matCellDef="let element" class="group-or-user" [class.is-x-small-screen]="isXSmallScreen">
-                <span *ngIf="isXSmallScreen" class="column-name">Group/ User:</span>
-                <span>{{ element.groupOrUser }}</span>
-            </mat-cell>
-        </ng-container>
+      <!-- Is Allowed to Query Column -->
+      <ng-container matColumnDef="isAllowedToQuery">
+        <mat-header-cell *matHeaderCellDef>Is Allowed to Query</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Is Allowed to Query:</span>
+          <span>{{ element.isAllowedToQuery ? 'Yes' : 'No' }}</span>
+        </mat-cell>
+      </ng-container>
 
-        <ng-container matColumnDef="permissions">
-            <mat-header-cell *matHeaderCellDef>Permissions</mat-header-cell>
-            <mat-cell *matCellDef="let element" class="permissions" [class.is-x-small-screen]="isXSmallScreen">
-                <span *ngIf="isXSmallScreen" class="column-name">Permissions:</span>
-                <span [innerHTML]="getPermissions(element.permissions)"></span>
-            </mat-cell>
-        </ng-container>
+      <!-- Query Retry Time Column -->
+      <ng-container matColumnDef="queryRetryTime">
+        <mat-header-cell *matHeaderCellDef>Query Retry Time</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Query Retry Time:</span>
+          <span>{{ element.queryRetryTime }}</span>
+        </mat-cell>
+      </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      <!-- Query Sample Threshold Column -->
+      <ng-container matColumnDef="querySampleThreshold">
+        <mat-header-cell *matHeaderCellDef>Query Sample Threshold</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Query Sample Threshold:</span>
+          <span>
+            @if (element.querySampleThreshold) {
+              {{ element.querySampleThreshold }}
+            } @else {
+              Not Given
+            }
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Auto Training Access Column -->
+      <ng-container matColumnDef="autoTrainingAccess">
+        <mat-header-cell *matHeaderCellDef>Auto Training Access</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Auto Training Access:</span>
+          <span>{{ element.autoTrainingAccess }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Created At Column -->
+      <ng-container matColumnDef="createdAt">
+        <mat-header-cell *matHeaderCellDef>Created At</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Created At:</span>
+          <span>{{ element.createdAt | date: 'medium' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Updated At Column -->
+      <ng-container matColumnDef="updatedAt">
+        <mat-header-cell *matHeaderCellDef>Updated At</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <span *ngIf="isXSmallScreen" class="column-name">Updated At:</span>
+          <span>{{ element.updatedAt | date: 'medium' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Table Headers and Rows -->
+      <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
     </mat-table>
+  </div>
 </div>

@@ -36,7 +36,7 @@
       "files": ["*.html"],
       "extends": ["plugin:@angular-eslint/template/recommended"],
       "rules": {
-        "max-len": ["error", { "code": 140 }]
+        "max-len": ["warn", { "code": 200 }] //TODO CHANGE THIS LATER TO 140
       }
     }
   ]

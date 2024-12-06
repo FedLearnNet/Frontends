@@ -1,0 +1,51 @@
+<div class="setup">
+
+  <h3>1. Install dependencies</h3>
+  <ul>
+    <li>Ensure you have Python 3.11 or later installed.</li>
+    <li>Use a virtual environment to isolate dependencies.</li>
+  </ul>
+  <markdown
+    clipboard
+    lineHighlight
+    [data]="setupDependencies">
+  </markdown>
+
+
+  <h3>2. Configure environment to connect to FedDB TestEmbed.</h3>
+  <ul>
+    <li>Replace <code>APP_ID</code> with your actual id.</li>
+    <li>Use a <code>.env</code> file for storage.</li>
+  </ul>
+  <markdown
+    clipboard
+    lineHighlight
+    [data]="setupConfig">
+  </markdown>
+
+  <h3>3. Create your config (or paste the generated one).</h3>
+  <markdown
+    clipboard
+    lineHighlight
+    [data]="setupConfigPydantic">
+  </markdown>
+
+  <h3>4. Create your model, which you register.</h3>
+  <ul>
+    <li>Ensure your model inherits from the <code>BaseApp</code> class.</li>
+    <li>Use your config for data validation.</li>
+    <li>Implement save and load methods for the model store.</li>
+  </ul>
+  <markdown
+    clipboard
+    lineHighlight
+    [data]="setupRun">
+  </markdown>
+
+  <h3>5. Create your <code>main.py</code></h3>
+  <markdown
+    clipboard
+    lineHighlight
+    [data]="setupMain">
+  </markdown>
+</div>

@@ -1,0 +1,41 @@
+@if(config){
+  <h2>Client Config</h2>
+  <mat-accordion>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> APP_KEY </mat-panel-title>
+        <mat-panel-description> {{config.APP_KEY}} </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>This key is used to determine which app reflects the application.
+        If you see this message, the config is correct..</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> ENABLE_CONFIG_SYNC </mat-panel-title>
+        <mat-panel-description> {{config.ENABLE_CONFIG_SYNC}} </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>If activated, the config is synchronised with the database.</p>
+      <p><b>Default:</b> True</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> TRACE_PERFORMANCE </mat-panel-title>
+        <mat-panel-description> {{config.TRACE_PERFORMANCE}} </mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>When activated, the system usage is synchronised with the frontend.</p>
+      <p><b>Default:</b> False</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Data files </mat-panel-title>
+        <mat-panel-description> {{datafiles.length}} files found </mat-panel-description>
+      </mat-expansion-panel-header>
+      @for (file of datafiles; track file) {
+        <p>{{file}}</p>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+} @else {
+  <p>No config received</p>
+}
+

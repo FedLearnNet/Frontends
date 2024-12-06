@@ -29,6 +29,7 @@ export const connectorAndFileResolver: ResolveFn<ConnectorConfig> = (route: Acti
           if (connector.fileInfo) {
             fileInfo.renamedColumns = connector.fileInfo?.renamedColumns || [];
             fileInfo.deletedColumns = connector.fileInfo?.deletedColumns || [];
+            fileInfo.columns = connector.fileInfo?.columns || [];
           }
           connector.fileInfo = fileInfo;
           return connector;

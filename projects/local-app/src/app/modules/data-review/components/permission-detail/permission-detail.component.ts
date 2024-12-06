@@ -1,199 +1,201 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
-import { SelectOption } from '@shared-lib/models';
-import { PermissionService } from '@local-app/data-review/services/permission.service';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSlideToggleChange } from '@angular/material/slide-toggle';
-import { Group, Permission } from '@local-app/data-review/models';
-import { cloneDeep } from 'lodash';
-import { MatSelectChange } from '@angular/material/select';
-import { SharedCohortService } from '@local-app/utils/services/shared-cohort.service';
+import {Component, inject, Inject, OnInit} from '@angular/core';
+import {AbstractControl, FormBuilder, FormControl, ValidationErrors, ValidatorFn, Validators} from '@angular/forms';
+import {Schema, SelectOption} from '@shared-lib/models';
+import {PermissionService} from '@local-app/data-review/services/permission.service';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Permission} from '@local-app/data-review/models';
+import {cloneDeep} from 'lodash';
+import {MatSelectChange} from '@angular/material/select';
+import {map} from "rxjs";
+import {SchemaService} from "@local-app/cohort/services/schema.service";
+
+// Extend SelectOption with an interface that includes the 'type' property
+interface GroupOrUserOption extends SelectOption {
+  type: 'user' | 'group';
+}
 
 @Component({
-    selector: 'app-permission-detail',
-    templateUrl: './permission-detail.component.html',
-    styleUrl: './permission-detail.component.scss',
+  selector: 'app-permission-detail',
+  templateUrl: './permission-detail.component.html',
+  styleUrls: ['./permission-detail.component.scss'],
 })
 export class PermissionDetailComponent implements OnInit {
-    cohortSelectOptions: SelectOption[];
-    groupAndUserSelectOptions: SelectOption[];
-    applications: SelectOption[];
-    permissionDetail: Permission | null;
-    permissions: Permission[];
-    groupAndUserList: Group[];
+  private readonly permissionService: PermissionService = inject(PermissionService);
+  private readonly schemaService: SchemaService = inject(SchemaService);
+  private readonly formBuilder: FormBuilder = inject(FormBuilder);
+  private readonly dialogRef: MatDialogRef<PermissionDetailComponent> = inject(MatDialogRef);
+  readonly data: Permission | null = inject<Permission | null>(MAT_DIALOG_DATA);
 
-    permissionForm = this.formBuilder.nonNullable.group({
-        cohort: [null, Validators.required],
-        groupOrUser: [[], Validators.required],
-        permissions: this.formBuilder.group({
-            querySampleThreshold: this.formBuilder.group({
-                checked: [false, Validators.required],
-                value: [100, Validators.required],
-            }),
-            specificGroupInterval: this.formBuilder.group({
-                checked: [false, Validators.required],
-                value: [3, Validators.required],
-            }),
-            anyGroupInterval: this.formBuilder.group({
-                checked: [false, Validators.required],
-                value: [1, Validators.required],
-            }),
-            maxQueryLimit: this.formBuilder.group({
-                checked: [false, Validators.required],
-                value: [50, Validators.required],
-            }),
-            accessWith: this.formBuilder.group({
-                checked: [false, Validators.required],
-                value: [1, Validators.required],
-            }),
-        }),
+  cohortSelectOptions: SelectOption[];
+  groupAndUserSelectOptions: GroupOrUserOption[];
+  permissionDetail: Permission | null;
+
+  permissionForm = this.formBuilder.group({
+    cohort: ['', Validators.required],
+    user: ['',],
+    group: ['',],
+    permissions: this.formBuilder.group({
+      isAllowedToQuery: [false, Validators.required],
+      retryTimeToQuery: [
+        null as number | null,
+        [Validators.required, Validators.min(3), Validators.max(10)],
+      ],
+      querySampleThreshold: [100, [Validators.required, Validators.min(100)]],
+      autoTrainingAccess: ['', Validators.required],
+    }),
+  });
+
+  ngOnInit() {
+    this.permissionDetail = cloneDeep(this.data);
+
+    this.loadCohorts();
+    this.loadGroupsAndUsers();
+    this.patchPermission();
+
+    this.permissionForm.get('user')!.valueChanges.subscribe(value => {
+      if (value) {
+        this.permissionForm.get('group')!.disable();
+      } else {
+        this.permissionForm.get('group')!.enable();
+      }
     });
 
-    constructor(
-        public dialogRef: MatDialogRef<PermissionDetailComponent>,
+    this.permissionForm.get('group')!.valueChanges.subscribe(value => {
+      if (value) {
+        this.permissionForm.get('user')!.disable();
+      } else {
+        this.permissionForm.get('user')!.enable();
+      }
+    });
 
-        @Inject(MAT_DIALOG_DATA) public data: any,
+    this.permissionForm.get('permissions.isAllowedToQuery')!.valueChanges.subscribe(value => {
+      const retryTimeToQueryControl = this.permissionForm.get('permissions.retryTimeToQuery');
+      const querySampleThresholdControl = this.permissionForm.get('permissions.querySampleThreshold');
 
-        private formBuilder: FormBuilder,
-        private sharedCohortService: SharedCohortService,
-        private permissionService: PermissionService,
-    ) { }
+      if (value) {
+        retryTimeToQueryControl!.setValidators([Validators.required, Validators.min(3), Validators.max(10)]);
+        querySampleThresholdControl!.setValidators([Validators.required, Validators.min(100)]);
+        retryTimeToQueryControl!.enable();
+        querySampleThresholdControl!.enable();
+      } else {
+        retryTimeToQueryControl!.clearValidators();
+        querySampleThresholdControl!.clearValidators();
+        retryTimeToQueryControl!.disable();
+        querySampleThresholdControl!.disable();
+      }
 
-    ngOnInit() {
-        this.permissionDetail = cloneDeep(this.data.permission);
+      retryTimeToQueryControl!.updateValueAndValidity();
+      querySampleThresholdControl!.updateValueAndValidity();
+    });
+  }
 
-        this.loadCohorts();
-        this.loadGroupsAndUsers();
-        this.loadApplications();
-        this.loadPermissions();
-        this.patchPermission();
+
+  loadCohorts(): void {
+    this.schemaService.getSchemas()
+      .pipe(map((cohorts: Schema[]) => cohorts.map(
+        (cohort: any) => ({value: cohort.uniqueId, label: cohort.name})
+      )))
+      .subscribe((cohorts: SelectOption[]) => {
+        this.cohortSelectOptions = cohorts;
+      });
+  }
+
+  loadGroupsAndUsers(): void {
+    // Modify code to dynamically load groups and users from an endpoint
+    // For now, using dummy data
+    this.groupAndUserSelectOptions = [
+      {value: 'u1', label: 'User 1', type: 'user'},
+      {value: 'u2', label: 'User 2', type: 'user'},
+      {value: 'g1', label: 'Group 1', type: 'group'},
+      {value: 'g2', label: 'Group 2', type: 'group'},
+    ];
+    // TODO: Replace dummy data with actual endpoint call
+  }
+
+  patchPermission(): void {
+    if (!this.isEdit()) {
+      this.permissionForm.get('permissions.retryTimeToQuery')?.disable();
+      this.permissionForm.get('permissions.querySampleThreshold')?.disable();
+      return;
     }
 
-    loadCohorts(): void {
-        this.sharedCohortService.getCohortList()
-            .subscribe(cohortList =>
-                this.cohortSelectOptions = cohortList.map(cohort => {
-                    return { value: cohort.id, label: cohort.name } as SelectOption
-                })
-            );
+    this.permissionForm.patchValue({
+      cohort: this.permissionDetail?.cohortId || '',
+      group: this.permissionDetail?.groupId || '',
+      user: this.permissionDetail?.userId || '',
+      permissions: {
+        isAllowedToQuery: this.permissionDetail?.isAllowedToQuery ?? false,
+        retryTimeToQuery: this.permissionDetail?.queryRetryTime ?? 3,
+        autoTrainingAccess: this.permissionDetail?.autoTrainingAccess || '',
+        querySampleThreshold: this.permissionDetail?.querySampleThreshold ?? 100,
+      },
+    });
+
+    this.permissionForm.get('cohort')?.disable();
+    this.permissionForm.get('group')?.disable();
+    this.permissionForm.get('user')?.disable();
+    if(!this.permissionDetail?.isAllowedToQuery) {
+      this.permissionForm.get('permissions.retryTimeToQuery')?.disable();
+      this.permissionForm.get('permissions.querySampleThreshold')?.disable();
     }
+  }
 
-    loadGroupsAndUsers(): void {
-        this.permissionService.getAllGroupsAndUsers()
-            .subscribe(groupAndUserList => {
-                this.groupAndUserList = groupAndUserList;
+  onCancel(): void {
+    this.dialogRef.close();
+  }
 
-                this.loadGroupOrUserSelectOptions(this.groupAndUserList);
-            });
-    }
+  onSubmit(): void {
+    this.permissionForm.markAllAsTouched();
 
-    loadApplications(): void {
-        this.permissionService.getAllApplications()
-            .subscribe(applicationList =>
-                this.applications = applicationList.map(application => {
-                    return { value: application.id, label: application.name } as SelectOption
-                })
-            );
-    }
+    if (this.permissionForm.invalid) return;
 
-    patchPermission(): void {
-        if (!this.isEdit()) return;
+    const permissionData = this.preparePermissionData();
 
-        this.permissionForm.patchValue({
-            cohort: [this.permissionDetail?.cohort],
-            groupOrUser: [this.permissionDetail?.groupOrUser],
-        } as any);
-
-        this.permissionForm.get('cohort')?.disable();
-        this.permissionForm.get('groupOrUser')?.disable();
-
-        const permissions = this.permissionDetail?.permissions as any;
-        const permissionKeys = ['querySampleThreshold', 'specificGroupInterval', 'anyGroupInterval', 'maxQueryLimit', 'accessWith']
-
-        permissionKeys.forEach(permissionsKey => {
-           this.permissionForm.patchValue({
-               ...this.permissionForm.getRawValue(),
-               permissions: {
-                   [permissionsKey]: {
-                       checked: permissions[permissionsKey] !== null,
-                       value: permissions[permissionsKey],
-                   },
-               },
-           });
-
-           const formControl = this.permissionForm.get(`permissions.${permissionsKey}.value`);
-           if (permissions[permissionsKey] === null) {
-               formControl?.clearValidators();
-           } else {
-               formControl?.setValidators([Validators.required]);
-           }
-
-           this.permissionForm.get(permissionsKey)?.updateValueAndValidity();
+    if (this.isEdit()) {
+      // Update existing permission
+      this.permissionService
+        .updatePermission(permissionData)
+        .subscribe((response) => {
+          this.dialogRef.close(response);
+        });
+    } else {
+      // Create new permission via API
+      this.permissionService
+        .createPermission(permissionData)
+        .subscribe((response) => {
+          this.dialogRef.close(response);
         });
     }
+  }
 
-    loadPermissions(): void {
-        this.permissionService.getAllPermissions()
-            .subscribe(permissionList => this.permissions = permissionList);
-    }
+  preparePermissionData(): Permission {
+    const formValue = this.permissionForm.getRawValue();
 
-    onCancel(): void {
-        this.dialogRef.close();
-    }
+    return {
+      id: this.permissionDetail?.id,
+      cohortId: formValue.cohort as string,
+      isAllowedToQuery: formValue.permissions.isAllowedToQuery ?? false,
+      queryRetryTime: formValue.permissions.retryTimeToQuery ?? null,
+      autoTrainingAccess: formValue.permissions.autoTrainingAccess || null,
+      querySampleThreshold: formValue.permissions.querySampleThreshold ?? null,
+      groupId: formValue.group || null,
+      userId: formValue.user || null,
+    } as Permission;
+  }
 
-    onSubmit(): void {
-        this.permissionForm.markAllAsTouched();
+  getDialogTitle(): string {
+    return `${this.isEdit() ? 'Update' : 'Add'} permission`;
+  }
 
-        if (this.permissionForm.invalid) return;
+  getSubmitButtonLabel(): string {
+    return this.isEdit() ? 'Update' : 'Create';
+  }
 
-        this.dialogRef.close({... this.permissionDetail, ...this.permissionForm.getRawValue()});
-    }
+  isEdit(): boolean {
+    return this.permissionDetail?.id !== undefined;
+  }
 
-    slideToggleChanged(event: MatSlideToggleChange): void {
-        const formControl = this.permissionForm.get(`permissions.${ event.source.name }.value`);
-
-        if (event.checked) {
-            formControl?.setValidators([Validators.required]);
-            formControl?.updateValueAndValidity();
-
-            return;
-        }
-
-        formControl?.clearValidators();
-        formControl?.updateValueAndValidity();
-    }
-
-    getDialogTitle(): string {
-        return `${ this.isEdit() ? 'Update' : 'Add' } permission`;
-    }
-
-    getSubmitButtonLabel(): string {
-        return `Accept and ${ this.isEdit() ? 'update' : 'add' }`;
-    }
-
-    isEdit(): boolean {
-        return this.permissionDetail?.id !== undefined;
-    }
-
-    cohortSelectionChange(event: MatSelectChange): void {
-        this.permissionForm.get('groupOrUser')?.reset();
-
-        const selectedCohorts = this.cohortSelectOptions
-            .filter(cohortSelectOption => event.value.includes(cohortSelectOption.value))
-            .map(cohortSelectOption => cohortSelectOption.label);
-
-        const existingGroupOrUserIds = [...new Set(this.permissions
-            .filter(permission => selectedCohorts.includes(permission.cohort.toString()))
-            .map(permission => permission.groupOrUser))];
-
-        this.loadGroupOrUserSelectOptions(
-            this.groupAndUserList.filter(groupOrUser => !existingGroupOrUserIds.includes(groupOrUser.name))
-        );
-    }
-
-    loadGroupOrUserSelectOptions(groupOrUserList: Group[]): void {
-        this.groupAndUserSelectOptions = groupOrUserList.map(groupOrUser => {
-            return { value: groupOrUser.id, label: groupOrUser.name } as SelectOption
-        })
-    }
+  cohortSelectionChange(event: MatSelectChange): void {
+    // Implement any necessary logic when cohort selection changes
+  }
 }

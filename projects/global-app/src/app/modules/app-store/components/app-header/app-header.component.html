@@ -1,0 +1,63 @@
+<div class="app">
+  @if (app) {
+    <div class="app-header">
+      @if (showImg) {
+        <div class="app-header__icon">
+          <img [src]="app.icon" alt="{{ app.name }} Icon">
+        </div>
+      }
+      <div class="app-header__column">
+        <h1 class="app-header__name">{{ app.name }}</h1>
+        @if (app.average) {
+          <app-app-rating [editMode]="false"
+                          [rating]="app.average"
+                          [ratingAmount]="app.count"
+          ></app-app-rating>
+        }
+        <div class="app-header__description">
+          <p>{{ app.shortDescription }}</p>
+          <app-app-tags [app]="app"></app-app-tags>
+        </div>
+      </div>
+      <div class="app-header__column">
+        <div class="app-header__info">
+          <span><b>Image Name:</b> {{ app.imageName }}</span>
+          <span>
+            <b>Version:</b> {{ app.latestVersion }}
+          </span>
+        </div>
+        <div class="app-header__developers">
+          <span><b>Author:</b></span>
+          @for (author of app.authors; track author) {
+            <app-user-link [id]="author.id" [name]="author.keycloakId"></app-user-link>
+          }
+        </div>
+        <div class="app-header__category">
+          <span><b>Category:</b> {{ app.type }}</span>
+        </div>
+
+
+        <div class="app-header__actions">
+          @if (linkToApp) {
+            <a mat-raised-button [routerLink]="['/app-store', app.id]">
+              <mat-icon>get_app</mat-icon>
+              Visit App
+            </a>
+          }
+          @if (app.sourceUrl) {
+            <a mat-stroked-button [href]="app.sourceUrl">
+              <mat-icon>code</mat-icon>
+              Source Code
+            </a>
+          }
+          @if (app.authors && app.authors.length) {
+            <a mat-button color="warn" href="mailto:todo@todo.de">
+              <mat-icon>bug_report</mat-icon>
+              Report Bug
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

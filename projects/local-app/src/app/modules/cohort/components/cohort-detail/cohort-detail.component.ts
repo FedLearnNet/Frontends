@@ -39,7 +39,7 @@ export class CohortDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isCohortEdit = isNotEmpty(this.activatedRoute.snapshot.params['schema-id']);
+    this.isCohortEdit = isNotEmpty(this.activatedRoute.snapshot.params['schemaId']);
 
     this.activatedRoute.data.subscribe(({schemaHeadList}) => this.schemaList = schemaHeadList);
 
@@ -77,7 +77,7 @@ export class CohortDetailComponent implements OnInit {
     }
 
     this.schemaService.updateSchema(
-      this.activatedRoute.snapshot.params['schema-id'],
+      this.activatedRoute.snapshot.params['schemaId'],
       this.cohortDetailFormGroup.getRawValue()
     ).subscribe(response => {
       this.setSubscribedSchema(response);

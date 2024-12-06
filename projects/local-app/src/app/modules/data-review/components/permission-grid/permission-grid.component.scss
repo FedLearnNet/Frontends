@@ -1,11 +1,21 @@
 @import "projects/shared-lib/src/lib/styles/main.scss";
 
+.permission-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.permission-header h2 {
+  margin: 0;
+}
+
 .permission-container {
-  margin-bottom: 20px;
+  margin: 40px;
 
   .action-buttons-row {
-    margin-bottom: 10px;
-    margin-right: 10px;
+    margin-bottom: 20px;
   }
 
   .group-or-user,
@@ -31,5 +41,35 @@
       background-color: #ececec;
       border: solid 1px #d2d2d2;
     }
+  }
+
+  /* New styles for vertical scrolling with fixed header */
+  .table-container {
+    max-height: 500px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
+
+  .mat-table {
+    position: relative;
+  }
+
+  .mat-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #fff; /* Adjust background color if necessary */
+  }
+
+  .mat-cell,
+  .mat-header-cell {
+    white-space: nowrap;
+  }
+
+  .mat-header-cell.sticky,
+  .mat-cell.sticky {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background-color: #fff; /* Adjust background color if necessary */
   }
 }

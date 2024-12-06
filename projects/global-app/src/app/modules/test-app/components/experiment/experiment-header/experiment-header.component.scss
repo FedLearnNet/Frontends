@@ -1,0 +1,16 @@
+.experiment-header {
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin: 20px 0;
+
+  &--body{
+    display: flex;
+    flex-direction: row;
+    gap: 70px;
+
+  }
+}

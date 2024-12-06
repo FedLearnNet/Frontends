@@ -1,0 +1,31 @@
+table {
+  width: calc(100% - 20px);
+  max-width: calc(100% - 20px);
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+mat-toolbar {
+
+  margin-top: 20px;
+  margin-bottom: 40px;
+
+  background-color: unset;
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  button{
+    margin-left: 10px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
+
+
+
+section {
+  padding: 20px;
+}

@@ -1,0 +1,27 @@
+@for (ratingId of ratingArr; track ratingId) {
+  <button mat-icon-button
+          class="rating-btn"
+          [id]="'star_'+ratingId" (click)="onClick(ratingId+1)"
+          [matTooltip]="''+ratingId" matTooltipPosition="above"
+          [disabled]="!editMode">
+    <mat-icon>
+      {{ showIcon(ratingId) }}
+    </mat-icon>
+  </button>
+}
+@if (ratingAmount) {
+  <span class="rating-info">
+ ({{ ratingAmount }} Ratings)
+</span>
+} @else {
+  <span class="rating-info">
+    ({{ rating }} / {{ starCount }})
+  </span>
+}
+
+@if (!starCount || starCount === 0) {
+  <mat-error>
+    Star count is <strong>required</strong> and cannot be zero
+  </mat-error>
+}
+

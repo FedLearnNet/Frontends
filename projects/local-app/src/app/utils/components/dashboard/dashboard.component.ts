@@ -7,5 +7,6 @@ import { environment } from '@local-app/env/environment';
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+  project = environment.project;
   appTitle: string = environment.appTitle;
 }

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { SelectOption } from '@shared-lib/models';
 import { CohortService } from '@local-app/cohort/services/cohort.service';
@@ -9,7 +9,7 @@ import { FormBuilder } from '@angular/forms';
   templateUrl: './confirm-patient-detail.component.html',
   styleUrl: './confirm-patient-detail.component.scss',
 })
-export class ConfirmPatientDetailComponent {
+export class ConfirmPatientDetailComponent implements OnInit {
   colorectalCancerOptions: SelectOption[];
 
   patientDetailForm = this.formBuilder.nonNullable.group({

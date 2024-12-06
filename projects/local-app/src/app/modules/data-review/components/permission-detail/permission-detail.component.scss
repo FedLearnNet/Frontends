@@ -1,24 +1,48 @@
 @import "projects/shared-lib/src/lib/styles/main.scss";
 
-.permissions-section {
+.dialog--header {
+  /* Make the "Add Permission" label bold */
+  font-weight: bold;
+}
+
+.settings-title {
+  /* Left-align and decrease font size of "Settings" label */
+  text-align: left;
+  font-size: 1.2em;
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
+
+.permissive-hint {
+  text-align: left;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
-  &--row {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-
-    mat-form-field {
-      width: 40%;
-      padding-inline: 5px;
-    }
-  }
 }
 
 .dialog--content {
-  justify-content: flex-start;
+  display: flex;
+  flex-direction: column;
 }
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+mat-slide-toggle {
+  margin-bottom: 16px;
+  float: left;
+}
+
+.settings-section h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.mat-slide-toggle {
+  margin-right: 8px;
+}
+

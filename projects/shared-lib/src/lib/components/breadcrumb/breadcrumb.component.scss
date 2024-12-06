@@ -7,6 +7,10 @@
   background-color: #f8f9fa;
   border-radius: 0.25rem;
 
+  &--no-margin {
+    margin: 0 !important;
+  }
+
   .breadcrumb-item {
     & + .breadcrumb-item::before {
       content: '>';

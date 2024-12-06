@@ -1,0 +1,14 @@
+@if (schema) {
+  <a [routerLink]="['/data-modelling','schema',schema.uniqueId ]">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title> {{ schema.name }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          {{ schema.description }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </a>
+}

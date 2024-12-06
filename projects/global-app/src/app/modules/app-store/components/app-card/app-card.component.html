@@ -1,0 +1,16 @@
+@if (app) {
+  <a [routerLink]="linkToShop ? ['/app-store', app.id] : null" (click)="itemClick()">
+    <mat-card class="example-card" appearance="outlined">
+      <mat-card-content>
+        <img [src]="app.icon" alt="Photo of a Shiba Inu">
+        <div class="mat-card-content-text">
+          <h4>{{ app.name }}</h4>
+          <p>{{ app.shortDescription }}</p>
+        </div>
+      </mat-card-content>
+      <mat-card-footer class="app-card-footer">
+        <app-app-tags [app]="app"></app-app-tags>
+      </mat-card-footer>
+    </mat-card>
+  </a>
+}

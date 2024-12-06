@@ -1,0 +1,17 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+mat-toolbar {
+  background: unset;
+
+  h3 {
+    font-size: 28px;
+  }
+}
+
+mat-dialog-content {
+  height: 100%;
+  max-height: calc(100% - 64px);
+
+}

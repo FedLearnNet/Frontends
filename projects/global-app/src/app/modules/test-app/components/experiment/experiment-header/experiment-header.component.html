@@ -1,0 +1,51 @@
+<div class="experiment-header">
+  @if (experiment && app) {
+    <h1>Experiment #{{ experiment!.id }} - {{ experiment!.name }}
+      @if (run) {
+        - Run #{{ run.id }}
+      }
+    </h1>
+    <div class="experiment-header--body">
+      <div>
+        <p><strong>Status:</strong> {{ experiment.status }}</p>
+        <p><strong>Runs:</strong> {{ passedRuns }} / {{ totalRuns }} ({{ failedRuns }} failed)</p>
+        <p>{{ experiment.description }}</p>
+      </div>
+      @if (getInputNames() && getInputNames().length > 0) {
+        <div>
+          <p><strong>Input</strong></p>
+          @for (in of getInputNames(); track in) {
+            <p>{{ in }}</p>
+          }
+        </div>
+      }
+      @if (app) {
+        <div>
+          <p><strong>Federated App:</strong> <a [routerLink]="['/app', app.id]">{{ app.name }}</a></p>
+          <p><strong>Published:</strong> {{ app.publishStatus }}</p>
+          <p>{{ app.shortDescription }}</p>
+        </div>
+      }
+      @if (run) {
+        <div>
+          <p><strong>Run:</strong> {{ run.name }}</p>
+          <p><strong>Status:</strong> {{ run.status }}</p>
+          <p>{{ run.error }}</p>
+        </div>
+      }
+      @if (model) {
+        <div>
+          <p><strong>Model:</strong> <a [routerLink]="['/model', model.modelId]">{{ model.modelId }}</a>
+            (v. {{ model.modelVersion }})</p>
+          <p><strong>Status:</strong> {{ model.publishStatus }}</p>
+          @if(model.selectedSubModel) {
+            <p><strong>Selected Model:</strong> {{ model.selectedSubModel }}</p>
+          } @else {
+            <p><strong>Selected Model Parameter:</strong> None</p>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+

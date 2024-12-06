@@ -1,0 +1,27 @@
+@if (dataType) {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title> {{ dataType.name }}</mat-card-title>
+      <mat-card-subtitle> {{ dataType.type }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p>
+        {{ dataType.desc }}
+      </p>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button mat-button (click)="openUpdateDialog()">
+        @if (dataType.schemaIds?.length) {
+          View
+        } @else {
+          Edit
+        }
+      </button>
+
+    </mat-card-actions>
+  </mat-card>
+} @else if(showAddBtn) {
+  <button class="add-btn" mat-fab aria-label="Example icon button with a delete icon" (click)="openUpdateDialog()">
+    <mat-icon>add</mat-icon>
+  </button>
+}

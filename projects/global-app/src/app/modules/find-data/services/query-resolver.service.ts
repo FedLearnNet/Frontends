@@ -1,13 +1,19 @@
-import { inject } from '@angular/core';
-import { ResolveFn } from '@angular/router';
-import { QueryConfig, QueryResultResponse } from '@global-app/find-data/models';
-import { QueryService } from '@global-app/find-data/services/query.service';
-import { QueryBuilderService } from '@global-app/find-data/services/query-builder.service';
+import {inject} from '@angular/core';
+import {ResolveFn} from '@angular/router';
+import {QueryConfig} from '@global-app/find-data/models';
+import {QueryService} from '@global-app/find-data/services/query.service';
+import {QueryBuilderService} from '@global-app/find-data/services/query-builder.service';
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {catchError, of} from "rxjs";
 
-export const queryListResolver: ResolveFn<QueryResultResponse> = () => {
-    return inject(QueryService).getAllQueries();
+export const queryListResolver: ResolveFn<QueryDTO[]> = () => {
+  return inject(QueryService)
+    .getAllQueries()
+    .pipe(
+      catchError(() => of([]))  // Return an empty array on error, dont block on error routing
+    );
 }
 
 export const queryConfigsResolver: ResolveFn<QueryConfig[]> = () => {
-    return inject(QueryBuilderService).getQueryConfigs();
+  return inject(QueryBuilderService).getQueryConfigs();
 }

@@ -1,0 +1,40 @@
+@if (data.forFederated) {
+  <h2 mat-dialog-title>Create new federated Experiment</h2>
+} @else {
+  <h2 mat-dialog-title>Create new local experiment</h2>
+}
+<mat-dialog-content>
+  @if(!isValidProject()){
+    <p>You dont have a valid project to create an experiment!</p>
+  }
+  @if (data.forFederated) {
+    <p>A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version.
+      This copy, along with your query information, will be sent to all relevant hospitals.</p>
+    <p> The hospitals will review your project and approve patient participation; they may choose to exclude certain
+      individuals. You can monitor the status at any time. If you are satisfied with the number of patients, you may
+      accept and initiate the study at your discretion.</p>
+  } @else {
+    <p>A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version.
+      This copy, will be used as a foundation for your local experiment.</p>
+    <p> You can start your controller at anytime. See bootstrap.</p>
+  }
+
+  <form [formGroup]="newExperimentForm">
+    <mat-form-field>
+      <mat-label>Name of the experiment</mat-label>
+      <input matInput placeholder="Experiment name" formControlName="name" required>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description of the experiment</mat-label>
+      <textarea matInput placeholder="Description" formControlName="description" required rows="5"></textarea>
+    </mat-form-field>
+    <mat-checkbox formControlName="acceptProcess">I accept the process</mat-checkbox>
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Close</button>
+  <button mat-button [disabled]="newExperimentForm.invalid || !isValidProject()" (click)="onSubmit()">Create</button>
+</mat-dialog-actions>

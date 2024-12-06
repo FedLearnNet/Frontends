@@ -1,0 +1,21 @@
+.wrapper {
+  margin: 30px 100px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+
+  gap: 60px;
+
+  &-element {
+    width: 500px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+.save-btn{
+  float: right;
+  background-color: greenyellow;
+}

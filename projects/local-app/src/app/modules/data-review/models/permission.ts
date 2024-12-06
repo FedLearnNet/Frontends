@@ -1,12 +1,12 @@
 export interface Permission {
-    id: number;
-    cohort: number | string;
-    groupOrUser: number | string;
-    permissions: {
-        querySampleThreshold: number | null;
-        specificGroupInterval: number | null;
-        anyGroupInterval: number | null;
-        maxQueryLimit: number | null;
-        accessWith: number | string | null;
-    };
+  id?: string;
+  cohortId: string | null;
+  userId?: string | null;
+  groupId?: string | null;
+  isAllowedToQuery: boolean;
+  queryRetryTime: number | null;
+  autoTrainingAccess: string | null;
+  querySampleThreshold: number | null;
+  createdAt?: string;
+  updatedAt?: string;
 }

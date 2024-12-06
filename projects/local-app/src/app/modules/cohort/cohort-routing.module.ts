@@ -24,7 +24,7 @@ const routes: Routes = [
                 data: { breadcrumb: 'New' },
             },
             {
-                path: 'edit/:schema-id',
+                path: 'edit/:schemaId',
                 component: CohortOverviewComponent,
                 resolve: { schema: schemaResolver, allData: schemaDataListResolver },
                 data: { breadcrumb: (data: any) => data.schema.name },

@@ -3,6 +3,12 @@
 .action-buttons-row {
   margin-bottom: 10px;
   margin-right: 10px;
+  display: flex;
+  flex-direction: row-reverse;
+
+  button{
+    width: 230px;
+  }
 }
 
 .query-builder-container {
@@ -14,14 +20,8 @@
 }
 
 table {
-  .mat-column-actions {
-    min-width: 225px;
+  width: 100%;
+  .action-column {
+    width: 50px;
   }
-}
-
-.query-string-column {
-  padding-block: 10px;
-  display: flex;
-  align-items: flex-start;
-  white-space: pre-line;
 }

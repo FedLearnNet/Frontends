@@ -1,0 +1,55 @@
+<app-lib-breadcrumb  [noMargin]="true"></app-lib-breadcrumb>
+@if (foundOntology) {
+  <div class="wrapper">
+
+    <div class="wrapper-element">
+      <h2>Ontology</h2>
+
+      <div class="relations">
+        <app-detail-ontology-relation-lists headerName="Parents" placeholder="Add Parent"
+                                            [relationIds]="foundOntology.parentIds" [ontologies]="ontologies"
+                                            (relationIdsChange)="foundOntology.parentIds = $event">
+          >
+        </app-detail-ontology-relation-lists>
+        <mat-divider></mat-divider>
+        <app-detail-ontology-relation-lists headerName="Children" placeholder="Add Children"
+                                            [relationIds]="foundOntology.childrenIds" [ontologies]="ontologies"
+                                            (relationIdsChange)="foundOntology.childrenIds = $event">
+        </app-detail-ontology-relation-lists>
+      </div>
+      <mat-divider></mat-divider>
+      <mat-form-field class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput placeholder="Name" [(ngModel)]="foundOntology.name">
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput placeholder="Description" [(ngModel)]="foundOntology.desc"></textarea>
+      </mat-form-field>
+
+      <button class="save-btn" mat-flat-button aria-label="Save" (click)="saveOntology()">
+        <mat-icon>save</mat-icon>
+        @if (foundOntology.uniqueId) {
+          Update
+        } @else {
+          Save
+        }
+      </button>
+    </div>
+    <div class="wrapper-element">
+      <h2>Related DataTypes</h2>
+      <app-list-datatypes [ontologyId]="ontologyId"></app-list-datatypes>
+      <app-datatype-card [showAddBtn]="true" [ontologyId]="ontologyId"></app-datatype-card>
+    </div>
+    <div class="wrapper-element">
+      <h2>Related Schemas (root)</h2>
+      <app-schema-card-list [ontologyId]="ontologyId"></app-schema-card-list>
+    </div>
+
+  </div>
+} @else {
+  <div class="wrapper">
+    <p>Loading or not found</p>
+  </div>
+}

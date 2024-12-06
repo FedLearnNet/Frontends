@@ -1,5 +1,6 @@
 <div class="container">
-    <mat-stepper linear #stepper class="stepper" (selectionChange)="onStepChange($event)" [labelPosition]="isLargeScreen ? 'end' : 'bottom'">
+    <mat-stepper linear #stepper class="stepper" (selectionChange)="onStepChange($event)"
+                 [labelPosition]="isLargeScreen ? 'end' : 'bottom'">
         <mat-step [stepControl]="cohortDetailForm" state="cohort">
             <ng-template matStepLabel><span [innerHTML]="getCohortName()"></span></ng-template>
             <app-cohort-detail

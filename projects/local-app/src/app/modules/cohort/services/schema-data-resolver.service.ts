@@ -6,5 +6,5 @@ import { SchemaDataResponse } from '@local-app/cohort/models';
 
 export const schemaDataListResolver: ResolveFn<SchemaDataResponse> = (route: ActivatedRouteSnapshot) => {
     const pageSize = inject(LocalStorageService).getItem('cohort-patients-page-size') || 50;
-    return inject(SchemaDataService).getAllSchemaData(route.paramMap.get('schema-id'), 1, pageSize);
+    return inject(SchemaDataService).getAllSchemaData(route.paramMap.get('schemaId'), 1, pageSize);
 }

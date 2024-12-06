@@ -1,0 +1,32 @@
+<div class="app-configs">
+  <mat-tab-group>
+    <mat-tab label="Hyperparameter">
+      @if (config) {
+        <app-app-detail-config-hyperparam [hyperparams]="config.hyperparams"
+        [editMode]="false">
+        </app-app-detail-config-hyperparam>
+      }
+    </mat-tab>
+    <mat-tab label="Inputs">
+      @if (config) {
+
+        <app-app-detail-config-input [configs]="config.input"
+                                     [editMode]="false">
+        </app-app-detail-config-input>
+      }
+    </mat-tab>
+    <mat-tab label="Outputs">
+      @if (config) {
+
+        <app-app-detail-config-output [configs]="config.output"
+                                      [editMode]="false">
+        </app-app-detail-config-output>
+      }
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+
+
+

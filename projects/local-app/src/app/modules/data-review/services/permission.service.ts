@@ -1,105 +1,63 @@
-import { Injectable } from '@angular/core';
-import { GROUPS_AND_USERS, APPLICATIONS, PERMISSIONS } from '@local-app/data-review/services/mock';
-import { Observable, of } from 'rxjs';
-import { Permission, Group, Application } from '@local-app/data-review/models';
-import { cloneDeep } from 'lodash';
-import { SharedCohortService } from '@local-app/utils/services/shared-cohort.service';
-import { CohortListItem } from '@local-app/utils/models/cohort-list-item';
+import {inject, Injectable} from '@angular/core';
+import {catchError, Observable} from 'rxjs';
+import {Permission} from '@local-app/data-review/models';
+import {convertObjectKeysToSnakeCase} from '@shared-lib/utils';
+import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
+import {ApiService} from "@shared-lib/services/api.service";
+import {environment} from "@local-app/env/environment";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class PermissionService {
-    protected permissionsList: Permission[] = [];
 
-    constructor(
-        private sharedCohortService: SharedCohortService,
-    ) { }
+  private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
+  private readonly apiService: ApiService = inject(ApiService);
+  private readonly apiUrl = `${environment.clientMetaApiUrl}/client_meta_api`;
+  private readonly path = 'permissions/'
 
-    getAllPermissions(): Observable<Permission[]> {
-        if (this.permissionsList.length === 0) {
-            this.permissionsList = PERMISSIONS;
-        }
+  createPermission(permissionData: Permission): Observable<Permission> {
+    const url = `${this.getBaseUrl()}`;
+    return this.apiService.post<Permission>(url, convertObjectKeysToSnakeCase(permissionData)).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to create permission: ' + permissionData.id))
+    );
+  }
 
-        return of(this.getReturnablePermissionList());
-    }
+  updatePermission(permissionData: Permission): Observable<Permission> {
+    const url = `${this.getBaseUrl()}${permissionData.id}/`;
+    return this.apiService.put<Permission>(url, convertObjectKeysToSnakeCase(permissionData)).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to update permission with id: ' + permissionData.id))
+    );
+  }
 
-    getPermission(permissionId: number): Observable<Permission | undefined> {
-        return of(this.permissionsList.find(permission => permission.id === permissionId));
-    }
+  getPermission(id: string): Observable<Permission> {
+    const url = `${this.getBaseUrl()}${id}/`;
+    return this.apiService.get<Permission>(url).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to get permission with id: ' + id))
+    );
+  }
 
-    getAllGroupsAndUsers(): Observable<Group[]> {
-        return of(GROUPS_AND_USERS);
-    }
+  deletePermission(id: string): Observable<void> {
+    const url = `${this.getBaseUrl()}${id}/`;
+    return this.apiService.delete<void>(url).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to delete permission with id: ' + id))
+    );
+  }
 
-    getAllApplications(): Observable<Application[]> {
-        return of(APPLICATIONS);
-    }
+  getAllPermissions(): Observable<Permission[]> {
+    const url = `${this.getBaseUrl()}`;
+    return this.apiService.get<Permission[]>(url).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        'Failed to fetch permissions'))
+    );
+  }
 
-    createPermission(selectedCohorts: number[], selectedGroupsOrUsers: number[], permissions: any): Observable<Permission[]> {
-        selectedCohorts.forEach(selectedCohort => {
-            selectedGroupsOrUsers.forEach(selectedGroupOrUser => {
-                this.createNewPermission({
-                    cohort: selectedCohort,
-                    groupOrUser: selectedGroupOrUser,
-                    permissions: permissions,
-                } as Permission);
-            });
-        });
 
-        return of(this.getReturnablePermissionList())
-    }
-
-    createNewPermission(permission: Permission): void {
-        const nextPermissionId = this.permissionsList.map(permission => permission.id).sort().pop() ?? 1;
-        const permissions: any = cloneDeep(permission.permissions);
-
-        Object.keys(permission.permissions).forEach((key) => {
-            permissions[key] = permissions[key]?.checked ? permissions[key].value : null;
-        });
-
-        this.permissionsList.push(<Permission>{
-            ...permission,
-            id: nextPermissionId + 1,
-            permissions: permissions,
-        });
-    }
-
-    updatePermission(permissionData: Permission): Observable<Permission[]> {
-        const permissions: any = permissionData.permissions;
-        const permissionIndex = this.permissionsList.findIndex(permission => permission.id === permissionData.id);
-
-        Object.keys(permissionData.permissions).forEach((key) => {
-            permissions[key] = permissions[key]?.checked ? permissions[key].value : null;
-        });
-
-        this.permissionsList[permissionIndex] = {
-            ...this.permissionsList[permissionIndex],
-            ...permissionData,
-            permissions: permissions,
-        };
-
-        return of(this.getReturnablePermissionList());
-    }
-
-    deletePermission(permissionId: number): Observable<Permission[]> {
-        this.permissionsList = this.permissionsList.filter(permission => permission.id !== permissionId);
-
-        return of(this.getReturnablePermissionList());
-    }
-
-    private getReturnablePermissionList(): Permission[] {
-        let cohortList: CohortListItem[] = [];
-        const returnablePermissionList = cloneDeep(this.permissionsList);
-
-        this.sharedCohortService.getCohortList().subscribe(cohorts => cohortList = cohorts);
-
-        this.permissionsList.forEach((permission, index) => {
-            returnablePermissionList[index].cohort = cohortList.find(cohort => cohort.id === this.permissionsList[index].cohort)?.name ?? '';
-            returnablePermissionList[index].groupOrUser = GROUPS_AND_USERS.find(groupAndUser => groupAndUser.id === this.permissionsList[index].groupOrUser)?.name ?? '';
-            returnablePermissionList[index].permissions.accessWith = APPLICATIONS.find(application => application.id === this.permissionsList[index].permissions.accessWith)?.name ?? null;
-        });
-
-        return returnablePermissionList;
-    }
+  private getBaseUrl(): string {
+    return `${this.apiUrl}/${this.path}`;
+  }
 }

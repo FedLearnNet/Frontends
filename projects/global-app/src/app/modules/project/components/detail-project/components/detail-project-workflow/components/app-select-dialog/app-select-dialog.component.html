@@ -1,0 +1,12 @@
+<mat-toolbar>
+  <h3>Select App</h3>
+  <span class="spacer"></span>
+  <button mat-icon-button aria-label="Close store" (click)="onNoClick()">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-toolbar>
+
+<mat-dialog-content>
+  <app-app-list [linkToShop]="false" (itemClicked)="itemClick($event)"></app-app-list>
+</mat-dialog-content>
+

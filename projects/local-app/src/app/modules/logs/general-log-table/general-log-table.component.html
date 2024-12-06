@@ -1,0 +1,60 @@
+<div class="generic-table-wrapper">
+  @if (allowSearch || filters.length > 0) {
+    <div class="filter-wrapper">
+
+      @if (allowSearch) {
+        <mat-form-field class="filter-wrapper--search">
+          <mat-label>Search</mat-label>
+          <input matInput (keyup)="applySearch($event)" placeholder="term">
+        </mat-form-field>
+      }
+      @if (filters.length > 0) {
+        <div class="filter-wrapper--filter">
+          <p>Filter</p>
+          <mat-chip-listbox multiple>
+            @for (filter of filters; track filter) {
+              <mat-chip-option [selected]="selectedFilter[$index]"
+                               (selectionChange)="applyFilter($event, $index)"
+              >{{ filter }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+          <button mat-raised-button (click)="clearFilters()">Clear</button>
+        </div>
+      }
+    </div>
+  }
+  <div class="table-container">
+
+    <table mat-table [dataSource]="data" class="example-table"
+           matSort matSortActive="created" matSortDisableClear matSortDirection="desc">
+
+      @if (columnsHasId()) {
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Change Id</th>
+          <td mat-cell *matCellDef="let row" (click)="openDetailEvent(row.id)">{{ row.id }}</td>
+        </ng-container>
+      }
+
+      @for (column of getAdditionalColumns(); track column) {
+        <ng-container [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ column }}</th>
+          <td mat-cell *matCellDef="let row">{{ row[column] }}</td>
+        </ng-container>
+      }
+      @if (columnsHasCreatedAt()) {
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+            Created
+          </th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt | date }}</td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <mat-paginator [length]="resultsLength" [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]"
+                 aria-label="Select page of GitHub search results"></mat-paginator>
+</div>

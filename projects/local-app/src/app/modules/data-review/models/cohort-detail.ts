@@ -1,5 +1,7 @@
 export interface CohortDetail {
     id: number;
-    name: string;
-    link: string;
+    flRequest: string;
+    cohortId: string;
+    cohortName: string;
+    patientIds: string[];
 }

@@ -2,17 +2,21 @@ import { CohortDetail } from '@local-app/data-review/models/cohort-detail';
 import { WorkflowDetail } from '@local-app/data-review/models/workflow-detail';
 
 export interface Training {
-    id: number;
-    user: number | string;
-    requestedData: CohortDetail[];
-    workflow: WorkflowDetail,
+    flRequestId: string;
+    platformUserId: number | string;
+    requestData: CohortDetail[];
+    flAppWorkflow: WorkflowDetail[],
     description: string;
-    date: Date,
-    status: TrainingStatus | string;
+    flRequestStatus: TrainingStatus | string;
+    createdAt: Date,
+    updatedAt: Date,
+    queryId: string,
 }
 
 export enum TrainingStatus {
-    'Pending',
-    'Completed',
-    'Rejected',
+    'Pending' = 'Pending',
+    'Completed' = 'Completed',
+    'Rejected' = 'Rejected',
+    'Approved' = 'Approved',
+    'Running' = 'Running',
 }

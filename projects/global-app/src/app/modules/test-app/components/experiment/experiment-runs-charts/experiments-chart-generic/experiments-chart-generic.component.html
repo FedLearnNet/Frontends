@@ -1,0 +1,11 @@
+
+<mat-card appearance="outlined" cdkDrag>
+  <mat-card-actions align="end">
+    <button mat-button (click)="editChart()">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-card-actions>
+  <mat-card-content>
+    <div echarts [options]="chartOption" class="demo-chart" [id]="randomId"></div>
+  </mat-card-content>
+</mat-card>

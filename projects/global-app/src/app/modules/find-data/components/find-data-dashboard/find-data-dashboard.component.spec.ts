@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  FindDataDashboardComponent
+} from "@global-app/find-data/components/find-data-dashboard/find-data-dashboard.component";
 
-import { FindDataDashboardComponent } from './dashboard.component';
 
 describe('DashboardComponent', () => {
   let component: FindDataDashboardComponent;

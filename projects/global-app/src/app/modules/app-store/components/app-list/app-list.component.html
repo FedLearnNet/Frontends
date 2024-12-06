@@ -1,0 +1,80 @@
+<div class="shop">
+  <div class="filter-wrapper" [class.active]="isMobileFilterActive">
+    <div class="filter-content">
+      <div class="filter-header">
+        <h3>Filter</h3>
+        <button mat-icon-button *ngIf="isMobile" (click)="toggleMobileFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <mat-form-field class="full-width">
+        <mat-label>Search</mat-label>
+        <input matInput placeholder="Search..." [(ngModel)]="searchQuery" (change)="appFiltered()">
+        <button *ngIf="searchQuery" matSuffix mat-icon-button aria-label="Clear" (click)="clearSearchQuery()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+
+      <div class="filter-section">
+        <h4>App type</h4>
+        @for (appType of appTypes; track appType) {
+          <mat-checkbox value="{{appType.id}}" [(ngModel)]="appType.checked" (change)="appFiltered()">
+            {{ appType.name }}
+          </mat-checkbox>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+      <div class="filter-section">
+        <h4>Privacy technique</h4>
+        @for (technique of privacyTechniques; track technique) {
+          <mat-checkbox value="{{technique.id}}" [(ngModel)]="technique.checked" (change)="appFiltered()">
+            {{ technique.name }}
+          </mat-checkbox>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+      <div class="filter-section">
+        <h4>Frontend</h4>
+        @for (fa of frontendAvailable; track fa) {
+          <mat-checkbox value="{{fa.id}}" [(ngModel)]="fa.checked" (change)="appFiltered()">
+            {{ fa.name }}
+          </mat-checkbox>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+      <div class="filter-section">
+        <h4>Minimum rating</h4>
+        <mat-radio-group [(ngModel)]="selectedRating" (change)="appFiltered()">
+          <mat-radio-button value="showAll">Show all</mat-radio-button>
+          <div *ngFor="let rating of ratings" class="rating-option">
+            <mat-radio-button [value]="rating">
+              @for (item of [].constructor(rating); let i = $index; track i) {
+                <mat-icon>star</mat-icon>
+              }
+            </mat-radio-button>
+          </div>
+        </mat-radio-group>
+      </div>
+
+      <mat-divider></mat-divider>
+      <div class="filter-section">
+        <h4>Uncertified apps</h4>
+        <mat-checkbox [(ngModel)]="showUncertified" (change)="appFiltered()">Show uncertified apps</mat-checkbox>
+      </div>
+    </div>
+  </div>
+  <div class="main-content">
+    <button mat-raised-button class="filter-toggle-button" *ngIf="isMobile" (click)="toggleMobileFilter()">Open Filter
+    </button>
+    <div class="app-list">
+      @for (app of apps; track app.id) {
+        <app-app-card [app]="app" [linkToShop]="linkToShop!" (itemClicked)="itemClick($event)"></app-app-card>
+      }
+    </div>
+
+  </div>
+</div>

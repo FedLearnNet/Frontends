@@ -1,5 +1,7 @@
-export interface WorkflowDetail {
+export interface WorkflowDetail { // TODO
     id: number;
     name: string;
-    link: string;
+    desc: string;
+    version: string;
+    hyperparams: string;
 }

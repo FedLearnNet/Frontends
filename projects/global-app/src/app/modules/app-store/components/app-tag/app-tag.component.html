@@ -1,0 +1,55 @@
+@if (app.tags) {
+  <mat-chip-set aria-label="App Tags">
+    @for (tag of app.tags; track tag) {
+      <mat-chip>{{ tag.name }}</mat-chip>
+    }
+
+    @if (app.hasImage) {
+      @if (app.certificationLevel === 0) {
+        <mat-chip class="icon-tag is-danger"
+                  matTooltip="This app has not been certified and not deemed safe by FeatureCloud."
+                  title="This app has not been certified and not deemed safe by FeatureCloud.">
+          <mat-icon>warning</mat-icon>
+        </mat-chip>
+      }
+      @if (app.certificationLevel > 0) {
+        <mat-chip class="icon-tag is-success"
+                  matTooltip="This app has been certified and deemed safe by FeatureCloud."
+                  title="This app has been certified and deemed safe by FeatureCloud.">
+          <mat-icon>approval</mat-icon>
+        </mat-chip>
+      }
+
+      @if (app.publishStatus === PublishStatus.UNPUBLISHED) {
+        <mat-chip class="icon-tag is-danger"
+                  matTooltip="This app has not been published or it has been unpublished from App Store."
+                  title="This app has not been published or it has been unpublished from App Store.">
+          <mat-icon>psychology_alt</mat-icon>
+        </mat-chip>
+      }
+    } @else {
+      <mat-chip class="icon-tag is-danger"
+                matTooltip="This app has no image yet."
+                title="This app has no image yet.">
+        <mat-icon>cancel</mat-icon>
+      </mat-chip>
+    }
+    @if (app.hasFrontend) {
+      <mat-chip
+        class="icon-tag is-success"
+        matTooltip="This app provides a frontend."
+        title="This app provides a frontend.">
+        <mat-icon>web</mat-icon>
+      </mat-chip>
+    } @else {
+      <mat-chip
+        class="icon-tag is-danger"
+        matTooltip="This app provides a frontend."
+        title="This app provides a frontend.">
+        <mat-icon>web_asset_off</mat-icon>
+      </mat-chip>
+    }
+
+
+  </mat-chip-set>
+}

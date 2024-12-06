@@ -1,120 +1,100 @@
-import {Injectable} from '@angular/core';
-import {Model, Prediction} from '../models';
-import {Observable, of} from 'rxjs';
-import {MODELS, PREDICTIONS} from './mock';
-import {isEmpty, cloneDeep} from 'lodash';
-import {isNotNull} from '@shared-lib/utils';
+import {Injectable} from "@angular/core";
+import {ApiService} from "@shared-lib/services/api.service";
+import {HttpClient, HttpParams} from "@angular/common/http";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {catchError, EMPTY, map, Observable, of, throwError} from "rxjs";
+import {environment} from "@global-app/env/environment";
+import {ModelDetailDto, ModelDto, ModelSubDto, ModelVersionDto} from "@global-app/model-store/dto/model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModelService {
-  models: Model[] = [];
-  predictions: Prediction[] = [];
+  private readonly apiUrl;
+  private readonly path = 'model'
 
-  constructor() {
+  constructor(
+    private apiService: ApiService,
+    private http: HttpClient,
+    private snackBar: MatSnackBar
+  ) {
+    this.apiUrl = environment.globalDBApiUrl;
   }
 
-  getAllModels(): Observable<Model[]> {
-    this.checkModelList();
-
-    return of(this.models);
+  public getModels(): Observable<ModelDto[]> {
+    return this.apiService.get<ModelDto[]>(this.getBaseUrl())
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to fetch models';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  getModels(filterData: object = {}): Observable<Model[]> {
-    this.checkModelList();
-
-    if (isEmpty(filterData)) return this.getAllModels();
-
-    return of(this.filterModels(cloneDeep(this.models), filterData))
+  public getSubModelForExperimentRun(runId: number): Observable<ModelSubDto> {
+    return this.apiService.get<ModelSubDto>(this.getBaseUrl() + "/experiment/run/" + runId)
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to fetch sub model';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  filterModels(array: Model[], filter: any): Model[] {
-    return array.filter((obj: any) => {
-      for (const key in filter) {
-        if (Object.prototype.hasOwnProperty.call(filter, key) && isNotNull(filter[key])) {
-          if (!obj[key].toLowerCase().includes(filter[key].toLowerCase())) {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
+  public getSubModelForExperiment(experimentId: number): Observable<ModelVersionDto> {
+    return this.apiService.get<ModelVersionDto>(this.getBaseUrl() + "/experiment/" + experimentId)
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to fetch sub model';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  getModel(modelId: number): Observable<Model> {
-    this.checkModelList();
-
-    return of(this.models.find(model => model.id === modelId) as Model);
+  public selectSubModel(subModelDto: number): Observable<ModelSubDto> {
+    return this.apiService.delete<ModelSubDto>(this.getBaseUrl() + "/" + subModelDto + "/select")
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to select sub model';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  predictUsingModel(modelId: number, files: any): Observable<boolean> {
-    console.debug('predictUsingModel', modelId, files);
-    this.checkModelList();
-    this.checkPredictionList();
-
-    this.predictions.push({
-      id: (this.predictions.map(prediction => prediction.id).sort().pop() ?? 1) + 1,
-      model: this.models.find(model => model.id === modelId) as Model,
-      status: 'Finished',
-      date: new Date(),
-      result: this.generateRandomBooleanArray(),
-    });
-
-    return of(true);
-  }
-
-  getAllPredictions(): Observable<Prediction[]> {
-    this.checkPredictionList();
-
-    return of(this.predictions);
-  }
-
-  getPredictions(filterData: object = {}): Observable<Prediction[]> {
-    this.checkPredictionList();
-
-    if (isEmpty(filterData)) return this.getAllPredictions();
-
-    return of(this.filterPredictions(cloneDeep(this.predictions), filterData))
-  }
-
-  filterPredictions(array: Prediction[], filter: any): Prediction[] {
-    return array.filter((obj: any) => {
-      for (const key in filter) {
-        if (Object.prototype.hasOwnProperty.call(filter, key) && isNotNull(filter[key])) {
-          if (!obj.model[key].toLowerCase().includes(filter[key].toLowerCase())) {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
-  }
-
-  getPredictionResults(predictionId: number): Observable<{ id: number; value: boolean }[]> {
-    this.checkPredictionList();
-
-    return of(this.predictions.find(prediction => prediction.id === predictionId)?.result ?? []);
-  }
-
-  private checkModelList(): void {
-    if (this.models.length === 0) {
-      this.models = MODELS;
+  public getMyModels(appId?: number): Observable<ModelDto[]> {
+    let queryParam = new HttpParams();
+    if (appId) {
+      queryParam = queryParam.set('appId', appId);
     }
+    return this.apiService.get<ModelDto[]>(this.getBaseUrl() + "/my", queryParam)
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to fetch models';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  private checkPredictionList(): void {
-    if (this.predictions.length === 0) {
-      this.predictions = PREDICTIONS;
+  public getModel(id: number): Observable<ModelDetailDto> {
+    if (!id) {
+      return EMPTY;
     }
+    return this.apiService.get<ModelDetailDto>(this.getBaseUrl() + "/" + id)
+      .pipe(
+        catchError((err) => {
+          const errorMessage = JSON.stringify(err.error) || 'Failed to fetch model';
+          this.snackBar.open(errorMessage, 'Close', {duration: 5000});
+          return throwError(() => err);
+        })
+      );
   }
 
-  private generateRandomBooleanArray(): { id: number; value: boolean }[] {
-    const length = Math.floor(Math.random() * 10) + 1;
-
-    return Array.from({length}, (_, index) => ({
-      id: index + 1,
-      value: Math.random() < 0.5,
-    }));
+  private getBaseUrl(): string {
+    return `${this.apiUrl}/${this.path}`;
   }
 }

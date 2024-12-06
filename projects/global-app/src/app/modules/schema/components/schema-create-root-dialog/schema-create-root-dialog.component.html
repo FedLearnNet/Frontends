@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Start a new Schema</h2>
+
+<mat-dialog-content>
+  <mat-form-field class="full-width">
+    <mat-label>Name</mat-label>
+    <input matInput placeholder="Name" [(ngModel)]="name">
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea matInput placeholder="Description" [(ngModel)]="description"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="saveRoot()" [disabled]="!(name && description)">Save root</button>
+</mat-dialog-actions>

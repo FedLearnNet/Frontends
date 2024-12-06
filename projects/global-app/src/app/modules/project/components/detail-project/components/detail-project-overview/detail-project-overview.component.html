@@ -1,0 +1,58 @@
+@if (project) {
+
+  <h2>Project Detail</h2>
+  <div class="project-detail">
+    <mat-form-field>
+      <mat-label>Project Name</mat-label>
+      <input
+        matInput
+        placeholder="My Project"
+        [formControl]="name"
+        required
+      />
+      @if (!editModeName) {
+        <button mat-icon-button matSuffix (click)="onEditName($event)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button matSuffix (click)="onSaveName($event)">
+          <mat-icon>save</mat-icon>
+        </button>
+      }
+      @if (name.invalid) {
+        <mat-error>Name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        placeholder="My Project Description"
+        [formControl]="description"
+        required
+      ></textarea>
+      @if (!editModeDescription) {
+        <button mat-icon-button matSuffix (click)="onEditDescription($event)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button matSuffix (click)="onSaveDescription($event)">
+          <mat-icon>save</mat-icon>
+        </button>
+      }
+      @if (name.invalid) {
+        <mat-error>Description is required</mat-error>
+      }
+    </mat-form-field>
+  </div>
+  <mat-divider></mat-divider>
+  <h2>Link Query</h2>
+  <div class="project-detail">
+    <app-select-query
+      [(queryId)]="queryId"
+      (queryIdChange)="save()"
+    ></app-select-query>
+  </div>
+
+}

@@ -1,0 +1,53 @@
+<div class="dynamic-container" [style.height.px]="dynamicHeight">
+  @if (isVisible) {
+    <div class="resize-handle" (mousedown)="onResizeStart($event)" matTooltip="Rezise the consolen output">
+    </div>
+  }
+
+  <mat-toolbar>
+    @if (clientConnected) {
+      <mat-icon class="connected-success" matTooltip="WebUI connected">sensors</mat-icon>
+    } @else {
+      <mat-icon class="connected-error" matTooltip="WebUI disconnected">error</mat-icon>
+    }
+    @if (appConnected) {
+      <mat-icon class="connected-success" matTooltip="App connected">stream</mat-icon>
+    } @else {
+      <mat-icon class="connected-warn" matTooltip="App disconnected">sync</mat-icon>
+    }
+    @if (appConnected) {
+      <button mat-icon-button (click)="toggleConsole()">
+        @if (!isVisible) {
+          <mat-icon>keyboard_arrow_up</mat-icon>
+        } @else {
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        }
+      </button>
+    }
+    @if (isVisible) {
+      <span class="spacer"></span>
+      <button mat-icon-button matTooltip="Delete output" (click)="deleteOutputs()">
+        <mat-icon class="connected-error">delete</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="toggleFollow()">
+        @if (followConsole) {
+          <mat-icon matTooltip="Unfollow output" class="connected-success">play_circle</mat-icon>
+        } @else {
+          <mat-icon matTooltip="Follow output" class="connected-warn">stop_circle</mat-icon>
+        }
+      </button>
+
+    }
+  </mat-toolbar>
+  @if (isVisible) {
+    <div class="console-output" #consoleOutput>
+      @if (consoleOutputs.length > 0) {
+        @for (output of consoleOutputs; track consoleOutputs) {
+          <p>{{ output.msg }}</p>
+        }
+
+      }
+    </div>
+  }
+</div>

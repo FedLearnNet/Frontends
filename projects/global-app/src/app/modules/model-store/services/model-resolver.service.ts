@@ -1,16 +1,23 @@
-import { ActivatedRouteSnapshot, ResolveFn } from '@angular/router';
-import { inject } from '@angular/core';
-import { Model, Prediction } from '../models';
-import { ModelService } from './model.service';
+import {ActivatedRouteSnapshot, ResolveFn} from '@angular/router';
+import {inject} from '@angular/core';
+import {ModelDetailDto, ModelDto} from "@global-app/model-store/dto/model";
+import {ModelService} from "@global-app/model-store/services/model.service";
+import {catchError, of} from "rxjs";
 
-export const modelListResolver: ResolveFn<Model[]> = () => {
-    return inject(ModelService).getModels();
+
+export const modelsResolver: ResolveFn<ModelDto[]> = () => {
+  return inject(ModelService).getModels().pipe(
+    catchError(() => of([]))
+  );
 }
 
-export const predictionListResolver: ResolveFn<Prediction[]> = () => {
-    return inject(ModelService).getPredictions();
+
+export const myModelResolver: ResolveFn<ModelDto[]> = () => {
+  return inject(ModelService).getMyModels().pipe(
+    catchError(() => of([]))
+  );
 }
 
-export const modelResolver: ResolveFn<Model> = (route: ActivatedRouteSnapshot) => {
-    return inject(ModelService).getModel(Number(route.paramMap.get('model-id')));
+export const modelResolver: ResolveFn<ModelDetailDto> = (route: ActivatedRouteSnapshot) => {
+  return inject(ModelService).getModel(Number(route.paramMap.get('model-id')));
 }

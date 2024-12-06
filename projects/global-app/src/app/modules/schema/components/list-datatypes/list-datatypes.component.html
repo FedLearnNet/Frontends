@@ -1,0 +1,8 @@
+<div class="wrapper">
+  @if ((datatypes$ | async); as dataTypes) {
+    @for (dataType of dataTypes; track dataType) {
+      <app-datatype-card [dataType]="dataType"></app-datatype-card>
+    }
+  }
+</div>
+

@@ -7,6 +7,9 @@ import {ConnectorStepConfigs} from "../enum/connector-step-config";
 
 export interface ConnectorConfig {
   id?: number;
+  createdAt?: string;
+  updatedAt?: string;
+
   name?: string;
   description?: string;
   schemaId?: string;
@@ -22,6 +25,9 @@ export interface ConnectorConfig {
 
 export interface ConnectorConfigDTO {
   id?: number;
+  createdAt?: string;
+  updatedAt?: string;
+
   name: string;
   description: string;
   schemaId?: string;
@@ -82,7 +88,8 @@ export function connectorConfigDTOToConfig(config: ConnectorConfigDTO): Connecto
     name: config.name,
     description: config.description,
     schemaId: config.schemaId,
-
+    createdAt: config.createdAt,
+    updatedAt: config.updatedAt,
     inputSource: source,
     inputConfig: config.inputConfig,
     transformer: config.transformer?.map((transformer) => {

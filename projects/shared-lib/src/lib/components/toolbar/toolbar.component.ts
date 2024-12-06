@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { environment } from '@shared-lib/env/environment';
 
 @Component({
   selector: 'app-lib-toolbar',
@@ -6,7 +7,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './toolbar.component.scss',
 })
 export class ToolbarComponent {
-  @Input() menuItems: any;
+  project = environment.project;
 
-  ICON="../../../assets/images/Logo%20Microb-AI-ome/Logo%20Microb-AI-ome/2%20Horizontal%20Version/Microb-AI-ome_Logo_white.png";
+  @Input() menuItems: any;
 }

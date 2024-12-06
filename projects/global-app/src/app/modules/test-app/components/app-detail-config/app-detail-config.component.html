@@ -1,0 +1,82 @@
+<div class="app-configs">
+  <mat-tab-group>
+    <mat-tab label="App Config">
+      <ng-template mat-tab-label>
+        @if (appConnected && clientConfig && clientConfig.ENABLE_CONFIG_SYNC) {
+          <mat-icon>sync</mat-icon>
+        }
+        App Config
+      </ng-template>
+
+      <app-app-edit [app]="app" (configChanged)="configInfoChanged($event)"
+      (published)="configInfoChanged($event)"
+      ></app-app-edit>
+
+    </mat-tab>
+    <mat-tab label="Hyperparameter">
+      <ng-template mat-tab-label>
+        @if (appConnected && clientConfig && clientConfig.ENABLE_CONFIG_SYNC) {
+          <mat-icon>sync</mat-icon>
+        }
+        Hyperparameter
+      </ng-template>
+      @if (app) {
+        <app-app-detail-config-hyperparam [hyperparams]="app.appConfig.hyperparams"
+                                          [pydanticClass]="pydanticClass"
+                                          (configChanged)="configHyperparamChanged($event)">
+        </app-app-detail-config-hyperparam>
+      }
+    </mat-tab>
+    <mat-tab label="Inputs">
+      <ng-template mat-tab-label>
+        @if (appConnected && clientConfig && clientConfig.ENABLE_CONFIG_SYNC) {
+          <mat-icon>sync</mat-icon>
+        }
+        Inputs
+      </ng-template>
+      @if (app) {
+
+        <app-app-detail-config-input [configs]="app.appConfig.input"
+                                     [pydanticClass]="pydanticClass"
+                                     (configChanged)="configInputChanged($event)">
+        </app-app-detail-config-input>
+      }
+    </mat-tab>
+    <mat-tab label="Outputs">
+      <ng-template mat-tab-label>
+        @if (appConnected && clientConfig && clientConfig.ENABLE_CONFIG_SYNC) {
+          <mat-icon>sync</mat-icon>
+        }
+        Outputs
+      </ng-template>
+      @if (app) {
+
+        <app-app-detail-config-output [configs]="app.appConfig.output"
+                                      [pydanticClass]="pydanticClass"
+                                      (configChanged)="configOutputChanged($event)">
+        </app-app-detail-config-output>
+      }
+    </mat-tab>
+    <mat-tab label="Local Config" [labelClass]="!appConnected ? 'local-config-tap-warning' : ''">
+      <ng-template mat-tab-label>
+        @if (!appConnected) {
+          <mat-icon>warning</mat-icon>
+        }
+        Local Config
+      </ng-template>
+
+      @if (appConnected) {
+        <app-app-client-config
+          [datafiles]="datafiles"
+          [config]="clientConfig"></app-app-client-config>
+      } @else {
+        <p>You need to Start you app to see the local configs</p>
+      }
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+
+
+

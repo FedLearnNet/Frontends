@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>{{ data.app.name }}</h2>
+<mat-dialog-content>
+  <app-app-header [app]="app" [showImg]="true" [linkToApp]="true"></app-app-header>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab label="Setup">
+      @if (selectedVersion) {
+        <app-app-run-hyperparameter [version]="selectedVersion"
+                                    (hyperParamsChanged)="onHyperParamsChanged($event)"
+                                    [dynamicHyperParams]="workflowElement.hyperParams || {}"
+                                    (formsValid)="hyperParamsValid = $event"
+        ></app-app-run-hyperparameter>
+      } @else {
+        <p>No valid version found. Please select another one</p>
+      }
+    </mat-tab>
+    <mat-tab label="Version">
+      <app-app-version-list [app]="app" (selectedVersion)="versionChanged($event)"></app-app-version-list>
+    </mat-tab>
+    <mat-tab label="Config">
+      @if (selectedVersion) {
+        <app-app-config [config]="selectedVersion.appConfig">
+        </app-app-config>
+      } @else {
+        <p>No valid version found. Please select another one</p>
+      }
+    </mat-tab>
+
+  </mat-tab-group>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
+  <button mat-button (click)="onRemoveClick()">Delete</button>
+  <button mat-button (click)="onOkClick()" [disabled]="!doesAppHaveValidHyperParamsConfig()">Ok</button>
+</mat-dialog-actions>

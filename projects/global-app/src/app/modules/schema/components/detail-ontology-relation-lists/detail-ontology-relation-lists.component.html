@@ -1,0 +1,38 @@
+<mat-list>
+  <div mat-subheader>
+    @if (!relationIds.length) {
+      No
+    }
+    {{ headerName }}
+  </div>
+  @for (relationId of relationIds; track relationId) {
+    <mat-list-item>
+      <div matListItemTitle>{{ getNameForId(relationId) }}</div>
+      <div matListItemLine>{{ relationId }}</div>
+      <button matListItemMeta mat-icon-button aria-label="Remove" (click)="removeRelation(relationId)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-list-item>
+  }
+</mat-list>
+
+<form>
+  <mat-form-field class="autocomplete">
+    <mat-label>{{ placeholder }}</mat-label>
+    <input type="text"
+           [placeholder]="placeholder"
+           matInput
+           [formControl]="autoCompleteControl"
+           [matAutocomplete]="auto">
+    @if (autoCompleteControl.value) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="addRelation()">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
+    <mat-autocomplete requireSelection #auto="matAutocomplete">
+      @for (option of filteredOntologies | async; track option) {
+        <mat-option [value]="option.uniqueId">{{ option.name }} ({{ option.uniqueId }})</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</form>

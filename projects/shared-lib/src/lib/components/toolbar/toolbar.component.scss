@@ -1,12 +1,18 @@
-@use "@angular/material" as mat;
-
-@import "../../styles/styles";
+@import '../../styles/main';
 
 mat-toolbar,
 mat-drawer {
-  background-color: mat.m2-get-color-from-palette($mb-frontend-primary, 100);
+  background-color: if(variable-exists(toolbar-color), $toolbar-color, $secondary-color);
 
   button {
     font-size: large;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  img {
+    width: 100%;
   }
 }

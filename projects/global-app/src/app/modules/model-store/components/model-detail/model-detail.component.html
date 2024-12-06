@@ -1,53 +1,52 @@
-<div class="container">
-    <div class="header-row">
-        <button mat-icon-button (click)="onGoBack()">
-            <mat-icon>arrow_back</mat-icon>
-        </button>
+<mat-toolbar>
+  <button mat-icon-button (click)="onGoBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>  {{ model.name }}</span>
+
+  <span class="spacer"></span>
+  @if (model.createdByUser) {
+    <button mat-icon-button>
+      <mat-icon>edit</mat-icon>
+    </button>
+  }
+
+  <button mat-icon-button>
+    <mat-icon>share</mat-icon>
+  </button>
+</mat-toolbar>
+
+
+<div class="model">
+  @if (model) {
+    <app-model-header [model]="model"></app-model-header>
+    <div class="model--body">
+      <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+        <mat-tab label="Description">
+          {{ model.longDescription }}
+        </mat-tab>
+        <mat-tab label="App">
+          <app-app-header [app]="model.federatedApp" [showImg]="false" [linkToApp]="true"></app-app-header>
+        </mat-tab>
+        <mat-tab label="Versions">
+          <app-model-version-list [model]="model"
+                                  (selectedVersion)="versionChanged($event)"
+          ></app-model-version-list>
+        </mat-tab>
+        @if (model.createdByUser) {
+          <mat-tab label="Rights">
+            <app-model-detail-access [model]="model"></app-model-detail-access>
+          </mat-tab>
+        }
+        <mat-tab label="Predictions">
+          <button mat-raised-button (click)="newPrediction()" class="new-pred-btn">
+            <mat-icon>add</mat-icon>
+            New Prediction
+          </button>
+          <app-prediction-list [modelId]="model.id"></app-prediction-list>
+
+        </mat-tab>
+      </mat-tab-group>
     </div>
-
-    <div class="model-detail-content">
-        <div class="model-detail-content--header" [ngClass]="'header-container-size-' + screenSize">
-            <img [src]="model.imageUrl" [alt]="model.name">
-
-            <div class="detail-column">
-                <div class="detail-column--author">
-                    <mat-icon>person</mat-icon>
-                    <h4>
-                        {{ model.author }}
-                    </h4>
-                </div>
-
-                <div class="detail-column--name">
-                    <h2>
-                        {{ model.name }}
-                    </h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="model-detail-content--description">
-            <div class="input-data">
-                <h3>Input Data</h3>
-                <p>{{ model.inputData }}</p>
-            </div>
-
-            <div class="predicted-concept">
-                <h3>Predicted Concept</h3>
-                <p>{{ model.predictedConcept }}</p>
-            </div>
-        </div>
-
-        <div class="model-detail-content--predict-input">
-            <h3>
-                Drag input data here to predict
-            </h3>
-            <app-lib-drag-and-drop-file
-                    [files]="filesForm.get('files')"
-                    (filesChange)="filesChanged($event)"
-            />
-            <button mat-raised-button color="primary" [disabled]="!hasInputFiles()" (click)="onPredict()">
-                Predict using this AI
-            </button>
-        </div>
-    </div>
+  }
 </div>
