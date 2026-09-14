@@ -1,0 +1,26 @@
+<div class="params">
+  <div class="param-card">
+    @for (param of getParamsNames(); track param) {
+      @if (fileParams()[param]) {
+        <div class="param" (click)="openDetailDialog(fileParams()[param]!)">
+          <h4 class="param-title">{{ param }}</h4>
+          <div class="param-text">
+            <div class="file-entry">
+              <span class="name">{{ fileParams()[param]!.file.fileName }}</span>
+              <span class="size">{{ fileParams()[param]!.file.size }} bytes</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="param">
+          <h4 class="param-title">{{ param }}</h4>
+          <p class="param-text">{{ params()[param] }}</p>
+        </div>
+      }
+    }
+  </div>
+
+  @if (getParamsNames().length === 0) {
+    <p class="no-param">{{ noParamsText() | translate }}</p>
+  }
+</div>

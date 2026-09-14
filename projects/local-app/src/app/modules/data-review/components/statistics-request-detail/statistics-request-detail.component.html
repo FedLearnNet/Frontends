@@ -1,0 +1,107 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'STATISTICS_REQUEST_SELECTION' | translate" />
+
+<mat-dialog-content class="content">
+  <div class="content-wrapper">
+    <lib-info-grid [title]="'GRID.OVERVIEW' | translate">
+      <lib-info-item [title]="'GRID.STATUS' | translate">
+        <lib-status-badge
+          [text]="data.request.status"
+          [type]="getStatusType(data.request.status)"
+          size="SMALL"
+          [animate]="true" />
+      </lib-info-item>
+      <lib-info-item [title]="'GRID.QUERY' | translate">
+        #{{ data.request.queryId }}
+      </lib-info-item>
+      <lib-info-item [title]="'GRID.USER_ID' | translate">
+        {{ data.request.requestKeycloakId || ('EMPTY_VALUE' | translate) }}
+      </lib-info-item>
+      <lib-info-item [title]="'GRID.CREATED_AT' | translate">
+        <lib-time-badge [date]="data.request.createdAt" />
+      </lib-info-item>
+      <lib-info-item [title]="'VERIFIED_ON' | translate">
+        @if (data.request.verifiedOn) {
+          <lib-time-badge [date]="data.request.verifiedOn" />
+        } @else {
+          {{ 'EMPTY_VALUE' | translate }}
+        }
+      </lib-info-item>
+      <lib-info-item [title]="'VERIFIED_BY' | translate">
+        {{ data.request.verifiedByKeycloakId || ('EMPTY_VALUE' | translate) }}
+      </lib-info-item>
+    </lib-info-grid>
+
+    <lib-info-grid [title]="'GRID.REQUESTED_DATA' | translate">
+      <lib-info-item [title]="'REQUESTED_COHORTS' | translate">
+        <lib-status-badge
+          [type]="'INIT'"
+          size="SMALL"
+          [text]="'' + data.request.cohortIds.length"
+          [animate]="true" />
+      </lib-info-item>
+      <lib-info-item [title]="'REQUESTED_PATIENTS' | translate">
+        <lib-status-badge
+          [type]="'INIT'"
+          size="SMALL"
+          [text]="'' + data.request.patientIds.length"
+          [animate]="true" />
+      </lib-info-item>
+    </lib-info-grid>
+  </div>
+
+  <div class="detail-section">
+    <h4>{{ 'GRID.COHORT' | translate }}</h4>
+    <div class="badge-list">
+      @for (cohort of getRequestCohorts(); track cohort.id) {
+        <lib-badge color="BLUE" [text]="cohort.name" />
+      } @empty {
+        <span class="muted">{{ 'EMPTY_VALUE' | translate }}</span>
+      }
+    </div>
+  </div>
+
+  <mat-divider />
+
+  <div class="detail-section">
+    <h4>{{ 'BUTTON.PATIENTS' | translate }}</h4>
+    <div class="badge-list">
+      @for (patientId of getVisiblePatientIds(); track patientId) {
+        <lib-badge color="GRAY" [text]="'' + patientId" />
+      } @empty {
+        <span class="muted">{{ 'EMPTY_VALUE' | translate }}</span>
+      }
+      @if (getHiddenPatientCount() > 0) {
+        <lib-badge color="ORANGE" [text]="'+' + getHiddenPatientCount() + ' more'" />
+      }
+    </div>
+  </div>
+
+  <mat-divider />
+
+  <div class="detail-section">
+    <h4>{{ 'GRID.QUERY' | translate }}</h4>
+    @if (query) {
+      <lib-query-detail-card [query]="query!" />
+    } @else if (isLoadingQuery) {
+      <lib-skeleton-loader />
+    } @else {
+      <span class="muted">{{ 'NO_DATA_FOUND' | translate }}</span>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">{{ 'BUTTON.CLOSE' | translate }}</button>
+
+  @if (!data.readOnly && data.request.status === pendingStatus) {
+    <span class="spacer"></span>
+    <button mat-raised-button color="warn" type="button" [disabled]="isSubmitting" (click)="onReject()">
+      {{ 'BUTTON.REJECT' | translate }}
+    </button>
+    <button mat-raised-button color="primary" type="button" [disabled]="isSubmitting" (click)="onAccept()">
+      {{ 'BUTTON.ACCEPT' | translate }}
+    </button>
+  }
+</mat-dialog-actions>

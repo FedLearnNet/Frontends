@@ -1,0 +1,29 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.name-field-invalid {
+  margin-bottom: 4px;
+}
+
+.form-wrap{
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+
+  mat-form-field{
+    margin-bottom: 20px;
+  }
+}
+
+.cohort-form__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 700px) {
+  .cohort-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

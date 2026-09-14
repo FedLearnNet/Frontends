@@ -1,0 +1,82 @@
+@if (ontologyNode(); as n) {
+  <mat-card class="onto-card">
+    <div class="onto-card__header">
+      <div class="onto-card__title-block">
+        <h3 class="onto-card__title" [title]="primaryName()">
+          {{ primaryName() }}
+        </h3>
+
+        <div class="onto-card__subtitle">
+          <lib-badge [text]="'ID: '+n.id" color="GRAY" size="X-SMALL" [border]="true"></lib-badge>
+
+          @if (n.cui) {
+            <lib-badge [text]="'CUI: '+n.cui" color="BLUE" size="X-SMALL" [border]="true"></lib-badge>
+          }
+        </div>
+
+        @if (secondaryNames().length > 0) {
+          <div class="onto-card__aliases">
+            @for (alias of secondaryNames(); track alias) {
+              <lib-badge [text]="alias" color="GREEN" size="X-SMALL" [border]="true"></lib-badge>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="onto-card__body">
+      @if (n.description) {
+        <p class="onto-card__description">
+          {{ n.description }}
+        </p>
+      } @else {
+        <p class="onto-card__description onto-card__description--muted">
+          No description available.
+        </p>
+      }
+
+      <div class="onto-card__meta">
+        @if (n.lat) {
+          <div class="onto-card__meta-row">
+            <span class="onto-card__meta-label">Language</span>
+
+            <lib-badge [text]="n.lat" color="GRAY" size="X-SMALL"></lib-badge>
+          </div>
+        }
+
+        @if (n.codes?.length) {
+          <div class="onto-card__meta-row">
+            <span class="onto-card__meta-label">Codes</span>
+            <div class="onto-card__tags">
+              @for (code of n.codes; track code) {
+                <lib-badge [text]="code" color="ORANGE" size="X-SMALL" [border]="true"></lib-badge>
+              }
+            </div>
+          </div>
+        }
+
+        @if (n.sabs?.length) {
+          <div class="onto-card__meta-row">
+            <span class="onto-card__meta-label">Sources</span>
+            <div class="onto-card__tags">
+              @for (sab of n.sabs; track sab) {
+                <lib-badge [text]="sab" color="BLUE" size="X-SMALL" [border]="true"></lib-badge>
+              }
+            </div>
+          </div>
+        }
+
+        @if (n.auis?.length) {
+          <div class="onto-card__meta-row">
+            <span class="onto-card__meta-label">AUIs</span>
+            <div class="onto-card__tags onto-card__tags--wrap">
+              @for (aui of n.auis; track aui) {
+                <lib-badge [text]="aui" color="GRAY" size="X-SMALL"></lib-badge>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </mat-card>
+}

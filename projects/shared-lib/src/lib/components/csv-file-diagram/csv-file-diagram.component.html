@@ -1,0 +1,77 @@
+<div class="controls">
+  <mat-form-field appearance="fill" class="control">
+    <mat-label>Chart Type</mat-label>
+    <mat-select
+      [value]="diagramType()"
+      (selectionChange)="setDiagramType($event.value)">
+      <mat-option [value]="null" disabled>Select a chart type</mat-option>
+      @for (cfg of availableDiagramTypes(); track cfg.id) {
+        <mat-option [value]="cfg.id">{{ cfg.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  @if (diagramType()) {
+    @if (numericColumns().length) {
+      <mat-form-field appearance="fill" class="control">
+        <mat-label>Numeric Variables</mat-label>
+        <mat-select
+          multiple
+          [(ngModel)]="selectedNumeric">
+          @for (col of numericColumns(); track col) {
+            <mat-option
+              [value]="col"
+              [disabled]="isNumericDisabled(col)">
+              {{ col }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint>
+          Selected: {{ selectedNumeric().length || 0 }}
+        </mat-hint>
+      </mat-form-field>
+    }
+    @if (categoricalColumns().length) {
+      <mat-form-field appearance="fill" class="control">
+        <mat-label>Categorical Variables</mat-label>
+        <mat-select
+          multiple
+          [(ngModel)]="selectedCategorical">
+          @for (col of categoricalColumns(); track col) {
+            <mat-option
+              [value]="col"
+              [disabled]="isCategoricalDisabled(col)">
+              {{ col }}
+            </mat-option>
+          }
+        </mat-select>
+        <mat-hint>
+          Selected: {{ selectedCategorical().length || 0 }}
+        </mat-hint>
+      </mat-form-field>
+    }
+  }
+</div>
+
+<div class="actions">
+  <button mat-stroked-button color="primary"
+          (click)="resetAll()">Reset All
+  </button>
+</div>
+
+@if (validationMessage()) {
+  <div class="validation">{{ validationMessage() }}</div>
+}
+
+@if (currentOption()) {
+  <echarts [options]="currentOption()!" class="chart" />
+} @else if (diagramType()) {
+  <p class="placeholder">
+    Select required variables to render the chart.
+  </p>
+} @else {
+  <p class="placeholder">
+    Choose a chart type to start.
+  </p>
+}
+

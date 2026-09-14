@@ -1,0 +1,72 @@
+@if (loadingErrorLogs) {
+  <h3>{{ 'ERROR.ERROR_TRY_AGAIN' | translate }}</h3>
+}
+<div class="log-table" [hidden]="loadingErrorLogs">
+  <mat-paginator [pageSize]="pageSize()"
+                 [pageSizeOptions]="pageSizeOptions"
+                 (page)="onPageChange($event)"
+                 aria-label="Select page of logs"
+  />
+
+  <div class="filter-box">
+    <p class="filter-box-name">{{ 'GRID.FILTERS' | translate }}</p>
+
+    <mat-form-field class="filter-box-input filter-box-search">
+      <mat-label>{{ 'GRID.SEARCH' | translate }}</mat-label>
+      <input matInput (keyup)="applyFilter($event)" [placeholder]="( 'FILTER_EXAMPLE' | translate )" #input>
+    </mat-form-field>
+
+    @if (this.currentConfig) {
+      <mat-form-field class="filter-box-input">
+        <mat-label>{{ currentConfig.label | translate }}</mat-label>
+        <mat-select multiple [value]="selectedFilter()"
+                    (selectionChange)="applySelectionFilter($event, currentConfig.key)">
+          @for (variant of currentConfig.variants; track variant) {
+            <mat-option [value]="variant">{{ variant | titlecase }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z0" matSort>
+
+    <ng-container matColumnDef="patientId">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.PATIENT_ID' | translate }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element.patientId }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="field">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.FIELD' | translate }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element.field }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="message">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.MESSAGE' | translate }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element.message }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="level">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.SEVERITY' | translate }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element.severity }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="logType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.LOG_TYPE' | translate }}</th>
+      <td mat-cell *matCellDef="let element"> {{ element.logType }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.CREATED_AT' | translate }}</th>
+      <td mat-cell *matCellDef="let element">
+        <lib-time-badge [date]="element.createdAt" [color]="'GRAY'"></lib-time-badge>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr class="no-data-row" *matNoDataRow>
+      <td [attr.colspan]="displayedColumns.length">{{ 'GRID.NO_DATA_FOUND' | translate }}</td>
+    </tr>
+  </table>
+</div>

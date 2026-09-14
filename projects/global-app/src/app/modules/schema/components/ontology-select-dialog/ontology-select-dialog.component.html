@@ -1,0 +1,55 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'ONTOLOGIES' | translate" />
+
+<div class="onto-list">
+  <div class="onto-toolbar">
+
+    <mat-form-field
+      appearance="outline"
+      class="onto-toolbar__search-field"
+    >
+      <mat-label>Search concepts</mat-label>
+      <input
+        matInput
+        placeholder="Name, code, CUI …"
+        [value]="search()"
+        (input)="onSearchChange($event)"
+      />
+    </mat-form-field>
+  </div>
+  @if (loading()) {
+    <lib-skeleton-loader></lib-skeleton-loader>
+  }
+
+  @if (error(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  }
+
+  @if (!loading() && !error()) {
+    @if (items().length === 0) {
+      <div class="onto-list__state">
+        No results found. Try another search term.
+      </div>
+    } @else {
+      <div class="onto-list__items">
+        @for (item of items(); track item.id) {
+          <app-ontology-card
+            (click)="select(item)"
+            [ontologyNode]="item"
+          ></app-ontology-card>
+        }
+      </div>
+
+      <mat-paginator
+        class="onto-list__paginator"
+        [length]="totalCount()"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPageChange($event)"
+        aria-label="Ontology pagination"
+      >
+      </mat-paginator>
+    }
+  }
+</div>

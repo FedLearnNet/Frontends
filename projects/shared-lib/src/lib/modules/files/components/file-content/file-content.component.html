@@ -1,0 +1,17 @@
+@if (fileContent(); as fileContent) {
+  <div class="file-content" [class.file-content-image]="fileContent.type === FederatedAppConfigDataType.IMAGE">
+    @if (isHTML()) {
+      <iframe
+        [src]="safeIframeUrl()" class="html-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
+    } @else if (fileContent.type === FederatedAppConfigDataType.CSV) {
+      <lib-csv-file-viewer [data]="content()" [isBase64Encoded]="base64Encoded()"/>
+    } @else if (fileContent.type === FederatedAppConfigDataType.TSV) {
+      <lib-csv-file-viewer [data]="content()" [isBase64Encoded]="base64Encoded()"
+                           [isTSV]="true"/>
+    } @else if (fileContent.type === FederatedAppConfigDataType.IMAGE) {
+      <img [src]="'data:image/png;base64,' + content()" [alt]="name()" class="output-image"/>
+    } @else {
+      <pre class="output-text">{{ content() }}</pre>
+    }
+  </div>
+}

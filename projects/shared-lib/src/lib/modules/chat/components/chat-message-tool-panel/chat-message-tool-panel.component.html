@@ -1,0 +1,43 @@
+<mat-list>
+  @for (tool of tools(); track tool.id) {
+    <mat-list-item class="list-item">
+      @if (tool.started) {
+        <mat-icon matListItemIcon>sync</mat-icon>
+      } @else {
+        <mat-icon matListItemIcon>check_circle</mat-icon>
+      }
+      <div matListItemTitle>
+        <div class="step">
+          <div class="action">
+            <span class="head">Tool:</span>
+            <span> {{ tool.name }} </span>
+          </div>
+          @if (tool.input) {
+            <details class="collapse-section">
+              <summary class="collapse-summary">
+                <span class="head">Input</span>
+                <mat-icon class="collapse-icon">chevron_right</mat-icon>
+              </summary>
+              <div class="collapse-content">
+                {{ tool.input }}
+              </div>
+            </details>
+          }
+          @if (tool.content && tool.content.length > 0) {
+            <details class="collapse-section">
+              <summary class="collapse-summary">
+                <span class="head">Output</span>
+                <mat-icon class="collapse-icon">chevron_right</mat-icon>
+              </summary>
+              <div class="collapse-content">
+                @for (content of tool.content; track $index) {
+                  <p [innerHTML]="content"></p>
+                }
+              </div>
+            </details>
+          }
+        </div>
+      </div>
+    </mat-list-item>
+  }
+</mat-list>

@@ -1,0 +1,39 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.CREATE_NEW_PROJECT.TITLE' | translate ">
+</lib-closeable-dialog-title>
+
+<mat-dialog-content>
+
+  <p>{{ 'DIALOG.CREATE_NEW_PROJECT.MESSAGE_LINE_1' | translate }}</p>
+  <p>{{ 'DIALOG.CREATE_NEW_PROJECT.MESSAGE_LINE_2' | translate }}</p>
+  <p>{{ 'DIALOG.CREATE_NEW_PROJECT.MESSAGE_LINE_3' | translate }}</p>
+
+  <form [formGroup]="newExperimentForm">
+    <mat-form-field>
+      <mat-label>{{ 'GRID.PROJECT_NAME' | translate }}</mat-label>
+      <input matInput [placeholder]="('PROJECT_NAME_EXAMPLE' | translate)" formControlName="name" required>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+      <textarea matInput [placeholder]="('PROJECT_DESCRIPTION_EXAMPLE' | translate)" formControlName="description"
+                required rows="5"></textarea>
+    </mat-form-field>
+    <mat-checkbox formControlName="acceptProcess">{{ 'BUTTON.I_ACCEPT_THE_PROCESS' | translate }}</mat-checkbox>
+  </form>
+
+  <mat-divider/>
+  <h4>{{ 'LINK_QUERY' | translate }}</h4>
+  <p>{{ 'YOU_CAN_LINK_A_QUERY' | translate }}</p>
+  <div class="project-detail">
+    <app-select-query [(queryId)]="queryId"
+    />
+  </div>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="margin-top-auto" align="end">
+  <lib-btn type="CREATE"
+           [disabled]="newExperimentForm.invalid" (clicked)="onSubmit()"/>
+</mat-dialog-actions>

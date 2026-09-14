@@ -1,0 +1,15 @@
+{
+  "reporterEnabled": "mocha-junit-reporter, mochawesome",
+  "mochaJunitReporterReporterOptions": {
+    "mochaFile": "results/junit/results-[hash].xml",
+    "toConsole": false
+  },
+  "mochawesomeReporterOptions": {
+    "reportDir": "results/mochawesome",
+    "reportFilename": "[name]-report",
+    "quiet": true,
+    "overwrite": false,
+    "html": true,
+    "json": true
+  }
+}

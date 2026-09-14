@@ -1,0 +1,7 @@
+<app-general-log-table
+  [loadedData]="data"
+  [allowSearch]="false"
+  [displayedColumns]="displayedColumns"
+  [filters]="filters"
+  (loadData)="loadData($event)"
+  (openDetail)="openDetail($event)" />

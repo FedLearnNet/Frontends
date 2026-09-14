@@ -1,0 +1,86 @@
+.add-more-btn {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 0.5rem;
+}
+
+.pdg-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0.25rem;
+  padding: 1.25rem 1rem;
+  border: 1px dashed rgba(0, 0, 0, 0.16);
+  border-radius: 0.75rem;
+  background: rgba(248, 250, 252, 0.9);
+  text-align: center;
+
+  mat-icon {
+    font-size: 2rem;
+    width: 2rem;
+    height: 2rem;
+    color: rgba(71, 85, 105, 0.75);
+  }
+
+  .empty-title {
+    margin: 0;
+    font-weight: 600;
+    color: rgba(15, 23, 42, 0.88);
+  }
+
+  .empty-hint {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(71, 85, 105, 0.85);
+    max-width: 28rem;
+  }
+
+  &--readonly .empty-hint {
+    margin-bottom: 0;
+  }
+}
+
+.pdg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .25rem;
+  gap: .5rem;
+
+  .left {
+    font-size: .875rem;
+    opacity: .8;
+  }
+
+  .right {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+  }
+
+  .more-hint {
+    font-size: .8rem;
+    opacity: .7;
+  }
+}
+
+.pdg-add-panel {
+  margin-top: .75rem;
+  padding: .75rem;
+  border: 1px solid rgba(0, 0, 0, .08);
+  border-radius: .75rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .75rem;
+  background: #fff;
+}
+
+.pdg-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}

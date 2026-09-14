@@ -1,0 +1,14 @@
+.detail-container { padding: 8px; }
+
+.kv { display: grid; gap: 12px; }
+
+.row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  align-items: start;
+  gap: 16px;
+}
+
+.k {
+  font-weight: 600;
+}

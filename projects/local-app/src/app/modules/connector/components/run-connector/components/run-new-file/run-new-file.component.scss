@@ -1,0 +1,69 @@
+.file-upload {
+  &-input {
+    display: none;
+  }
+
+  &-preview {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+  }
+}
+
+
+.new-file-upload-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  &--errors {
+    align-items: flex-start;
+
+    mat-list-item {
+      height: 25px;
+    }
+
+    h4 {
+      color: var(--failed-text);
+      margin-bottom: 4px;
+    }
+
+    .column-diff-hint {
+      margin: 0 0 8px;
+      max-width: 42ch;
+      font-size: 12px;
+      opacity: 0.75;
+    }
+  }
+}
+
+
+.run-mode-radio {
+  display: block;
+  margin: 20px 0;
+
+  .mdc-form-field {
+    align-items: flex-start;
+  }
+
+  &-label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .warning {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+}
+
+.file-analysis-state {
+  margin-top: 16px;
+
+  p {
+    margin: 0;
+    font-weight: 600;
+  }
+}

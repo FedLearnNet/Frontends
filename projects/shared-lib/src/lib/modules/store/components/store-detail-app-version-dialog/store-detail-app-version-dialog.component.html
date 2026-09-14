@@ -1,0 +1,49 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  [title]="getDialogTitle()" />
+
+<mat-dialog-content>
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab [label]="('GRID.DETAIL' | translate)">
+      <div class="detail-container">
+        <div class="kv">
+          <div class="row">
+            <div class="k">{{ 'GRID.IMAGE_NAME' | translate }}</div>
+            <div class="v">
+              <span>{{ data.version.imageName }}</span>
+            </div>
+          </div>
+
+          <mat-divider />
+
+          <div class="row">
+            <div class="k">{{ 'GRID.SHORT_DESCRIPTION' | translate }}</div>
+            <div class="v">{{ data.version.shortDescription || '-' }}</div>
+          </div>
+
+          <mat-divider />
+
+          <div class="row">
+            <div class="k">{{ 'GRID.CHANGELOG' | translate }}</div>
+            <div class="v">
+              <span class="changelog">{{ data.version.changelog || '-' }}</span>
+            </div>
+          </div>
+          <mat-divider />
+
+          <div class="row">
+            <div class="k">{{ 'GRID.DESCRIPTION' | translate }}</div>
+            <markdown [data]="data.version.longDescription" />
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+    <mat-tab [label]="('BUTTON.CONFIG' | translate)">
+      <lib-store-app-config [config]="data.version.appConfig" />
+
+    </mat-tab>
+
+  </mat-tab-group>
+
+
+</mat-dialog-content>

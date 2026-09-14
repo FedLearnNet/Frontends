@@ -1,0 +1,35 @@
+.dynamic-container {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: 20px;
+  z-index: 90;
+}
+
+.resize-handle {
+  background-color: #b8ccdb;
+  border: none;
+  cursor: row-resize;
+  transition: background-color 0.3s;
+  width: 100%;
+  height: 3px;
+}
+
+.resize-handle:hover {
+  background-color: #98a8b7;
+}
+
+.connected {
+  &-success {
+    color: var(--success-text);
+  }
+
+  &-error {
+    color: var(--failed-text);
+  }
+
+  &-warn {
+    color: var(--warning-text);
+  }
+}

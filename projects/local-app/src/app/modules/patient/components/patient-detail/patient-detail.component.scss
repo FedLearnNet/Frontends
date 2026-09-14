@@ -1,0 +1,24 @@
+.patient-edit-shell {
+  display: block;
+}
+
+.view-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.detail {
+  display: flex;
+  gap: 15px;
+
+  .patient-data {
+    width: 65%;
+    padding-top: 1rem;
+  }
+
+  .logs {
+    width: calc(35% - 30px);
+    margin-right: 15px;
+  }
+}

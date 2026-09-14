@@ -1,0 +1,188 @@
+<lib-closeable-dialog-title
+  title="Upload source file"
+  [allowMaximize]="false"/>
+
+<mat-dialog-content>
+  <app-file-import
+    [cohortId]="data.cohortId"
+    [accept]="acceptedExtensions"
+    [settings]="importSettings()"
+    [autoStart]="false"
+    label="Choose a file or drag it here"
+    (fileSelected)="selectFile($event)"
+    (completed)="onImportCompleted($event)"
+    (failed)="onImportFailed($event)"/>
+
+  @if (!started()) {
+  <p class="dialog-copy">
+    Select the file and describe how it should be read. The connector keeps these settings with the selected file
+    so the same interpretation can be used for preview and analysis.
+  </p>
+
+  @if (file(); as selectedFile) {
+    <div class="selected-file">
+      <div class="selected-file__icon">
+        <mat-icon>description</mat-icon>
+      </div>
+      <div class="selected-file__details">
+        <strong>{{ selectedFile.name }}</strong>
+        <div class="selected-file__meta">
+          <lib-badge [text]="form.controls.fileType.value" color="BLUE" size="X-SMALL" [border]="true"/>
+          <span>{{ selectedFile.size / 1024 | number:'1.0-1' }} KB</span>
+        </div>
+      </div>
+      <lib-btn
+        type="REMOVE"
+        variant="GHOST"
+        size="SMALL"
+        [iconOnly]="true"
+        ariaLabel="Remove selected file"
+        (clicked)="clearFile()"/>
+    </div>
+  }
+
+  @if (fileError(); as error) {
+    <p class="file-error">{{ error }}</p>
+  }
+
+  <form class="settings-form" [formGroup]="form">
+    <div class="settings-heading">
+      <div>
+        <h3>File interpretation</h3>
+        <p>Only settings that affect parsing and reusable column metadata belong here.</p>
+      </div>
+      <mat-icon>tune</mat-icon>
+    </div>
+
+    <div class="settings-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>File type</mat-label>
+        <mat-select formControlName="fileType">
+          <mat-option value="CSV">CSV or delimited text</mat-option>
+          <mat-option value="EXCEL">Excel workbook</mat-option>
+          <mat-option value="JSON">JSON</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      @if (form.controls.fileType.value === 'CSV') {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Delimiter</mat-label>
+          <mat-select formControlName="delimiter">
+            <mat-option value=",">Comma (,)</mat-option>
+            <mat-option value=";">Semicolon (;)</mat-option>
+            <mat-option value="|">Pipe (|)</mat-option>
+            <mat-option value="\t">Tab</mat-option>
+            <mat-option value="s">Space</mat-option>
+            <mat-option value="CUSTOM">Custom</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (form.controls.delimiter.value === 'CUSTOM') {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Custom delimiter</mat-label>
+            <input matInput formControlName="customDelimiter" maxlength="4">
+          </mat-form-field>
+        }
+      }
+    </div>
+
+    @if (form.controls.fileType.value !== 'JSON') {
+      <mat-slide-toggle formControlName="hasHeader">
+        First row contains column headers
+      </mat-slide-toggle>
+    }
+
+    @if (form.controls.fileType.value === 'CSV') {
+      <div class="settings-choice">
+        <strong>CSV source</strong>
+        <mat-radio-group formControlName="firstSheetOnly">
+          <mat-radio-button [value]="true">Single CSV or text file</mat-radio-button>
+          <mat-radio-button [value]="false">ZIP archive containing multiple CSV files</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    }
+
+    @if (form.controls.fileType.value === 'EXCEL') {
+      <div class="settings-choice">
+        <strong>Workbook scope</strong>
+        <mat-radio-group formControlName="firstSheetOnly">
+          <mat-radio-button [value]="true">Use the first sheet</mat-radio-button>
+          <mat-radio-button [value]="false">Analyze the entire workbook</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    }
+
+    @if (form.controls.fileType.value !== 'EXCEL') {
+      <mat-slide-toggle formControlName="hasSupportFile">
+        This connector also uses additional patient-data files
+      </mat-slide-toggle>
+    }
+
+    <mat-slide-toggle formControlName="deleteUnneededFileAfterSuccess">
+      Delete the source file after a successful run when it is no longer referenced
+    </mat-slide-toggle>
+  </form>
+
+  <lib-info-card
+    type="INFO"
+    size="SMALL"
+    title="Background file analysis"
+    subtitle="After upload, column types, possible values, and statistics can be prepared while you continue configuring the connector."/>
+  }
+
+  @if (hasSheets()) {
+    <section class="analysis-result">
+      <div class="analysis-result__heading">
+        <div>
+          <lib-badge text="Analysis complete" color="GREEN" iconName="check_circle" [border]="true"/>
+          <h3>{{ uploadedFile()?.fileName ?? file()?.name }}</h3>
+          <p>Review the bounded preview and full-file column statistics before using this source.</p>
+        </div>
+        <lib-badge
+          [text]="analyzedSheets().length + (analyzedSheets().length === 1 ? ' table' : ' tables')"
+          color="BLUE"
+          [border]="true"/>
+      </div>
+
+      <mat-tab-group animationDuration="0ms" class="analysis-tabs">
+        @for (sheet of analyzedSheets(); track sheet.name) {
+          <mat-tab [label]="sheet.name">
+            <app-connector-file-sheet-detail-card
+              [fileName]="uploadedFile()?.fileName ?? file()?.name ?? ''"
+              [sheet]="sheet"/>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    </section>
+  }
+
+  @if (analysisError(); as error) {
+    <p class="file-error analysis-error">{{ error }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (uploadedFile()) {
+    <lib-btn type="CLOSE" variant="SECONDARY" (clicked)="dialogRef.close()"/>
+    <span class="spacer"></span>
+    <lib-btn
+      type="CONTINUE"
+      label="Use file"
+      icon="check_circle"
+      (clicked)="useUploadedFile()"/>
+  } @else if (analyzing()) {
+    <!-- The import outlives this dialog, so leaving is not the same as stopping. -->
+    <lib-btn type="CANCEL" variant="DANGER" [label]="'BUTTON.STOP_IMPORT' | translate" (clicked)="cancel()"/>
+    <span class="spacer"></span>
+    <lib-btn type="CLOSE" variant="SECONDARY" [label]="'BUTTON.CLOSE_KEEP_RUNNING' | translate" (clicked)="close()"/>
+  } @else {
+    <lib-btn type="CANCEL" variant="SECONDARY" (clicked)="cancel()"/>
+    <span class="spacer"></span>
+    <lib-btn
+      type="IMPORT"
+      label="Upload and analyze"
+      icon="cloud_upload"
+      [disabled]="!file() || form.invalid"
+      (clicked)="submit()"/>
+  }
+</mat-dialog-actions>

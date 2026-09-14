@@ -1,0 +1,42 @@
+@use '../shared';
+@use '@angular/material/index' as mat;
+@use 'variables' as var;
+
+@include mat.elevation-classes();
+@include mat.app-background();
+
+
+$dAIbetes-theme: mat.m2-define-light-theme(
+    (
+        color: (
+                primary: var.$mb-frontend-primary,
+                accent: var.$mb-frontend-accent,
+                warn: var.$mb-frontend-warn,
+        ),
+        typography: (
+                brand-family: 'Open Sans',
+                bold-weight: 900
+        ),
+        density: (
+                scale: -1,
+        )
+    )
+);
+
+:root {
+  @include mat.all-component-themes($dAIbetes-theme);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.main-container {
+  margin: 10px;
+}

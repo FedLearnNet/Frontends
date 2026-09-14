@@ -1,0 +1,34 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.cohort-patients-container {
+  &--table-wrapper {
+    overflow: hidden;
+
+    &--table {
+      overflow-x: auto;
+      border-radius: 4px;
+
+      .mat-elevation-z0 {
+        width: 100%;
+        display: block;
+        table-layout: fixed;
+      }
+
+      mat-header-cell, mat-cell {
+        min-width: 150px;
+      }
+    }
+  }
+}
+
+.patients-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

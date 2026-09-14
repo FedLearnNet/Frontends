@@ -1,0 +1,183 @@
+<div class="schema-node-detail">
+  <section class="schema-node-detail__hero">
+    <div class="schema-node-detail__icon">
+      <mat-icon fontSet="material-symbols-outlined">
+        {{ data.nodeType === SchemaNodeTypeEnum.ATTRIBUTE ? 'tag' : data.nodeType === SchemaNodeTypeEnum.ROOT ? 'home' : 'folder' }}
+      </mat-icon>
+    </div>
+
+    <div class="schema-node-detail__summary">
+      <div class="schema-node-detail__badges">
+        <lib-badge [text]="data.nodeType" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+        @if (data.globalId) {
+          <lib-badge [text]="data.globalId" color="BLUE" [border]="true" [uppercase]="true"></lib-badge>
+        }
+      </div>
+
+      <p>{{ data.description || 'No schema description provided.' }}</p>
+    </div>
+  </section>
+
+  @if (isStructuralNode()) {
+    <lib-info-card
+      type="INFO"
+      variant="BANNER"
+      icon="account_tree"
+      title="Structural schema node"
+      subtitle="Groups and roots organize the schema hierarchy. They intentionally do not have ontology or datatype mappings; only attribute nodes carry those details.">
+    </lib-info-card>
+  }
+
+  <lib-info-grid title="Schema">
+    <div class="schema-node-detail__grid-item">
+      <span>Name</span>
+      <lib-badge [text]="display(data.name)" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+    </div>
+    <div class="schema-node-detail__grid-item">
+      <span>Node type</span>
+      <lib-badge [text]="data.nodeType" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+    </div>
+    <div class="schema-node-detail__grid-item">
+      <span>Local ID</span>
+      <lib-badge [text]="display(data.id)" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+    </div>
+    <div class="schema-node-detail__grid-item">
+      <span>Parent ID</span>
+      <lib-badge [text]="display(parentId(), 'Root')" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+    </div>
+    <div class="schema-node-detail__grid-item">
+      <span>Global ID</span>
+      <lib-badge [text]="display(data.globalId)" color="BLUE" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+    </div>
+    <div class="schema-node-detail__grid-item">
+      <span>Children</span>
+      <lib-badge [text]="display(childCount())" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+    </div>
+  </lib-info-grid>
+
+  @if (!isStructuralNode()) {
+    <section class="schema-node-detail__grid">
+      <lib-info-grid title="Ontology">
+        @if (ontology(); as ontologyNode) {
+          <div class="schema-node-detail__grid-item">
+            <span>Name</span>
+            <lib-badge [text]="display(ontologyNode.name)" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item schema-node-detail__grid-item--wide">
+            <span>Description</span>
+            <p>{{ ontologyNode.description || 'No description provided.' }}</p>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Local ID</span>
+            <lib-badge [text]="display(ontologyNode.id)" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Global ID</span>
+            <lib-badge [text]="display(ontologyNode.globalId)" color="BLUE" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Root source</span>
+            <lib-badge [text]="display(ontologyNode.rootSource)" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+          </div>
+        } @else {
+          <lib-info-card
+            type="WARNING"
+            variant="NOTICE"
+            title="Attribute has no ontology mapping">
+          </lib-info-card>
+        }
+      </lib-info-grid>
+
+      <lib-info-grid title="Datatype">
+        @if (dataType(); as dt) {
+          <div class="schema-node-detail__grid-item">
+            <span>Name</span>
+            <lib-badge [text]="display(dt.name)" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item schema-node-detail__grid-item--wide">
+            <span>Description</span>
+            <p>{{ dt.description || 'No description provided.' }}</p>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Type</span>
+            <lib-badge [text]="display(dt.type)" color="BLUE" [border]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Form type</span>
+            <lib-badge [text]="display(dt.formType)" color="GRAY" [border]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Global ID</span>
+            <lib-badge [text]="display(dt.globalId)" color="BLUE" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Is required</span>
+            <lib-badge [text]="dt.isRequired ? 'Yes' : 'No'" [color]="dt.isRequired ? 'ORANGE' : 'GRAY'" [border]="true" [uppercase]="true"></lib-badge>
+          </div>
+          <div class="schema-node-detail__grid-item">
+            <span>Allow null values</span>
+            <lib-badge [text]="dt.allowNullValues ? 'Yes' : 'No'" [color]="dt.allowNullValues ? 'ORANGE' : 'GRAY'" [border]="true" [uppercase]="true"></lib-badge>
+          </div>
+        } @else {
+          <lib-info-card
+            type="WARNING"
+            variant="NOTICE"
+            title="Attribute has no datatype mapping">
+          </lib-info-card>
+        }
+      </lib-info-grid>
+    </section>
+
+    @if (dataType(); as dt) {
+      <section class="schema-node-detail__grid">
+        <lib-info-grid title="Validation">
+          @if (dt.validations?.length) {
+            <div class="schema-node-detail__list">
+              @for (validation of dt.validations; track validation) {
+                <lib-badge [text]="validationLabel(validation)" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+              }
+            </div>
+          } @else {
+            <lib-info-card type="INFO" variant="NOTICE" title="No validation rules configured"></lib-info-card>
+          }
+        </lib-info-grid>
+
+        <lib-info-grid title="Allowed values">
+          @if (allowedValueLabels().length) {
+            <div class="schema-node-detail__list">
+              @for (option of allowedValueLabels(); track option) {
+                <lib-badge [text]="option" color="BLUE" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+              }
+            </div>
+          } @else {
+            <lib-info-card type="INFO" variant="NOTICE" title="No allowed values configured"></lib-info-card>
+          }
+        </lib-info-grid>
+      </section>
+
+      @if (hasMapping(dt.mapping)) {
+        <lib-info-grid title="Value mapping">
+          @for (mapping of dt.mapping | keyvalue; track mapping.key) {
+            <div class="schema-node-detail__grid-item">
+              <span>{{ mapping.key }}</span>
+              <lib-badge [text]="mapping.value" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+            </div>
+          }
+        </lib-info-grid>
+      }
+    }
+  } @else {
+    <section class="schema-node-detail__structural-grid">
+      <lib-info-grid title="Mappings">
+        <div class="schema-node-detail__grid-item">
+          <span>Ontology</span>
+          <lib-badge text="Not applicable for group/root nodes" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+        </div>
+        <div class="schema-node-detail__grid-item">
+          <span>Datatype</span>
+          <lib-badge text="Not applicable for group/root nodes" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
+        </div>
+      </lib-info-grid>
+    </section>
+  }
+</div>

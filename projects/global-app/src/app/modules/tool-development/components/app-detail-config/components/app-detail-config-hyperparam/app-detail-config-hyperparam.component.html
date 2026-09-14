@@ -1,0 +1,245 @@
+<div class="config-wrapper">
+  <div class="hyperparams-list">
+    @for (param of hyperparams(); track param) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          @if (supportsTraining()) {
+            <app-app-detail-config-mode-icon
+              mat-card-avatar
+              [mode]="param.mode"
+              [editMode]="param.editMode"
+              (modeChanged)="setParamField(param, 'mode', $event)"
+              [hasSpace]="true"
+            />
+          }
+          <mat-card-title class="row">
+            @if (param.editMode) {
+              <mat-form-field appearance="fill" class="input-name">
+                <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+                <input
+                  matInput
+                  [ngModel]="param.name"
+                  (ngModelChange)="setParamField(param, 'name', $event)"
+                />
+              </mat-form-field>
+            } @else {
+              <lib-kv [label]="'GRID.NAME' | translate" [value]="param.name" [border]="false"/>
+            }
+
+            @if (editMode()) {
+              <div class="actions">
+                @if (param.editMode) {
+                  <button mat-icon-button (click)="removeParam(param)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                  @if (param.edited) {
+                    <button mat-icon-button (click)="saveParam(param)">
+                      <mat-icon>save</mat-icon>
+                    </button>
+                  } @else {
+                    <button mat-icon-button (click)="editParam(param)">
+                      <mat-icon>edit_off</mat-icon>
+                    </button>
+                  }
+                } @else {
+                  <button mat-icon-button (click)="toggleValidate(param)">
+                    @if (param.showValidate) {
+                      <mat-icon fontSet="material-symbols-outlined">check_box_outline_blank</mat-icon>
+                    } @else {
+                      <mat-icon fontSet="material-symbols-outlined">indeterminate_question_box</mat-icon>
+                    }
+                  </button>
+                  <button mat-icon-button (click)="editParam(param)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+              </div>
+            }
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="row">
+            <div class="row-el">
+              @if (param.editMode) {
+                <mat-form-field>
+                  <mat-label>{{ 'GRID.INPUT_DATA_TYPE' | translate }}</mat-label>
+                  <mat-select
+                    [ngModel]="param.type"
+                    (ngModelChange)="setParamField(param, 'type', $event)"
+                  >
+                    @for (type of toolConfigDataTypes; track type.key) {
+                      <mat-option [value]="type.key">{{ type.value }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              } @else {
+                <lib-kv
+                  [label]="'GRID.TYPE' | translate"
+                  [value]="param.type"
+                  [mono]="true"
+                  [border]="false"
+                />
+              }
+            </div>
+
+            <div class="row-el">
+              @if (param.editMode) {
+                <lib-app-hyper-param-input
+                  [hyperparam]="param"
+                  [label]="('DEFAULT' | translate)"
+                  (valueChanged)="setParamField(param, 'default', $event)"
+                />
+              } @else {
+                <lib-kv [label]="'DEFAULT' | translate" [value]="param.default" [border]="false"/>
+              }
+            </div>
+          </div>
+
+          <div class="row">
+            @if (param.type === FederatedAppConfigHyperParamDataType.INTEGER ||
+            param.type === FederatedAppConfigHyperParamDataType.FLOAT) {
+              @if (param.editMode) {
+                <mat-form-field>
+                  <mat-label>{{ 'GRID.MIN_VALUE' | translate }}</mat-label>
+                  <input
+                    matInput
+                    placeholder="0"
+                    type="number"
+                    [ngModel]="param.minValue"
+                    (ngModelChange)="setParamField(param, 'minValue', $event)"
+                  />
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-label>{{ 'GRID.MAX_VALUE' | translate }}</mat-label>
+                  <input
+                    matInput
+                    placeholder="1"
+                    type="number"
+                    [ngModel]="param.maxValue"
+                    (ngModelChange)="setParamField(param, 'maxValue', $event)"
+                  />
+                </mat-form-field>
+              } @else {
+                <lib-kv [label]="'GRID.MIN_VALUE' | translate" [value]="param.minValue" [border]="false"/>
+                <lib-kv [label]="'GRID.MAX_VALUE' | translate" [value]="param.maxValue" [border]="false"/>
+              }
+            }
+
+            @if (param.type === FederatedAppConfigHyperParamDataType.STRING) {
+              @if (param.editMode) {
+                <mat-form-field>
+                  <mat-label>{{ 'GRID.PATTERN' | translate }}</mat-label>
+                  <input
+                    matInput
+                    [ngModel]="param.pattern"
+                    (ngModelChange)="setParamField(param, 'pattern', $event)"
+                  />
+                </mat-form-field>
+              } @else {
+                <lib-kv
+                  [label]="'GRID.PATTERN' | translate"
+                  [value]="param.pattern"
+                  [mono]="true"
+                  [border]="false"
+                />
+              }
+            }
+          </div>
+
+          @if (param.editMode) {
+            @if (param.type === FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+              <mat-form-field class="full-width">
+                <mat-label>{{ 'GRID.CATEGORICAL_OPTIONS' | translate }}</mat-label>
+                <mat-chip-grid #chipGrid aria-label="Enter Options">
+                  @for (option of param.options; track $index) {
+                    <mat-chip-row
+                      (removed)="removeOption(param, option)"
+                      [editable]="true"
+                      (edited)="editOption(param, option, $event)"
+                      [aria-description]="'press enter to edit ' + option"
+                    >
+                      {{ option }}
+                      <button matChipRemove [attr.aria-label]="'remove ' + option">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip-row>
+                  }
+
+                  <input
+                    [placeholder]="('NEW_OPTION' | translate)"
+                    [matChipInputFor]="chipGrid"
+                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                    [matChipInputAddOnBlur]="true"
+                    (matChipInputTokenEnd)="addOption(param, $event)"
+                  />
+                </mat-chip-grid>
+              </mat-form-field>
+            }
+
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+              <input
+                matInput
+                [ngModel]="param.description"
+                (ngModelChange)="setParamField(param, 'description', $event)"
+              />
+            </mat-form-field>
+          } @else {
+            @if (param.options && param.type === FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+              <div class="row">
+                <lib-kv
+                  [label]="'GRID.OPTIONS' | translate"
+                  [value]="(param.options ? param.options!.join(', ') : 'None')"
+                  [multiline]="true"
+                  [border]="false"
+                />
+              </div>
+            }
+
+            <lib-kv
+              [label]="'GRID.DESCRIPTION' | translate"
+              [value]="param.description"
+              [multiline]="true"
+              [border]="false"
+            />
+            @if (param.showValidate) {
+              <lib-tool-hyperparam-validation class="full-width"
+                                              [hyperparam]="param"/>
+            }
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (editMode()) {
+      <lib-btn type="CREATE" [label]="'BUTTON.ADD_PARAMETER' | translate" (clicked)="addParam()"></lib-btn>
+    }
+  </div>
+
+  @if (editMode()) {
+    <div class="pydantic-compact-action">
+      <button mat-mini-fab
+              color="primary"
+              [disabled]="!pydanticClass()"
+              (click)="openPydanticClassDialog()"
+              [attr.aria-label]="'MENU.PYDANTIC_CLASS' | translate">
+        <mat-icon>code</mat-icon>
+      </button>
+      <div>
+        <strong>{{ 'MENU.PYDANTIC_CLASS' | translate }}</strong>
+        <p>{{ 'PYDANTIC_CLASS_COMPACT_HINT' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="pydantic">
+      <h3>{{ 'MENU.PYDANTIC_CLASS' | translate }}</h3>
+      @if (pydanticClass()) {
+        <markdown clipboard lineHighlight [data]="pydanticMarkdown()"/>
+      } @else {
+        <p>{{ 'LOADING' | translate }}...</p>
+      }
+    </div>
+  }
+</div>

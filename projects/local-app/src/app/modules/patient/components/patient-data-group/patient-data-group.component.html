@@ -1,0 +1,95 @@
+@if (total() > 0) {
+  <div class="pdg-header">
+    <div class="left">
+      <span>{{ 'PATIENT.SHOWING_ENTRIES' | translate:{ shown: renderedCount(), total: total() } }}</span>
+    </div>
+
+    @if (hasMore()) {
+      <div class="right">
+        <button mat-icon-button (click)="showMore()" aria-label="Show more">
+          <mat-icon>add</mat-icon>
+        </button>
+        <span class="more-hint">+{{ step() }} more</span>
+      </div>
+    }
+  </div>
+}
+
+@for (e of renderedItems(); track e.id) {
+  <app-patient-data-element
+    [item]="e"
+    [schemaNode]="schemaNode()"
+    [editable]="editable()"
+    (itemChange)="onItemChange($event)"
+    (deleteElement)="onDelete(e)"
+  />
+}
+
+@if (total() > 1) {
+  <app-patient-data-sparkline
+    [items]="items()"
+    [showChart]="showChart()"
+  />
+}
+
+@if (total() === 0 && !adding()) {
+  <div class="pdg-empty-state" [class.pdg-empty-state--readonly]="!editable()">
+    <p class="empty-title">{{ 'PATIENT.NO_DATA_RECORDED' | translate }}</p>
+    <p class="empty-hint">{{ 'PATIENT.NO_DATA_RECORDED_HINT' | translate:{ fieldName: schemaNode().name } }}</p>
+    @if (canAddMore()) {
+      <lib-btn
+        type="UPDATE"
+        variant="PRIMARY"
+        [label]="'PATIENT.ADD_VALUE' | translate"
+        (clicked)="openAdd()" />
+    }
+  </div>
+}
+
+@if (total() > 0 && !adding() && canAddMore()) {
+  <div class="add-more-btn">
+    <lib-btn
+      type="UPDATE"
+      variant="PRIMARY"
+      [label]="'PATIENT.ADD_ANOTHER_VALUE' | translate"
+      (clicked)="openAdd()" />
+  </div>
+}
+
+@if (editable() && adding() && form()) {
+  <form
+    [formGroup]="form()!"
+    (ngSubmit)="onSubmit()"
+    class="visit-form pdg-add-panel"
+    [attr.data-patient-add-panel]="schemaNode().id">
+    <h3>{{ 'BUTTON.ADD_A_NEW_ELEMENT' | translate }}</h3>
+    <app-patient-data-form-field
+      [node]="schemaNode()"
+      [control]="form()?.get(schemaNode().id.toString())"
+    />
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'GRID.VISIT_ID' | translate }}</mat-label>
+      <input matInput formControlName="visitId" placeholder="e.g. VISIT_001">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'GRID.VISIT_TIMESTAMP' | translate }}</mat-label>
+      <input matInput type="datetime-local" formControlName="visitTimestamp">
+      <mat-hint>Stored as ISO-8601 (UTC)</mat-hint>
+    </mat-form-field>
+
+    <div class="pdg-actions">
+      <lib-btn
+        type="CANCEL"
+        variant="SECONDARY"
+        btnType="button"
+        (clicked)="cancelAdd()" />
+      <lib-btn
+        type="ADD"
+        variant="PRIMARY"
+        [label]="'BUTTON.ADD' | translate"
+        btnType="submit" />
+    </div>
+  </form>
+}

@@ -1,0 +1,36 @@
+@if (storeLoading()) {
+  <lib-skeleton-loader></lib-skeleton-loader>
+} @else {
+  @if (storeError(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  }
+  @if (appDetail(); as app) {
+    <h3>Overview</h3>
+    <lib-store-card [linkToShop]="false" [storeElement]="{app: app}" size="x-large"></lib-store-card>
+    <mat-divider></mat-divider>
+
+    <h3>Settings</h3>
+    @if (hasHyperParams()) {
+      <lib-app-run-hyperparameter [app]="app"
+                                  (formsValid)="hyperParamValid=$event"
+                                  (hyperParamsChange)="hyperParams.set($event)"
+      />
+    } @else {
+      <lib-hint-card>There are no HyperParams</lib-hint-card>
+    }
+    <mat-divider></mat-divider>
+    <h3>Inputs</h3>
+    @if (hasInputs()) {
+
+      <lib-app-run-input [app]="app"
+                         [directUploadToWorkflow]="undefined"
+                         (inputChanged)="changeInput($event)"
+      />
+    } @else {
+      <lib-hint-card>There are no inputs</lib-hint-card>
+    }
+  } @else {
+    <lib-error-card>No App found</lib-error-card>
+  }
+}
+

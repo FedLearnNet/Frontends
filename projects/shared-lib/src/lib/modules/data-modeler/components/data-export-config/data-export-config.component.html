@@ -1,0 +1,152 @@
+<div class="body">
+  <section class="panel">
+    <div class="panel-title">Settings</div>
+
+    @if (allowAppBased()) {
+      <div class="mode">
+        <div class="mode__label">Export type</div>
+        <mat-button-toggle-group
+          class="mode__toggle"
+          [value]="config().appBased ? 'app' : 'native'"
+          (change)="setAppBased($event.value === 'app')"
+          hideSingleSelectionIndicator
+          aria-label="Export type">
+          <mat-button-toggle value="native">
+            <mat-icon>table_view</mat-icon>
+            Table (CSV)
+          </mat-button-toggle>
+          <mat-button-toggle value="app">
+            <mat-icon>widgets</mat-icon>
+            Export app
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    }
+
+    <div class="row">
+
+      @if (showPatientFilter()) {
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Max patients</mat-label>
+          <input
+            matInput
+            type="number"
+            min="1"
+            placeholder="All"
+            [ngModel]="config().patientFilter?.limit ?? null"
+            (ngModelChange)="setPatientLimit($event)"
+          />
+          <mat-hint>Ordered by patient id.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="field">
+          <mat-label>Patients</mat-label>
+          <mat-select
+            multiple
+            placeholder="All patients"
+            [ngModel]="config().patientFilter?.externalPatientIds ?? []"
+            (ngModelChange)="setExternalPatientIds($event)"
+          >
+            @for (patient of patientOptions(); track patient.externalPatientId) {
+              <mat-option [value]="patient.externalPatientId">{{ patient.externalPatientId }}</mat-option>
+            }
+          </mat-select>
+          @if (patientOptionsTruncated()) {
+            <mat-hint>Only the first {{ patientOptions().length }} patients are listed.</mat-hint>
+          } @else {
+            <mat-hint>Leave empty to export every patient.</mat-hint>
+          }
+        </mat-form-field>
+      }
+    </div>
+
+    <div class="hint">
+      @if (config().appBased) {
+        Runs an export app on the cohort's data. Its outputs are stored with the run and downloaded as a zip.
+      } @else {
+        Uses native pivot/join rules.
+      }
+    </div>
+  </section>
+
+  @if (config().appBased) {
+    <section class="panel">
+      <div class="panel-title">App-based export</div>
+
+      <button mat-flat-button color="primary" (click)="onShowTools()">
+        <mat-icon>menu_open</mat-icon>
+        {{ 'BUTTON.SHOW_TOOLS' | translate }}
+      </button>
+      @if (selectedTool(); as app) {
+
+        <lib-store-card [linkToShop]="false" [storeElement]="{app}" size="x-large"/>
+
+        <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+          <mat-tab [label]="('GRID.SETUP' | translate)">
+            @if (selectedVersion(); as sv) {
+              <lib-app-run-hyperparameter [version]="sv"
+                                          (hyperParamsChange)="onHyperParamsChanged($event)"
+                                          [hyperParams]="config().hyperParams || {}"
+                                          (formsValid)="hyperParamsValid.set($event)"
+              />
+            } @else {
+              <p>{{ 'WARNING.NO_VALID_VERSION' | translate }}</p>
+            }
+          </mat-tab>
+          <mat-tab [label]="('GRID.VERSION' | translate)">
+            <lib-store-version-list [detail]="app" (selectedVersion)="versionChanged($event)"/>
+          </mat-tab>
+          <mat-tab [label]="('GRID.CONFIG' | translate)">
+            @if (selectedVersion(); as sv) {
+              <lib-store-app-config [config]="sv.appConfig"/>
+            } @else {
+              <p>{{ 'WARNING.NO_VALID_VERSION' | translate }}</p>
+            }
+          </mat-tab>
+
+        </mat-tab-group>
+      }
+    </section>
+  } @else {
+    <section class="panel">
+      <div class="panel-title">Native export</div>
+
+      <div class="row row--native">
+        <mat-slide-toggle
+          [ngModel]="config().wideFormat ?? false"
+          (ngModelChange)="setWideFormat($event)"
+        >
+          Wide format (pivot)
+        </mat-slide-toggle>
+
+        @if (config().wideFormat) {
+          <mat-form-field appearance="outline" class="field">
+            <mat-label>Join fields</mat-label>
+            <mat-select
+              multiple
+              [ngModel]="config().joinFields ?? []"
+              (ngModelChange)="setJoinFields($event)"
+            >
+              @for (jf of joinFieldOptions; track jf.key) {
+                <mat-option [value]="jf.key">{{ jf.value }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field">
+            <mat-label>Duplicate policy</mat-label>
+            <mat-select
+              [ngModel]="config().duplicatePolicy ?? null"
+              (ngModelChange)="setDuplicatePolicy($event)"
+            >
+              @for (p of duplicatePolicyOptions; track p.key) {
+                <mat-option [value]="p.key">{{ p.value }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+      </div>
+    </section>
+  }
+
+</div>

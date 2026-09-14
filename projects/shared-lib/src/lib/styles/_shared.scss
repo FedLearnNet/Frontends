@@ -1,0 +1,51 @@
+:root {
+  --surface-bg: #ffffff;
+
+  --gray-light-bg: #fbfbfb;
+  --gray-bg: #f9fafb;
+  --gray-light-border: #dfe1e6;
+  --gray-text: #5F6368;
+
+  --success-bg: #E6F4EA;
+  --success-text: #1E8E3E;
+
+  --failed-bg: #FCE8E6;
+  --failed-text: #C5221F;
+
+  --warning-bg: #FEF7E0;
+  --warning-text: #AF6000;
+
+  --running-bg: #E8F0FE;
+  --running-text: #1A73E8;
+
+  --pending-bg: var(--gray-bg);
+  --pending-text: var(--gray-text);
+
+  --line: rgba(2, 6, 23, 0.08);
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .margin-top-auto {
+    margin-top: auto;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .page-wrapper {
+    margin-block: 1rem;
+  }
+
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  --pad: 24px;
+  --gap: 16px;
+
+  --muted: rgba(15, 23, 42, 0.62);
+}
+

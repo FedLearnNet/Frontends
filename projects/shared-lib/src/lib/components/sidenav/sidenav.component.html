@@ -1,0 +1,98 @@
+<aside class="shell">
+  <div class="header">
+    <div class="logo">
+      <button class="logo-mark" (click)="onToggle()">{{ initials() }}</button>
+      <div class="brand" [class.hide]="collapsed()">
+        <div class="brand-name">{{ title() }}</div>
+      </div>
+    </div>
+
+    @if (!collapsed()) {
+      <button class="toggle" (click)="onToggle()" [attr.aria-pressed]="collapsed()">
+        <mat-icon>{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+      </button>
+    }
+  </div>
+
+  <nav class="nav">
+    @for (section of sections(); track section.title ?? $index) {
+      <div class="section">
+        @if (section.title) {
+          <div class="section-title" [class.hide]="collapsed()">{{ section.title | translate | uppercase }}</div>
+        }
+
+        <ul class="list">
+          @for (item of section.items; track itemKey(item)) {
+            <li>
+              <a
+                class="entry"
+                [class.disabled]="item.disabled"
+                [routerLink]="item.route || null"
+                routerLinkActive="active"
+                (isActiveChange)="setIsActive(item,$event)"
+                (click)="onItemClick(item)"
+                [matTooltip]="collapsed() ? (item.label | translate) : ''"
+                matTooltipPosition="right"
+              >
+                <div class="entry-icon">
+                  <mat-icon>{{ item.icon }}</mat-icon>
+                </div>
+                <div class="entry-label" [class.hide]="collapsed()">{{ item.label | translate }}</div>
+                @if (item.badge !== undefined && item.badge !== null && !collapsed()) {
+                  <span class="entry-badge">{{ item.badge }}</span>
+                }
+                @if (item.starrable && !collapsed()) {
+                  <button
+                    type="button"
+                    class="star-btn"
+                    [class.starred]="isStarred(item)"
+                    (click)="onStarClick($event, item)"
+                    [attr.aria-pressed]="isStarred(item)"
+                    [matTooltip]="isStarred(item) ? 'Unstar' : 'Star'"
+                  >
+                    <mat-icon>{{ isStarred(item) ? 'star' : 'star_border' }}</mat-icon>
+                  </button>
+                }
+              </a>
+            </li>
+            @if (item.children && !collapsed() && isOpen(item)) {
+              <div class="subsections">
+                @for (subItem of item.children; track itemKey(subItem)) {
+                  <li>
+                    <a
+                      class="entry"
+                      [class.disabled]="subItem.disabled"
+                      [routerLink]="subItem.route || null"
+                      routerLinkActive="active"
+                      (click)="onChildItemClick(item, subItem)"
+                    >
+                      <div class="entry-icon">
+                        <mat-icon>{{ subItem.icon }}</mat-icon>
+                      </div>
+                      <div class="entry-label">{{ subItem.label | translate }}</div>
+                      @if (subItem.badge !== undefined && subItem.badge !== null) {
+                        <span class="entry-badge">{{ subItem.badge }}</span>
+                      }
+                      @if (subItem.starrable) {
+                        <button
+                          type="button"
+                          class="star-btn"
+                          [class.starred]="isStarred(subItem)"
+                          (click)="onStarClick($event, subItem)"
+                          [attr.aria-pressed]="isStarred(subItem)"
+                          [matTooltip]="isStarred(subItem) ? 'Unstar' : 'Star'"
+                        >
+                          <mat-icon>{{ isStarred(subItem) ? 'star' : 'star_border' }}</mat-icon>
+                        </button>
+                      }
+                    </a>
+                  </li>
+                }
+              </div>
+            }
+          }
+        </ul>
+      </div>
+    }
+  </nav>
+</aside>

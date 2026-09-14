@@ -1,0 +1,193 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'Create a new tool'"
+/>
+
+<mat-dialog-content class="content">
+  <lib-info-card
+    title="Create a new tool"
+    subtitle="Follow the steps to define the basics, select a tool type, and review before publishing"
+    size="SMALL"
+    type="PRIMARY">
+  </lib-info-card>
+
+  <form class="form" [formGroup]="form">
+    <mat-stepper
+      class="stepper"
+      [linear]="true"
+      #stepper
+    >
+      <mat-step [stepControl]="basicsGroup">
+        <ng-template matStepLabel>Basics</ng-template>
+        <div class="grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input
+              matInput
+              formControlName="name"
+              placeholder="e.g. Cohort Normalizer"
+              autocomplete="off"
+            />
+            @if (name.touched && name.hasError('required')) {
+              <mat-error>Name is required</mat-error>
+            }
+            <mat-hint>Shown to users in the Tool Store.</mat-hint>
+          </mat-form-field>
+
+          <app-tool-slug-input
+            formControlName="slug"
+            [toolName]="name.value"
+            [showErrors]="slug.touched && slug.invalid"
+            label="Slug"
+            placeholder="e.g. cohort-normalizer"
+            hint="Auto-derived from name until you edit it."
+          ></app-tool-slug-input>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Short description</mat-label>
+            <textarea
+              matInput
+              formControlName="shortDescription"
+              rows="3"
+              placeholder="One sentence that tells users what this tool does."
+            ></textarea>
+
+            @if (shortDescription.touched && shortDescription.hasError('required')) {
+              <mat-error>Short description is required</mat-error>
+            }
+            @if (shortDescription.touched && shortDescription.hasError('maxlength')) {
+              <mat-error>Keep it under 160 characters</mat-error>
+            }
+
+            <mat-hint align="start">Keep it short and specific.</mat-hint>
+            <mat-hint align="end">{{ (shortDescription.value?.length ?? 0) }}/160</mat-hint>
+          </mat-form-field>
+        </div>
+        <lib-info-card
+          class="mt-2"
+          title="Name and Slugs"
+          subtitle="The name is shown in the store. The slug becomes part of URLs and identifiers."
+          size="SMALL"
+          [border]="true"
+          type="INFO">
+        </lib-info-card>
+      </mat-step>
+
+      <mat-step [stepControl]="type">
+        <ng-template matStepLabel>Type</ng-template>
+
+        <div class="section">
+          <lib-tool-type-selector
+            formControlName="toolType"
+            [showRequiredError]="type.touched && type.hasError('required')"
+          ></lib-tool-type-selector>
+        </div>
+
+        @if (supportsFederated()) {
+          <div class="federated-option">
+            <mat-checkbox [formControl]="supportsFederatedLearning">
+              Enable federated learning
+            </mat-checkbox>
+            <span class="federated-option__description">
+              @if (supportsFederatedLearning.value) {
+                This tool will run as a <strong>federated</strong> learning tool and will not execute centrally.
+              } @else {
+                This tool will run centrally across all data.
+              }
+            </span>
+          </div>
+
+          <lib-info-card
+            class="mt-2"
+            title="Federated Learning"
+            size="SMALL"
+            [border]="true"
+            type="INFO">
+            <div subtitle>
+              @if (supportsFederatedLearning.value) {
+                <strong>Federated mode is active.</strong>
+                Execution is distributed across institutions — no central data access.
+                  This cannot be changed after creation.
+              } @else {
+                Enabling federated learning will make this tool run in a distributed mode
+                  across institutions instead of centrally.
+                  This cannot be changed after creation.
+              }
+            </div>
+          </lib-info-card>
+        }
+
+        @if (type.touched && type.hasError('required')) {
+          <lib-error-card class="inline-error">
+            Please select a tool type to continue.
+          </lib-error-card>
+        }
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Review</ng-template>
+        <lib-info-card
+          class="mb-2"
+          title="Ready?"
+          subtitle="Confirm the details. You can go back and adjust anything."
+          size="SMALL"
+          [border]="true"
+          type="PRIMARY">
+        </lib-info-card>
+
+        @if (form.invalid) {
+          <lib-error-card class="inline-error">
+            Something is missing or invalid. Please go back and fix the highlighted fields.
+          </lib-error-card>
+        } @else {
+          <lib-store-card [linkToShop]="false" [storeElement]="{app: previewApp()}" [size]="'large'"></lib-store-card>
+        }
+      </mat-step>
+    </mat-stepper>
+  </form>
+</mat-dialog-content>
+
+<span class="spacer"></span>
+<mat-dialog-actions>
+  @if (stepper.selectedIndex > 0) {
+    <button mat-stroked-button type="button" (click)="goBack(stepper)">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+  }
+  <span class="spacer"></span>
+  @if (stepper.selectedIndex === 0) {
+    <button
+      mat-flat-button
+      type="button"
+      (click)="goNext(stepper)"
+      [disabled]="!isBasicsValid()"
+    >
+      Continue
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  } @else if (stepper.selectedIndex === 1) {
+    <button
+      mat-flat-button
+      type="button"
+      (click)="goNext(stepper)"
+      [disabled]="!type.valid"
+    >
+      Continue
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  } @else if (stepper.selectedIndex === 2) {
+    <button
+      mat-raised-button
+      class="primary-cta"
+      [disabled]="!canSubmit()"
+      [ngClass]="{ valid: canSubmit() }"
+      (click)="createNewApp()"
+    >
+      @if (canSubmit()) {
+        <mat-icon>check</mat-icon>
+      }
+      Create tool
+    </button>
+  }
+</mat-dialog-actions>

@@ -1,0 +1,13 @@
+<div class="row">
+  <div class="col">
+    <textarea
+      #markdownInput
+      [disabled]="disabled()"
+      (blur)="onTouched()"
+    ></textarea>
+  </div>
+
+  <div class="col markdown-body">
+    <markdown [data]="markdown()"></markdown>
+  </div>
+</div>

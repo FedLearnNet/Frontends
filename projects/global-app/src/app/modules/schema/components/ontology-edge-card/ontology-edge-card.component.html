@@ -1,0 +1,161 @@
+<div class="edge-card">
+  <div class="edge-card__header">
+    <div class="edge-card__title-block">
+      <lib-badge [text]="ontologyName()" [color]="'BLUE'"
+      (click)="changeOntology()"
+      >
+      </lib-badge>
+      <lib-badge [text]="relationDirection()" [color]="'GRAY'">
+      </lib-badge>
+    </div>
+
+    <div class="edge-card__actions">
+      @if (isEditMode()) {
+        <div class="edge-card__toggle-group" aria-label="Relation direction">
+          <button
+            mat-button
+            type="button"
+            class="edge-card__toggle-button"
+            [class.edge-card__toggle-button--active]="relationDirection() === 'parent'"
+            (click)="switchDirection('parent')"
+          >
+            Parent
+          </button>
+          <button
+            mat-button
+            type="button"
+            class="edge-card__toggle-button"
+            [class.edge-card__toggle-button--active]="relationDirection() === 'child'"
+            (click)="switchDirection('child')"
+          >
+            Child
+          </button>
+        </div>
+      }
+      <button
+        mat-icon-button
+        type="button"
+        class="edge-card__icon-btn"
+        (click)="toggleEdit()"
+        [attr.aria-label]="isEditMode() ? 'Cancel edit' : 'Edit relation'"
+      >
+        @if (!isEditMode()) {
+          <mat-icon>edit</mat-icon>
+        } @else {
+          <mat-icon>close</mat-icon>
+        }
+      </button>
+    </div>
+  </div>
+
+  <div class="edge-card__body">
+    @if (!isEditMode()) {
+      <div class="edge-card__row">
+        <span class="edge-card__label">REL</span>
+        <span class="edge-card__value">
+          {{ edge().rel || '—' }}
+        </span>
+      </div>
+
+      <div class="edge-card__row">
+        <span class="edge-card__label">RELA</span>
+        <span class="edge-card__value">
+          {{ edge().rela || '—' }}
+        </span>
+      </div>
+
+      <div class="edge-card__row">
+        <span class="edge-card__label">Source (SAB)</span>
+        <span class="edge-card__value">
+          {{ edge().sab || '—' }}
+        </span>
+      </div>
+
+      <div class="edge-card__row edge-card__row--description">
+        <span class="edge-card__label">Description</span>
+
+        @if (hasDescription()) {
+          <p class="edge-card__description">
+            {{ edge().description }}
+          </p>
+        } @else {
+          <p class="edge-card__description edge-card__description--placeholder">
+            No description provided.
+          </p>
+        }
+      </div>
+    } @else {
+      <form
+        class="edge-card__form"
+        [formGroup]="form"
+        (ngSubmit)="save()"
+      >
+        <div class="edge-card__form-grid">
+
+          <mat-form-field appearance="outline">
+            <mat-label>REL</mat-label>
+            <input
+              matInput
+              formControlName="rel"
+              placeholder="Original UMLS REL"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>RELA</mat-label>
+            <input
+              matInput
+              formControlName="rela"
+              placeholder="Refined relation (RELA)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Source (SAB)</mat-label>
+            <input
+              matInput
+              formControlName="sab"
+              placeholder="e.g. SNOMEDCT, ICD10, RXNORM"
+            />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field
+          appearance="outline"
+          class="edge-card__form-description"
+        >
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            rows="3"
+            formControlName="description"
+            placeholder="Free-text description of the relation"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="edge-card__footer">
+          <span class="edge-card__hint">
+            Changes apply only to this relation.
+          </span>
+
+          <div class="edge-card__footer-actions">
+            <button
+              mat-button
+              type="button"
+              (click)="toggleEdit()"
+            >
+              Cancel
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</div>

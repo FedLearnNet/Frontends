@@ -1,0 +1,31 @@
+<div class="project-view">
+
+  @if (schemas(); as schemas) {
+    <div>
+      <h4>{{ 'GRID.SELECTED_DATA' | translate }}</h4>
+
+      <div class="selected-data">
+        @for (d of schemas; track d.id) {
+
+          <lib-info-grid [title]="d.name">
+            <lib-info-item title="Description">
+              {{ d.description }}
+            </lib-info-item>
+            <lib-info-item title="Description">
+                  <span class="pill"
+                        [ngClass]="d.nodeType.toLowerCase()">{{ d.nodeType }}</span>
+            </lib-info-item>
+          </lib-info-grid>
+        }
+      </div>
+    </div>
+  }
+
+
+  @if (query()) {
+    <div>
+      <h4>{{ 'GRID.QUERY' | translate }}</h4>
+      <lib-query-detail-card [query]="query()!"/>
+    </div>
+  }
+</div>

@@ -1,0 +1,11 @@
+@if (echartsOption()) {
+  <div #wrapper class="chart-wrapper">
+    @if (rendered() && echartsOption()) {
+      <echarts [style.width.px]="widthPx() || null"
+        [style.height.px]="canvasHeight() || null"
+        [options]="echartsOption()!"
+        (chartClick)="onChartClick($event)"
+        class="chart" />
+    }
+  </div>
+}

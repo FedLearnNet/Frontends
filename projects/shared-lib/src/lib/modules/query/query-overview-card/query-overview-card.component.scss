@@ -1,0 +1,55 @@
+.content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+
+  .row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #334155;
+
+      strong {
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      &.ts {
+        color: #64748b;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: #475569;
+
+      strong {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        background: #eef2ff;
+        border: 1px solid #dbeafe;
+        color: #1d4ed8;
+        font-weight: 600;
+        letter-spacing: .15px;
+        transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+      }
+    }
+  }
+}

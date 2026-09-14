@@ -1,0 +1,36 @@
+<table mat-table [dataSource]="model().accesses">
+
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NO' | translate }}</th>
+    <td mat-cell *matCellDef="let element"> {{ element.position }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.USER_ID' | translate }}</th>
+    <td mat-cell *matCellDef="let element"> {{ element.keycloakId }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="access">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.WEIGHT' | translate }}</th>
+    <td mat-cell *matCellDef="let element">
+
+      @if (model().createdByUser && model().creator.id !== element.id) {
+        <mat-form-field>
+          <mat-label>{{ 'SELECT_AN_OPTION' | translate }}</mat-label>
+          <mat-select [(value)]="element.access">
+            @for (option of getAccessOptions(); track option) {
+              <mat-option value="{{option}}">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+      } @else {
+        {{ element.access }}
+      }
+    </td>
+  </ng-container>
+
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

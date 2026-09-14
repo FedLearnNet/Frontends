@@ -1,0 +1,79 @@
+<div class="dialog-header">
+  <div class="dialog-title">
+    <span class="indicator" [attr.data-type]="notification.type"></span>
+    <mat-icon>info</mat-icon>
+    <span>{{ notification.title }}</span>
+  </div>
+  <lib-btn type="CLOSE" variant="GHOST" [iconOnly]="true" (clicked)="close()"/>
+</div>
+
+<mat-dialog-content class="dialog-body">
+  <div class="badges">
+    <lib-badge [color]="typeColor(notification.type)" [text]="notification.type" size="X-SMALL"/>
+    @if (notification.priority) {
+      <lib-badge [color]="priorityColor(notification.priority)" [text]="notification.priority" size="X-SMALL"/>
+    }
+    <lib-badge [color]="statusColor(notification.status)" [text]="notification.status" size="X-SMALL"/>
+  </div>
+
+  <p class="message">{{ notification.message }}</p>
+
+  <div class="facts">
+    @if (notification.sourceService) {
+      <lib-kv [label]="'INFORMATION.SOURCE' | translate">{{ notification.sourceService }}</lib-kv>
+    }
+    @if (notification.sourceEntityType) {
+      <lib-kv label="Entity">{{ notification.sourceEntityType }}@if (notification.sourceEntityId) {
+        <span> · {{ notification.sourceEntityId }}</span>
+      }</lib-kv>
+    }
+    @if (notification.createdAt) {
+      <lib-kv [label]="'INFORMATION.DATE' | translate">{{ notification.createdAt | date:'medium' }}</lib-kv>
+    }
+    @if (notification.deliveredAt) {
+      <lib-kv label="Delivered at">{{ notification.deliveredAt | date:'medium' }}</lib-kv>
+    }
+    @if (notification.readAt) {
+      <lib-kv label="Read at">{{ notification.readAt | date:'medium' }}</lib-kv>
+    }
+    @if (notification.archivedAt) {
+      <lib-kv label="Archived at">{{ notification.archivedAt | date:'medium' }}</lib-kv>
+    }
+    @if (notification.deliveryAttemptCount) {
+      <lib-kv label="Delivery attempts">{{ notification.deliveryAttemptCount }}</lib-kv>
+    }
+    @if (notification.deliveryErrorMessage) {
+      <lib-kv label="Delivery error" [multiline]="true">{{ notification.deliveryErrorMessage }}</lib-kv>
+    }
+    @if (notification.actionUrl) {
+      <lib-kv label="Link" [multiline]="true">{{ notification.actionUrl }}</lib-kv>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <lib-btn type="DELETE" variant="DANGER" (clicked)="delete()"/>
+  <span class="spacer"></span>
+  <lib-btn
+    type="CUSTOM"
+    variant="GHOST"
+    icon="inventory_2"
+    [label]="'INFORMATION.ARCHIVE' | translate"
+    (clicked)="archive()"/>
+  @if (unread) {
+    <lib-btn
+      type="CUSTOM"
+      variant="SECONDARY"
+      icon="mark_email_read"
+      [label]="'INFORMATION.MARK_AS_READ' | translate"
+      (clicked)="markAsRead()"/>
+  }
+  @if (notification.actionUrl) {
+    <lib-btn
+      type="CUSTOM"
+      variant="PRIMARY"
+      icon="open_in_new"
+      [label]="'INFORMATION.OPEN_LINK' | translate"
+      (clicked)="openAction()"/>
+  }
+</mat-dialog-actions>

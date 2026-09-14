@@ -1,0 +1,37 @@
+.filter-wrapper {
+
+  &--search {
+    width: 100%;
+
+    ::ng-deep {
+      .mdc-line-ripple {
+        display: none;
+      }
+
+      .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+      }
+    }
+  }
+
+  &--filter {
+    height: 56px;
+    width: calc(100% - 14px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 14px;
+
+    background: rgb(245, 245, 245);
+
+    p {
+      padding-right: 10px;
+      border-right: 1px solid #808080;
+    }
+
+    button {
+      margin-right: 20px;
+      margin-left: auto;
+    }
+  }
+}

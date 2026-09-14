@@ -1,0 +1,33 @@
+@if (model()) {
+  @if (routeOnClick()) {
+    <a [routerLink]="[model().id]">
+      <mat-card class="example-card" appearance="outlined">
+        <mat-card-content>
+          <lib-placeholder-image class="img-wrp" [src]="relatedApp.icon" [name]="model().name" />
+          <div class="mat-card-content-text">
+            <h4>{{ model().name }}</h4>
+            <p>{{ model().shortDescription }}</p>
+          </div>
+        </mat-card-content>
+        <mat-card-footer class="app-card-footer">
+          <h4>APP: {{ relatedApp.name }}</h4>
+          <p>{{ relatedApp.shortDescription }}</p>
+        </mat-card-footer>
+      </mat-card>
+    </a>
+  } @else {
+    <mat-card class="example-card" appearance="outlined">
+      <mat-card-content>
+        <lib-placeholder-image class="img-wrp" [src]="relatedApp.icon" [name]="model().name" />
+        <div class="mat-card-content-text">
+          <h4>{{ model().name }}</h4>
+          <p>{{ model().shortDescription }}</p>
+        </div>
+      </mat-card-content>
+      <mat-card-footer class="app-card-footer">
+        <h4>APP: {{ relatedApp.name }}</h4>
+        <p>{{ relatedApp.shortDescription }}</p>
+      </mat-card-footer>
+    </mat-card>
+  }
+}

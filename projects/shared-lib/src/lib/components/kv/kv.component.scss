@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.kv {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fff;
+
+  display: grid;
+  gap: 4px;
+
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.k {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.v {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  opacity: 0.4;
+}
+
+.mono .v {
+  font-size: 13px;
+}
+
+.multiline .v {
+  white-space: normal;
+  overflow: visible;
+  line-height: 1.4;
+}
+
+.no-border {
+  border-color: transparent;
+}
+
+:host-context(.compact) .kv {
+  padding: 6px 8px;
+
+  .v {
+    font-size: 13px;
+  }
+}

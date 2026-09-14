@@ -1,0 +1,137 @@
+<lib-header
+  title="Dummy Data"
+  description="Select data types and preview generated sample data"
+  [enableGoBack]="!hideBackBtn()"
+  [locationBack]="true"
+  [enableSearch]="true"
+  searchLabel="Filter"
+  searchPlaceholder="Name, ontology..."
+  (searchInput)="applyFilter($event)">
+  @if (allowSave()) {
+    <div suffix>
+      <button mat-button
+              aria-label="Save"
+              [disabled]="!selection.selected.length"
+              (click)="save()">
+        <mat-icon>save</mat-icon>
+        <span>{{ 'BUTTON.SAVE' | translate }}</span>
+      </button>
+    </div>
+  }
+</lib-header>
+
+<div class="wrapper">
+
+  <div class="select-datatypes-container">
+    <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="example-table">
+
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.SELECT' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()" (change)="select($event,row)"
+                        [checked]="selection.isSelected(row)" aria-label="Select for data generation" />
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DATA_TYPE' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ontologyName">
+        <th mat-header-cell *matHeaderCellDef>{{ 'MENU.ONTOLOGY' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.ontology?.names }}</td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="expand">
+        <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button aria-label="expand row" (click)="openDetails(element); $event.stopPropagation()">
+            @if (expandedElement === element) {
+              <mat-icon>keyboard_arrow_up</mat-icon>
+            } @else {
+              <mat-icon>keyboard_arrow_down</mat-icon>
+            }
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="detail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+          <div [@detailExpand]="element === expandedElement ? 'expanded' : 'collapsed'">
+            @if (expandedElement && expandedElement === element) {
+              @if(expandedElement && expandedElement.ontology){
+                <app-selectable-data-card [dataType]="expandedElement" [ontologyNode]="expandedElement.ontology!"></app-selectable-data-card>
+              }
+              @if (expandedElement.subscriptionsCount) {
+                <p>{{ 'SELECTED_BY_NAME' | translate: {name: expandedElement.subscriptionsCount} }}</p>
+              }
+              <div class="example-element-detail">
+                <div class="example-element-detail--card">
+                  <h4>{{ 'GRID.DATA_TYPE' | translate }}</h4>
+                  <app-datatype-card [dataType]="expandedElement" />
+                </div>
+                @if (expandedElement.ontology) {
+                  <div class="example-element-detail--card">
+                    <h4>{{ 'MENU.ONTOLOGY' | translate }}</h4>
+                    <app-ontology-card [ontologyNode]="expandedElement.ontology!" />
+                  </div>
+                } @else {
+                  <div class="example-element-detail--card">
+                    <h4>{{ 'MENU.ONTOLOGY' | translate }}</h4>
+                    <p>{{ 'WARNING.NO_ONTOLOGY_CONNECTED' | translate }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['detail']" class="detail-row"></tr>
+
+    </table>
+    <mat-paginator [pageSize]="10" />
+  </div>
+
+  <div class="view-datatypes-container">
+    <div style="display: flex; justify-content: flex-end; gap: 8px;">
+      @if (showDummyColumns()) {
+        <button mat-button aria-label="Download result" class="download-btn" (click)="download()">
+          <mat-icon>download</mat-icon>
+          <span>{{ 'BUTTON.DOWNLOAD' | translate }}</span>
+        </button>
+      }
+      @if (showDummyColumns() && dummyColumns().length) {
+        <mat-checkbox [(ngModel)]="wideFormat">Wide-Format</mat-checkbox>
+      }
+      <button mat-button aria-label="Toggle randomly generated data" (click)="toggleDummyColumns()">
+        <mat-icon>{{ showDummyColumns() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        <span>{{ showDummyColumns() ? 'Hide randomly generated data' : 'Show randomly generated data' }}</span>
+      </button>
+    </div>
+
+    @if (showDummyColumns() && dummyColumns().length) {
+      <div class="view-datatypes-table-container">
+        <table mat-table [dataSource]="dummyDataSource()">
+
+          @for (dummyColumn of dummyColumns(); track dummyColumn) {
+            <ng-container [matColumnDef]="dummyColumn">
+              <th mat-header-cell *matHeaderCellDef>{{ dummyColumn }} <br> {{ getSchemaNodeName(dummyColumn) }}</th>
+              <td mat-cell *matCellDef="let row">{{ row[dummyColumn] }}</td>
+            </ng-container>
+          }
+
+          <tr mat-header-row *matHeaderRowDef="dummyColumns()"></tr>
+          <tr mat-row *matRowDef="let row; columns: dummyColumns();"></tr>
+
+        </table>
+      </div>
+    }
+  </div>
+</div>

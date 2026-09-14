@@ -1,0 +1,26 @@
+@if (model()) {
+  <div class="model-header">
+    <div class="model-header__icon">
+      <lib-placeholder-image class="img-wrp" [src]="model().federatedApp.icon" [name]="model().name"/>
+    </div>
+
+    <div class="model-header__column">
+      <h1 class="model-header__name">{{ model().name }}</h1>
+      <div class="model-header__description">
+        <p>{{ model().shortDescription }}</p>
+      </div>
+    </div>
+    <div class="model-header__column">
+      <div class="model-header__info">
+        @if (model().lastVersion) {
+          <lib-kv [label]="'GRID.VERSION' | translate">{{ model().lastVersion!.modelVersion }}</lib-kv>
+          <lib-kv [label]="'GRID.LATEST_CHANGES' | translate">{{ model().lastVersion!.changelog }}</lib-kv>
+          <lib-docker-image-tag [imageName]="model().lastVersion!.selectedSubModel?.imageName" size="MEDIUM" [border]="true"/>
+        } @else {
+          <lib-kv [label]="'GRID.VERSION' | translate">'NO_VERSION' | translate</lib-kv>
+        }
+      </div>
+    </div>
+  </div>
+}
+

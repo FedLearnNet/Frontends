@@ -1,0 +1,30 @@
+@for (ratingId of ratingArr(); track ratingId) {
+  <button mat-icon-button
+          class="rating-btn"
+          [id]="'star_'+ratingId" (click)="onClick(ratingId+1)"
+          [matTooltip]="''+(ratingId + 1)" matTooltipPosition="above"
+          [class.no-edit]="!editMode()"
+          [disabled]="!editMode()">
+    <mat-icon>
+      {{ showIcon(ratingId) }}
+    </mat-icon>
+  </button>
+}
+@if (ratingAmount()) {
+  <span class="rating-info"
+        [class.no-edit]="!editMode()">
+ ({{ ratingAmount() }} {{ 'GRID.RATINGS' | translate }})
+</span>
+} @else {
+  <span class="rating-info"
+        [class.no-edit]="!editMode()">
+    ({{ rating() }} / {{ starCount() }})
+  </span>
+}
+
+@if (!starCount() || starCount() === 0) {
+  <mat-error>
+    {{ 'VALIDATION.REQUIRED_AND_CANNOT_BE_ZERO' | translate:{ fieldName: ('GRID.STAR_COUNT' | translate) } }}
+  </mat-error>
+}
+

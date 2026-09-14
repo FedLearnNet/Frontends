@@ -1,0 +1,230 @@
+.entry {
+  border-radius: 16px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: box-shadow .2s ease, transform .06s ease;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    &.head {
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+
+      .left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+
+    &.chips {
+      margin-top: 8px;
+
+      mat-chip {
+        --mdc-chip-container-height: 28px;
+        font-size: 12px;
+        background: #f3f4f6;
+      }
+
+      .more {
+        background: #eef2ff;
+        color: #3730a3;
+        font-weight: 600;
+      }
+    }
+
+    &.details {
+      margin-top: 12px;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+
+      .col {
+        flex: 1 1 320px;
+        min-width: 280px;
+      }
+    }
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #e0e7ff;
+  }
+
+  .value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: clamp(260px, 40vw, 720px);
+
+    .v-icon {
+      font-variation-settings: 'OPSZ' 24;
+      opacity: .7;
+    }
+
+    .v-text {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #0f172a;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #155e75;
+      border: 1px solid #cffafe;
+    }
+  }
+
+  .meta-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid rgba(2, 6, 23, 0.06);
+
+      mat-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+      }
+    }
+  }
+
+  .actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .code {
+    margin: 8px 0 0;
+    padding: 12px;
+    background: #0b1020;
+    color: #e6edf3;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.45;
+    overflow: auto;
+  }
+}
+
+/* Dark mode tuning */
+:host-context(html.dark, .dark) .entry {
+  background: #0b1020;
+  border-color: rgba(255, 255, 255, 0.06);
+
+  .v-text {
+    color: #e5e7eb;
+  }
+
+  .badge {
+    background: #1f2937;
+    color: #c7d2fe;
+    border-color: #374151;
+  }
+
+  .meta-inline .pill {
+    background: #0f172a;
+    color: #cbd5e1;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .row.chips mat-chip {
+    background: #111827;
+    color: #e5e7eb;
+  }
+
+  .row.chips .more {
+    background: #1f2937;
+    color: #c7d2fe;
+  }
+}
+
+.visit-form {
+  padding: 20px 0 0 0;
+  .full-width {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+.read-only-details {
+  .read-only-fields {
+    margin: 0;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .read-only-field {
+    dt {
+      margin: 0 0 0.2rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: rgba(71, 85, 105, 0.82);
+    }
+
+    dd {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0f172a;
+      word-break: break-word;
+    }
+  }
+}
+
+.actions {
+  display: flex !important;
+  justify-content: space-between !important;
+
+  .delete{
+    &:hover{
+      color: red;
+    }
+  }
+}

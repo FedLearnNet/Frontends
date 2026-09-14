@@ -1,0 +1,56 @@
+<div class="config-wrapper">
+
+  @if (configOptions().needsInputConfig) {
+    <div class="hyperparams-list">
+
+      @for (param of configs(); track $index) {
+        <app-detail-config-element
+          [editMode]="canEditMode()"
+          [inputConfig]="param"
+          (inputConfigChange)="updateConfig(param, $event)"
+          (removeConfig)="removeParam(param)"
+          [supportsTraining]="supportsTraining()"
+          [files]="files()"
+        >
+        </app-detail-config-element>
+
+      }
+      @if (canEditMode()) {
+        <div class="add-actions">
+          <lib-btn type="CREATE" [label]="'BUTTON.ADD_PREDEFINED_PARAMETER' | translate"
+                   (clicked)="openRemoteConfigDialog()"></lib-btn>
+          <lib-btn type="CREATE" [label]="'BUTTON.ADD_PARAMETER' | translate" (clicked)="addParam()"></lib-btn>
+        </div>
+      }
+    </div>
+
+    @if (canEditMode()) {
+      <div class="pydantic-compact-action">
+        <button mat-mini-fab
+                color="primary"
+                [disabled]="!pydanticClass()"
+                (click)="openPydanticClassDialog()"
+                [attr.aria-label]="'MENU.PYDANTIC_CLASS' | translate">
+          <mat-icon>code</mat-icon>
+        </button>
+        <div>
+          <strong>{{ 'MENU.PYDANTIC_CLASS' | translate }}</strong>
+          <p>{{ 'PYDANTIC_CLASS_COMPACT_HINT' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="pydantic">
+        <h3>{{ 'MENU.PYDANTIC_CLASS' | translate }}</h3>
+        @if (pydanticClass()) {
+          <markdown clipboard
+                    lineHighlight
+                    [data]="getPydanticClass()"/>
+        } @else {
+          <p>{{ 'LOADING' | translate }}...</p>
+        }
+      </div>
+    }
+  } @else {
+    <lib-hint-card>{{ this.toolType() }} - supports no input</lib-hint-card>
+  }
+</div>

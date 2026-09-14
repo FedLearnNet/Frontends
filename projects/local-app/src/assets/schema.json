@@ -1,0 +1,585 @@
+{
+  "unique_id": "ids0",
+  "name": "Dummy schema Root Diabetes",
+  "description": "The start of the dummy schema",
+  "created_by": null,
+  "created_at": null,
+  "version": 0,
+  "fields": [
+    {
+      "node_type": "group",
+      "form_type": "",
+      "data_type": "",
+      "label": "Demographics",
+      "name": "Demographics",
+      "description": "Includes fundamental personal information used to categorize individuals for statistical analysis, such as age, sex, and ethnicity.",
+      "data_type_description": null,
+      "ontology_description": null,
+      "value": null,
+      "validations": null,
+      "options": null,
+      "ontology_id": null,
+      "schema_node_id": "ids3",
+      "fields": [
+        {
+          "node_type": "group",
+          "form_type": "",
+          "data_type": "",
+          "label": "Economic Factors",
+          "name": "Economic Factors",
+          "description": "Relates to the financial aspects of an individual's life, including income and marital status, which may impact access to resources and overall lifestyle.",
+          "data_type_description": null,
+          "ontology_description": null,
+          "value": null,
+          "validations": null,
+          "options": null,
+          "ontology_id": null,
+          "schema_node_id": "ids4",
+          "fields": [
+            {
+              "node_type": "attribute",
+              "form_type": "select",
+              "data_type": "categorical",
+              "label": "Marital Status",
+              "name": "Marital Status",
+              "description": "Marital status of the individual.",
+              "data_type_description": "Records the patient’s marital status.",
+              "ontology_description": "Marital status of the individual.",
+              "value": null,
+              "validations": [],
+              "options": [
+                {
+                  "label": "Single",
+                  "value": "Single"
+                },
+                {
+                  "label": "Married",
+                  "value": "Married"
+                },
+                {
+                  "label": "Divorced",
+                  "value": "Divorced"
+                },
+                {
+                  "label": "Widowed",
+                  "value": "Widowed"
+                },
+                {
+                  "label": "Separated",
+                  "value": "Separated"
+                },
+                {
+                  "label": "In a Relationship",
+                  "value": "In a Relationship"
+                }
+              ],
+              "ontology_id": "idn34",
+              "schema_node_id": "ids17"
+            },
+            {
+              "node_type": "attribute",
+              "form_type": "select",
+              "data_type": "categorical",
+              "label": "Household Income",
+              "name": "Household Income",
+              "description": "Annual income of the household.",
+              "data_type_description": "Categorizes the patient’s household income into different brackets.",
+              "ontology_description": "Annual income of the household, categorized into ranges for detailed analysis.",
+              "value": null,
+              "validations": [],
+              "options": [
+                {
+                  "label": "Under 20,000",
+                  "value": "Under 20,000"
+                },
+                {
+                  "label": "20,000 to 40,000",
+                  "value": "20,000 to 40,000"
+                },
+                {
+                  "label": "40,001 to 60,000",
+                  "value": "40,001 to 60,000"
+                },
+                {
+                  "label": "60,001 to 80,000",
+                  "value": "60,001 to 80,000"
+                },
+                {
+                  "label": "80,001 to 100,000",
+                  "value": "80,001 to 100,000"
+                },
+                {
+                  "label": "Over 100,000",
+                  "value": "Over 100,000"
+                }
+              ],
+              "ontology_id": "idn15",
+              "schema_node_id": "ids16"
+            }
+          ]
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "select",
+          "data_type": "categorical",
+          "label": "Education",
+          "name": "Education",
+          "description": "Highest level of education completed by the individual.",
+          "data_type_description": "Indicates the highest level of education attained by the patient.",
+          "ontology_description": "Highest level of education completed by the individual.",
+          "value": null,
+          "validations": [],
+          "options": [
+            {
+              "label": "High School",
+              "value": "High School"
+            },
+            {
+              "label": "Bachelors",
+              "value": "Bachelors"
+            },
+            {
+              "label": "Masters",
+              "value": "Masters"
+            },
+            {
+              "label": "PhD",
+              "value": "PhD"
+            },
+            {
+              "label": "Other",
+              "value": "Other"
+            }
+          ],
+          "ontology_id": "idn33",
+          "schema_node_id": "ids15"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "select",
+          "data_type": "categorical",
+          "label": "Race",
+          "name": "Race",
+          "description": "Racial or ethnic identification of the individual.",
+          "data_type_description": "Records the patient’s race. The list is extendible to include other races.",
+          "ontology_description": "Racial or ethnic identification of the individual.",
+          "value": null,
+          "validations": [],
+          "options": [
+            {
+              "label": "White",
+              "value": "White"
+            },
+            {
+              "label": "Black",
+              "value": "Black"
+            },
+            {
+              "label": "Asian",
+              "value": "Asian"
+            },
+            {
+              "label": "Other",
+              "value": "Other"
+            }
+          ],
+          "ontology_id": "idn32",
+          "schema_node_id": "ids14"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "select",
+          "data_type": "categorical",
+          "label": "Sex",
+          "name": "Sex",
+          "description": "Gender of the individual.",
+          "data_type_description": "Records the patient’s sex as Male, Female, or Other.",
+          "ontology_description": "Gender identity and sexual orientation of the individual.",
+          "value": null,
+          "validations": [],
+          "options": [
+            {
+              "label": "Male",
+              "value": "Male"
+            },
+            {
+              "label": "Female",
+              "value": "Female"
+            },
+            {
+              "label": "Other",
+              "value": "Other"
+            }
+          ],
+          "ontology_id": "idn21",
+          "schema_node_id": "ids13"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "number",
+          "data_type": "int",
+          "label": "Age",
+          "name": "Age",
+          "description": "Age category of the individual.",
+          "data_type_description": "Records the patient’s age, expected to range from 0 to 120 years.",
+          "ontology_description": "Age refers to the amount of time since an individual's birth. Age is a fundamental demographic characteristic that significantly impacts various aspects of health, development, and societal roles, guiding both clinical decisions and personal life stages.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn7",
+          "schema_node_id": "ids12"
+        }
+      ]
+    },
+    {
+      "node_type": "group",
+      "form_type": "",
+      "data_type": "",
+      "label": "Lifestyle",
+      "name": "Lifestyle",
+      "description": "Reflects personal habits and behaviors that can influence health and wellbeing, such as diet, exercise, alcohol consumption, smoking, and sleep patterns.",
+      "data_type_description": null,
+      "ontology_description": null,
+      "value": null,
+      "validations": null,
+      "options": null,
+      "ontology_id": null,
+      "schema_node_id": "ids5",
+      "fields": [
+        {
+          "node_type": "attribute",
+          "form_type": "number",
+          "data_type": "int",
+          "label": "Sleep",
+          "name": "Sleep",
+          "description": "Average number of hours of sleep the individual gets per night.",
+          "data_type_description": "Records the average number of hours the patient sleeps per night.",
+          "ontology_description": "Average number of hours of sleep the individual gets per night.",
+          "value": null,
+          "validations": [
+            {
+              "name": "min",
+              "validator": "0",
+              "message": "Sleep cannot be less than 0."
+            },
+            {
+              "name": "max",
+              "validator": "24",
+              "message": "Sleep cannot be more than 24 per night."
+            }
+          ],
+          "options": [],
+          "ontology_id": "idn27",
+          "schema_node_id": "ids22"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Smoking",
+          "name": "Smoking",
+          "description": "History of smoking at least 100 cigarettes in the individual's lifetime.",
+          "data_type_description": "Indicates if the patient smokes.",
+          "ontology_description": "History of smoking at least 100 cigarettes in the individual's lifetime",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn26",
+          "schema_node_id": "ids21"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Alcohol Consumption",
+          "name": "Alcohol Consumption",
+          "description": "Classification of the individual as a heavy drinker.",
+          "data_type_description": "Indicates if the patient consumes alcohol regularly.",
+          "ontology_description": "Classification of the individual as a heavy drinker",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn25",
+          "schema_node_id": "ids20"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Exercise",
+          "name": "Exercise",
+          "description": "Engagement in physical activity or exercise outside of regular job duties.",
+          "data_type_description": "Indicates if the patient engages in regular exercise.",
+          "ontology_description": "Engagement in physical activity or exercise, including type, frequency, and intensity.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn24",
+          "schema_node_id": "ids19"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Diet",
+          "name": "Diet",
+          "description": "Frequency of fruit and vegetable consumption.",
+          "data_type_description": "Indicates if the patient follows a specific diet.",
+          "ontology_description": "Daily intake habits, focusing on the variety, quality, and quantity of consumed foods and drinks.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn23",
+          "schema_node_id": "ids18"
+        }
+      ]
+    },
+    {
+      "node_type": "group",
+      "form_type": "",
+      "data_type": "",
+      "label": "Health Status",
+      "name": "Health Status",
+      "description": "Encompasses metrics and conditions related to an individual's current health situation, including vital statistics and diagnoses from health professionals.",
+      "data_type_description": null,
+      "ontology_description": null,
+      "value": null,
+      "validations": null,
+      "options": null,
+      "ontology_id": null,
+      "schema_node_id": "ids1",
+      "fields": [
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "BMI",
+          "name": "BMI",
+          "description": "Body Mass Index (BMI) measurement.",
+          "data_type_description": "Indicates if the patients BMI is in the overweight or obese range.",
+          "ontology_description": "Body Mass Index (BMI) classified in the obese range, taking into account age and sex differences.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn19",
+          "schema_node_id": "ids8"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Blood Pressure",
+          "name": "Blood Pressure",
+          "description": "Diagnosis of high blood pressure by a healthcare professional.",
+          "data_type_description": "Indicates if the patient has high blood pressure.",
+          "ontology_description": "Blood pressure is the force of blood against the walls of the arteries as the heart pumps it around the body. It is measured in millimeters of mercury (mmHg) and recorded as two numbers: systolic pressure (when the heart beats) over diastolic pressure (when the heart relaxes).",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn98",
+          "schema_node_id": "ids7"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Cholesterol (High)",
+          "name": "Cholesterol (High)",
+          "description": "High cholesterol as informed by a healthcare professional.",
+          "data_type_description": "Indicates if the patient has high cholesterol levels.",
+          "ontology_description": "Cholesterol is a waxy, fat-like substance found in the cells of the body and certain foods. It is essential for building cell membranes, producing hormones, and digesting dietary fats. However, high levels of cholesterol in the blood can increase the risk of heart disease and stroke.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn99",
+          "schema_node_id": "ids9"
+        },
+        {
+          "node_type": "group",
+          "form_type": "",
+          "data_type": "",
+          "label": "Chronic Health Conditions",
+          "name": "Chronic Health Conditions",
+          "description": "Pertains to long-term health conditions that affect an individual's lifestyle and may require ongoing management or medication.",
+          "data_type_description": null,
+          "ontology_description": null,
+          "value": null,
+          "validations": null,
+          "options": null,
+          "ontology_id": null,
+          "schema_node_id": "ids2",
+          "fields": [
+            {
+              "node_type": "attribute",
+              "form_type": "radio",
+              "data_type": "boolean",
+              "label": "Diabetes",
+              "name": "Diabetes",
+              "description": "Diagnosis of diabetes.",
+              "data_type_description": "Indicates if the patient has been diagnosed with diabetes.",
+              "ontology_description": "Diabetes is a chronic medical condition characterized by elevated levels of glucose in the blood, resulting from the body's inability to produce enough insulin or effectively use the insulin it produces. There are several types of diabetes, including Type 1, Type 2, and gestational diabetes, each with unique causes, characteristics, and treatments.",
+              "value": null,
+              "validations": [],
+              "options": [],
+              "ontology_id": "idn2",
+              "schema_node_id": "ids10"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "node_type": "group_list",
+      "form_type": "",
+      "data_type": "",
+      "label": "Heartrate Group",
+      "name": "Heartrate Group",
+      "description": "The Group of Heartrate (Time Series Data)",
+      "data_type_description": null,
+      "ontology_description": null,
+      "value": null,
+      "validations": null,
+      "options": null,
+      "ontology_id": null,
+      "schema_node_id": "ids26",
+      "fields": [
+        {
+          "node_type": "attribute",
+          "form_type": "number",
+          "data_type": "int",
+          "label": "Heartrate",
+          "name": "Heartrate",
+          "description": "Measurement of the heart rate, expressed in beats per minute (bpm).",
+          "data_type_description": "Records the patient’s heart rate in beats per minute at a specific time.",
+          "ontology_description": "Measurement of the heart rate, expressed in beats per minute (bpm). This parameter quantifies the number of times the heart beats within a minute, providing crucial insights into cardiovascular health and physical condition",
+          "value": null,
+          "validations": [
+            {
+              "name": "min",
+              "validator": "0",
+              "message": "Heartrate cannot be less than 0."
+            }
+          ],
+          "options": [],
+          "ontology_id": "idn36",
+          "schema_node_id": "ids28"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "number",
+          "data_type": "int",
+          "label": "Timestamp",
+          "name": "Timestamp",
+          "description": "Timestamp Unix of the event",
+          "data_type_description": "Records the Unix timestamp of an event or data collection point.",
+          "ontology_description": "Timestamp of the data entry",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn35",
+          "schema_node_id": "ids27"
+        }
+      ]
+    },
+    {
+      "node_type": "group",
+      "form_type": "",
+      "data_type": "",
+      "label": "General and Mental Health",
+      "name": "General and Mental Health",
+      "description": "Addresses overall health status, healthcare accessibility, and mental health conditions that impact an individual's quality of life and daily functioning.",
+      "data_type_description": null,
+      "ontology_description": null,
+      "value": null,
+      "validations": null,
+      "options": null,
+      "ontology_id": null,
+      "schema_node_id": "ids6",
+      "fields": [
+        {
+          "node_type": "attribute",
+          "form_type": "number",
+          "data_type": "int",
+          "label": "Mental Health",
+          "name": "Mental Health",
+          "description": "Number of days with poor mental health experienced by the individual in the past 30 days.",
+          "data_type_description": "Indicates the patient’s mental health status, assessed on a numeric scale.",
+          "ontology_description": "Number of days with poor mental health experienced by the individual in the past 30 days.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn31",
+          "schema_node_id": "ids25"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "radio",
+          "data_type": "boolean",
+          "label": "Health Care Coverage",
+          "name": "Health Care Coverage",
+          "description": "Presence of health care coverage for the individual.",
+          "data_type_description": "Indicates whether the patient has health care coverage.",
+          "ontology_description": "Presence of health care coverage for the individual.",
+          "value": null,
+          "validations": [],
+          "options": [],
+          "ontology_id": "idn30",
+          "schema_node_id": "ids24"
+        },
+        {
+          "node_type": "attribute",
+          "form_type": "select",
+          "data_type": "categorical",
+          "label": "Time Since Last Checkup",
+          "name": "Time Since Last Checkup",
+          "description": "Time elapsed since the individual's last checkup with a healthcare professional.",
+          "data_type_description": "Indicates the time since the patient’s last medical checkup.",
+          "ontology_description": "Time elapsed since the individual's last checkup with a healthcare professional.",
+          "value": null,
+          "validations": [],
+          "options": [
+            {
+              "label": "Days",
+              "value": "Days"
+            },
+            {
+              "label": "Weeks",
+              "value": "Weeks"
+            },
+            {
+              "label": "Months",
+              "value": "Months"
+            },
+            {
+              "label": "Years",
+              "value": "Years"
+            }
+          ],
+          "ontology_id": "idn29",
+          "schema_node_id": "ids23"
+        }
+      ]
+    },
+    {
+      "node_type": "attribute",
+      "form_type": "text",
+      "data_type": "string",
+      "label": "Unique ID",
+      "name": "Unique Patient ID",
+      "description": "The unique patient id of your hospital system. This field is required.",
+      "data_type_description": "The data type of the field is a string.",
+      "ontology_description": "The unique patient id of your hospital system. This field is required.",
+      "value": null,
+      "validations": [
+        {
+          "name": "required",
+          "validator": "required",
+          "message": "This field is required."
+        }
+      ],
+      "options": null,
+      "ontology_id": "external_id",
+      "schema_node_id": "external_id"
+    }
+  ]
+}

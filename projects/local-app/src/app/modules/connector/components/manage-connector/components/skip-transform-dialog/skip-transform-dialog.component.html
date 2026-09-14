@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>{{ 'DIALOG.SKIP_TRANSFORM.TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+  <div class="skip-transform-dialog-copy">
+    <div class="skip-transform-dialog-icon">
+      <mat-icon>transform</mat-icon>
+    </div>
+
+    <div>
+      <p class="skip-transform-dialog-lead">{{ 'DIALOG.SKIP_TRANSFORM.LEAD' | translate }}</p>
+      <p class="skip-transform-dialog-text">{{ 'DIALOG.SKIP_TRANSFORM.DESCRIPTION' | translate }}</p>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="skip()">{{ 'BUTTON.SKIP_TO_MAPPER' | translate }}</button>
+  <button mat-flat-button color="primary" (click)="addTransform()">{{ 'BUTTON.ADD_TRANSFORMATION' | translate }}</button>
+</mat-dialog-actions>

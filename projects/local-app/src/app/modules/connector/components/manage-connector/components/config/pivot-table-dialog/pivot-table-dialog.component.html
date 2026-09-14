@@ -1,0 +1,109 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  title="Pivot table"/>
+
+<mat-dialog-content>
+  <p class="help-text">{{ 'PIVOT_TABLE_HELP' | translate }}</p>
+
+  <div class="pivot-config__tables">
+    @for (table of data.sheets; track table.name) {
+      <div class="pivot-config__table">
+        @if (data.sheets.length > 1) {
+          <strong class="table-name">{{ table.name }}</strong>
+        }
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'PIVOT_VALUE_COLUMN' | translate }}</mat-label>
+          <mat-select
+            [value]="getPivotColumnIndex(table.name)"
+            (selectionChange)="selectPivotColumn(table.name, $event.value)">
+            @for (column of table.info.columns; track $index) {
+              <mat-option [value]="$index">{{ column }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'PIVOT_MODE' | translate }}</mat-label>
+          <mat-select
+            [value]="getPivotMode(table.name)"
+            (selectionChange)="selectPivotMode(table.name, $event.value)">
+            <mat-option [value]="PivotMode.TRANSPOSE">{{ 'PIVOT_MODE_TRANSPOSE' | translate }}</mat-option>
+            <mat-option [value]="PivotMode.ONE_HOT">{{ 'PIVOT_MODE_ONE_HOT' | translate }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        @if (getPivotMode(table.name) === PivotMode.ONE_HOT) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'PIVOT_PREFIX' | translate }}</mat-label>
+            <input
+              matInput
+              [value]="getPrefix(table.name)"
+              (input)="selectPrefix(table.name, $any($event.target).value)"/>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ 'PIVOT_VALUE_FORMAT' | translate }}</mat-label>
+            <mat-select
+              [value]="getValueFormat(table.name)"
+              (selectionChange)="selectValueFormat(table.name, $event.value)">
+              <mat-option [value]="PivotValueFormat.TRUE_FALSE">
+                {{ 'PIVOT_VALUE_FORMAT_TRUE_FALSE' | translate }}
+              </mat-option>
+              <mat-option [value]="PivotValueFormat.YES_NO">
+                {{ 'PIVOT_VALUE_FORMAT_YES_NO' | translate }}
+              </mat-option>
+              <mat-option [value]="PivotValueFormat.ONE_ZERO">
+                {{ 'PIVOT_VALUE_FORMAT_ONE_ZERO' | translate }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <p class="mode-help">{{ 'PIVOT_MODE_ONE_HOT_HELP' | translate }}</p>
+        }
+      </div>
+    }
+  </div>
+
+  @if (previewError; as error) {
+    <lib-error-card [errorObject]="error"></lib-error-card>
+  }
+
+  <div class="preview">
+    @if (previewSheets.length > 1) {
+      <mat-tab-group>
+        @for (sheet of previewSheets; track sheet.name) {
+          <mat-tab [label]="sheet.name">
+            <app-dynamic-table
+              [data]="sheet.info.json"
+              [renamedColumns]="sheet.info.renamedColumns"
+              [columns]="sheet.info.columns"
+              [deletedColumns]="sheet.info.deletedColumns"
+              [headerAction]="false"/>
+          </mat-tab>
+        }
+      </mat-tab-group>
+    } @else if (previewSheets[0]; as sheet) {
+      <app-dynamic-table
+        [data]="sheet.info.json"
+        [renamedColumns]="sheet.info.renamedColumns"
+        [columns]="sheet.info.columns"
+        [deletedColumns]="sheet.info.deletedColumns"
+        [headerAction]="false"/>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <lib-btn
+    type="CUSTOM"
+    variant="GHOST"
+    icon="block"
+    [label]="'BUTTON.DO_NOT_PIVOT' | translate"
+    (clicked)="doNotPivot()"/>
+  <span class="spacer"></span>
+  <lib-btn
+    type="CUSTOM"
+    variant="PRIMARY"
+    icon="check"
+    [label]="'BUTTON.APPLY' | translate"
+    [disabled]="!isValid()"
+    (clicked)="apply()"/>
+</mat-dialog-actions>

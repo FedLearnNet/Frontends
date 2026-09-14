@@ -1,0 +1,109 @@
+<lib-header
+  title="Cross-clinic property comparison"
+  description="Review the average profile of this query and drill down into clinic-level deviations where responses differ."
+  [enableAddBtn]="!!query().latestDataStatisticsRequest"
+  [addBtnLabel]="'BUTTON.REQUEST_STATISTICS_AGAIN'|translate"
+  addBtnIcon="restart_alt"
+  (addBtnClick)="request.emit()"
+>
+  <div class="statistics-hero__badges">
+    @if (isPending()) {
+      <lib-badge color="ORANGE" [border]="true" text="Pending"/>
+    } @else {
+      <lib-badge color="BLUE" [border]="true" [text]="clinicCount() + ' clinics'"/>
+      <lib-badge color="GRAY" [border]="true" [text]="comparisonGroups().length + ' properties'"/>
+    }
+  </div>
+  @if (query().latestDataStatisticsRequestTimestamp) {
+    <lib-time-badge format="SHORT" suffix [date]="query().latestDataStatisticsRequestTimestamp!"/>
+  } @else {
+    —
+  }
+</lib-header>
+<lib-page-wrapper
+  [error]="error()"
+  [isEmpty]="isEmpty()"
+  [isLoading]="isLoading()"
+  [margin]="false"
+  [skeletonOnLoading]="true">
+
+  <lib-empty-state
+    empty
+    [icon]="query().latestDataStatisticsRequest ? 'hourglass_top':'analytics'"
+    [title]="query().latestDataStatisticsRequest ?
+    'No statistics responses yet':
+    'No statistics requested'"
+    [subtitle]="query().latestDataStatisticsRequest ?
+     'The request exists, but no clinic responses are available yet.':
+     'Request data statistics to compare clinic-level property distributions here.'"
+  ></lib-empty-state>
+
+  <div class="statistics-page">
+    <div class="overview-chart-card">
+      <div class="chart-title">Rapid Comparison Overview</div>
+      <div class="chart-subtitle">
+        Top: averaged numeric distributions (boxplot). Bottom: categorical value distribution by frequency rank.
+      </div>
+      <echarts [options]="overviewChartOption()" class="overview-chart"/>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-bar__controls">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search properties</mat-label>
+          <input matInput [value]="search()" (input)="updateSearch($event)">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="config-field">
+          <mat-label>Sort</mat-label>
+          <mat-select [value]="sortMode()" (selectionChange)="updateSortMode($event)">
+            <mat-option value="coverage">Most clinics</mat-option>
+            <mat-option value="missing">Highest missingness</mat-option>
+            <mat-option value="name">Name</mat-option>
+            <mat-option value="type">Type</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="config-field">
+          <mat-label>Density</mat-label>
+          <mat-select [value]="cardDensity()" (selectionChange)="updateDensity($event)">
+            <mat-option value="compact">Compact</mat-option>
+            <mat-option value="comfortable">Comfortable</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="filter-bar__meta">
+        <mat-chip-listbox aria-label="Type filter">
+          @for (filter of availableTypeFilters(); track filter) {
+            <mat-chip-option
+              [selected]="selectedType() === filter"
+              (click)="setTypeFilter(filter)">
+              {{ filter === 'ALL' ? 'All types' : filter }}
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+
+        <div class="filter-summary">
+          <span class="filter-summary__count">{{ filteredGroups().length }}</span>
+          <span class="filter-summary__label">matching properties</span>
+        </div>
+      </div>
+    </div>
+
+    @if (filteredGroups().length) {
+      <div
+        class="comparison-grid"
+        [class.comparison-grid--compact]="cardDensity() === 'compact'"
+        [class.comparison-grid--comfortable]="cardDensity() === 'comfortable'">
+        @for (group of filteredGroups(); track group.propertyName) {
+          <app-query-statistics-property-compare-card
+            [propertyName]="group.propertyName"
+            [clinicProfiles]="group.clinics"
+            [density]="cardDensity()"/>
+        }
+      </div>
+    }
+  </div>
+</lib-page-wrapper>

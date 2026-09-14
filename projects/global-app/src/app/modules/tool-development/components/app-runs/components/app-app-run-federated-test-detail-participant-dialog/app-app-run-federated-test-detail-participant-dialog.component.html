@@ -1,0 +1,22 @@
+<lib-status-title [type]="runStatusToBadgeStatus(data.run.status ?? RunStatusTypes.PENDING )">
+  {{ data.participant.participantId }}
+</lib-status-title>
+<mat-dialog-content>
+  <lib-experiment-workflow-node-detail
+    [hideOutput]="true"
+    [config]="data.app.appConfig"
+    [experimentData]="experimentData"
+  />
+  @if (data.participant.role === FLNetParticipantRole.AGGREGATOR) {
+    <lib-info-card
+      class="mt-2"
+      subtitle="Results are shown in the results tab"
+      size="SMALL"
+      [border]="true"
+      type="INFO">
+    </lib-info-card>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CLOSE' | translate }}</button>
+</mat-dialog-actions>

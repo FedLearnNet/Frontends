@@ -1,0 +1,168 @@
+@use "../flow-common";
+
+
+.workflow-node-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e8eaf0;
+  box-shadow: 0 4px 12px rgba(0, 30, 80, 0.05);
+  padding: 24px;
+  width: 400px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+
+  &.invalid {
+    border: 2px solid #AF6000 !important;
+
+    .config-btn {
+      color: #AF6000 !important;
+      animation: pulse 2s infinite;
+    }
+
+
+  }
+}
+
+.ex-order {
+  position: absolute;
+  top: 0;
+  left: 6px;
+  background-color: #e3e8ff;
+  color: #4a69ff;
+  padding: 0 10px;
+}
+
+.extend-btn,
+.config-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #909ab0;
+  border-radius: 50%;
+  transition: color 0.2s, background-color 0.2s;
+
+  &:hover {
+    color: #1a202c;
+    background-color: #f0f2f5;
+  }
+}
+
+.extend-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.config-btn {
+  left: 0;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.icon-container {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e3e8ff;
+  border-radius: 8px;
+  color: #4a69ff;
+}
+
+.header-text {
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.app-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  .app-name-text {
+    min-width: 0;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f7f9fc;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+
+.edit-mode-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  backdrop-filter: blur(4px);
+  border-radius: 12px;
+}
+
+
+::ng-deep f-flow {
+  @include flow-common.connection;
+}
+
+.f-node {
+  cursor: move;
+}
+
+@include flow-common.connector;
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.2);
+  }
+  0%, 100%, 25%, 75% {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,29 @@
+@if (!editMode()) {
+  @if (isPredictionMode()) {
+    <mat-icon class="mode-icon"
+              [matTooltip]="('PARAM_FOR_PREDICTION_TOOLTIP' | translate)"
+    >online_prediction
+    </mat-icon>
+  } @else if (isTrainingMode()) {
+    <mat-icon
+      [matTooltip]="('PARAM_FOR_TRAINING_TOOLTIP' | translate)"
+      class="mode-icon">model_training
+    </mat-icon>
+  } @else {
+    <mat-icon
+      [matTooltip]="('PARAM_FOR_TRAINING_AND_PREDICTION_TOOLTIP' | translate)"
+      class="mode-icon">clear_all
+    </mat-icon>
+  }
+}
+@if (editMode()) {
+  <mat-form-field [class]="hasSpace()? 'space':'no-space'">
+    <mat-label>{{ 'GRID.MODE' | translate }}</mat-label>
+    <mat-select [(value)]="editedMode" (selectionChange)="changeMode()"
+                panelWidth="200px">
+      @for (mode of getAllModes(); track mode) {
+        <mat-option [value]="mode">{{ mode }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+}

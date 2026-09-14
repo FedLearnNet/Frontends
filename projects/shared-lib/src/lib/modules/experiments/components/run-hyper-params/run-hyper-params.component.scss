@@ -1,0 +1,31 @@
+.list {
+  max-height: min(70vh, 1000px);
+  overflow: auto;
+  scroll-behavior: smooth;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.row {
+  display: grid;
+  gap: 6px;
+  border-left: 3px solid var(--gray-bg);
+  border-right: 3px solid var(--gray-bg);
+
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.val {
+  margin-left: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .row-head {
+    flex-wrap: wrap;
+  }
+}

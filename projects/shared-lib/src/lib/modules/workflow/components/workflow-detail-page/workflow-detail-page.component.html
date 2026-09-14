@@ -1,0 +1,17 @@
+@if (workflowId(); as wId) {
+  <lib-workflow-view [workflowId]="wId"></lib-workflow-view>
+} @else {
+  @if (loading()) {
+    @if (isCreating()) {
+      <lib-skeleton-loader title="Creating empty Workflow"></lib-skeleton-loader>
+    } @else {
+      <lib-skeleton-loader></lib-skeleton-loader>
+    }
+  } @else if (error(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  } @else {
+    <lib-error-card>
+      No Workflow id found
+    </lib-error-card>
+  }
+}

@@ -1,0 +1,32 @@
+<mat-list>
+  <div mat-subheader>
+    @if (!ontology()?.edges?.length) {
+      {{ 'NO' | translate }}
+    }
+    {{ headerName() }}
+  </div>
+  @for (edge of ontology()?.edges; track edge.id) {
+    <app-ontology-edge-card [edge]="edge" [node]="getRelatedOntology(edge)" [sourceNodeId]="ontologyNode().id!"></app-ontology-edge-card>
+  }
+</mat-list>
+
+<form>
+  <mat-form-field class="autocomplete">
+    <mat-label>{{ placeholder() }}</mat-label>
+    <input type="text"
+           [placeholder]="placeholder()"
+           matInput
+           [formControl]="autoCompleteControl"
+           [matAutocomplete]="auto">
+    @if (autoCompleteControl.value) {
+      <button matSuffix mat-icon-button aria-label="Clear" (click)="addRelation()">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
+    <mat-autocomplete requireSelection #auto="matAutocomplete">
+      @for (option of filteredOntologies | async; track option) {
+        <mat-option [value]="option.id">{{ option.names }} ({{ option.id }})</mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</form>

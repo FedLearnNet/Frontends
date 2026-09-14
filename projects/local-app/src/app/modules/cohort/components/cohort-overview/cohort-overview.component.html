@@ -1,0 +1,153 @@
+<lib-header
+  [title]="cohort()?.name"
+  [description]="cohort()?.description"
+  [enableSkeleton]="!cohort()"
+  [enableGoBack]="true"
+  [mainGap]="false"
+  [locationBack]="true">
+  <div suffix class="tab-header-row">
+    @if (cohort()) {
+      <lib-btn
+        type="CUSTOM"
+        variant="SECONDARY"
+        [label]="'GRID.CONNECTOR' | translate"
+        icon="cable"
+        [disabled]="isDeleting()"
+        [matTooltip]="('TOOLTIP.MANAGE_CONNECTORS' | translate)"
+        (clicked)="navigateToConnectors()"/>
+
+      @if (selectedTabIndex() === 0) {
+        <lib-btn
+          type="EDIT"
+          variant="GHOST"
+          [iconOnly]="true"
+          [icon]="isEditing() ? 'edit_off' : 'edit'"
+          [disabled]="isDeleting()"
+          [matTooltip]="('TOOLTIP.EDIT_COHORT' | translate)"
+          (clicked)="toggleEdit()"/>
+      }
+
+      <lib-btn
+        type="EXPORT"
+        variant="GHOST"
+        [iconOnly]="true"
+        [disabled]="isDeleting()"
+        [matTooltip]="('TOOLTIP.EXPORT_COHORT' | translate)"
+        (clicked)="exportCohort()"/>
+
+      <lib-btn
+        type="CUSTOM"
+        variant="GHOST"
+        [iconOnly]="true"
+        [icon]="isStarred() ? 'star' : 'star_border'"
+        [disabled]="isDeleting()"
+        [matTooltip]="isStarred() ? 'Unstar cohort' : 'Star cohort'"
+        [ngClass]="{'star-active': isStarred()}"
+        (clicked)="toggleStar()"/>
+
+      <lib-btn
+        type="DELETE"
+        variant="GHOST"
+        [iconOnly]="true"
+        [disabled]="isDeleting()"
+        [matTooltip]="('TOOLTIP.DELETE_COHORT' | translate)"
+        (clicked)="deleteCohort()"/>
+    }
+  </div>
+
+  @if (cohort()) {
+    <div class="tab-header-row tab-header-row--center">
+      @let si = selectedTabIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="si === 0" (click)="setSelectedTabIndex(0)">
+          {{ 'BUTTON.COHORT_DETAILS' | translate }}
+        </a>
+
+        @if (schema()) {
+          <a mat-tab-link [active]="si === 1" (click)="setSelectedTabIndex(1)">
+            {{ 'SCHEMA' | translate }}
+          </a>
+          <a mat-tab-link [active]="si === 2" (click)="setSelectedTabIndex(2)">
+            {{ 'BUTTON.QUERIABILITY' | translate }}
+          </a>
+        }
+
+        <a mat-tab-link [active]="si === (schema() ? 3 : 1)" (click)="setSelectedTabIndex(schema() ? 3 : 1)">
+          Access management
+        </a>
+
+        <a mat-tab-link [active]="si === (schema() ? 4 : 2)" (click)="setSelectedTabIndex(schema() ? 4 : 2)">
+          {{ 'GRID.STATISTICS' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === (schema() ? 5 : 3)" (click)="setSelectedTabIndex(schema() ? 5 : 3)">
+          {{ 'BUTTON.PATIENTS' | translate }}
+        </a>
+         <a mat-tab-link [active]="si === (schema() ? 6 : 4)" (click)="setSelectedTabIndex(schema() ? 6 : 4)">
+          {{ 'COHORT_MEMBERS.TITLE' | translate }}
+        </a>
+      </nav>
+    </div>
+  }
+</lib-header>
+
+@if (isDeleting()) {
+  <section class="deletion-progress-banner">
+    <lib-status-badge type="RUNNING" [text]="'COHORT_DELETION.DELETING' | translate" size="SMALL"/>
+    <span class="deletion-progress-banner__message">{{ 'COHORT_DELETION.DETAIL_BANNER' | translate }}</span>
+  </section>
+}
+
+<lib-page-wrapper [isEmpty]="!cohort()">
+  <lib-error-card empty>
+    {{ 'WARNING.COHORT_NOT_FOUND' | translate }}
+  </lib-error-card>
+
+  <mat-tab-nav-panel #panel>
+    @if (cohort()) {
+      @switch (selectedTabIndex()) {
+        @case (0) {
+          <app-cohort-detail
+            [isEditing]="isEditing()"
+            [(cohort)]="cohort"
+          />
+        }
+        @case (1) {
+          @if (schema()) {
+            <app-schema-detail [schema]="schema()!"/>
+          } @else {
+            <app-data-review-permission-grid [filterCohort]="cohort()" />
+          }
+        }
+        @case (2) {
+          @if (schema()) {
+            <app-patient-detail-queryability-form [cohortId]="cohort()!.id"
+                                                  [schemaNodes]="schemaDynamicFormConfig()"/>
+          } @else {
+            <app-cohort-statistics [cohortId]="cohort()!.id" />
+          }
+        }
+        @case (3) {
+          @if (schema()) {
+            <app-data-review-permission-grid [filterCohort]="cohort()" />
+          } @else {
+            <app-cohort-patients [cohort]="cohort()!"
+                                 [schemaNodes]="schemaDynamicFormConfig()!"
+                                 [patients]="patients()!"/>
+          }
+        }
+        @case (4) {
+          <app-cohort-statistics [cohortId]="cohort()!.id" />
+        }
+        @case (5) {
+          <app-cohort-patients [cohort]="cohort()!"
+                               [schemaNodes]="schemaDynamicFormConfig()!"
+                               [patients]="patients()!"/>
+        }
+        @case (6) {
+          <app-cohort-members [(cohort)]="cohort" />
+        }
+      }
+    }
+  </mat-tab-nav-panel>
+</lib-page-wrapper>

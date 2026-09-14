@@ -1,0 +1,18 @@
+@if (detail(); as detail) {
+  <lib-status-title [type]="runStatusToBadgeStatus(detail.stepStatus!)">
+    #{{ this.node.nodeId }} {{ name }}
+  </lib-status-title>
+  <mat-dialog-content>
+    @if (experimentData(); as data) {
+      <lib-experiment-workflow-node-detail [experimentData]="data!"
+        [hideMetric]="isTestExperiment()"
+        [hideOutput]="isTestExperiment()"
+        [hideInput]="isTestExperiment()" />
+    } @else {
+      <p>loading</p>
+    }
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onNoClick()">{{ 'BUTTON.CLOSE' | translate }}</button>
+  </mat-dialog-actions>
+}

@@ -1,0 +1,28 @@
+<div class="tags-container">
+
+  @if (app().tags) {
+    @for (tag of app().tags; track tag.id ?? tag.name ?? $index) {
+      <lib-badge [text]="tag.name" [color]="'GRAY'" />
+    }
+  }
+  @if (app().needsInternetAccess) {
+    <lib-badge [iconName]="'perm_scan_wifi'" [text]="('DIALOG.APP_TAG.NEEDS_INTERNET_ACCESS' | translate)" [color]="'RED'"></lib-badge>
+  }
+  @if (app().needsHostAccess) {
+    <lib-badge [iconName]="'perm_scan_wifi'" [text]="('DIALOG.APP_TAG.NEEDS_HOST_ACCESS' | translate)" [color]="'RED'"></lib-badge>
+  }
+  @if (!onlyTags()) {
+    <lib-app-card-cert-badge [app]="app()" />
+    @if (showPublish()) {
+      <lib-publish-badge [type]="publishStatus()" [animate]="false" />
+    }
+
+    @if (!app().hasImage) {
+      <lib-status-badge type="FAILED"
+                        [animate]="false"
+                        [text]="('DIALOG.APP_TAG.NO_IMAGE_APP_SHORT' | translate)" size="SMALL"
+                        [matTooltip]="('DIALOG.APP_TAG.NO_IMAGE_APP' | translate)"
+       />
+    }
+  }
+</div>

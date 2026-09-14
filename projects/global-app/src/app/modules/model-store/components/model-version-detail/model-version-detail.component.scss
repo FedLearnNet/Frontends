@@ -1,0 +1,118 @@
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  h2 {
+    line-height: 1.2;
+  }
+  .actions{
+    display: flex;
+    align-items: center;
+  }
+
+}
+
+.details-display {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  margin-bottom: 24px;
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &.changelog {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+
+  .detail-label {
+    font-weight: 500;
+    color: #666;
+  }
+
+  .detail-value {
+    color: #333;
+
+    &.changelog-text {
+      white-space: pre-wrap;
+      background-color: #f9f9f9;
+      padding: 8px 12px;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+}
+
+.version-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  background-color: #fdfdfd;
+}
+
+.preview-detail-container {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  padding: 16px;
+  background-color: #fdfdfd;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+
+  .list-pane {
+    flex: 1;
+    max-width: 400px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+
+    .card-wrapper {
+      padding: 8px;
+      cursor: pointer;
+      border-left: 4px solid transparent;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: #fafafa;
+      }
+
+      &.selected {
+        background-color: #f0f7ff;
+        border-left-color: #007bff;
+      }
+    }
+  }
+
+  .detail-pane {
+    flex: 2;
+  }
+
+  .placeholder-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #888;
+    font-style: italic;
+  }
+}

@@ -1,0 +1,77 @@
+@if (experiment(); as experiment) {
+  @if (app(); as app) {
+    <mat-toolbar class="input-wrapper">
+      <button mat-icon-button (click)="onGoBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Experiment #{{ experiment!.id }} - {{ experiment!.name }}</h1>
+      <span class="spacer"></span>
+      @if (run(); as run) {
+
+        <span> Run #{{ run.id }}</span>
+
+      }
+    </mat-toolbar>
+    <div class="experiment-header">
+
+      <div class="experiment-header--body">
+        <lib-store-card
+          size="small"
+          [linkToShop]="true" [storeElement]="{app: app}"></lib-store-card>
+
+        <div>
+          <lib-kv label="Status">
+            <lib-status-badge
+              size="SMALL"
+              [type]="runStatusToBadgeStatus(experiment.status)"></lib-status-badge>
+          </lib-kv>
+          <lib-kv label="Runs">
+            {{ passedRuns() }} / {{ totalRuns() }} ({{ failedRuns() }} failed)
+          </lib-kv>
+          <lib-kv label="Runs" [value]="experiment.description"></lib-kv>
+        </div>
+        @if (getInputNames() && getInputNames().length > 0) {
+          <div>
+            <lib-kv label="Input">
+              @for (input of getInputNames(); track input) {
+                <p>{{ input }}</p>
+              }
+            </lib-kv>
+          </div>
+        }
+
+        @if (run(); as run) {
+          <div>
+            <lib-kv label="Run" [value]="run.name"></lib-kv>
+            <lib-kv label="Staus">
+              <lib-status-badge
+                size="SMALL"
+                [type]="runStatusToBadgeStatus(run.status)"></lib-status-badge>
+            </lib-kv>
+            @if (run.error) {
+              <lib-kv label="Error" [value]="run.error"></lib-kv>
+            }
+          </div>
+        }
+        @if (model(); as model) {
+
+          <div>
+            <lib-kv label="Model">
+              <a [routerLink]="['/model', model.modelId]">{{ model.modelId }}  (v. {{ model.modelVersion }})</a>
+            </lib-kv>
+            <lib-kv label="Status">
+              <lib-publish-badge [type]="model.publishStatus"></lib-publish-badge>
+            </lib-kv>
+            <lib-kv label="Selected Model" [value]="model.selectedSubModel?.imageName"></lib-kv>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <lib-error-card>No App found</lib-error-card>
+  }
+} @else {
+  <lib-error-card>No Experiment found</lib-error-card>
+}
+
+

@@ -1,0 +1,43 @@
+<mat-card class="fed-detail__card"
+          (click)="showDetail()">
+  <mat-card-header>
+
+    <lib-federated-client-type-badge [clientType]="participant().role"
+                                     [clientName]="participant().participantId"></lib-federated-client-type-badge>
+    <span class="spacer"></span>
+    <lib-status-badge size="SMALL" [type]="participantBadge()" [text]="participant().status ?? ''"/>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="fed-detail__card-row">
+      <span class="fed-detail__label">{{ 'FEDERATED.ROUND' | translate }}</span>
+      <span>{{ participant().currentRound ?? 0 }}</span>
+    </div>
+    <div class="fed-detail__card-row">
+      <span class="fed-detail__label">{{ 'FEDERATED.MESSAGES_SENT' | translate }}</span>
+      <span class="fed-detail__counter">
+                  <mat-icon inline>arrow_upward</mat-icon>
+        {{ participant().messagesSent ?? 0 }}
+                </span>
+    </div>
+    <div class="fed-detail__card-row">
+      <span class="fed-detail__label">{{ 'FEDERATED.MESSAGES_RECEIVED' | translate }}</span>
+      <span class="fed-detail__counter">
+                  <mat-icon inline>arrow_downward</mat-icon>
+        {{ participant().messagesReceived ?? 0 }}
+                </span>
+    </div>
+    <!--@if (participant().config) {
+
+    }-->
+    @if (participant().waitingFor && participant().waitingFor!.length > 0) {
+      <div class="fed-detail__card-row fed-detail__card-row--stack">
+        <span class="fed-detail__label">{{ 'FEDERATED.WAITING_FOR' | translate }}</span>
+        <mat-chip-set>
+          @for (w of participant().waitingFor; track w) {
+            <mat-chip>{{ w }}</mat-chip>
+          }
+        </mat-chip-set>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

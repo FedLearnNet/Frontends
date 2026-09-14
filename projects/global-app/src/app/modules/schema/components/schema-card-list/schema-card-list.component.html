@@ -1,0 +1,8 @@
+<div class="wrapper">
+  @if ((schemas$ | async); as schemas) {
+    @for (schema of schemas; track schema) {
+      <app-schema-card [schema]="schema" />
+    }
+  }
+</div>
+

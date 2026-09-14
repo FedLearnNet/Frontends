@@ -1,0 +1,58 @@
+@if (app() || version()) {
+  @if (mode() === 'LIST') {
+    @for (param of getHyperParams(); track param) {
+      <lib-app-hyper-param-input class="full-width"
+                                 [hyperparam]="param"
+                                 [value]="getHyperParamValue(param)"
+                                 [allowMultiple]="allowMultiple()"
+                                 (valuesChanged)="emitMultiHyperParamsChanged(param, $event)"
+                                 (validChanged)="validateForms(param, $event)"
+                                 (valueChanged)="emitHyperParamsChanged(param, $event)"/>
+    }
+  }
+  @if (mode() === 'TABLE') {
+    <mat-table [dataSource]="getHyperParams()">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let param">
+          {{ param.name }}
+          @if (param.description?.trim()) {
+            <mat-icon class="material-icons" [matTooltip]="param.description">info_i
+            </mat-icon>
+          }
+        </mat-cell>
+      </ng-container>
+
+      @if (allowColumnInputs()) {
+        <ng-container matColumnDef="column">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.COLUMN' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let param">
+            <mat-form-field>
+              <mat-select (selectionChange)="emitHyperParamsChanged(param, $event.value)">
+                @for (column of columns(); track column) {
+                  <mat-option [value]="column">{{ column }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-cell>
+        </ng-container>
+      }
+      <ng-container matColumnDef="value">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.VALUE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let param">
+          <lib-app-hyper-param-input class="full-width"
+                                     [hyperparam]="param"
+                                     [value]="getHyperParamValue(param)"
+                                     [allowMultiple]="allowMultiple()"
+                                     (valuesChanged)="emitMultiHyperParamsChanged(param, $event)"
+                                     (validChanged)="validateForms(param, $event)"
+                                     (valueChanged)="emitHyperParamsChanged(param, $event)"/>
+        </mat-cell>
+      </ng-container>
+      <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
+    </mat-table>
+  }
+} @else {
+  <lib-skeleton-loader [lines]="10"></lib-skeleton-loader>
+}

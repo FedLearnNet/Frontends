@@ -1,0 +1,21 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.dynamic-form-component,
+::ng-deep mat-form-field {
+  width: 100%;
+}
+
+.state-toggle {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mat-column-dataType {
+  flex: 0 0 10%;
+  width: 10%;
+  box-sizing: border-box;
+}
+.schema-detail__actions {
+  width: 56px;
+  text-align: right;
+}

@@ -1,0 +1,52 @@
+<button matIconButton (click)="processAction.emit(action.DELETE_SELECTED)" [disabled]="!canRemove()"
+        matTooltip="Delete"
+        matTooltipPosition="below">
+  <mat-icon>delete</mat-icon>
+</button>
+
+<button matIconButton  (click)="processAction.emit(action.CONNECT_SELECTED)" [disabled]="!canConnect()"
+        matTooltip="Connect two nodes"
+        matTooltipPosition="below">
+  <mat-icon>linked_services</mat-icon>
+
+</button>
+
+<button matIconButton (click)="processAction.emit(action.ZOOM_IN)"
+        matTooltip="Zoom In"
+        matTooltipPosition="below">
+  <mat-icon>zoom_in</mat-icon>
+</button>
+
+<button matIconButton (click)="processAction.emit(action.ZOOM_OUT)"
+        matTooltip="Zoom Out"
+        matTooltipPosition="below">
+  <mat-icon>zoom_out</mat-icon>
+</button>
+
+<button matIconButton (click)="processAction.emit(action.FIT_TO_SCREEN)"
+        matTooltip="Fit to Screen"
+        matTooltipPosition="below">
+  <mat-icon>zoom_in_map</mat-icon>
+</button>
+
+<button matIconButton (click)="processAction.emit(action.ONE_TO_ONE)"
+        matTooltip="1:1"
+        matTooltipPosition="below">
+  <mat-icon>center_focus_strong</mat-icon>
+</button>
+
+<div class="divider"></div>
+
+<button matIconButton (click)="processAction.emit(action.RESET)"
+        matTooltip="Reset"
+        matTooltipPosition="below">
+  <mat-icon>clearAll</mat-icon>
+</button>
+
+@if (isValid()) {
+  <button matIconButton (click)="processAction.emit(action.SAVE)"
+          matTooltip="Save"
+          matTooltipPosition="below">
+    <mat-icon>save</mat-icon>
+  </button>
+}

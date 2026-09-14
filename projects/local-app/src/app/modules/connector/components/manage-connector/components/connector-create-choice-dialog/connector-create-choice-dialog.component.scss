@@ -1,0 +1,109 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+  min-width: min(560px, 100%);
+}
+
+.dialog-intro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(17, 24, 39, 0.72);
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.choice-card {
+  display: grid;
+  grid-template-columns: 44px 1fr 24px;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 16px;
+  border: 1.5px solid rgba(17, 24, 39, 0.12);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.05);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--mat-sys-primary, #1976d2);
+    box-shadow: 0 8px 22px rgba(25, 118, 210, 0.12);
+    background: rgba(25, 118, 210, 0.02);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary, #1976d2);
+    outline-offset: 2px;
+  }
+}
+
+.choice-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.choice-card__icon--create {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--mat-sys-primary, #1976d2);
+}
+
+.choice-card__icon--import {
+  background: rgba(46, 125, 50, 0.1);
+  color: #2e7d32;
+}
+
+.choice-card__body {
+  min-width: 0;
+}
+
+.choice-card__title {
+  font-size: 14px;
+  font-weight: 650;
+  color: rgba(17, 24, 39, 0.92);
+}
+
+.choice-card__description {
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: rgba(17, 24, 39, 0.62);
+}
+
+.choice-card__arrow {
+  color: rgba(17, 24, 39, 0.38);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 24px;
+}

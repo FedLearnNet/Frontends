@@ -1,0 +1,14 @@
+<div class="list" role="list">
+  @if (entries().length === 0) {
+    <lib-hint-card>
+      No hyperparameters.
+    </lib-hint-card>
+  } @else {
+    @for (e of entries(); track $index) {
+      <article class="row">
+        <lib-badge [text]="e.key" [color]="'GRAY'" />
+        <div class="val" [title]="e.value">{{ e.value }}</div>
+      </article>
+    }
+  }
+</div>

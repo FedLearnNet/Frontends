@@ -1,0 +1,19 @@
+<div class="uploader">
+  <mat-toolbar>
+    <span>Data Management</span>
+    <span class="spacer"></span>
+    <button mat-icon-button (click)="toggleUpload()">
+      <mat-icon>upload</mat-icon>
+    </button>
+  </mat-toolbar>
+  @if (showUpload()) {
+    <lib-upload-file-area [progress]="currentUpload()" (toUploadFile)="uploadFile($event)" />
+  }
+  @if (file(); as f) {
+    <lib-file-card [file]="f!" />
+  }
+  @if (error(); as err) {
+    <lib-error-card [oopsError]="err" />
+  }
+</div>
+

@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>{{ 'DIALOG.START_NEW_SCHEMA.TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+  <mat-form-field class="full-width">
+    <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+    <input matInput [placeholder]="( 'GRID.NAME' | translate )" [(ngModel)]="name">
+  </mat-form-field>
+
+  <mat-form-field class="full-width">
+    <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+    <textarea matInput [placeholder]="( 'GRID.DESCRIPTION' | translate )" [(ngModel)]="description"></textarea>
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.NO_THANKS' | translate }}</button>
+  <button mat-button (click)="saveRoot()" [disabled]="!(name && description)">{{ 'BUTTON.SAVE_ROOT' | translate }}</button>
+</mat-dialog-actions>

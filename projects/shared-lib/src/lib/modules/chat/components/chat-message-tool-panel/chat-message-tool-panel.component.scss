@@ -1,0 +1,78 @@
+mat-list-item {
+  height: initial !important;
+  margin: 10px 0 !important;
+
+  mat-icon {
+    margin-top: 1px;
+    margin-inline-end: 10px;
+    color: var(--mat-sys-on-surface);
+    align-self: start !important;
+  }
+
+  ::ng-deep .mat-mdc-list-item-title {
+    word-wrap: break-word !important;
+    white-space: pre-wrap !important;
+  }
+
+  ::ng-deep .step {
+
+    span {
+      text-wrap: auto;
+    }
+    .reason,
+    .subtask {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      align-items: start;
+    }
+
+    .action {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .head {
+      font-weight: 600;
+      margin-right: 5px;
+    }
+  }
+}
+
+.collapse-section {
+  margin-top: 4px;
+}
+
+.collapse-summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.collapse-summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapse-content {
+  margin-top: 4px;
+  padding-left: 8px;
+  border-left: 2px solid #e0e0e0;
+  word-wrap: break-word !important;
+  white-space: pre-wrap !important;
+}
+
+.collapse-icon {
+  font-size: 18px;
+  transition: transform 150ms ease;
+  transform: rotate(90deg);
+
+}
+
+details[open] .collapse-icon {
+  transform: rotate(270deg);
+}

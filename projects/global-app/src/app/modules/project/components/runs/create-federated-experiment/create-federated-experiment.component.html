@@ -1,0 +1,71 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.CREATE_EXPERIMENT.TITLE_1' | translate"></lib-closeable-dialog-title>
+
+<mat-dialog-content>
+
+  @if (trainableApps === 0) {
+    <lib-hint-card>
+      You don't have trainable apps inside your workflow, so no model can be trained.
+      But the workflow <b>still</b> can be executed federated.
+    </lib-hint-card>
+  }
+  @if (!hasProject) {
+    <lib-error-card>
+      No project found
+    </lib-error-card>
+  }
+
+  @if (!hasProjectName) {
+    <lib-error-card warningButtonText="Specify" (warningClicked)="routeToPage('overview')">
+      You need to specify project name
+    </lib-error-card>
+  }
+  @if (!hasProjectDescription) {
+    <lib-error-card warningButtonText="Specify" (warningClicked)="routeToPage('overview')">
+      You need to specify project description
+    </lib-error-card>
+  }
+  @if (!hasEnoughSelectedData) {
+    <lib-error-card warningButtonText="Specify" (warningClicked)="routeToPage('data')">
+      You need to specify which data you need
+    </lib-error-card>
+  }
+  @if (!hasQueryId) {
+    <lib-error-card warningButtonText="Specify" (warningClicked)="routeToPage('overview')">
+      You need to select a federated query
+    </lib-error-card>
+  }
+
+  <p>
+    {{ 'DIALOG.CREATE_EXPERIMENT.MESSAGE_LINE_FEDERATED_1' | translate }}
+  </p>
+  <p>
+    {{ 'DIALOG.CREATE_EXPERIMENT.MESSAGE_LINE_FEDERATED_2' | translate }}
+  </p>
+
+  <form [formGroup]="newExperimentForm">
+    <mat-form-field>
+      <mat-label>{{ 'GRID.NAME_OF_THE_EXPERIMENT' | translate }}</mat-label>
+      <input matInput [placeholder]="('GRID.NAME_OF_THE_EXPERIMENT' | translate)" formControlName="name" required>
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{ 'GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate }}</mat-label>
+      <textarea matInput [placeholder]="('GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate)"
+                formControlName="description" required rows="5"></textarea>
+    </mat-form-field>
+    <mat-checkbox formControlName="modelNeedToBePublic">{{ 'BUTTON.MODEL_NEED_TO_BE_PUBLIC' | translate }}
+    </mat-checkbox>
+    <mat-divider></mat-divider>
+    <mat-checkbox formControlName="acceptProcess">{{ 'BUTTON.I_ACCEPT_THE_PROCESS' | translate }}</mat-checkbox>
+  </form>
+
+</mat-dialog-content>
+
+
+<mat-dialog-actions class="margin-top-auto" align="end">
+  <lib-btn type="CREATE"
+           [disabled]="newExperimentForm.invalid || !isValidProject()"
+           (clicked)="onSubmit()"/>
+</mat-dialog-actions>

@@ -1,0 +1,17 @@
+.apps{
+  padding: 20px;
+
+  mat-form-field{
+    width: 100%;
+  }
+}
+
+.table-toolbar{
+  display: flex;
+
+  gap: 40px;
+  .add-btn{
+    margin-top: 9px;
+    width: 150px;
+  }
+}

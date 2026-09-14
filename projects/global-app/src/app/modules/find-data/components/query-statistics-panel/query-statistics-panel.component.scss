@@ -1,0 +1,145 @@
+:host {
+  display: block;
+}
+
+.statistics-page {
+  display: grid;
+  gap: 18px;
+}
+
+.statistics-hero__badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.overview-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+.overview-chart-card {
+  margin-top: 10px;
+  padding: 16px 16px 0;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.chart-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #64748b;
+}
+
+.chart-subtitle {
+  margin-top: 6px;
+  margin-bottom: 10px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.overview-chart {
+  width: 100%;
+  max-width: 100%;
+  height: 360px;
+  display: block;
+}
+
+.filter-bar {
+  display: grid;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.filter-bar__controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-bar__meta {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  width: min(420px, 100%);
+}
+
+.config-field {
+  min-width: 150px;
+}
+
+.filter-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.filter-summary__count {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.filter-summary__label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.comparison-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.comparison-grid--compact {
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.comparison-grid--comfortable {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+@media (max-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .filter-bar__controls,
+  .filter-bar__meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-field,
+  .config-field {
+    width: 100%;
+  }
+
+  .filter-summary {
+    align-items: flex-start;
+  }
+
+  .comparison-grid,
+  .comparison-grid--compact,
+  .comparison-grid--comfortable {
+    grid-template-columns: 1fr;
+  }
+}

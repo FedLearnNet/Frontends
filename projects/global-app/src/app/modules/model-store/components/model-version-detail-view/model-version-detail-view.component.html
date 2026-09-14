@@ -1,0 +1,17 @@
+<lib-page-wrapper
+  [isLoading]="selectModelLoading()"
+  [error]="selectModelError()"
+  [skeletonOnLoading]="true"
+  [isEmpty]="selectedVersion() === null || selectedModel() === null"
+>
+  <lib-empty-state
+    empty
+    title="Model not found"
+    subtitle="Please reload and try again later"
+  ></lib-empty-state>
+  @if (selectedVersion() && selectedModel()) {
+    <app-model-version-detail [modelDetail]="selectedModel()!"
+                              [modelVersion]="selectedVersion()!"/>
+  }
+</lib-page-wrapper>
+

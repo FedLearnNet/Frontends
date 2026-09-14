@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{ (data.isCsvZip ? 'DIALOG.MERGE_CSV_FILES_TITLE' : 'DIALOG.MERGE_SHEETS_TITLE') | translate }}</h2>
+
+<mat-dialog-content>
+  <p>{{ (data.isCsvZip ? 'DIALOG.MERGE_CSV_FILES_DESCRIPTION' : 'DIALOG.MERGE_SHEETS_DESCRIPTION') | translate }}</p>
+
+  <mat-divider></mat-divider>
+
+  <div class="sheet-uid-selector">
+    @for (sheet of data.sheets; track sheet.name) {
+      <mat-form-field appearance="fill" class="uid-field">
+        <mat-label>{{ sheet.name }} - {{ 'DIALOG.UID_COLUMN' | translate }}</mat-label>
+        <mat-select [(ngModel)]="sheetUidMapping[sheet.name]">
+          @for (column of sheet.columns; track $index) {
+            @let columnValue = getBaseColumnName(column, sheet.name);
+            <mat-option [value]="columnValue">{{ columnValue }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <mat-form-field appearance="fill" class="common-uid-field">
+    <mat-label>{{ 'DIALOG.COMMON_UID_COLUMN_NAME' | translate }}</mat-label>
+    <input matInput [(ngModel)]="commonUidColumnName" placeholder="{{ 'DIALOG.COMMON_UID_PLACEHOLDER' | translate }}" required>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancelClick()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  <button mat-raised-button color="primary" (click)="onMergeClick()" [disabled]="!isValid()">
+    {{ 'BUTTON.MERGE' | translate }}
+  </button>
+</mat-dialog-actions>

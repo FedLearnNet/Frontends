@@ -1,0 +1,974 @@
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Code-Quality.gitlab-ci.yml
+  - template: Jobs/Code-Intelligence.gitlab-ci.yml
+
+stages:
+  - dependencies
+  - assemble
+  - check
+  - test
+  - security
+  - deploy
+
+variables:
+  # GitLab registry base images without tags
+  CI_LOCAL_IMAGE_DIABETES: $CI_REGISTRY/$CI_PROJECT_PATH/local-daibetes
+  CI_LOCAL_IMAGE_MICROBAIOME: $CI_REGISTRY/$CI_PROJECT_PATH/local-microbaiome
+  CI_LOCAL_IMAGE_FLNET: $CI_REGISTRY/$CI_PROJECT_PATH/local-fl-net
+
+  CI_GLOBAL_IMAGE_DIABETES: $CI_REGISTRY/$CI_PROJECT_PATH/global-daibetes
+  CI_GLOBAL_IMAGE_MICROBAIOME: $CI_REGISTRY/$CI_PROJECT_PATH/global-microbaiome
+  CI_GLOBAL_IMAGE_POSYMED: $CI_REGISTRY/$CI_PROJECT_PATH/global-posymed
+  CI_GLOBAL_IMAGE_FL_NET: $CI_REGISTRY/$CI_PROJECT_PATH/global-fl-net
+
+  # GHCR base images without tags
+  GHCR_LOCAL_IMAGE_DIABETES: ghcr.io/fedlearnnet/frontend/local-daibetes
+  GHCR_LOCAL_IMAGE_MICROBAIOME: ghcr.io/fedlearnnet/frontend/local-microbaiome
+  GHCR_LOCAL_IMAGE_FLNET: ghcr.io/fedlearnnet/frontend/local-fl-net
+
+  GHCR_GLOBAL_IMAGE_DIABETES: ghcr.io/fedlearnnet/frontend/global-daibetes
+  GHCR_GLOBAL_IMAGE_MICROBAIOME: ghcr.io/fedlearnnet/frontend/global-microbaiome
+  GHCR_GLOBAL_IMAGE_POSYMED: ghcr.io/fedlearnnet/frontend/global-posymed
+  GHCR_GLOBAL_IMAGE_FL_NET: ghcr.io/fedlearnnet/frontend/global-fl-net
+
+  # GitLab staging images
+  CI_LOCAL_IMAGE_DIABETES_STAGING: $CI_LOCAL_IMAGE_DIABETES:staging
+  CI_LOCAL_IMAGE_MICROBAIOME_STAGING: $CI_LOCAL_IMAGE_MICROBAIOME:staging
+  CI_LOCAL_IMAGE_FL_NET_STAGING: $CI_LOCAL_IMAGE_FLNET:staging
+
+  CI_GLOBAL_IMAGE_DIABETES_STAGING: $CI_GLOBAL_IMAGE_DIABETES:staging
+  CI_GLOBAL_IMAGE_MICROBAIOME_STAGING: $CI_GLOBAL_IMAGE_MICROBAIOME:staging
+  CI_GLOBAL_IMAGE_POSYMED_STAGING: $CI_GLOBAL_IMAGE_POSYMED:staging
+  CI_GLOBAL_IMAGE_FL_NET_STAGING: $CI_GLOBAL_IMAGE_FL_NET:staging
+  CI_GLOBAL_IMAGE_FL_NET_STAGING_RELATIVE: $CI_GLOBAL_IMAGE_FL_NET:staging-relative
+  CI_LOCAL_IMAGE_FL_NET_STAGING_LOCALHOST: $CI_LOCAL_IMAGE_FLNET:staging-localhost
+
+  # GitLab latest images
+  CI_LOCAL_IMAGE_DIABETES_LATEST: $CI_LOCAL_IMAGE_DIABETES:latest
+  CI_LOCAL_IMAGE_MICROBAIOME_LATEST: $CI_LOCAL_IMAGE_MICROBAIOME:latest
+  CI_LOCAL_IMAGE_FL_NET_LATEST: $CI_LOCAL_IMAGE_FLNET:latest
+  CI_GLOBAL_IMAGE_DIABETES_LATEST: $CI_GLOBAL_IMAGE_DIABETES:latest
+  CI_GLOBAL_IMAGE_MICROBAIOME_LATEST: $CI_GLOBAL_IMAGE_MICROBAIOME:latest
+  CI_GLOBAL_IMAGE_POSYMED_LATEST: $CI_GLOBAL_IMAGE_POSYMED:latest
+  CI_GLOBAL_IMAGE_FL_NET_LATEST: $CI_GLOBAL_IMAGE_FL_NET:latest
+
+  # GHCR staging images
+  GHCR_LOCAL_IMAGE_DIABETES_STAGING: $GHCR_LOCAL_IMAGE_DIABETES:staging
+  GHCR_LOCAL_IMAGE_MICROBAIOME_STAGING: $GHCR_LOCAL_IMAGE_MICROBAIOME:staging
+  GHCR_LOCAL_IMAGE_FL_NET_STAGING: $GHCR_LOCAL_IMAGE_FLNET:staging
+
+  GHCR_GLOBAL_IMAGE_DIABETES_STAGING: $GHCR_GLOBAL_IMAGE_DIABETES:staging
+  GHCR_GLOBAL_IMAGE_MICROBAIOME_STAGING: $GHCR_GLOBAL_IMAGE_MICROBAIOME:staging
+  GHCR_GLOBAL_IMAGE_POSYMED_STAGING: $GHCR_GLOBAL_IMAGE_POSYMED:staging
+  GHCR_GLOBAL_IMAGE_FL_NET_STAGING: $GHCR_GLOBAL_IMAGE_FL_NET:staging
+  GHCR_GLOBAL_IMAGE_FL_NET_STAGING_RELATIVE: $GHCR_GLOBAL_IMAGE_FL_NET:staging-relative
+  GHCR_LOCAL_IMAGE_FL_NET_STAGING_LOCALHOST: $GHCR_LOCAL_IMAGE_FLNET:staging-localhost
+
+  # GHCR latest images
+  GHCR_LOCAL_IMAGE_DIABETES_LATEST: $GHCR_LOCAL_IMAGE_DIABETES:latest
+  GHCR_LOCAL_IMAGE_MICROBAIOME_LATEST: $GHCR_LOCAL_IMAGE_MICROBAIOME:latest
+  GHCR_LOCAL_IMAGE_FL_NET_LATEST: $GHCR_LOCAL_IMAGE_FLNET:latest
+  GHCR_GLOBAL_IMAGE_DIABETES_LATEST: $GHCR_GLOBAL_IMAGE_DIABETES:latest
+  GHCR_GLOBAL_IMAGE_MICROBAIOME_LATEST: $GHCR_GLOBAL_IMAGE_MICROBAIOME:latest
+  GHCR_GLOBAL_IMAGE_POSYMED_LATEST: $GHCR_GLOBAL_IMAGE_POSYMED:latest
+  GHCR_GLOBAL_IMAGE_FL_NET_LATEST: $GHCR_GLOBAL_IMAGE_FL_NET:latest
+
+  GITLAB_ADVANCED_SAST_ENABLED: "true"
+  GIT_DEPTH: "0"
+  CS_IMAGE: $CI_LOCAL_IMAGE_DIABETES_LATEST
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .npm/
+    - /root/.cache/Cypress
+
+.docker_login: &docker_login
+  - docker info
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+.docker_login_ghcr: &docker_login_ghcr
+  - test -n "$GITHUB_USERNAME" || (echo "GITHUB_USERNAME is empty" && exit 1)
+  - test -n "$GITHUB_TOKEN" || (echo "GITHUB_TOKEN is empty" && exit 1)
+  - echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USERNAME" --password-stdin
+
+.docker_buildx: &docker_buildx
+  - docker context create fedDB-context || true
+  - docker buildx create --name fedDBBuilder --use fedDB-context || docker buildx use fedDBBuilder
+  - docker buildx inspect --bootstrap
+
+.docker_buildxrm: &docker_buildxrm
+  - docker buildx rm fedDBBuilder || true
+
+#https://docs.gitlab.com/ci/jobs/job_rules/#reuse-rules-in-different-jobs
+.security_default_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "develop"
+      when: on_success
+    - when: manual
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# install
+
+install:
+  image: node:lts-alpine
+  stage: dependencies
+  rules:
+    - when: always
+  script:
+    - npm install --prefer-offline
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+      - /root/.cache/Cypress
+
+# ─────────────────────────────────────────────────────────────────────────────
+# assemble
+
+.assemble:
+  image: node:lts-alpine
+  stage: assemble
+  needs:
+    - install
+  dependencies:
+    - install
+  script:
+    - npm run $SCRIPT
+  artifacts:
+    paths:
+      - dist
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+    policy: pull
+
+# daibetes
+assemble:global-daibetes:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-dAIbetes
+  only:
+    - master
+    - main
+    - develop
+
+assemble:global-daibetes-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-dAIbetes-staging
+  only:
+    - master
+    - main
+    - develop
+
+assemble:local-daibetes:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-dAIbetes
+  only:
+    - master
+    - main
+    - develop
+
+assemble:local-daibetes-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-dAIbetes-staging
+  only:
+    - master
+    - main
+    - develop
+
+# Posymed - only needs global prod
+assemble:posymed:
+  extends: .assemble
+  variables:
+    SCRIPT: build-posymed
+  only:
+    - master
+    - main
+
+assemble:posymed-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-posymed-staging
+  only:
+    - develop
+
+# microbaiome
+assemble:global-microbaiome:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-microbAIome
+  only:
+    - master
+    - main
+    - develop
+
+assemble:global-microbaiome-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-microbAIome-staging
+  only:
+    - master
+    - main
+    - develop
+
+assemble:local-microbaiome:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-microbAIome
+  only:
+    - master
+    - main
+    - develop
+
+assemble:local-microbaiome-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-microbAIome-staging
+  only:
+    - master
+    - main
+    - develop
+
+# FL-Net
+assemble:global-fl-net:
+  extends: .assemble
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    SCRIPT: build-global-fl-net
+
+assemble:global-fl-net-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-fl-net-staging
+  rules:
+    - when: always
+
+assemble:global-fl-net-staging-relative:
+  extends: .assemble
+  variables:
+    SCRIPT: build-global-fl-net-staging-relative
+  only:
+    - develop
+
+assemble:local-fl-net:
+  extends: .assemble
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    SCRIPT: build-local-fl-net
+
+assemble:local-fl-net-staging:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-fl-net-staging
+  rules:
+    - when: always
+
+assemble:local-fl-net-staging-localhost:
+  extends: .assemble
+  variables:
+    SCRIPT: build-local-fl-net-staging-localhost
+  only:
+    - develop
+
+# ─────────────────────────────────────────────────────────────────────────────
+# check
+
+.check:lint:
+  stage: check
+  image: node:lts-alpine
+  needs:
+    - install
+  cache:
+    key:
+      files:
+        - package.json
+    paths:
+      - node_modules
+    policy: pull
+  script:
+    - npm run $SCRIPT
+
+check:lint:local:
+  extends: .check:lint
+  variables:
+    SCRIPT: lint-local
+
+check:lint:shared:
+  extends: .check:lint
+  variables:
+    SCRIPT: lint-shared-lib
+
+check:lint:global:
+  extends: .check:lint
+  variables:
+    SCRIPT: lint-global
+
+.check:build:
+  image: docker:24.0.2
+  stage: check
+  services:
+    - name: docker:24.0.2-dind
+      alias: docker
+  before_script:
+    - *docker_login
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  script:
+    - docker build -t $CI_IMAGE -f ./Dockerfile .
+    - docker save -o $TAR_FILE_NAME $CI_IMAGE
+    - chmod 644 $TAR_FILE_NAME
+    - echo "API image created at $TAR_FILE_NAME"
+  artifacts:
+    paths:
+      - $TAR_FILE_NAME
+    expire_in: 1 hour
+
+# Daibetes
+check:build:local:diabetes-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:local-daibetes
+  needs:
+    - assemble:local-daibetes
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING
+    TAR_FILE_NAME: diabetes-local.tar
+
+check:build:global:diabetes-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:global-daibetes
+  needs:
+    - assemble:global-daibetes
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING
+    TAR_FILE_NAME: diabetes-global.tar
+
+check:build:global:diabetes-latest:
+  extends: .check:build
+  dependencies:
+    - assemble:global-daibetes
+  needs:
+    - assemble:global-daibetes
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_LATEST
+    TAR_FILE_NAME: diabetes-global-latest.tar
+
+check:build:local:diabetes-latest:
+  extends: .check:build
+  dependencies:
+    - assemble:local-daibetes
+  needs:
+    - assemble:local-daibetes
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_LATEST
+    TAR_FILE_NAME: diabetes-local-latest.tar
+
+# Microbaiome
+check:build:local:microbaiome-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:local-microbaiome-staging
+  needs:
+    - assemble:local-microbaiome-staging
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_STAGING
+    TAR_FILE_NAME: microbaiome-local.tar
+
+check:build:global:microbaiome-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:global-microbaiome-staging
+  needs:
+    - assemble:global-microbaiome-staging
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_STAGING
+    TAR_FILE_NAME: microbaiome-global.tar
+
+check:build:local:microbaiome-latest:
+  extends: .check:build
+  dependencies:
+    - assemble:local-microbaiome
+  needs:
+    - assemble:local-microbaiome
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_LATEST
+    TAR_FILE_NAME: microbaiome-local-latest.tar
+
+check:build:global:microbaiome-latest:
+  extends: .check:build
+  dependencies:
+    - assemble:global-microbaiome
+  needs:
+    - assemble:global-microbaiome
+  only:
+    - master
+    - main
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_LATEST
+    TAR_FILE_NAME: microbaiome-global-latest.tar
+
+# Posymed
+check:build:global:posymed-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:posymed-staging
+  needs:
+    - assemble:posymed-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_STAGING
+    TAR_FILE_NAME: posymed.tar
+
+check:build:global:posymed-latest:
+  extends: .check:build
+  dependencies:
+    - assemble:posymed
+  needs:
+    - assemble:posymed
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_LATEST
+    TAR_FILE_NAME: posymed-latest.tar
+
+# FL-Net
+check:build:local:fl-net-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:local-fl-net-staging
+  needs:
+    - assemble:local-fl-net-staging
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_FL_NET_STAGING
+    TAR_FILE_NAME: fl-net-local.tar
+  rules:
+    - when: always
+
+check:build:global:fl-net-staging:
+  extends: .check:build
+  dependencies:
+    - assemble:global-fl-net-staging
+  needs:
+    - assemble:global-fl-net-staging
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_FL_NET_STAGING
+    TAR_FILE_NAME: fl-net-global.tar
+  rules:
+    - when: always
+
+# ─────────────────────────────────────────────────────────────────────────────
+# test
+test:e2e:local:
+  image: cypress/browsers:22.15.0
+  stage: test
+  allow_failure: true
+  script:
+    - npm ci
+    - npm run cy:local:automatic
+  artifacts:
+    when: always
+    paths:
+      - results
+    expire_in: 1 day
+    reports:
+      junit:
+        - results/junit/*.xml
+
+test:e2e:global:
+  image: cypress/browsers:22.15.0
+  stage: test
+  allow_failure: true
+  script:
+    - npm ci
+    - npm run cy:global:automatic
+  artifacts:
+    when: always
+    paths:
+      - results
+    expire_in: 1 day
+    reports:
+      junit:
+        - results/junit/*.xml
+
+# ─────────────────────────────────────────────────────────────────────────────
+# deploy
+
+.deploy:gitlab_registry:
+  image: docker:24.0.2
+  stage: deploy
+  services:
+    - name: docker:24.0.2-dind
+      alias: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  before_script:
+    - *docker_login
+    - *docker_buildx
+  script:
+    - docker buildx build --platform linux/amd64,linux/arm64/v8 --provenance false -t $CI_IMAGE -f ./Dockerfile --push .
+
+.deploy:github_registry:
+  image: docker:24.0.2
+  stage: deploy
+  services:
+    - name: docker:24.0.2-dind
+      alias: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: "tcp://docker:2375"
+  before_script:
+    - *docker_login_ghcr
+    - *docker_buildx
+  script:
+    - docker buildx build --platform linux/amd64,linux/arm64/v8 --provenance false -t $CI_IMAGE -f ./Dockerfile --push .
+
+# LOCAL
+deploy:gitlab_registry:local:diabetes-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-daibetes
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING
+
+deploy:github_registry:local:diabetes-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-daibetes
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_DIABETES_STAGING
+
+deploy:gitlab_registry:local:diabetes-staging-local:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-daibetes-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_STAGING-local
+
+deploy:gitlab_registry:local:diabetes-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-daibetes
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_DIABETES_LATEST
+
+deploy:github_registry:local:diabetes-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-daibetes
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_DIABETES_LATEST
+
+deploy:gitlab_registry:local:microbaiome-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-microbaiome
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_STAGING
+
+deploy:github_registry:local:microbaiome-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-microbaiome
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_MICROBAIOME_STAGING
+
+deploy:gitlab_registry:local:microbaiome-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-microbaiome
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_MICROBAIOME_LATEST
+
+deploy:github_registry:local:microbaiome-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-microbaiome
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_MICROBAIOME_LATEST
+
+deploy:gitlab_registry:local:fl-net-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-fl-net
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_FL_NET_LATEST
+
+deploy:github_registry:local:fl-net-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-fl-net
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_FL_NET_LATEST
+
+deploy:gitlab_registry:local:fl-net-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-fl-net-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_FL_NET_STAGING
+
+deploy:gitlab_registry:local:fl-net-staging-localhost:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:local-fl-net-staging-localhost
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_LOCAL_IMAGE_FL_NET_STAGING_LOCALHOST
+
+deploy:github_registry:local:fl-net-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-fl-net-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_FL_NET_STAGING
+
+deploy:github_registry:local:fl-net-staging-localhost:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:local-fl-net-staging-localhost
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_LOCAL_IMAGE_FL_NET_STAGING_LOCALHOST
+
+# GLOBAL
+deploy:gitlab_registry:global:diabetes-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-daibetes
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING
+
+deploy:github_registry:global:diabetes-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-daibetes
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_DIABETES_STAGING
+
+deploy:gitlab_registry:global:diabetes-staging-local:
+  extends: .deploy:gitlab_registry
+  only:
+    - develop
+  needs:
+    - assemble:global-daibetes-staging
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_STAGING-local
+
+deploy:gitlab_registry:global:diabetes-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-daibetes
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_DIABETES_LATEST
+
+deploy:github_registry:global:diabetes-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-daibetes
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_DIABETES_LATEST
+
+deploy:gitlab_registry:global:microbaiome-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-microbaiome-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_STAGING
+
+deploy:github_registry:global:microbaiome-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-microbaiome-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_MICROBAIOME_STAGING
+
+deploy:gitlab_registry:global:microbaiome-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-microbaiome
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_MICROBAIOME_LATEST
+
+deploy:github_registry:global:microbaiome-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-microbaiome
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_MICROBAIOME_LATEST
+
+deploy:gitlab_registry:global:posymed-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:posymed-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_STAGING
+
+deploy:github_registry:global:posymed-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:posymed-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_POSYMED_STAGING
+
+deploy:gitlab_registry:global:posymed-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:posymed
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_POSYMED_LATEST
+
+deploy:github_registry:global:posymed-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:posymed
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_POSYMED_LATEST
+
+deploy:gitlab_registry:global:fl-net-staging:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-fl-net-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_FL_NET_STAGING
+
+deploy:gitlab_registry:global:fl-net-staging-relative:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-fl-net-staging-relative
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_FL_NET_STAGING_RELATIVE
+
+deploy:github_registry:global:fl-net-staging:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-fl-net-staging
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_FL_NET_STAGING
+
+deploy:github_registry:global:fl-net-staging-relative:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-fl-net-staging-relative
+  only:
+    - develop
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_FL_NET_STAGING_RELATIVE
+
+deploy:gitlab_registry:global:fl-net-latest:
+  extends: .deploy:gitlab_registry
+  needs:
+    - assemble:global-fl-net
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $CI_GLOBAL_IMAGE_FL_NET_LATEST
+
+deploy:github_registry:global:fl-net-latest:
+  extends: .deploy:github_registry
+  needs:
+    - assemble:global-fl-net
+  only:
+    - main
+    - master
+  variables:
+    CI_IMAGE: $GHCR_GLOBAL_IMAGE_FL_NET_LATEST
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Override all security scanning jobs
+
+spotbugs-sast:
+  needs:
+    - install
+  rules:
+    - !reference [.security_default_rules, rules]
+  variables:
+    COMPILE: "false"
+    SECURE_LOG_LEVEL: debug
+
+gitlab-advanced-sast:
+  dependencies:
+    - install
+  needs:
+    - install
+  rules:
+    - !reference [.security_default_rules, rules]
+  artifacts:
+    paths:
+      - '**/trace.ctf'
+    expire_in: 1 week
+    when: always
+  variables:
+    RUNNER_SCRIPT_TIMEOUT: 50m
+  timeout: 1h
+
+container-scanning:local:
+  extends: container_scanning
+  stage: security
+  rules:
+    - !reference [.security_default_rules, rules]
+  needs:
+    - check:build:local:fl-net-staging
+  dependencies:
+    - check:build:local:fl-net-staging
+  variables:
+    CS_IMAGE: "archive://fl-net-local.tar"
+
+container-scanning:global:
+  extends: container_scanning
+  stage: security
+  rules:
+    - !reference [.security_default_rules, rules]
+  needs:
+    - check:build:global:fl-net-staging
+  dependencies:
+    - check:build:global:fl-net-staging
+  variables:
+    CS_IMAGE:  "archive://fl-net-global.tar"
+
+secret_detection:
+  needs:
+    - install
+  dependencies:
+    - install
+  stage: security
+  rules:
+    - !reference [.security_default_rules, rules]
+  variables:
+    GIT_DEPTH: 100
+
+gemnasium-dependency_scanning:
+  needs:
+    - install
+  dependencies:
+    - install
+  rules:
+    - !reference [.security_default_rules, rules ]
+# Use the generic dependancy scanner

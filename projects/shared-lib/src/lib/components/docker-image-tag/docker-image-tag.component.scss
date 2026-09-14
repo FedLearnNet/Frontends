@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+}
+
+.wrapper {
+  display: inline-flex;
+  border-radius: 25px;
+  transition: filter 0.15s ease, transform 0.12s ease;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      filter: brightness(0.9);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      filter: brightness(0.85);
+      transform: translateY(0);
+    }
+  }
+}

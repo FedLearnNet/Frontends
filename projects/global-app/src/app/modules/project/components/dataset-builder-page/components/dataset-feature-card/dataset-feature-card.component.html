@@ -1,0 +1,130 @@
+<mat-card class="feature-card" [class.feature-card--active]="active()" (click)="featureSelected.emit()">
+  <div class="feature-card__header">
+    <div class="feature-card__drag" cdkDragHandle>
+      <mat-icon>drag_indicator</mat-icon>
+    </div>
+
+    <mat-form-field appearance="outline" class="feature-card__name">
+      <mat-label>Feature name</mat-label>
+      <input
+        matInput
+        [ngModel]="feature().name"
+        (ngModelChange)="updateName($event)"
+        (keydown.backspace)="$event.stopPropagation()"
+        placeholder="e.g. HbA1c baseline"
+      />
+    </mat-form-field>
+
+    <button mat-icon-button type="button" aria-label="Remove feature" (click)="removeFeature($event)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+
+  <div class="feature-card__badges">
+    <lib-badge [text]="'Order ' + (feature().order + 1)" color="GRAY"></lib-badge>
+    <lib-badge [text]="assignedSelections().length + ' source' + (assignedSelections().length === 1 ? '' : 's')" color="BLUE"></lib-badge>
+    <lib-badge [text]="clinicCoverage() + ' clinics'" color="GREEN"></lib-badge>
+    @if (statisticsCoverage() > 0) {
+      <lib-badge [text]="'Stats from ' + statisticsCoverage() + ' clinics'" color="ORANGE"></lib-badge>
+    }
+    @if (autoTargetLabel(); as targetLabel) {
+      <lib-badge [text]="'Target: ' + targetLabel" color="GRAY"></lib-badge>
+    }
+  </div>
+
+  @if (needsTargetDatatypeSelection()) {
+    <mat-form-field appearance="outline" class="feature-card__target-select">
+      <mat-label>Target datatype</mat-label>
+      <mat-select
+        [ngModel]="resolvedTargetDatatypeId()"
+        (ngModelChange)="updateTargetDatatype($event)"
+      >
+        @for (option of targetDatatypeOptions(); track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+
+  <div
+    class="feature-card__dropzone"
+    (dragover)="allowNativeDrop($event)"
+    (drop)="handleNativeDrop($event)"
+  >
+    <div class="feature-card__drop-copy">
+      <strong>Drop data cards here</strong>
+      <span>Drag a card from the left into this feature or add one with the select field.</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="feature-card__add-select">
+      <mat-label>Add data selection</mat-label>
+      <mat-select
+        [ngModel]="selectedSelectionKey"
+        (ngModelChange)="addSelectionFromSelect($event)"
+      >
+        @for (option of selectableOptions(); track option.key) {
+          <mat-option [value]="option.key">{{ option.dataTypeName }} · {{ option.ontologyName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (assignedSelections().length === 0) {
+    <div class="feature-card__empty">
+      Add one or more data selections from the catalog on the left to define this export feature.
+    </div>
+  } @else {
+    <div class="feature-card__sources">
+      @for (selection of assignedSelections(); track trackSelection($index, selection)) {
+        <mat-expansion-panel class="feature-source">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ selection.dataTypeName }}</mat-panel-title>
+            <mat-panel-description>{{ selection.ontologyName }}</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="feature-source__badges">
+            <lib-badge [text]="selection.dataTypeType ?? 'Unknown'" color="GRAY"></lib-badge>
+            <lib-badge [text]="selection.clinicCount + ' clinics'" color="GREEN"></lib-badge>
+            @if (selection.statisticsClinicCount > 0) {
+              <lib-badge [text]="'Stats ' + selection.statisticsClinicCount + ' clinics'" color="ORANGE"></lib-badge>
+            }
+          </div>
+
+          <div class="feature-source__grid">
+            <div class="feature-source__info">
+              <span class="feature-source__label">Query</span>
+              <strong>{{ selection.querySummary }}</strong>
+            </div>
+            <div class="feature-source__info">
+              <span class="feature-source__label">Datatype</span>
+              <strong>{{ selection.dataTypeName }}</strong>
+            </div>
+            <div class="feature-source__info">
+              <span class="feature-source__label">Ontology</span>
+              <strong>{{ selection.ontologyName }}</strong>
+            </div>
+            <div class="feature-source__info">
+              <span class="feature-source__label">Average missing</span>
+              <strong>{{ asPercent(selection.averageMissingRate) }}</strong>
+            </div>
+            <div class="feature-source__info">
+              <span class="feature-source__label">Average mean</span>
+              <strong>{{ asNumber(selection.averageMean) }}</strong>
+            </div>
+            <div class="feature-source__info">
+              <span class="feature-source__label">Description</span>
+              <strong>{{ selection.dataTypeDescription || selection.ontologyDescription || 'No description available.' }}</strong>
+            </div>
+          </div>
+
+          <div class="feature-source__actions">
+            <button mat-stroked-button type="button" (click)="removeSelection($event, selection)">
+              <mat-icon>remove_circle</mat-icon>
+              Remove from feature
+            </button>
+          </div>
+        </mat-expansion-panel>
+      }
+    </div>
+  }
+</mat-card>

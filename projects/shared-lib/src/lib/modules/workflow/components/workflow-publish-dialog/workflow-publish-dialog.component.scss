@@ -1,0 +1,39 @@
+:host {
+  display: block;
+}
+
+.publish-card {
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.publish-title {
+  margin-bottom: 1rem;
+}
+
+
+.publish-form {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.publish-field {
+  width: 100%;
+}
+
+
+.publish-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn {
+  min-width: 120px;
+}
+
+.unpublish-btn {
+  min-width: 120px;
+}

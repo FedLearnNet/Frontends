@@ -1,0 +1,193 @@
+<div class="connector-container-wrapper">
+  <mat-drawer-container class="connector-container">
+    <mat-drawer mode="side" opened>
+      @for (card of getConfigCards(); track card.index) {
+        <app-connector-cards (click)="onCardClick(card)"
+                             [data]="card"
+                             [selected]="card.index === currentStep.index"/>
+      }
+      <mat-divider class="divider-mb"/>
+
+      <div class="drop-list">
+        @if (canShowDownstreamSteps() && getTransformCards().length === 0) {
+          <app-connector-cards [data]="transformerPlaceholderCard"
+                               [selected]="false"/>
+        }
+
+        <div cdkDropListGroup>
+          <div
+            cdkDropList
+            [cdkDropListData]="cards"
+            class="example-list"
+            (cdkDropListDropped)="drop($event)">
+
+            @for (card of getTransformCards(); track card.id ?? card.index) {
+              <app-connector-cards cdkDrag
+                                   (click)="onCardClick(card)"
+                                   [data]="card"
+                                   [function]="getTransformerForCard(card)"
+                                   [selected]="card.index === currentStep.index"
+                                   [draggable]="true"
+                                   [editable]="true"
+                                   (edit)="onEditTransformer(card)"/>
+            }
+          </div>
+        </div>
+
+        @if (canShowDownstreamSteps()) {
+          <div class="drop-list-add">
+            <lib-btn
+              type="CUSTOM"
+              variant="PRIMARY"
+              icon="transform"
+              [label]="'BUTTON.ADD_TRANSFORM' | translate"
+              [disabled]="disableAddTransformer"
+              [fullWidth]="true"
+              (clicked)="addTransform()"/>
+          </div>
+        }
+      </div>
+
+      @if (canShowDownstreamSteps()) {
+        <mat-divider class="divider-mb divider-mt"/>
+        @for (card of getMappingCards(); track card.id ?? card.index) {
+          <app-connector-cards (click)="onCardClick(card)"
+                               [data]="card"
+                               [selected]="card.index === currentStep.index"/>
+        }
+      }
+    </mat-drawer>
+
+    <mat-drawer-content>
+      @if (ongoingImports().length) {
+        <div class="connector-imports">
+          @for (activity of ongoingImports(); track activity.importId) {
+            <app-import-activity-chip [activity]="activity"/>
+          }
+        </div>
+      }
+
+      @if (currentStep) {
+        @if (currentStep.type === 'CONFIG') {
+          <app-connector-step-config #configComponent
+                                     [cohortId]="cohortId()"
+                                     (save)="configChanged($event)"
+                                     (inputFileChanged)="onInputFileChanged()"
+                                     [componentType]="currentStep.step"
+                                     [(config)]="config"/>
+        }
+
+        @if (currentStep.type === 'TRANSFORM') {
+          <div class="connector-step-config-wrapper">
+            <div class="step-heading">
+              @if (getTransformer()) {
+                <h2>{{ getTransformer()?.methodName }}</h2>
+              } @else {
+                <h2>{{ 'WARNING.TRANSFORM_NOT_YET_SET' | translate }}</h2>
+              }
+
+              @if (getCurrentStage(); as stage) {
+                <button mat-icon-button
+                        class="cache-indicator"
+                        [matTooltip]="getStageTooltipKey(stage) | translate"
+                        [attr.aria-label]="'PREVIEW_CACHE.TITLE' | translate"
+                        (click)="openPreviewCacheDialog()">
+                  <mat-icon [class.cached]="stage.cached">{{ getStageIcon(stage) }}</mat-icon>
+                </button>
+              }
+            </div>
+
+            @if (getCurrentStage(); as stage) {
+              @if (stage.appBased || stage.blockedByStep) {
+                <app-app-based-transformer
+                  [config]="config"
+                  [transformers]="transformer"
+                  [cohortId]="cohortId()"
+                  [stepIndex]="stage.stepIndex"
+                  [transformer]="getTransformer()"
+                  [stage]="stage"
+                  (finished)="applyTransform()"
+                  (openBlockingStep)="openTransformStep($event)"/>
+              }
+            }
+
+            @if (isAwaitingAppRun()) {
+              <!-- The rows at this point are this step's input, not its output; the empty state above
+                   says so and offers the run rather than showing them under this step's heading. -->
+            } @else if (getPrimarySheetInfo() && getTransformedData()) {
+              <app-dynamic-table [data]="getTransformedData()"
+                                 [renamedColumns]="getPrimarySheetInfo()!.renamedColumns"
+                                 [columns]="getPrimarySheetInfo()!.columns"
+                                 [deletedColumns]="getPrimarySheetInfo()!.deletedColumns"
+                                 [hideDeleted]="true"
+                                 [loading]="currentStep.previewRunning ?? false"
+                                 [headerAction]="false"
+                                 [renewColumns]="true"
+                                 [calledColumns]="getTransformedColumns()"/>
+            } @else {
+              <lib-skeleton-loader></lib-skeleton-loader>
+            }
+          </div>
+        }
+
+        @if (currentStep.type === 'MAPPING') {
+          <app-edit-mapper
+            [columns]="getLatestColumns()"
+            [inputData]="getLatestData()"
+            [validationConfig]="config"
+            [patientIdConflictColumn]="patientIdTransformerConflict"
+            [(config)]="config.schemaMapping"
+            (cardDetail)="onMappingCardContentChange($event)"/>
+        }
+      }
+    </mat-drawer-content>
+  </mat-drawer-container>
+
+  @if (toolbarManagement.showToolbar) {
+    <mat-toolbar class="connector-toolbar">
+      @if (!this.config.id) {
+        <lib-btn
+          type="CUSTOM"
+          variant="GHOST"
+          icon="restart_alt"
+          [label]="'BUTTON.CLEAR' | translate"
+          (clicked)="onClearClick()"/>
+      }
+
+      <lib-btn type="CANCEL" variant="GHOST" (clicked)="onCancelClick()"/>
+
+      @if (getTransformCards().length > 0) {
+        <lib-btn
+          type="CUSTOM"
+          variant="GHOST"
+          icon="insights"
+          [label]="'BUTTON.TRANSFORMATION_OVERVIEW' | translate"
+          (clicked)="openTransformationOverview()"/>
+      }
+
+      <span class="spacer"></span>
+
+      @if (currentStep && currentStep.index > 0) {
+        <lib-btn type="BACK" variant="GHOST" (clicked)="onBackClick()"/>
+      }
+      @if (currentStep && currentStep.index > 1) {
+        <lib-btn
+          type="SAVE"
+          variant="SECONDARY"
+          [disabled]="!!patientIdTransformerConflict"
+          (clicked)="saveConfig()"/>
+      }
+      @if (hasContinue()) {
+        <lib-btn type="CONTINUE" variant="PRIMARY" (clicked)="onContinueClick()"/>
+      } @else {
+        <lib-btn
+          type="CUSTOM"
+          variant="PRIMARY"
+          icon="play_arrow"
+          [label]="'BUTTON.SAVE_AND_RUN' | translate"
+          [disabled]="!!patientIdTransformerConflict"
+          (clicked)="saveConfig(true)"/>
+      }
+    </mat-toolbar>
+  }
+</div>

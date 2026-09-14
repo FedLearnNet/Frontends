@@ -1,0 +1,33 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<h3>Trainings</h3>
+
+<div class="timeline" role="list" aria-live="polite">
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  } @else {
+    @for (it of items(); track it.id) {
+      <a [routerLink]="['/training/overview', it.id]" class="item" role="listitem" @rowIn>
+        <div class="content">
+          <div class="row">
+            <strong># {{ $index + 1 }}</strong>
+            <p class="ts">{{ it.createdAt | date }}</p>
+          </div>
+          <div class="meta">
+            <p>{{ it.projectName }}</p>
+          </div>
+        </div>
+      </a>
+    } @empty {
+      <lib-error-card>
+        No trainings found
+      </lib-error-card>
+    }
+  }
+
+  @if (hasMore()) {
+    TODO
+  }
+</div>

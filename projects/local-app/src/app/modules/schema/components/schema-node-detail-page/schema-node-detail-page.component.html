@@ -1,0 +1,12 @@
+@if (node(); as node) {
+  <lib-header
+    [title]="node.name"
+    description="Schema node details"
+    [enableGoBack]="true"
+    [locationBack]="true">
+  </lib-header>
+
+  <lib-page-wrapper>
+    <app-schema-node-detail [node]="node"/>
+  </lib-page-wrapper>
+}

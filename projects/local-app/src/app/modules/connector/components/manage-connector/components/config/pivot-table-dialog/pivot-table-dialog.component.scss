@@ -1,0 +1,46 @@
+mat-dialog-content {
+  min-height: 480px;
+}
+
+.help-text {
+  margin-top: 0;
+  color: #666;
+}
+
+.pivot-config__tables {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pivot-config__table {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) repeat(3, minmax(220px, 1fr));
+  align-items: center;
+  gap: 1rem;
+}
+
+.mode-help {
+  grid-column: 2 / -1;
+  margin: 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.preview {
+  overflow: auto;
+}
+
+.preview-error {
+  color: #b00020;
+}
+
+@media (max-width: 1100px) {
+  .pivot-config__table {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-help {
+    grid-column: auto;
+  }
+}

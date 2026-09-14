@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>{{ 'DIALOG.IMPORT_FILES' | translate }}</h2>
+<mat-dialog-content>
+  <lib-upload-file-area
+    [multiple]="true"
+    (toUploadFiles)="onFilesDropped($event)" />
+
+  @for (file of files; track file.name) {
+    <div class="file-item">
+      <div class="file-item__head">
+        <p>{{ file.name }}</p>
+        <button mat-icon-button (click)="removeFile(file)">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </div>
+      @if (progress[file.name]; as p) {
+        <lib-upload-progress [progress]="p" />
+      }
+    </div>
+  }
+
+  <mat-divider />
+  @if (existingFiles.length > 0) {
+    <h3>{{ 'EXISTING_FILES' | translate }}</h3>
+    @for (file of existingFiles; track file.id) {
+      <div class="file-item">
+        <div class="file-item__head">
+          <p>{{ file.fileName }}</p>
+          <button mat-icon-button (click)="removeExistingFile(file)">
+            <mat-icon>clear</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  @if (files.length > 0) {
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()">
+      <button mat-raised-button color="warn" type="button" (click)="clearAllFiles()">
+        {{ 'BUTTON.CLEAR_ALL' | translate }}
+      </button>
+      <button mat-raised-button color="primary" type="submit">
+        {{ 'BUTTON.IMPORT' | translate }}
+      </button>
+
+    </form>
+  }
+</mat-dialog-actions>

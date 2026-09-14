@@ -1,0 +1,89 @@
+<div class="selectors-header">
+  <h2>{{ 'SPECIFY_HEADER_TO_LOAD_PREVIEW' | translate }}</h2>
+  @if (fileDetails()) {
+    <button
+      mat-icon-button
+      type="button"
+      [matTooltip]="'Show file metadata'"
+      (click)="openFileInfoDialog()">
+      <mat-icon>info</mat-icon>
+    </button>
+  }
+</div>
+
+@if (isToolBased()) {
+  <app-app-based-extractor
+    [config]="config()"
+    (configChange)="changeConfigAppBased($event)"
+    (runStarted)="toolRunStarted()"
+    (runFinished)="setAppBasedResult($event)"
+  ></app-app-based-extractor>
+}
+
+@if (!isToolBased() && sourceTables.length > 0) {
+  <lib-info-card
+    [type]="pivotedTableCount() > 0 ? 'SUCCESS' : 'PRIMARY'"
+    icon="pivot_table_chart"
+    [title]="'PIVOT_TABLE' | translate"
+    [subtitle]="pivotedTableCount() <= 0 ? ('PIVOT_TABLE_HELP' | translate) : ('PIVOT_TABLES_CONFIGURED' | translate: {count: pivotedTableCount()})"
+  >
+    <lib-btn
+      button
+      [disabled]="pivotPreviewRunning()"
+      (click)="openPivotDialog()"
+      [label]="'PIVOT_TABLE' | translate"
+      type="CUSTOM"
+      icon="pivot_table_chart"
+      label="Suggest mapping"
+    >
+    </lib-btn>
+  </lib-info-card>
+}
+
+@if (sheets.length > 1 || mergeConfig) {
+  <div class="multi-sheet-container">
+    <div class="merge-action">
+      <button mat-raised-button color="accent" (click)="openMergeDialog()">
+        {{ (isCsvZip ? 'BUTTON.MERGE_CSV_FILES' : 'BUTTON.MERGE_SHEETS') | translate }}
+      </button>
+      @if (mergeConfig) {
+        <span class="merge-status">{{ (isCsvZip ? 'CSV_FILES_MERGED_BY' : 'SHEETS_MERGED_BY') | translate }}
+          : {{ mergeConfig.commonUidColumnName }}</span>
+      }
+    </div>
+    @if (sheets.length > 1) {
+      <mat-tab-group [(selectedIndex)]="activeSheetIndex">
+        @for (sheet of sheets; track sheet.name) {
+          @if (sheet.info) {
+            <mat-tab [label]="sheet.name">
+
+              <app-dynamic-table
+                [data]="sheet.info.json"
+                [renamedColumns]="sheet.info.renamedColumns"
+                [columns]="sheet.info.columns"
+                [deletedColumns]="sheet.info.deletedColumns"
+                (headerClicked)="headerClick($event, sheet.name)"
+              />
+
+            </mat-tab>
+          }
+        }
+      </mat-tab-group>
+    } @else if (sheets.length === 1) {
+      <app-dynamic-table [data]="sheets[0].info.json"
+                         [renamedColumns]="sheets[0].info.renamedColumns"
+                         [columns]="sheets[0].info.columns"
+                         [deletedColumns]="sheets[0].info.deletedColumns"
+                         (headerClicked)="headerClick($event, sheets[0].name)"/>
+    }
+  </div>
+} @else if (sheets.length === 1) {
+  <app-dynamic-table [data]="sheets[0].info.json"
+                     [renamedColumns]="sheets[0].info.renamedColumns"
+                     [columns]="sheets[0].info.columns"
+                     [deletedColumns]="sheets[0].info.deletedColumns"
+                     (headerClicked)="headerClick($event, sheets[0].name)"/>
+} @else if (!isToolBased()) {
+  <button mat-raised-button color="primary" (click)="loadColumns()">{{ 'ADD_DEFAULT_SELECTORS' | translate }}</button>
+  <p>{{ 'ADD_DEFAULT_SELECTORS_MESSAGE' | translate }}</p>
+}

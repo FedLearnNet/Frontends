@@ -1,0 +1,25 @@
+<div class="sheet-layout">
+  <div class="sheet-summary">
+    <lib-badge color="GRAY" [text]="sheet().columns.length + ' columns'"></lib-badge>
+    <lib-badge color="GRAY" [text]="(sheet().rowsScanned | number) + ' profiled rows'"></lib-badge>
+    @if (sheet().missingValues) {
+      <lib-badge color="ORANGE" [text]="(sheet().missingValues | number) + ' empty cells'"></lib-badge>
+    }
+  </div>
+
+  @if (hasStatistics()) {
+    <lib-file-profile-card
+      [profile]="profile()"
+      [path]="pathLabel()"
+      [initialExpanded]="true"
+    />
+  } @else {
+    <section class="empty-state">
+      <mat-icon>analytics</mat-icon>
+      <div>
+        <h3>No sheet statistics available</h3>
+        <p>This sheet does not contain any column profile data.</p>
+      </div>
+    </section>
+  }
+</div>

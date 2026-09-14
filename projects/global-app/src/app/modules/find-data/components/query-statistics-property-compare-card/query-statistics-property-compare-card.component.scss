@@ -1,0 +1,154 @@
+:host {
+  display: block;
+}
+
+.compare-card {
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    border-color: rgba(29, 78, 216, 0.22);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(29, 78, 216, 0.35);
+    outline-offset: 2px;
+  }
+}
+
+.compare-card__head {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+
+  h3 {
+    margin: 4px 0 0;
+    font-size: 1.05rem;
+  }
+}
+
+.compare-card__head-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.compare-card__body {
+  padding: 16px 18px 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.stats {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.stat {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.stat__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.stat__value {
+  margin-top: 4px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.chart-panel {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 0;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.chart {
+  width: 100%;
+  max-width: 100%;
+  height: 260px;
+  display: block;
+}
+
+.view-toggle {
+  ::ng-deep .mat-button-toggle-group-appearance-standard {
+    border-radius: 10px;
+    border-color: rgba(15, 23, 42, 0.1);
+  }
+
+  ::ng-deep .mat-button-toggle {
+    background: #f8fafc;
+    color: #334155;
+    font-size: 12px;
+  }
+}
+
+.compare-card--compact {
+  .compare-card__head {
+    padding: 12px 14px;
+
+    h3 {
+      font-size: 0.95rem;
+    }
+  }
+
+  .compare-card__body {
+    padding: 12px 14px 14px;
+    gap: 10px;
+  }
+
+  .stats {
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 8px 10px;
+  }
+
+  .chart {
+    height: 210px;
+  }
+}
+
+@media (max-width: 720px) {
+  .compare-card__head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .compare-card__head-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

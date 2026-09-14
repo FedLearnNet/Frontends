@@ -1,0 +1,10 @@
+<div [class]="className()">
+  @if(pulseCircle()){
+    <span class="status-dot" aria-hidden="true"></span>
+  }
+  @if (iconName()) {
+    <mat-icon>{{ iconName() }}</mat-icon>
+  }
+  <span>{{ formattedText() }}</span>
+  <ng-content></ng-content>
+</div>

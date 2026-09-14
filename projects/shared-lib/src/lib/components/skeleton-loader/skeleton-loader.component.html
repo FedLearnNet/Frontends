@@ -1,0 +1,87 @@
+<div class="root" [class]="classes()"
+     [style.--pad.px]="pad()" [style.--gap.px]="gap()">
+  @if (title()) {
+    <p class="title">{{ title() }}</p>
+  }
+
+  @if (variant() === 'detail') {
+    @if (showHeader()) {
+      <div class="skeleton header"></div>
+      @if (showActions()) {
+        <div class="actions">
+          <div class="skeleton btn"></div>
+          <div class="skeleton btn"></div>
+          <div class="skeleton btn"></div>
+        </div>
+      }
+    }
+    <div class="card">
+      <div class="skeleton thumb"></div>
+      @for (i of linesArray(); track $index) {
+        <div class="skeleton line" [class.short]="$index % 3 === 2"></div>
+      }
+    </div>
+
+  } @else if (variant() === 'grid') {
+    @if (showHeader()) {
+      <div class="skeleton header"></div>
+    }
+    <div class="grid">
+      @for (c of cardsArray(); track $index) {
+        <div class="card">
+          <div class="skeleton thumb"></div>
+          @for (l of linesArray(); track $index) {
+            <div class="skeleton line" [class.short]="$index % 2 === 1"></div>
+          }
+        </div>
+      }
+    </div>
+
+  } @else if (variant() === 'table') {
+    @if (showHeader()) {
+      <div class="skeleton header"></div>
+    }
+
+    <div class="table" [style.--cols]="tableCols()">
+      @if (showTableHeader()) {
+        <div class="trow thead">
+          @for (col of tableColsArray(); track $index) {
+            <div class="tcell">
+              <div class="skeleton cell" [class.short]="$index === tableColsArray().length - 1"></div>
+            </div>
+          }
+        </div>
+      }
+
+      @for (r of tableRowsArray(); track $index) {
+        <div class="trow">
+          @for (col of tableColsArray(); track $index) {
+            <div class="tcell">
+              <div class="skeleton cell"
+                   [class.short]="$index % 3 === 2"></div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  } @else {
+    @if (showHeader()) {
+      <div class="skeleton header"></div>
+    }
+    <div class="list">
+      @for (c of cardsArray(); track $index) {
+        <div class="row">
+          <div class="skeleton avatar"></div>
+          <div class="grow">
+            <div class="skeleton line"></div>
+            <div class="skeleton line short"></div>
+          </div>
+          @if (showActions()) {
+            <div class="skeleton pill"></div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

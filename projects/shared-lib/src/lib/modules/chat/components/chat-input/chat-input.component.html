@@ -1,0 +1,47 @@
+<div class="ai-dock" [class.absolute]="positionAbsolute()">
+  <mat-form-field class="ai-field" appearance="fill">
+    <div matPrefix class="ai-field__status" [class.ok]="connected()"
+         [attr.aria-label]="connected() ? 'WebSocket connected' : 'WebSocket disconnected'">
+      <mat-icon class="ai-field__status-icon">
+        {{ connected() ? 'cloud_done' : 'cloud_off' }}
+      </mat-icon>
+      <span class="ai-field__status-text">
+        {{ connected() ? 'Online' : 'Offline' }}
+      </span>
+    </div>
+    <input matInput
+           class="ai-field__input"
+           (keydown.enter)="onEnter($event)"
+           [(ngModel)]="message"
+           [matAutocomplete]="auto"
+           placeholder="Ask the AI"
+    >
+    <mat-autocomplete #auto="matAutocomplete"
+                      autoActiveFirstOption
+                      (optionSelected)="onOptionSelected($event)">
+      @for (s of suggestions(); track $index) {
+        <mat-option [value]="s">
+          {{ s }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+
+    <div matSuffix class="ai-field__suffix">
+      <button
+        mat-icon-button
+        class="ai-field__send"
+        [disabled]="!messageLength() && !loading()"
+        (click)="submit()"
+        aria-label="Send"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+    </div>
+    <mat-hint align="start">{{ messageLength() }} / 256</mat-hint>
+  </mat-form-field>
+
+
+  @if (loading()) {
+    <mat-progress-bar class="ai-progress" mode="indeterminate" />
+  }
+</div>

@@ -1,0 +1,54 @@
+<div
+  class="empty-state"
+  [class.background]="hasBackground()"
+  [class.bordered]="bordered()"
+  [class.compact]="compact()"
+  [attr.aria-label]="ariaLabel()"
+  (click)="handleRootClick($event)"
+>
+  <div class="empty-state-inner">
+    <div
+      class="icon-shell"
+      [class.icon-shell--btn]="iconBtn()"
+      [attr.role]="iconBtn() ? 'button' : null"
+      [attr.tabindex]="iconBtn() ? 0 : null"
+      [attr.aria-label]="iconBtn() ? primaryButtonLabel() : null"
+      (click)="iconBtn() && handlePrimaryClick($event)"
+    >
+      <mat-icon fontSet="material-symbols-outlined" class="empty-icon">{{ icon() }}</mat-icon>
+    </div>
+
+    @if (title()) {
+      <h2 class="title">{{ title() }}</h2>
+    }
+
+    @if (subtitle()) {
+      <p class="subtitle">{{ subtitle() }}</p>
+    }
+
+    <div class="actions">
+      @if (primaryButtonEnabled()) {
+        <button
+          mat-raised-button
+          type="button"
+          class="primary-btn"
+          (click)="handlePrimaryClick($event)"
+        >
+          {{ primaryButtonLabel() }}
+        </button>
+      }
+
+      @if (secondaryActionEnabled()) {
+        <button
+          type="button"
+          class="secondary-link"
+          (click)="handleSecondaryClick($event)"
+        >
+          {{ secondaryActionLabel() }}
+        </button>
+      }
+    </div>
+
+    <ng-content />
+  </div>
+</div>

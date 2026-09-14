@@ -1,0 +1,104 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="loading()"
+  [hasCustomTitle]="model() !== null"
+  [mainGap]="false">
+  @if (model(); as m) {
+    <app-model-header title [model]="m" class="model-header"/>
+  }
+  @if (model(); as m) {
+    <div suffix class="header-actions">
+      @if (isEditing()) {
+        <button mat-raised-button color="primary" (click)="saveEdit()">
+          <mat-icon>save</mat-icon>
+          Save
+        </button>
+        <button mat-icon-button (click)="cancelEdit()" matTooltip="Cancel">
+          <mat-icon>close</mat-icon>
+        </button>
+      } @else if (m.createdByUser) {
+        <button mat-icon-button (click)="startEdit()" matTooltip="Edit model">
+          <mat-icon>edit</mat-icon>
+        </button>
+      }
+    </div>
+  }
+  @if (model(); as m) {
+    <div class="tab-header-row">
+      @let si = selectedIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="si === 0" (click)="setSelectedIndex(0)">
+          {{ 'GRID.DESCRIPTION' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 1" (click)="setSelectedIndex(1)">
+          {{ 'GRID.VERSIONS' | translate }}
+        </a>
+        @if (m.createdByUser) {
+          <a mat-tab-link [active]="si === 2" (click)="setSelectedIndex(2)">
+            {{ 'GRID.RIGHTS' | translate }}
+          </a>
+        }
+      </nav>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [isLoading]="loading()" [error]="error()" [isEmpty]="model() === null">
+  <mat-tab-nav-panel #panel>
+    @if (model(); as model) {
+      @switch (selectedIndex()) {
+        @case (0) {
+          @if (isEditing()) {
+            <div class="edit-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Name</mat-label>
+                <input matInput
+                       [value]="draftName()"
+                       (input)="draftName.set($any($event.target).value)"
+                       placeholder="Name">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Short Description</mat-label>
+                <input matInput
+                       [value]="draftShortDescription()"
+                       (input)="draftShortDescription.set($any($event.target).value)"
+                       placeholder="Short description">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Long Description</mat-label>
+                <textarea matInput
+                          rows="8"
+                          [value]="draftLongDescription()"
+                          (input)="draftLongDescription.set($any($event.target).value)"
+                          placeholder="Long description"></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Publish Status</mat-label>
+                <mat-select [value]="draftPublishStatus()"
+                            (selectionChange)="draftPublishStatus.set($event.value)">
+                  @for (status of publishStatuses; track status) {
+                    <mat-option [value]="status">{{ status }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          } @else {
+            <p class="description-text">{{ model.longDescription }}</p>
+          }
+        }
+        @case (1) {
+          <lib-store-version-list [detail]="model" (selectedVersion)="versionChanged($event)"/>
+        }
+        @case (2) {
+          @if (model.createdByUser) {
+            <app-model-detail-access [model]="model"/>
+          }
+        }
+      }
+    }
+  </mat-tab-nav-panel>
+</lib-page-wrapper>

@@ -1,0 +1,40 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.query-detail {
+  width: 100%;
+}
+
+.query-builder {
+  &--container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &--header {
+      display: flex;
+      padding-bottom: 15px;
+    }
+  }
+}
+
+.query-execution {
+  &--container {
+    min-height: 50px;
+    width: 100%;
+
+    .query-progress-indicator {
+      height: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .query-result {
+      font-weight: bold;
+    }
+  }
+}
+
+.dialog--footer{
+  gap: 10px;
+}

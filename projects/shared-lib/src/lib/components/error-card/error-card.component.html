@@ -1,0 +1,34 @@
+<div class="error">
+  @if (showAnimation()) {
+    <video class="loading-cat"
+           appAutoplayOnView
+           muted
+           loop
+           src="assets/animation/error-cat.webm">
+    </video>
+  }
+  <div class="warning-wrapper">
+    <div class="warning">
+      @if (oopsError()) {
+        <div class="warning-text">
+          @if (showOops()) {
+            <p>OOPS something went wrong</p>
+          }
+          <p>{{ errorText() }}</p>
+          @if (showOops()) {
+            <p>Please <a href="javascript:location.reload()">reload
+              the page</a> and try again.</p>
+          }
+        </div>
+      }
+      @if (errorObject(); as err) {
+        {{ errorObjectParsed() }}
+      }
+      <ng-content/>
+    </div>
+
+    @if (warningButtonText()) {
+      <button mat-raised-button class="warning-btn" (click)="onWarningClick()">{{ warningButtonText() }}</button>
+    }
+  </div>
+</div>

@@ -1,0 +1,47 @@
+@if (modelDetail(); as model) {
+  <mat-toolbar>
+    <button mat-icon-button (click)="onGoBack()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span>  {{ model.name }}</span>
+
+    <span class="spacer"></span>
+    @if (model.createdByUser) {
+      <button mat-icon-button>
+        <mat-icon>edit</mat-icon>
+      </button>
+    }
+  </mat-toolbar>
+  <div class="model">
+    <lib-store-card [linkToShop]="false" [storeElement]="storeElement()" size="x-large" />
+    <div class="model--body">
+      <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+        <mat-tab [label]="('GRID.DESCRIPTION' | translate)">
+          {{ model.longDescription }}
+        </mat-tab>
+        <mat-tab [label]="('GRID.VERSIONS' | translate)">
+          <lib-store-version-list [(detail)]="modelDetail"
+                                  (selectedVersion)="versionChanged($event)" />
+        </mat-tab>
+        @if (model.createdByUser) {
+          <mat-tab [label]="('GRID.RIGHTS' | translate)">
+            <app-model-detail-access [model]="model" />
+          </mat-tab>
+        }
+      </mat-tab-group>
+    </div>
+
+  </div>
+} @else {
+  @if (!isLoading()) {
+    <mat-toolbar>
+      <button mat-icon-button (click)="onGoBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <lib-error-card>
+      Model not loaded
+    </lib-error-card>
+  }
+}

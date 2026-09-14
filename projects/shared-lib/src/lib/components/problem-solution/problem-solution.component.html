@@ -1,0 +1,94 @@
+<section class="problem-solution" @sectionIn>
+  <header class="problem-solution__header">
+    <h2 class="problem-solution__title" data-anim>{{ title() }}</h2>
+    @if (hasSubtitle()) {
+      <p class="problem-solution__subtitle" data-anim>{{ subtitle() }}</p>
+    }
+  </header>
+
+  <div class="problem-solution__grid" role="list" aria-label="Problem to solution workflow" data-anim>
+    <section class="problem-solution__col problem-solution__col--problem" aria-label="Problems">
+      <h3 class="problem-solution__colTitle">{{ problemTitle() }}</h3>
+
+      @if (hasProblems()) {
+        <div class="problem-solution__stack">
+          @for (p of problems(); track p.title) {
+            <article class="problem-solution__card" role="listitem">
+              <header class="problem-solution__cardHead">
+                @if (p.icon) {
+                  <span class="problem-solution__icon" aria-hidden="true">
+                    <mat-icon>{{ p.icon }}</mat-icon>
+                  </span>
+                }
+                <h4 class="problem-solution__cardTitle">
+                  <span class="problem-solution__cardTitleText">{{ p.title }}</span>
+
+                  @if (p.helper) {
+                    <span class="problem-solution__hint" aria-hidden="true">
+                      <mat-icon>info</mat-icon>
+                    </span>
+                  }
+                </h4>
+              </header>
+
+              <p class="problem-solution__desc">{{ p.description }}</p>
+
+              @if (p.helper) {
+                <p class="problem-solution__helper" role="note">{{ p.helper }}</p>
+              }
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <div class="problem-solution__connector" aria-hidden="true">
+      <span class="problem-solution__line"></span>
+      <span class="problem-solution__arrow">
+        <mat-icon>east</mat-icon>
+      </span>
+    </div>
+
+    <section class="problem-solution__col problem-solution__col--solution" aria-label="Solutions">
+      <h3 class="problem-solution__colTitle">{{ solutionTitle() }}</h3>
+
+      @if (hasSolutions()) {
+        <div class="problem-solution__stack">
+          @for (s of solutions(); track s.title) {
+            <article class="problem-solution__card problem-solution__card--solution" role="listitem">
+              <header class="problem-solution__cardHead">
+                @if (s.icon) {
+                  <span class="problem-solution__icon" aria-hidden="true">
+                    <mat-icon>{{ s.icon }}</mat-icon>
+                  </span>
+                }
+                <h4 class="problem-solution__cardTitle">
+                  <span class="problem-solution__cardTitleText">{{ s.title }}</span>
+
+                  @if (s.helper) {
+                    <span class="problem-solution__hint" aria-hidden="true">
+                      <mat-icon>info</mat-icon>
+                    </span>
+                  }
+                </h4>
+              </header>
+
+              <p class="problem-solution__desc">{{ s.description }}</p>
+
+              @if (s.helper) {
+                <p class="problem-solution__helper" role="note">{{ s.helper }}</p>
+              }
+            </article>
+          }
+        </div>
+      }
+    </section>
+  </div>
+
+  <div class="problem-solution__cta" data-anim>
+    <button mat-flat-button color="primary" class="problem-solution__btn" (click)="cta.emit()">
+      <span>{{ ctaLabel() }}</span>
+      <mat-icon aria-hidden="true">{{ ctaIcon() }}</mat-icon>
+    </button>
+  </div>
+</section>

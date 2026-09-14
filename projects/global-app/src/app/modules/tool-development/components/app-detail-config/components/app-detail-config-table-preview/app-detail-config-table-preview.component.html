@@ -1,0 +1,98 @@
+<div class="panel panel-preview">
+  <div class="panel-head">
+    <div>
+      <div class="section-title">CSV preview</div>
+      <div class="section-subtitle">
+        This is a quick preview of the expected CSV structure derived from your current schema.
+      </div>
+    </div>
+
+    <div class="badge-row">
+      <lib-badge [border]="true" color="GRAY"
+                 [text]="Object.keys(schema().columns ?? {}).length + ' columns'"></lib-badge>
+      <lib-badge [border]="true" color="GRAY"
+                 [text]="(schema().requiredColumns?.length ?? 0)+ ' required'"></lib-badge>
+    </div>
+  </div>
+
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-title">Header</div>
+      @if (!csvHeader()) {
+        <div class="preview-empty">Add at least one column to generate a header preview.</div>
+      } @else {
+        <pre class="code">{{ csvHeader() }}</pre>
+      }
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-title">Example row</div>
+      @if (!csvExampleRow()) {
+        <div class="preview-empty">Add at least one column to generate an example row.</div>
+      } @else {
+        <pre class="code">{{ csvExampleRow() }}</pre>
+      }
+    </div>
+
+    <div class="preview-card">
+      <div class="preview-title">Constraints</div>
+
+      <div class="preview-kv">
+        <div class="kv">
+          <div class="k">Global</div>
+          <div class="v">
+            <div class="chips">
+
+              @if (schema().minRows || schema().maxRows) {
+                @let rowsHint = 'Rows' + (schema().minRows ?? '-') + '...' + (schema().maxRows ?? '-');
+                <lib-badge [border]="true" size="X-SMALL" color="BLUE"
+                           [text]="rowsHint">
+                </lib-badge>
+              }
+              @if (schema().minColumns || schema().maxColumns) {
+                @let rowsHint = 'Columns' + (schema().minRows ?? '-') + '...' + (schema().maxRows ?? '-');
+                <lib-badge [border]="true" size="X-SMALL" color="BLUE"
+                           [text]="rowsHint">
+                </lib-badge>
+              }
+              @if (schema().allowOnlyNumbers) {
+                <lib-badge [border]="true" size="X-SMALL" color="BLUE" [text]="'Only numbers'"></lib-badge>
+              }
+              @if (!schema().prohibitedNulls) {
+                <lib-badge [border]="true" size="X-SMALL" color="BLUE" [text]="'No nulls'"></lib-badge>
+              }
+
+              @if (schema().prohibitedNulls &&
+              !schema().allowOnlyNumbers &&
+              schema().minColumns === null &&
+              schema().maxColumns === null &&
+              schema().minRows === null &&
+              schema().maxRows === null) {
+                <span class="muted">No global constraints set</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="kv">
+          <div class="k">Required columns</div>
+          <div class="v">
+            @if ((schema().requiredColumns?.length ?? 0) === 0) {
+              <span class="muted">None</span>
+            } @else {
+              <div class="chips">
+                @for (c of (schema().requiredColumns ?? []); track c) {
+                  <lib-badge [border]="true" size="X-SMALL" color="BLUE" [text]="c"></lib-badge>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-footnote">
+    Tip: column order in CSV is typically the header order. Your schema uses the current column key order.
+  </div>
+</div>

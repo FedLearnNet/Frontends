@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+
+  gap: 60px;
+
+  &-element {
+    width: 500px;
+  }
+}
+
+.save-btn {
+  float: right;
+}
+
+
+.names-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+  padding-left: 20px;
+
+  .names-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .names-field {
+    flex: 1;
+  }
+}
+

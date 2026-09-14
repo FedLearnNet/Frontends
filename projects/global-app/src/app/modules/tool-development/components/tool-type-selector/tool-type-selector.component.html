@@ -1,0 +1,77 @@
+<div class="tts" [class.tts--compact]="compact()" [class.tts--disabled]="isDisabled()">
+  <div class="tts__head">
+    <div class="tts__title">Tool type</div>
+    <div class="tts__help">
+      Choose the best match, this influences how the tool is presented and where it fits in workflows.
+    </div>
+  </div>
+
+  <div class="tts__grid" role="list">
+    @for (m of typeMeta; track m.type) {
+      <lib-select-btn
+        role="listitem"
+        size="COMPACT"
+        [icon]="m.icon"
+        [title]="m.label"
+        [description]="m.tagline"
+        [selected]="selectedType() === m.type"
+        [disabled]="isDisabled()"
+        (clicked)="select(m.type)"/>
+    }
+  </div>
+
+  @if (selectedMeta(); as meta) {
+    <div class="ttsInfo" @selectPop>
+      <div class="ttsInfo__left">
+        <lib-badge [iconName]="meta.icon" [text]="meta.label" color="GRAY" [border]="true"></lib-badge>
+
+        <div class="ttsInfo__desc">{{ meta.description }}</div>
+        <div class="ttsInfo__example">{{ meta.example }}</div>
+      </div>
+
+      <div class="ttsInfo__right">
+        <div class="miniViz" aria-hidden="true">
+          @if (meta.type === FederatedAppType.EXPORT) {
+            <div class="miniViz__node">FL-Net Client Database</div>
+          } @else if (meta.type === FederatedAppType.EXTRACTOR) {
+            <div class="miniViz__node">No input</div>
+          } @else {
+            <div class="miniViz__node">Input</div>
+          }
+          <div class="miniViz__arrow"></div>
+          <div class="miniViz__node miniViz__node--active">{{ meta.label }}</div>
+          <div class="miniViz__arrow"></div>
+          @if (meta.type === FederatedAppType.DATA_TRANSFORMATION) {
+            <div class="miniViz__node">Transformed Input</div>
+          } @else if (meta.type === FederatedAppType.EXTRACTOR) {
+            <div class="miniViz__node">Export</div>
+          } @else {
+            <div class="miniViz__node">Output</div>
+            @if (meta.type === FederatedAppType.ANALYSIS) {
+              <div class="miniViz__node">Model Weights</div>
+            }
+          }
+        </div>
+        <div class="ttsInfo__hint">This is how the tool will be understood in the workflow chain.</div>
+      </div>
+    </div>
+  } @else {
+    <lib-info-card
+      class="mt-2"
+      title="Details"
+      subtitle="Please select a tool type to see details."
+      size="SMALL"
+      [border]="true"
+      type="INFO">
+    </lib-info-card>
+  }
+  @if (showRequiredError()) {
+    <lib-info-card
+      class="mt-2"
+      subtitle="Tool type is required"
+      size="SMALL"
+      [border]="true"
+      type="INFO">
+    </lib-info-card>
+  }
+</div>

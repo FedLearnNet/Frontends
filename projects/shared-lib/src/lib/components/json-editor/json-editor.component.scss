@@ -1,0 +1,163 @@
+:host {
+  display: block;
+}
+
+.je-card {
+  --c1: rgba(17, 24, 39, .12);
+  --c2: rgba(17, 24, 39, .08);
+  --c3: rgba(17, 24, 39, .06);
+  --t1: rgba(17, 24, 39, .92);
+  --t2: rgba(17, 24, 39, .55);
+  --t3: rgba(17, 24, 39, .75);
+  --b1: rgba(17, 24, 39, .14);
+  --bg: rgba(17, 24, 39, .02);
+  border: 1px solid var(--c1);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 8px 20px var(--c3);
+  overflow: hidden;
+}
+
+.je-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--c2);
+  background: linear-gradient(180deg, rgba(17, 24, 39, .02), rgba(17, 24, 39, 0))
+}
+
+.je-title {
+  min-width: 180px
+}
+
+.je-title-text {
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--t1);
+  letter-spacing: .2px
+}
+
+.je-subtitle {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--t2)
+}
+
+.je-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end
+}
+
+.je-body {
+  padding: 14px 16px 16px;
+}
+
+.je-field {
+  width: 100%
+}
+
+.je-textarea {
+  min-height: 320px;
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.je-textarea--edit {
+  display: block;
+  width: 100%;
+  min-height: 360px;
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--b1);
+  background: #fff;
+  color: var(--t1);
+  caret-color: var(--mat-sys-primary, #1976d2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: var(--mat-sys-primary, #1976d2);
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.18);
+  }
+
+  &::selection {
+    background: rgba(25, 118, 210, 0.18);
+    color: var(--t1);
+  }
+}
+
+.je-error {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, .22);
+  background: rgba(220, 38, 38, .06)
+}
+
+.je-error-title {
+  font-size: 12px;
+  font-weight: 750;
+  color: rgba(185, 28, 28, .95)
+}
+
+.je-error-msg {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(185, 28, 28, .85)
+}
+
+
+.je-label {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--t3)
+}
+
+.je-overlay {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid var(--b1);
+  background: var(--bg);
+  overflow: hidden;
+  height: calc(100% - 90px);
+}
+
+.je-pre {
+  margin: 0;
+  padding: 25px 12px;
+  width: 100%;
+  height: 100%;
+  overflow: auto
+}
+
+.je-textarea--overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 25px 12px;
+  border: 0;
+  outline: 0;
+  resize: vertical;
+  background: transparent;
+  color: transparent;
+}
+
+.je-textarea--overlay::selection {
+  background: rgba(17, 24, 39, .12);
+  color: transparent
+}

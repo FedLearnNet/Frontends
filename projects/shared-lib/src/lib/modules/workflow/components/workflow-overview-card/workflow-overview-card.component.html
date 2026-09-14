@@ -1,0 +1,106 @@
+<article
+  class="workflow-card"
+  (click)="onCardClick()"
+>
+  <header class="workflow-card__header">
+    <div class="workflow-card__title-block">
+      <div class="workflow-card__id">
+        <span class="workflow-card__id-label">Workflow</span>
+        <span class="workflow-card__id-value">
+          @if (workflow().name) {
+            {{ workflow().name }}
+          } @else {
+            #{{ workflow().id }}
+          }</span>
+      </div>
+    </div>
+
+    <lib-publish-badge [type]="publishStatus()"></lib-publish-badge>
+  </header>
+
+
+  <section class="workflow-card__body">
+    <div class="workflow-card__stats">
+      <div class="workflow-card__stat">
+        <div class="workflow-card__stat-label">Nodes</div>
+        <div class="workflow-card__stat-value">
+          {{ summary().nodeCount }}
+        </div>
+        <div class="workflow-card__stat-sub">
+          {{ summary().appNodeCount }} apps ·
+          {{ summary().modelNodeCount }} models
+        </div>
+      </div>
+
+      <div class="workflow-card__divider"></div>
+
+      <div class="workflow-card__stat">
+        <div class="workflow-card__stat-label">Connections</div>
+        <div class="workflow-card__stat-value">
+          {{ summary().connectionCount }}
+        </div>
+        <div class="workflow-card__stat-sub">
+          {{ summary().distinctAppCount }} distinct apps
+        </div>
+      </div>
+
+      <div class="workflow-card__stat">
+        <div class="workflow-card__stat-label">Input</div>
+        <div class="workflow-card__stat-value">
+          {{ summary().inputCount }}
+        </div>
+        <div class="workflow-card__stat-sub">
+          {{ summary().distinctInputCount }} distinct input types
+        </div>
+      </div>
+
+      @if (summary().legacyCount > 0) {
+        <div class="workflow-card__divider"></div>
+
+        <div class="workflow-card__stat">
+          <div class="workflow-card__stat-label">Legacy</div>
+          <div class="workflow-card__stat-value workflow-card__stat-value--warning">
+            {{ summary().legacyCount }}
+          </div>
+          <div class="workflow-card__stat-sub">Old FC versions</div>
+        </div>
+      }
+      <span class="spacer"></span>
+      @if (workflow().updatedAt; as updated) {
+        <lib-time-badge [date]="updated" [color]="'GRAY'"></lib-time-badge>
+      }
+    </div>
+    @if (workflow().description) {
+      <p> {{ workflow().description }}</p>
+    }
+    @if (highlightedNodes().length > 0) {
+      <div class="workflow-card__highlights">
+        <div class="workflow-card__highlights-list">
+          @for (n of highlightedNodes(); track $index) {
+            <lib-store-card [linkToShop]="false" [storeElement]="n" size="x-small" class="store-hint"></lib-store-card>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  @if (clickable()) {
+    <footer class="workflow-card__footer">
+      <div class="workflow-card__footer-left">
+        <button
+          mat-stroked-button
+          class="workflow-card__action"
+        >
+          <mat-icon aria-hidden="true">open_in_new</mat-icon>
+          Open details
+        </button>
+      </div>
+
+      <div class="workflow-card__footer-right">
+      <span class="workflow-card__hint">
+        Click card to inspect workflow graph
+      </span>
+      </div>
+    </footer>
+  }
+</article>

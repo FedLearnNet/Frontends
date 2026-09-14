@@ -1,0 +1,19 @@
+@if (chartOptions(); as chart) {
+
+  @if(appOutputVisualisations().name){
+    <p class="header">{{appOutputVisualisations().name}}</p>
+  }
+
+  <div echarts
+       class="chart"
+       [loading]="false"
+       [options]="chart"
+       (chartInit)="onChartInit($event)">
+
+  </div>
+
+  @if(appOutputVisualisations().description){
+    <p>{{appOutputVisualisations().description}}</p>
+  }
+  <mat-divider></mat-divider>
+}

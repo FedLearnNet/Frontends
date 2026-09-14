@@ -1,0 +1,21 @@
+<lib-header
+  title="Audit Inbox"
+  description="Audit tools"
+  [enableGoBack]="false">
+  <lib-badge suffix color="GRAY" text="pending">{{ pendingCount() }}</lib-badge>
+  <button suffix mat-icon-button type="button" class="btn" (click)="refresh()" [disabled]="loading()">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</lib-header>
+
+<lib-page-wrapper [error]="error()" [isLoading]="loading()" [skeletonOnLoading]="true">
+  <div class="list">
+    @for (p of pendingAudits(); track p.appDetail.latestVersionId) {
+      <a [routerLink]="[p.appDetail.latestVersionId]">
+        <lib-store-card
+          [linkToShop]="false"
+          [storeElement]="{app: p.appDetail}"></lib-store-card>
+      </a>
+    }
+  </div>
+</lib-page-wrapper>

@@ -1,0 +1,182 @@
+<lib-header
+  [title]="query()?.name ?? 'Query detail'"
+  description="Review, refine and execute this query."
+  [enableGoBack]="true"
+  (goBack)="goBack()">
+  <div suffix class="hero-actions">
+    @if (query(); as query) {
+      @if (query.latestDataStatisticsRequest) {
+        <lib-badge color="BLUE" [border]="true" [text]="'GRID.STATISTICS_REQUEST' | translate"/>
+      }
+      @if (!query.latestDataStatisticsRequest) {
+        <lib-btn
+          [disabled]="isBusy() || !query.hasFired"
+          type="SEND"
+          [label]="'BUTTON.REQUEST_STATISTICS' | translate"
+          label="Send Request to All Clinics" (clicked)="requestStatistics()"/>
+      }
+    }
+  </div>
+  @if (query(); as query) {
+    <div class="tab-header-row tab-header-row--center">
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="selectedTab() === 'overview'" (click)="setSelectedTab('overview')">
+          {{ 'MENU.OVERVIEW' | translate }}
+        </a>
+        <a mat-tab-link [active]="selectedTab() === 'builder'" (click)="setSelectedTab('builder')">
+          {{ 'MENU.QUERY_BUILDER' | translate }}
+        </a>
+        @if (hasVersionsTab()) {
+          <a mat-tab-link [active]="selectedTab() === 'versions'" (click)="setSelectedTab('versions')">
+            {{ 'GRID.VERSIONS' | translate }}
+          </a>
+        }
+        @if (hasStatisticsTab()) {
+          <a mat-tab-link [active]="selectedTab() === 'statistics'" (click)="setSelectedTab('statistics')">
+            {{ 'GRID.STATISTICS' | translate }}
+          </a>
+        }
+      </nav>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [error]="pageError()">
+  <mat-tab-nav-panel #panel>
+    @if (query(); as query) {
+      @switch (selectedTab()) {
+        @case ('overview') {
+          <div class="tab-content">
+            <div class="meta-grid">
+              <lib-info-grid [title]="'GRID.OVERVIEW' | translate">
+                <lib-info-item [title]="'GRID.CREATED_AT' | translate">
+                  <lib-time-badge [date]="query.createdAt"/>
+                </lib-info-item>
+                <lib-info-item [title]="'GRID.DESCRIPTION' | translate">
+                  {{ query.description || '—' }}
+                </lib-info-item>
+                <lib-info-item [title]="'GRID.RESULT' | translate">
+                  <strong>{{ query.hasResult ? query.result : '—' }}</strong>
+                </lib-info-item>
+                <lib-info-item [title]="'GRID.STATISTICS_REQUEST' | translate">
+                  @if (query.latestDataStatisticsRequestTimestamp) {
+                    <lib-time-badge [date]="query.latestDataStatisticsRequestTimestamp!"/>
+                  } @else {
+                    —
+                  }
+                </lib-info-item>
+              </lib-info-grid>
+            </div>
+
+            <lib-query-detail-card [query]="query"></lib-query-detail-card>
+          </div>
+        }
+        @case ('builder') {
+          <div class="tab-content">
+            <div class="builder-card">
+              <div class="builder-card__head">
+                <div>
+                  <div class="builder-card__eyebrow">{{ 'MENU.QUERY_BUILDER' | translate }}</div>
+                  <h2>Review and adjust query conditions</h2>
+                </div>
+
+                <div class="builder-card__actions">
+                  <lib-btn
+                    [disabled]="isBusy() || !hasChanges()"
+                    type="SAVE"
+                    variant="RAISED"
+                    (clicked)="saveQuery()"/>
+                  <lib-btn
+                    [disabled]="isBusy()"
+                    type="SEND"
+                    [label]="'BUTTON.SAVE_AND_RUN_QUERY' | translate"
+                    label="Send Request to All Clinics" (clicked)="saveAndRunQuery()"/>
+                </div>
+              </div>
+
+              @if (query.hasFired) {
+                <div class="builder-card__hint">
+                  Changes to a fired query create a new version in the same group so previous results stay attached to
+                  the older run.
+                </div>
+              }
+
+              <form [formGroup]="queryDetailForm" class="builder-form">
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'GRID.NAME_OF_THE_QUERY' | translate }}</mat-label>
+                  <input matInput formControlName="name">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+                  <textarea matInput rows="3" formControlName="description"></textarea>
+                </mat-form-field>
+              </form>
+
+              <div class="builder-list">
+                @for (_ of queryList; track $index) {
+                  <app-query-builder-item
+                    [(queryItem)]="queryList[$index]"
+                    [queryConfigs]="queryConfigs()"
+                    [isLastItem]="$last"
+                    (queryItemChange)="handleQueryItemChange($index, $event)"
+                    (removeQueryItem)="removeQueryItem($index)"/>
+                }
+              </div>
+
+              <button mat-stroked-button color="primary" (click)="onAddQueryItem()">
+                <mat-icon>add</mat-icon>
+                {{ 'BUTTON.ADD_CONDITION' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+        @case ('versions') {
+          @if (hasVersionsTab()) {
+            <div class="tab-content">
+              <div class="versions-intro">
+                <div class="builder-card__eyebrow">{{ 'GRID.VERSIONS' | translate }}</div>
+                <h2>Previous query versions</h2>
+                <p>Older versions stay read-only so you can compare each query definition with the result it
+                  produced.</p>
+              </div>
+
+              <div class="versions-list">
+                @for (olderQuery of olderQueries(); track olderQuery.id) {
+                  <section class="version-card">
+                    <lib-info-grid [title]="olderQuery.name + ' - ' +olderQuery.globalUniqueId">
+                      <lib-info-item [title]="'GRID.CREATED_AT' | translate">
+                        <lib-time-badge [date]="olderQuery.createdAt"/>
+                      </lib-info-item>
+                      <lib-info-item [title]="'GRID.STATUS' | translate">
+                        <lib-badge
+                          [text]="getQueryStatusText(olderQuery)"
+                          [color]="getQueryStatusBadgeColor(olderQuery)"
+                          [border]="true"/>
+                      </lib-info-item>
+                      <lib-info-item [title]="'GRID.RESULT' | translate">
+                        <strong>{{ olderQuery.hasResult ? olderQuery.result : '—' }}</strong>
+                      </lib-info-item>
+                      <lib-info-item [title]="'GRID.DESCRIPTION' | translate">
+                        {{ olderQuery.description || '—' }}
+                      </lib-info-item>
+                    </lib-info-grid>
+
+                    <lib-query-detail-card [query]="olderQuery"></lib-query-detail-card>
+                  </section>
+                }
+              </div>
+            </div>
+          }
+        }
+        @case ('statistics') {
+          @if (hasStatisticsTab()) {
+            <div class="tab-content">
+              <app-query-statistics-panel [query]="query" (request)="requestStatistics()"/>
+            </div>
+          }
+        }
+      }
+    }
+  </mat-tab-nav-panel>
+</lib-page-wrapper>

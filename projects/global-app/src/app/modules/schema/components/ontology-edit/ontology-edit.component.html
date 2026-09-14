@@ -1,0 +1,133 @@
+@let foundOntology = ontology();
+<div class="wrapper">
+
+  <div class="wrapper-element" [class.full-width]="!limitWidth()">
+    <div class="names-section">
+      <h3>{{ 'GRID.NAME' | translate }}</h3>
+
+      @for (name of foundOntology.names ?? []; track $index) {
+        <div class="names-row">
+          <mat-form-field class="names-field">
+            <input
+              matInput
+              [placeholder]="'GRID.NAME' | translate"
+              [(ngModel)]="foundOntology.names![$index]"
+            />
+          </mat-form-field>
+
+          <button
+            mat-icon-button
+            color="warn"
+            type="button"
+            (click)="removeName($index)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      }
+
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="addName()"
+      >
+        <mat-icon>add</mat-icon>
+        {{ 'BUTTON.ADD_NAME' | translate }}
+      </button>
+    </div>
+
+
+    <mat-form-field class="full-width">
+      <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+      <textarea
+        matInput
+        [placeholder]="('GRID.DESCRIPTION' | translate)"
+        [(ngModel)]="foundOntology.description"
+      ></textarea>
+    </mat-form-field>
+
+    <mat-form-field class="full-width" [class.two-columns]="twoColumns()">
+      <mat-label>CUI</mat-label>
+      <input
+        matInput
+        placeholder="CUI"
+        [(ngModel)]="foundOntology.cui"
+      />
+    </mat-form-field>
+
+    <mat-form-field class="full-width" [class.two-columns]="twoColumns()">
+      <mat-label>LAT</mat-label>
+      <input
+        matInput
+        placeholder="LAT"
+        [(ngModel)]="foundOntology.lat"
+      />
+    </mat-form-field>
+
+    <mat-form-field class="full-width" [class.two-columns]="twoColumns()">
+      <mat-label>{{ 'GRID.CODES' | translate }}</mat-label>
+
+      <mat-chip-grid #codesChipGrid>
+        @for (code of foundOntology.codes ?? []; track $index) {
+          <mat-chip-row (removed)="removeChip('codes', $index)">
+            {{ code }}
+            <button matChipRemove aria-label="Remove code">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+
+      <input
+        matInput
+        [placeholder]="'GRID.ADD_CODE' | translate"
+        [matChipInputFor]="codesChipGrid"
+        (matChipInputTokenEnd)="addChip('codes', $event)"
+      />
+    </mat-form-field>
+
+    <mat-form-field class="full-width" [class.two-columns]="twoColumns()">
+      <mat-label>{{ 'GRID.SABS' | translate }}</mat-label>
+
+      <mat-chip-grid #sabsChipGrid>
+        @for (sab of foundOntology.sabs ?? []; track $index) {
+          <mat-chip-row (removed)="removeChip('sabs', $index)">
+            {{ sab }}
+            <button matChipRemove aria-label="Remove sab">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+
+      <input
+        matInput
+        [placeholder]="'GRID.ADD_SAB' | translate"
+        [matChipInputFor]="sabsChipGrid"
+        (matChipInputTokenEnd)="addChip('sabs', $event)"
+      />
+    </mat-form-field>
+
+    <mat-form-field class="full-width" [class.two-columns]="twoColumns()">
+      <mat-label>AUIs</mat-label>
+
+      <mat-chip-grid #auisChipGrid>
+        @for (aui of foundOntology.auis ?? []; track $index) {
+          <mat-chip-row (removed)="removeChip('auis', $index)">
+            {{ aui }}
+            <button matChipRemove aria-label="Remove aui">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+
+      <input
+        matInput
+        placeholder="Add AUI…"
+        [matChipInputFor]="auisChipGrid"
+        (matChipInputTokenEnd)="addChip('auis', $event)"
+      />
+    </mat-form-field>
+  </div>
+</div>

@@ -1,0 +1,141 @@
+.file-upload {
+  overflow: hidden;
+  border: 1px solid #dfe6f2;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 36px rgba(17, 34, 68, 0.05);
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 22px 24px 12px;
+  }
+
+  h3 {
+    margin: 0 0 8px;
+    color: #172033;
+    font-size: 1.15rem;
+  }
+
+  &-copy {
+    margin: 0;
+    color: #66768c;
+  }
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e1e5e8;
+
+  &-label {
+    min-width: 215px;
+    align-self: start;
+    display: flex;
+    align-items: center;
+
+    &-icon {
+      background: unset !important;
+      color: white !important;
+
+    }
+  }
+
+  mat-icon {
+    vertical-align: middle;
+    background: white;
+    margin-left: 5px;
+    color: #6b7c93;
+  }
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+}
+
+.input-row--stacked {
+  align-items: stretch;
+  flex-direction: column;
+}
+
+.input-row-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.file-upload-actions {
+  padding-top: 4px;
+}
+
+.file-upload-input {
+  display: none;
+}
+
+.file-upload-preview {
+  padding: 0 24px 24px;
+}
+
+.file-preview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0 0;
+  border-top: 1px solid #e7edf5;
+}
+
+.file-parsing-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-top: 8px;
+  color: #66768c;
+  font-size: 12px;
+}
+
+.file-selection-button {
+  white-space: nowrap;
+}
+
+.existing-file-button {
+  gap: 8px;
+}
+
+.file-preview-link {
+  color: #315899;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.file-preview-link:hover {
+  text-decoration: underline;
+}
+
+app-run-new-file {
+  padding: 10px 20px;
+}
+
+@media (max-width: 900px) {
+  .file-upload {
+    &-header {
+      flex-direction: column;
+      padding-bottom: 0;
+    }
+  }
+
+  .input-row {
+    flex-wrap: wrap;
+  }
+}

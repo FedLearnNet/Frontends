@@ -1,0 +1,44 @@
+<div class="app-runs">
+  <mat-tab-group>
+    @if (supportsTraining() && !app()?.supportsFederatedLearning) {
+      <mat-tab [label]="('MENU.LOCAL_EXPERIMENTS' | translate)">
+        <app-experiment [app]="app()"
+                        [appRunning]="appRunning()"
+                        [datafiles]="datafiles()"/>
+      </mat-tab>
+    }
+    @if (app()?.supportsFederatedLearning) {
+      <mat-tab [label]="('MENU.FEDERATED_RUNS' | translate)">
+        <app-app-run-federated-test [app]="app()" [appRunning]="appRunning()" [localFiles]="localFiles()"/>
+      </mat-tab>
+    } @else {
+      <mat-tab [label]="('MENU.TEST_RUNS' | translate)">
+        <app-app-run-test [app]="app()" [appRunning]="appRunning()"
+                          [datafiles]="datafiles()"/>
+      </mat-tab>
+    }
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div [class.local-config-tap-warning]="!appRunning()">
+          @if (!appRunning()) {
+            <mat-icon>warning</mat-icon>
+          }
+          {{ 'MENU.MONITOR' | translate }}
+        </div>
+      </ng-template>
+
+      @if (appRunning()) {
+        <app-app-detail-monitor [performance$]="performance$()"/>
+      } @else {
+        <app-start-app-warning [uiConnected]="uiConnected()">
+          Start your application to see {{ 'MENU.MONITOR' | translate }}.
+        </app-start-app-warning>
+      }
+
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+
+

@@ -1,0 +1,76 @@
+@let c = config();
+
+@if (c) {
+  <section class="config-card">
+    <header class="config-card__head">
+      <div class="config-card__title">
+        <div class="title-row">
+          <div class="title-text">{{ title() }}</div>
+
+          <div class="title-actions">
+            <button mat-icon-button class="validate-btn" (click)="toggleValidate()">
+              @if (showValidate()) {
+                <mat-icon fontSet="material-symbols-outlined">check_box_outline_blank</mat-icon>
+              } @else {
+                <mat-icon fontSet="material-symbols-outlined">indeterminate_question_box</mat-icon>
+              }
+            </button>
+          </div>
+        </div>
+
+        <div class="subtitle-row">
+          <div class="badges">
+            <lib-badge [text]="typeText()" color="GRAY" size="SMALL" [border]="true"
+                       [uppercase]="true"/>
+
+            @if (inputConfig()) {
+              <lib-badge
+                [text]="isRequiredInput() ? 'Required' : 'Optional'"
+                color="RED"
+                size="SMALL"
+                [border]="true"
+                [uppercase]="true"
+              />
+            }
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="config-card__body">
+      <lib-kv label="Description" [value]="c.description" [multiline]="true"/>
+
+      @if (showValidate()) {
+        <div class="validate-panel">
+          <div class="validate-panel__head">
+            <div class="validate-panel__title">Validation</div>
+            <div class="validate-panel__hint">
+              @if (isIO()) {
+                Inputs/Outputs checks
+              } @else {
+                Hyperparameter checks
+              }
+            </div>
+          </div>
+
+          <div class="validate-panel__body">
+            @if (isIO()) {
+              <lib-tool-input-output-validation
+                class="full-width"
+                [config]="ioConfig()!"
+                [files]="files()">
+              </lib-tool-input-output-validation>
+            }
+
+            @if (isHyperparamConfig()) {
+              <lib-tool-hyperparam-validation
+                class="full-width"
+                [hyperparam]="hyperparamConfig()!">
+              </lib-tool-hyperparam-validation>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}

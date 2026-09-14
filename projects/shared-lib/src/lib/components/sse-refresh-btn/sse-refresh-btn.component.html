@@ -1,0 +1,30 @@
+<div class="wrapper">
+
+  @if (showBtn() && !streaming()) {
+
+    @if (btnText()) {
+      <lib-btn variant="SECONDARY" [label]="btnText()" icon="refresh"
+               (click)="onBtnClick()"
+               [disabled]="refreshing() ?? false"/>
+    } @else {
+      <button mat-icon-button
+              class="refresh-btn"
+              [disabled]="refreshing()"
+              (click)="onBtnClick()">
+
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
+  }
+
+  @if (streaming()) {
+    <div class="chip live">
+      <mat-icon class="pulse-icon">sensors</mat-icon>
+      <span>Live</span>
+    </div>
+  }
+  @if (refreshing()) {
+    <mat-icon class="spinner">sync</mat-icon>
+  }
+
+</div>

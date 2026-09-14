@@ -1,0 +1,41 @@
+@if (allowGlobalDataModeling) {
+  <app-lib-toolbar
+    [menuItems]="menuItems()"
+    [(collapsed)]="menuCollapsed"
+  ></app-lib-toolbar>
+} @else {
+  <app-lib-toolbar
+    [menuItems]="menuPosyMed()"
+    [(collapsed)]="menuCollapsed"
+  ></app-lib-toolbar>
+}
+
+<div class="layout" [class.has-scrim]="!menuCollapsed()">
+
+  @if (allowGlobalDataModeling) {
+    <lib-sidenav
+      [title]="title"
+      [(collapsed)]="menuCollapsed"
+      [sections]="sections()">
+    </lib-sidenav>
+  } @else {
+    <lib-sidenav
+      [title]="title"
+      [(collapsed)]="menuCollapsed"
+      [sections]="sectionsPosyMed()">
+    </lib-sidenav>
+  }
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <div class="scrim" (click)="onToggle()"></div>
+
+  <app-lib-spinner></app-lib-spinner>
+</div>
+
+<app-lib-footer
+  [brand]="project"
+  [tagline]="'Clinical-grade, reproducible tool execution for biomedical research.'"
+  [groups]="groups()"
+/>

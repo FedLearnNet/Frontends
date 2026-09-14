@@ -1,0 +1,18 @@
+@if (schema().length > 0) {
+  <div class="schema-card">
+    <div class="schema-title">
+      Schema (1 table, {{ schema().length }} columns)
+    </div>
+    <div class="schema-table">
+      <div class="schema-row header">
+        <span class="col-name">data</span>
+      </div>
+      @for (f of schema(); track $index) {
+        <div class="schema-row">
+          <span class="col-name">{{ f.name }}</span>
+          <span class="col-type">{{ f.type }}</span>
+        </div>
+      }
+    </div>
+  </div>
+}

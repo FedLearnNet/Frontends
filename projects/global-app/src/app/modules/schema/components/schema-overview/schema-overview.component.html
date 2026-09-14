@@ -1,0 +1,18 @@
+<lib-header
+  [title]="'DATA_MODELER.TITLE' | translate"
+  [description]="'DATA_MODELER.MANAGEMENT_OVERVIEW' | translate">
+</lib-header>
+<lib-page-wrapper
+>
+  <div class="overview__grid">
+    @for (card of cards(); track card.route) {
+      <lib-action-card-button
+        class="tile-action"
+        [title]="card.titleKey | translate"
+        [subtitle]="card.descriptionKey | translate"
+        [icon]="card.icon"
+        [routerLink]="card.route"
+      />
+    }
+  </div>
+</lib-page-wrapper>

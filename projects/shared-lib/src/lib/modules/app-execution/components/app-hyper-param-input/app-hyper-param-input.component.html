@@ -1,0 +1,180 @@
+@if (allowMultiple()) {
+  <mat-form-field appearance="fill">
+    <mat-label>{{ parsedLabel() }}</mat-label>
+    <input matInput [formControl]="formControl"/>
+    @if (errorMessages) {
+      @for (message of errorMessages; track message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    }
+    <mat-hint>
+      @switch (hyperparam().type) {
+        @case (FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+          {{ 'HYPERPARAM_TYPE_HINT_CATEGORICAL' | translate: {options: hyperparam().options} }}
+        }
+        @case (FederatedAppConfigHyperParamDataType.BOOLEAN) {
+          {{ 'HYPERPARAM_TYPE_HINT_BOOLEAN' | translate }}
+        }
+        @case (FederatedAppConfigHyperParamDataType.INTEGER) {
+          <ng-container
+            [ngTemplateOutlet]="matErrorNumber"
+            [ngTemplateOutletContext]="{showRangeInput: 'true'}"
+          />
+        }
+        @case (FederatedAppConfigHyperParamDataType.FLOAT) {
+          <ng-container
+            [ngTemplateOutlet]="matErrorNumber"
+            [ngTemplateOutletContext]="{showRangeInput: 'true'}"
+          />
+        }
+        @default {
+          {{ 'HYPERPARAM_TYPE_HINT_DEFAULT' | translate: {pattern: hyperparam().pattern} }}
+        }
+      }
+    </mat-hint>
+    @if (showTooltip()) {
+      <mat-icon matSuffix
+                [matTooltip]="hyperparam().description"
+      >mode_edit
+      </mat-icon>
+    }
+  </mat-form-field>
+} @else {
+  @switch (hyperparam().type) {
+    @case (FederatedAppConfigHyperParamDataType.CATEGORICAL) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ parsedLabel() }}</mat-label>
+        <mat-select [formControl]="formControl">
+          @for (option of hyperparam().options; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: parsedLabel()} }}</mat-error>
+        }
+        <mat-hint>
+          {{ 'VALIDATION.VALUES_NEEDS_TO_BE_IN' | translate:{options: hyperparam().options} }}
+        </mat-hint>
+        @if (showTooltip()) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam().description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.INTEGER) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ parsedLabel() }}</mat-label>
+        <input matInput [formControl]="formControl" type="number" step="1"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: parsedLabel()} }}</mat-error>
+        }
+
+        <ng-container
+          [ngTemplateOutlet]="matErrorNumber"
+        />
+        @if (formControl.hasError('pattern')) {
+          <mat-error>{{ 'VALIDATION.SHOULD_NOT_BE_A_FLOAT_VALUE' | translate:{fieldName: parsedLabel()} }}</mat-error>
+        }
+        @if (showTooltip()) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam().description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.FLOAT) {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ parsedLabel() }}</mat-label>
+        <input matInput [formControl]="formControl" type="number" step="0.1"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: parsedLabel()} }}</mat-error>
+        }
+        <ng-container
+          [ngTemplateOutlet]="matErrorNumber"
+        />
+        @if (showTooltip()) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam().description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+    @case (FederatedAppConfigHyperParamDataType.BOOLEAN) {
+      <div class="checkbox">
+        <mat-checkbox [formControl]="formControl">
+          {{ parsedLabel() }}
+        </mat-checkbox>
+        @if (showTooltip()) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam().description"
+          >mode_edit
+          </mat-icon>
+        }
+      </div>
+    }
+    @default {
+      <mat-form-field appearance="fill">
+        <mat-label>{{ parsedLabel() }}</mat-label>
+        <input matInput [formControl]="formControl"/>
+        @if (formControl.hasError('required')) {
+          <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: parsedLabel()} }}</mat-error>
+        }
+        @if (formControl.hasError('patter')) {
+          <mat-error>{{
+              'VALIDATION.MUST_MATCH_THE_PATTERN' | translate:{
+                fieldName: parsedLabel(),
+                pattern: hyperparam().pattern
+              }
+            }}
+          </mat-error>
+        }
+        @if (hyperparam().pattern) {
+          <mat-hint>
+            {{ 'VALIDATION.VALUES_NEEDS_TO_FIT_REGEX_TEST' | translate : {pattern: hyperparam().pattern} }}
+          </mat-hint>
+        }
+        @if (showTooltip()) {
+          <mat-icon matSuffix
+                    [matTooltip]="hyperparam().description"
+          >mode_edit
+          </mat-icon>
+        }
+      </mat-form-field>
+    }
+  }
+}
+
+<ng-template #matErrorNumber let-showRangeInput>
+  @if (hyperparam()) {
+    <mat-hint>
+      @if (hyperparam()!.minValue !== null && hyperparam()!.maxValue !== null) {
+        {{
+          'VALIDATION.RANGE_VALIDATION_ISSUE' | translate:{
+            minValue: (hyperparam()!.minValue ?? ('HYPERPARAM_TYPE_HINT_NOT_SET' | translate)),
+            maxValue: (hyperparam()!.maxValue ?? ('HYPERPARAM_TYPE_HINT_NOT_SET' | translate)),
+          }
+        }}
+      } @else if (hyperparam()!.minValue !== null) {
+        {{
+          'VALIDATION.VALIDATION_BIGGER' | translate:{
+            minValue: (hyperparam()!.minValue ?? ('HYPERPARAM_TYPE_HINT_NOT_SET' | translate))
+          }
+        }}
+      } @else if (hyperparam()!.maxValue !== null) {
+        {{
+          'VALIDATION.VALIDATION_SMALLER' | translate:{
+            minValue: (hyperparam()!.maxValue ?? ('HYPERPARAM_TYPE_HINT_NOT_SET' | translate))
+          }
+        }}
+      }
+
+      @if (showRangeInput) {
+        <span>{{ 'VALIDATION.VALIDATION_SMALLER' | translate }}</span>
+      }
+    </mat-hint>
+  }
+</ng-template>

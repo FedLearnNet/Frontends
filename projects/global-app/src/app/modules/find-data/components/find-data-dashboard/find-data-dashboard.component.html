@@ -1,0 +1,129 @@
+<lib-header
+  title="Query workspace"
+  description="Create, review and manage reusable queries across your connected clinics."
+  [enableSearch]="!isEmpty"
+  [enableAddBtn]="!isEmpty"
+  searchLabel="Search queries"
+  searchPlaceholder="Name, description, result or query string"
+  addBtnLabel="Add Query"
+  (addBtnClick)="openQueryDetailDialog()"
+  (searchInput)="onSearchInput($event)"
+  [enableSkeleton]="isLoading()"
+  (keyInput)="onSearchKeyInput($event)">
+</lib-header>
+<lib-page-wrapper
+  [isLoading]="isLoading()"
+  [isEmpty]="isEmpty"
+>
+  <lib-empty-state
+    empty
+    [title]="'No queries yet'"
+    [subtitle]="'Create your first query.'"
+    [primaryButtonEnabled]="true"
+    [primaryButtonLabel]="'Add Query'"
+    (cta)="openQueryDetailDialog()"
+  ></lib-empty-state>
+  <div>
+    <table mat-table [dataSource]="dataSource"
+           matSort
+           [class.is-x-small-screen]="isXSmallScreen">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.NAME' | translate }}</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.NAME' | translate }}:</span>
+          }
+          <a class="query-link" [routerLink]="['/find-data', element.id]">{{ element.name }}</a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DESCRIPTION' | translate }}</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.DESCRIPTION' | translate }}:</span>
+          }
+          <span>{{ element.description }}</span>
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="queryString">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY_STRING' | translate }}</th>
+        <td mat-cell *matCellDef="let element" class="query-string-column">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.QUERY_STRING' | translate }}:</span>
+          }
+          <span>{{ getQueryString(element) }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="update">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header="updatedAt">{{ 'GRID.UPDATED_AT' | translate }}</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.UPDATED_AT' | translate }}:</span>
+          }
+          <lib-time-badge [date]="element.updatedAt"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="result">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.RESULT' | translate }}</th>
+        <td mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.RESULT' | translate }}:</span>
+          }
+          <span>{{ element.result }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions" stickyEnd>
+        <th mat-header-cell *matHeaderCellDef class="action-column action-column--header" aria-hidden="true"></th>
+        <td mat-cell *matCellDef="let element" class="action-column">
+
+          @if (!element.hasFired) {
+            <button mat-icon-button [matMenuTriggerFor]="modelTableMenu"
+                    [matMenuTriggerData]="{query: element}"
+                    aria-label="Context Menu for each query">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+          } @else {
+            <button mat-icon-button (click)="onEditQuery(element.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-menu #modelTableMenu="matMenu">
+      <ng-template matMenuContent let-query="query">
+        <button mat-menu-item (click)="onEditQuery(query.id)">
+          <mat-icon>edit</mat-icon>
+          <p>{{ 'BUTTON.EDIT' | translate }}</p>
+        </button>
+        <button mat-menu-item (click)="onDeleteQuery(query.id)"
+                [disabled]="query.projectId || query.hasResult || query.hasFired">
+          <mat-icon>delete</mat-icon>
+          <p>{{ 'BUTTON.DELETE' | translate }}</p>
+        </button>
+        <button mat-menu-item (click)="onRunQuery(query.id)"
+                [disabled]="query.projectId || query.hasResult || query.hasFired">
+          <mat-icon>play_arrow</mat-icon>
+          <p>{{ 'BUTTON.RUN_QUERY' | translate }}</p>
+        </button>
+        <button mat-menu-item [routerLink]="['/project', query.projectId]"
+                [disabled]="!query.projectId">
+          <mat-icon>account_tree</mat-icon>
+          <p>{{ 'BUTTON.GO_TO_PROJECT' | translate }}</p>
+        </button>
+      </ng-template>
+    </mat-menu>
+  </div>
+</lib-page-wrapper>

@@ -1,0 +1,94 @@
+<lib-header
+  [title]="'BUTTON.PATIENTS' | translate"
+  description="Review, edit and manage patient records in this cohort."
+  [enableAddBtn]="!actionsDisabled()"
+  [addBtnLabel]="'BUTTON.ADD_PATIENT' | translate"
+  addBtnIcon="add"
+  (addBtnClick)="openAddPatientPage()">
+  <div suffix class="patients-header-actions">
+    <button mat-icon-button (click)="openPatientDetailGridSettingsModal()" [matTooltip]="('TOOLTIP.GRID_SETTINGS' | translate)">
+      <mat-icon>view_column</mat-icon>
+    </button>
+  </div>
+</lib-header>
+
+<lib-page-wrapper [isLoading]="isLoading()">
+  <div class="cohort-patients-container">
+  <div class="cohort-patients-container--table-wrapper">
+    <div class="cohort-patients-container--table-wrapper--table">
+      <mat-table [dataSource]="patientsList()" class="mat-elevation-z8" [class.is-x-small-screen]="isXSmallScreen()">
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.ACTION' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            @if (isXSmallScreen()) {
+              <span class="column-name">{{ 'GRID.ACTION' | translate }}:</span>
+            }
+            <div class="row-actions">
+              <lib-btn
+                type="CUSTOM"
+                variant="GHOST"
+                icon="table_eye"
+                [iconOnly]="true"
+                [routerLink]="['patient', element.id]"
+                [matTooltip]="('BUTTON.VIEW' | translate)"/>
+              <lib-btn
+                type="EDIT"
+                variant="GHOST"
+                [iconOnly]="true"
+                [disabled]="actionsDisabled()"
+                (clicked)="editRow(element)"
+                [matTooltip]="('BUTTON.EDIT' | translate)"/>
+              <lib-btn
+                type="DELETE"
+                variant="GHOST"
+                [iconOnly]="true"
+                [disabled]="actionsDisabled()"
+                (clicked)="deleteRow(element)"
+                [matTooltip]="('BUTTON.DELETE' | translate)"/>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- External Patient ID -->
+        <ng-container matColumnDef="externalPatientId">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.EXTERNAL_PATIENT_ID' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            @if (isXSmallScreen()) {
+              <span class="column-name">{{ 'GRID.EXTERNAL_PATIENT_ID' | translate }}:</span>
+            }
+            <span>{{ element.externalPatientId }}</span>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Dynamic Columns -->
+        @for (column of patientTableColumns(); track column.id) {
+          <ng-container [matColumnDef]="''+column.id">
+            <mat-header-cell *matHeaderCellDef>{{ getColumnName(column) }}</mat-header-cell>
+            <mat-cell *matCellDef="let element">
+              @if (isXSmallScreen()) {
+                <span class="column-name">{{ getColumnName(column) }}:</span>
+              }
+              <span>{{ getRowValue(element, column.id) }}</span>
+            </mat-cell>
+          </ng-container>
+        }
+
+        <!-- Header + Rows -->
+        <mat-header-row *matHeaderRowDef="displayedColumns()" />
+        <mat-row *matRowDef="let row; columns: displayedColumns();" />
+      </mat-table>
+    </div>
+
+    <app-lib-mat-paginator #paginator
+      tableName="cohort-patients"
+      [(pageSize)]="pageSize"
+      [(pageIndex)]="pageIndex"
+      [disabled]="isLoading()"
+      [length]="patients().totalCount"
+      [showFirstLastButtons]="true"
+     />
+  </div>
+  </div>
+</lib-page-wrapper>

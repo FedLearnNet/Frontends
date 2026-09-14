@@ -1,0 +1,158 @@
+<mat-card appearance="outlined">
+  <form class="form" [formGroup]="form">
+    <mat-card-header>
+      @if (!hideMode() && supportsTraining()) {
+        <app-app-detail-config-mode-icon
+          mat-card-avatar
+          [mode]="param().mode"
+          [editMode]="param().editMode"
+          (modeChanged)="onModeChanged($event)"
+          [hasSpace]="true"
+        />
+      }
+
+      <mat-card-title class="row">
+        @if (param().editMode) {
+          <mat-form-field appearance="fill" class="input-name">
+            <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+            <input matInput formControlName="name"/>
+          </mat-form-field>
+        } @else {
+          <lib-kv
+            [label]="'GRID.NAME' | translate"
+            [value]="param().required ? (param().name + ' *') : param().name"
+            [border]="false"
+          />
+        }
+
+        @if (editMode()) {
+          <div class="actions">
+            @if (param().editMode) {
+              @if (!hideDelete()) {
+                <button mat-icon-button (click)="deleteConfig()">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+              <button mat-icon-button (click)="saveParam()" [disabled]="form.invalid">
+                <mat-icon>save</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button (click)="toggleValidate()">
+                @if (showValidate()) {
+                  <mat-icon fontSet="material-symbols-outlined">check_box_outline_blank</mat-icon>
+                } @else {
+                  <mat-icon fontSet="material-symbols-outlined">indeterminate_question_box</mat-icon>
+                }
+              </button>
+              <button mat-icon-button (click)="editParam()">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (param().editMode) {
+        <div class="row">
+          <mat-form-field>
+            <mat-label>{{ 'GRID.INPUT_DATA_TYPE' | translate }}</mat-label>
+            <mat-select formControlName="type">
+              @for (type of getDataTypes(); track type) {
+                <mat-option [value]="type">{{ toolConfigDataTypeText[type] }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (forInputConfig()) {
+            <mat-checkbox formControlName="required">
+              {{ 'REQUIRED' | translate }}
+            </mat-checkbox>
+          }
+        </div>
+
+        @if (inputRequiresShape()) {
+          <mat-form-field class="full-width">
+            <mat-label>{{ 'SHAPE_INPUT_LABEL' | translate }}</mat-label>
+            <input matInput placeholder="[None, 28, 28, 1]" formControlName="shape"/>
+          </mat-form-field>
+        }
+
+        @if (inputRequiresDelimiterAndHeader()) {
+          <div class="row">
+            <mat-form-field>
+              <mat-label>{{ 'DELIMITER' | translate }}</mat-label>
+              <input matInput placeholder="," formControlName="delimiter"/>
+            </mat-form-field>
+
+            <mat-checkbox formControlName="hasHeader">
+              {{ 'HAS_HEADER' | translate }}
+            </mat-checkbox>
+
+            <mat-form-field>
+              <mat-label>{{ 'INDEX_COL' | translate }}</mat-label>
+              <input matInput type="number" placeholder="0" formControlName="indexCol"/>
+            </mat-form-field>
+
+          </div>
+        }
+
+        @if (inputRequiresConstraints()) {
+          <div class="row">
+            <mat-form-field>
+              <mat-label>{{ 'GRID.MIN_VALUE' | translate }}</mat-label>
+              <input matInput type="number" placeholder="0" formControlName="minValue"/>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>{{ 'GRID.MAX_VALUE' | translate }}</mat-label>
+              <input matInput type="number" placeholder="1" formControlName="maxValue"/>
+            </mat-form-field>
+          </div>
+        }
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+          <input matInput formControlName="description"/>
+        </mat-form-field>
+
+        @if (inputRequiresDelimiterAndHeader()) {
+          <div class="row">
+            <button mat-raised-button (click)="openTableSettings()">
+              Global constraints and per-column rules.
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="row">
+          <lib-kv
+            [label]="'GRID.INPUT_DATA_TYPE' | translate"
+            [value]="param().type"
+            [mono]="true"
+            [border]="false"
+          />
+
+          @if (inputRequiresShape()) {
+            <lib-kv [label]="'GRID.SHAPE' | translate" [value]="param().shape" [mono]="true" [border]="false"/>
+          }
+
+          @if (inputRequiresConstraints()) {
+            <lib-kv [label]="'GRID.MIN_VALUE' | translate" [value]="param().minValue" [border]="false"/>
+            <lib-kv [label]="'GRID.MAX_VALUE' | translate" [value]="param().maxValue" [border]="false"/>
+          }
+        </div>
+
+        <lib-kv
+          [label]="'GRID.DESCRIPTION' | translate"
+          [value]="param().description"
+          [multiline]="true"
+          [border]="false"
+          class="description"
+        />
+        @if (showValidate()) {
+          <lib-tool-input-output-validation class="full-width" [config]="param()"
+                                            [files]="files()"></lib-tool-input-output-validation>
+        }
+      }
+    </mat-card-content>
+  </form>
+</mat-card>

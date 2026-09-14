@@ -1,0 +1,44 @@
+.tab-header-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+
+  &--center {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  padding-left: 30px;
+}
+
+mat-tab-nav-panel {
+  display: block;
+  margin-top: 10px;
+}
+
+.doc-link,
+.copy-app-id {
+  color: #5c5c5c;
+  border-color: #ccc;
+
+  mat-icon {
+    font-size: 18px;
+    margin-right: 4px;
+  }
+}
+
+.copy-app-id {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.tab-group {
+  width: 100%;
+}
+
+
+.mat-tab-body-wrapper {
+  margin-top: 48px;
+}

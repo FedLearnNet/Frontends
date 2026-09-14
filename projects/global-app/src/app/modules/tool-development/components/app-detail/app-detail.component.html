@@ -1,0 +1,126 @@
+<lib-header
+  [title]="app()?.name"
+  [enableSkeleton]="app() === undefined"
+  [enableGoBack]="true"
+  [mainGap]="false"
+  [locationBack]="true">
+
+  <div suffix class="tab-header-row">
+    <a
+      class="doc-link"
+      mat-raised-button
+      href="/documentation/docs/tool-dev/create-app"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <mat-icon>book</mat-icon>
+      Documentation
+    </a>
+    @if (app(); as app) {
+      @if (app.id) {
+        <button
+          mat-raised-button
+          (click)="openStartupGeneratorCode()"
+          matTooltip="Generate startup code"
+        >
+          <mat-icon>api</mat-icon>
+          Start coding
+        </button>
+
+        <button
+          mat-raised-button
+          class="copy-app-id"
+          (click)="copyAppId()"
+          matTooltip="App Id"
+        >
+          <mat-icon>content_copy</mat-icon>
+          #{{ app.id }}
+        </button>
+
+      }
+      @if (app.type) {
+        <lib-app-type-badge [type]="app.type"
+                            [supportsFederatedLearning]="app.supportsFederatedLearning"></lib-app-type-badge>
+      }
+    }
+  </div>
+  @if (app()) {
+    <div class="tab-header-row tab-header-row--center">
+      @let si = selectedIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a
+          mat-tab-link
+          [active]="si === 0"
+          (click)="setSelectedIndex(0)"
+        >
+          {{ 'MENU.OVERVIEW' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 1" (click)="setSelectedIndex(1)">
+          {{ 'MENU.RUNS' | translate }}
+        </a>
+
+        @if (supportsTraining()) {
+          <a mat-tab-link [active]="si === 2" (click)="setSelectedIndex( 2)">
+            {{ 'MENU.MODELS' | translate }}
+          </a>
+        }
+        <a mat-tab-link [active]="si === 3" (click)="setSelectedIndex( 3)">
+          {{ 'MENU.PIPELINES' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 4" (click)="setSelectedIndex( 4)">
+          {{ 'GRID.APP_VERSIONS' | translate }}
+        </a>
+      </nav>
+    </div>
+  }
+</lib-header>
+
+<mat-tab-nav-panel #panel>
+
+  @if (app(); as app) {
+    @switch (selectedIndex()) {
+      @case (0) {
+        @if (app) {
+          <app-app-detail-config
+            [app]="app"
+            [pydanticClass]="configPydantic()"
+            [appConnected]="appConnected()"
+            [uiConnected]="connected()"
+            (appChange)="appChanged($event)"
+            [clientConfig]="clientConfig()"
+            [datafiles]="datafiles()"
+          />
+        } @else {
+          <lib-skeleton-loader></lib-skeleton-loader>
+        }
+      }
+      @case (1) {
+        <app-app-runs [app]="app"
+                      [appRunning]="appConnected()"
+                      [uiConnected]="connected()"
+                      [localFiles]="datafiles()"
+                      [performance$]="getPerformance$()"/>
+      }
+      @case (2) {
+        @if (supportsTraining()) {
+          @if (app) {
+            <app-my-model-list [forAppId]="app.id"/>
+          } @else {
+            <lib-skeleton-loader></lib-skeleton-loader>
+          }
+        } @else {
+          <lib-error-card>This tool type does not support training/models</lib-error-card>
+        }
+      }
+      @case (3) {
+        <app-pipeline-list [appVersionId]="app.latestVersionId" [appId]="app.id"/>
+      }
+      @case (4) {
+        <lib-store-version-list [detail]="app" (detailChange)="configChangedVersion($event)"/>
+      }
+    }
+  }
+</mat-tab-nav-panel>
+<app-app-console-log [appConnected]="appConnected()" [clientConnected]="connected()"/>

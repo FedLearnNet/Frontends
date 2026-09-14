@@ -1,0 +1,37 @@
+<lib-header
+  [title]="title()"
+  [description]="subtitle()"
+  [enableSearch]="false"
+  [enableAddBtn]="false">
+
+  @if (hasAction()) {
+    <a
+      suffix
+      mat-flat-button
+      color="primary"
+      class="hero__action"
+      [href]="actionUrl()!"
+      target="_blank"
+      rel="noopener">
+      <mat-icon>{{ actionIcon() }}</mat-icon>
+      {{ actionLabel() }}
+    </a>
+  }
+</lib-header>
+
+<lib-page-wrapper>
+  <section class="grid" role="list">
+    @for (tile of tiles(); track tile.id) {
+      <div role="listitem" class="tile-item">
+        <lib-action-card-button
+          class="tile-action"
+          [title]="tile.title"
+          [subtitle]="tile.description"
+          [icon]="tile.icon"
+          [routerLink]="tile.routerLink"
+          [externalUrl]="tile.externalUrl"
+        />
+      </div>
+    }
+  </section>
+</lib-page-wrapper>

@@ -1,0 +1,308 @@
+<lib-header
+  [title]="connector?.name ?? ('BUTTON.LOADING' | translate)"
+  [description]="connector?.description ?? 'Review configuration, automation and recent connector runs.'"
+  [enableGoBack]="true"
+  [locationBack]="true">
+  @if (connector) {
+    <div suffix class="header-actions">
+      <lib-btn type="RUN" [matTooltip]="('TOOLTIP.RUN_CONNECTOR' | translate)" (click)="onRunClick()"/>
+      <lib-btn type="EDIT" [label]="'BUTTON.EDIT_CONFIGURATION' | translate" variant="SECONDARY" [menuTriggerFor]="menu"
+               [matTooltip]="('TOOLTIP.EDIT_CONNECTOR' | translate)" (click)="onEditClick()"/>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="asJSON()"
+                [matTooltip]="('TOOLTIP.VIEW_CONNECTOR_JSON' | translate)">{{ 'BUTTON.VIEW_JSON' | translate }}
+        </button>
+        <button mat-menu-item (click)="onDuplicateClick()"
+                [matTooltip]="('TOOLTIP.DUPLICATE_CONNECTOR' | translate)">{{ 'BUTTON.DUPLICATE' | translate }}
+        </button>
+        <button mat-menu-item (click)="onDeleteClick()"
+                [matTooltip]="('TOOLTIP.DELETE_CONNECTOR' | translate)">{{ 'BUTTON.DELETE' | translate }}
+        </button>
+      </mat-menu>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [isLoading]="!connector" [skeletonOnLoading]="true">
+  <div class="connector-content">
+    @if (connector) {
+      <h3>{{ 'CONNECTOR_SUMMARY' | translate }}</h3>
+      <div class="summary">
+        <div class="summary-group summary-group-action">
+          <span class="summary-group-name">{{ 'GRID.NAME' | translate }}</span>
+
+          @if (editModes['name']) {
+            <mat-form-field>
+              <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+              <input matInput [(ngModel)]="connector.name">
+              <button (click)="save('name')" matSuffix mat-icon-button>
+                <mat-icon>save</mat-icon>
+              </button>
+              <button (click)="toggleEditMode('name')" matSuffix mat-icon-button>
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          } @else {
+            <span>{{ connector.name }}</span>
+            <button (click)="toggleEditMode('name')" mat-icon-button class="summary-group-edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+
+
+        </div>
+        <div class="summary-group summary-group-action">
+          <span class="summary-group-name">{{ 'GRID.DESCRIPTION' | translate }}</span>
+          @if (editModes['description']) {
+            <mat-form-field>
+              <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+              <input matInput [(ngModel)]="connector.description">
+              <button (click)="save('description')" matSuffix mat-icon-button>
+                <mat-icon>save</mat-icon>
+              </button>
+              <button (click)="toggleEditMode('description')" matSuffix mat-icon-button>
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-form-field>
+          } @else {
+            <span>{{ connector.description }}</span>
+            <button (click)="toggleEditMode('description')" mat-icon-button class="summary-group-edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+
+
+        </div>
+        <div class="summary-group">
+          <span class="summary-group-name">{{ 'GRID.SOURCE' | translate }}</span>
+          <span>{{ connector.inputConfig?.mode }}</span>
+        </div>
+
+        <div class="summary-group">
+          <span class="summary-group-name">{{ 'SCHEDULE_AND_TRIGGER_SETTINGS' | translate }}</span>
+          <span>
+          @if (isScheduleEnabled()) {
+            Scheduled: {{ connector.scheduleSettings?.cronExpression }}
+          } @else {
+            Manual schedule
+          }
+            <span class="summary-divider">/</span>
+            @if (isTriggerEnabled()) {
+              After {{ getTriggerConnectorName(connector.triggerSettings?.sourceConnectorId) }}
+            } @else {
+              No trigger
+            }
+        </span>
+        </div>
+      </div>
+
+      <section class="automation-section" [class.automation-section--expanded]="showAutomationSettings">
+        <div class="automation-disclosure">
+          <div>
+            <h3>Automation settings</h3>
+            <p>Schedules and connector chains are advanced run controls. Keep them hidden until you need recurring or
+              dependent imports.</p>
+          </div>
+
+          <div class="automation-actions">
+            @if (showAutomationSettings) {
+              <lib-btn type="EDIT" label="Hide automation" variant="SECONDARY"
+                       icon="expand_less"
+                       (click)="toggleAutomationSettings()"/>
+
+              <lib-btn type="SAVE" (clicked)="saveAutomationSettings()" [disabled]="savingAutomationSettings"></lib-btn>
+            } @else {
+              <lib-btn type="EDIT" label="Configure automation" variant="SECONDARY"
+                       icon="tune"
+                       (click)="toggleAutomationSettings()"/>
+            }
+          </div>
+        </div>
+
+        @if (showAutomationSettings) {
+          <div class="automation-grid">
+            <div class="automation-card">
+              <div class="automation-card__header">
+                <div>
+                  <h4>Schedule</h4>
+                  <p>Use a predictable run cadence for imports that arrive regularly.</p>
+                </div>
+                <div class="automation-card__actions">
+                  <button
+                    mat-icon-button
+                    type="button"
+                    (click)="toggleCronHelp()"
+                    [matTooltip]="showCronHelp ? 'Hide cron help' : 'How to write a Quarkus cron expression'"
+                    aria-label="How to write a Quarkus cron expression">
+                    <mat-icon>{{ showCronHelp ? 'info' : 'info_outline' }}</mat-icon>
+                  </button>
+                  <mat-slide-toggle
+                    color="primary"
+                    [checked]="isScheduleEnabled()"
+                    (change)="onScheduleEnabledChange($event.checked)"
+                    aria-label="Enable schedule">
+                  </mat-slide-toggle>
+                </div>
+              </div>
+
+              @if (showCronHelp) {
+                <div class="cron-help">
+                  <div class="cron-help__title">Quarkus cron format</div>
+                  <p>Quarkus uses Quartz cron syntax by default: seconds, minutes, hours, day of month, month, day of
+                    week.</p>
+                  <div class="cron-help__example">
+                    <code>0 15 10 * * ?</code>
+                    <span>Runs every day at 10:15.</span>
+                  </div>
+                  <div class="cron-help__example">
+                    <code>0 0 2 ? * MON-FRI</code>
+                    <span>Runs at 02:00 on weekdays.</span>
+                  </div>
+                  <p>Use <code>?</code> in either day field when you do not want to specify that field.</p>
+                </div>
+              }
+
+              <mat-form-field appearance="outline">
+                <mat-label>Cron expression</mat-label>
+                <input
+                  matInput
+                  [disabled]="!isScheduleEnabled()"
+                  [ngModel]="connector.scheduleSettings?.cronExpression || '0 2 * * *'"
+                  (ngModelChange)="onCronExpressionChange($event)">
+                <mat-icon matSuffix>schedule</mat-icon>
+              </mat-form-field>
+
+              <div class="setting-preview" [class.setting-preview--muted]="!isScheduleEnabled()">
+                <mat-icon>{{ isScheduleEnabled() ? 'event_available' : 'event_busy' }}</mat-icon>
+                <span>
+                @if (isScheduleEnabled()) {
+                  Runs from cron: {{ connector.scheduleSettings?.cronExpression || '0 2 * * *' }}
+                } @else {
+                  Schedule is off. Users can still start the connector manually.
+                }
+              </span>
+              </div>
+            </div>
+
+            <div class="automation-card">
+              <div class="automation-card__header">
+                <div>
+                  <h4>Trigger</h4>
+                  <p>Chain connectors so dependent data loads start after upstream imports complete.</p>
+                </div>
+                <mat-slide-toggle
+                  color="primary"
+                  [checked]="isTriggerEnabled()"
+                  (change)="onTriggerEnabledChange($event.checked)"
+                  [disabled]="availableTriggerConnectors.length === 0"
+                  aria-label="Enable trigger">
+                </mat-slide-toggle>
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Source connector</mat-label>
+                <mat-select
+                  [disabled]="!isTriggerEnabled() || availableTriggerConnectors.length === 0"
+                  [ngModel]="connector.triggerSettings?.sourceConnectorId"
+                  (ngModelChange)="onTriggerSourceChange($event)">
+                  @for (triggerConnector of availableTriggerConnectors; track triggerConnector.id) {
+                    <mat-option [value]="triggerConnector.id">{{ triggerConnector.name }}</mat-option>
+                  }
+                </mat-select>
+                <mat-icon matSuffix>account_tree</mat-icon>
+              </mat-form-field>
+
+              <div class="setting-preview" [class.setting-preview--muted]="!isTriggerEnabled()">
+                <mat-icon>{{ isTriggerEnabled() ? 'bolt' : 'bolt_disabled' }}</mat-icon>
+                <span>
+                @if (availableTriggerConnectors.length === 0) {
+                  Add another connector in this cohort to create a trigger chain.
+                } @else if (isTriggerEnabled()) {
+                  Starts when {{ getTriggerConnectorName(connector.triggerSettings?.sourceConnectorId) }} finishes successfully.
+                } @else {
+                  Trigger is off. This connector will not be started by another connector.
+                }
+              </span>
+              </div>
+            </div>
+          </div>
+        }
+      </section>
+
+      <h3>{{ 'ACTIVITY_LOG' | translate }}</h3>
+      <table mat-table [dataSource]="runDataSource" class="mat-elevation-z0">
+
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.ID' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.id }}</td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let element">
+            <div class="status-group">
+              <lib-status-badge
+                [size]="'SMALL'"
+                [text]="element.status"
+                [type]="convertStatus(element.status)"></lib-status-badge>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Weight Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.RUN_DATE' | translate }}</th>
+          <td mat-cell *matCellDef="let element">
+            @if (convertStatus(element.status) === 'RUNNING') {
+              <lib-time-badge
+                [date]="element.createdAt"
+                [calcDuration]="true"></lib-time-badge>
+            } @else {
+              @if (convertStatus(element.status) === 'FAILED') {
+                <lib-time-badge [date]="element.createdAt" [color]="'RED'"></lib-time-badge>
+              } @else {
+                <lib-time-badge [date]="element.createdAt"></lib-time-badge>
+              }
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="newEntities">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NEW_PATIENTS' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.newEntities || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="updatedEntities">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.UPDATED_PATIENTS' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.updatedEntities || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="deletedEntities">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DELETED_PATIENTS' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.deletedEntities || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="failedEntities">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.FAILED_PATIENTS' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.failedEntities || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="unchangedEntities">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.UNCHANGED_PATIENTS' | translate }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element.unchangedEntities || 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-raised-button (click)="onViewClick(element)"
+                    [matTooltip]="('TOOLTIP.VIEW_RUN_DETAILS' | translate)">{{ 'GRID.VIEW_DETAILS' | translate }}
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedRunColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedRunColumns;"></tr>
+      </table>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"/>
+
+
+    }
+  </div>
+</lib-page-wrapper>

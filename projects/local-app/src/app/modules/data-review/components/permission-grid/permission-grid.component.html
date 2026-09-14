@@ -1,0 +1,186 @@
+<lib-header
+  [title]="'MENU.PERMISSIONS' | translate"
+  description="Manage which users and groups can query, train or request statistics for this cohort."
+  [enableAddBtn]="true"
+  [addBtnLabel]="'BUTTON.ADD_PERMISSION' | translate"
+  addBtnIcon="add"
+  (addBtnClick)="addPermission()">
+</lib-header>
+
+<lib-page-wrapper>
+<div class="permission-container">
+  <div class="table-container">
+    <mat-table
+      [dataSource]="permissions"
+      class="mat-elevation-z0"
+      [class.is-x-small-screen]="isXSmallScreen"
+    >
+      <!-- Action Column -->
+      <ng-container matColumnDef="actions" sticky>
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.ACTION' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.ACTION' | translate }}:</span>
+          }
+          <button mat-icon-button color="primary" (click)="editRow(element)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteRow(element)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Cohort Name Column -->
+      <ng-container matColumnDef="cohortName">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.COHORT' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.COHORT' | translate }}:</span>
+          }
+          <span>{{ getCohortName(element.cohortId) }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Group/User Column -->
+      <ng-container matColumnDef="groupOrUser">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.USER' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element" class="group-or-user">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.USER' | translate }}:</span>
+          }
+          <span>{{ element.userId }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Is Allowed to Query Column -->
+      <ng-container matColumnDef="isAllowedToQuery">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.IS_ALLOWED_TO_QUERY' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.IS_ALLOWED_TO_QUERY' | translate }}:</span>
+          }
+          <span>{{ element.isAllowedToQuery ? ('YES' | translate) : ('NO' | translate) }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Query Retry Time Column -->
+      <ng-container matColumnDef="queryRetryTime">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY_RETRY_TIME' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.QUERY_RETRY_TIME' | translate }}:</span>
+          }
+          <span>{{ element.queryRetryTime }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Query Sample Threshold Column -->
+      <ng-container matColumnDef="querySampleThreshold">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY_SAMPLE_THRESHOLD' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.QUERY_SAMPLE_THRESHOLD' | translate }}:</span>
+          }
+          <span>
+            @if (element.querySampleThreshold) {
+              {{ element.querySampleThreshold }}
+            } @else {
+              {{ 'WARNING.NOT_GIVEN' | translate }}
+            }
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Auto Training Access Column -->
+      <ng-container matColumnDef="autoTrainingAccess">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_TRAINING_ACCESS' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.AUTO_TRAINING_ACCESS' | translate }}:</span>
+          }
+          <span>{{ element.autoTrainingAccess }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Auto Statistics Access Column -->
+      <ng-container matColumnDef="autoStatisticsAccess">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_STATISTICS_ACCESS' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.AUTO_STATISTICS_ACCESS' | translate }}:</span>
+          }
+          <span>{{ element.autoStatisticsAccess }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Auto Metrics Access Column -->
+      <ng-container matColumnDef="autoMetricsAccess">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_METRICS_ACCESS' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.AUTO_METRICS_ACCESS' | translate }}:</span>
+          }
+          <span>{{ element.autoMetricsAccess }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Valid From Column -->
+      <ng-container matColumnDef="validFrom">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.VALID_FROM' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.VALID_FROM' | translate }}:</span>
+          }
+          @if (element.validFrom) {
+            <lib-time-badge [color]="'GRAY'" [format]="'DATE'" [date]="$any(element.validFrom)" />
+          } @else {
+            <span>-</span>
+          }
+        </mat-cell>
+      </ng-container>
+
+      <!-- Valid Until Column -->
+      <ng-container matColumnDef="validUntil">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.VALID_UNTIL' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.VALID_UNTIL' | translate }}:</span>
+          }
+          @if (element.validUntil) {
+            <lib-time-badge [color]="'GRAY'" [format]="'DATE'" [date]="$any(element.validUntil)" />
+          } @else {
+            <span>-</span>
+          }
+        </mat-cell>
+      </ng-container>
+
+      <!-- Created At Column -->
+      <ng-container matColumnDef="createdAt">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.CREATED_AT' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.CREATED_AT' | translate }}:</span>
+          }
+          <lib-time-badge [color]="'GRAY'" [format]="'SHORT'" [date]="element.createdAt" />
+        </mat-cell>
+      </ng-container>
+
+      <!-- Updated At Column -->
+      <ng-container matColumnDef="updatedAt">
+        <mat-header-cell *matHeaderCellDef>{{ 'GRID.UPDATED_AT' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          @if (isXSmallScreen) {
+            <span class="column-name">{{ 'GRID.UPDATED_AT' | translate }}:</span>
+          }
+          <lib-time-badge [color]="'GRAY'" [format]="'SHORT'" [date]="element.updatedAt" />
+        </mat-cell>
+      </ng-container>
+
+      <!-- Table Headers and Rows -->
+      <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" />
+      <mat-row *matRowDef="let row; columns: displayedColumns" />
+    </mat-table>
+  </div>
+</div>
+</lib-page-wrapper>

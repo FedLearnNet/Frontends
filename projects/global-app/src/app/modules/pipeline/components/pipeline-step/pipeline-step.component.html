@@ -1,0 +1,64 @@
+<mat-toolbar>
+  <button mat-icon-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>  {{ name() }}</span>
+</mat-toolbar>
+
+<div class="step-detail-container">
+
+  <div class="step-main-content">
+    <lib-raw-log-viewer [rawLogs]="step().logs"></lib-raw-log-viewer>
+  </div>
+
+  <!-- Sidebar: Details + Errors -->
+  <aside class="step-sidebar">
+    <div class="sidebar-panel">
+      <h3 class="sidebar-panel__header">Job Details</h3>
+      <div class="sidebar-panel__body">
+        <dl>
+          <dt>Status</dt>
+          <dd>
+            <lib-status-badge [size]="'SMALL'"
+                              [width]="200"
+                              [type]="pipelineStatusToBadgeStatus(step().stepStatus)"/>
+          </dd>
+
+          <dt>Started</dt>
+          <dd>
+            <lib-time-badge color="GRAY" [date]="step().startedAt"/>
+          </dd>
+
+          <dt>Finished</dt>
+          <dd>
+            <lib-time-badge color="GRAY" [date]="step().finishedAt"/>
+          </dd>
+
+          <dt>Duration</dt>
+          <dd>
+            <lib-time-badge [date]="step().startedAt" [dateTo]="step().finishedAt"
+                            [calcDuration]="true"/>
+          </dd>
+        </dl>
+      </div>
+    </div>
+
+    @if (step().errorCode || step().errorMessage) {
+      <div class="sidebar-panel error-panel">
+        <h3 class="sidebar-panel__header">Error Details</h3>
+        <div class="sidebar-panel__body">
+          <dl>
+            @if (step().errorCode) {
+              <dt>Error Code</dt>
+              <dd>{{ step().errorCode }}</dd>
+            }
+            @if (step().errorMessage) {
+              <dt>Error Message</dt>
+              <dd class="error-message">{{ step().errorMessage }}</dd>
+            }
+          </dl>
+        </div>
+      </div>
+    }
+  </aside>
+</div>

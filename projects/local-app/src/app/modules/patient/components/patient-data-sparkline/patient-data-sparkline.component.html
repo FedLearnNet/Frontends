@@ -1,0 +1,8 @@
+<div #chartWrap class="chart-wrap">
+  @if (currentOption() && chartRendering() && showChart()) {
+    <echarts [options]="currentOption()!"
+      [autoResize]="true"
+      [initOpts]="initOptions()"
+      class="chart" />
+  }
+</div>

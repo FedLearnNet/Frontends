@@ -1,0 +1,51 @@
+@use '@angular/material' as mat;
+
+.warning-wrapper {
+  border-left: 6px solid var(--failed-text);
+  background-color:  var(--warning-bg);
+  padding: 10px;
+  width: 100%;
+  max-width: 500px;
+
+  .warning {
+    display: flex;
+    gap: 10px;
+    color: black;
+    vertical-align: center;
+    justify-content: center;
+    margin: 10px 0 10px 0;
+
+    .accordion{
+      width: 100%;
+    }
+    @include mat.expansion-overrides((
+      container-background-color: var(--warning-bg),
+    ));
+
+    .warning-text {
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      justify-content: center;
+      gap: 10px;
+
+      p {
+        margin: 0;
+      }
+    }
+  }
+
+  .warning-btn {
+    margin-left: 50%;
+    transform: translateX(-50%);
+    background: var(--warning-bg);
+    color: var(--warning-text);
+  }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

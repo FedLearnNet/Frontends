@@ -1,0 +1,14 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="getDialogTitle()">
+</lib-closeable-dialog-title>
+
+@if (loading()) {
+  <lib-skeleton-loader></lib-skeleton-loader>
+} @else {
+  @if (workflow(); as w) {
+    <lib-workflow-readonly-view [updatePosition]="false" [workflow]="w!">
+    </lib-workflow-readonly-view>
+  }
+}
+

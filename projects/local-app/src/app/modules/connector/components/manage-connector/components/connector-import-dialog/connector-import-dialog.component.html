@@ -1,0 +1,94 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.CONNECTOR_IMPORT.TITLE' | translate"
+/>
+
+<mat-dialog-content class="import-dialog-content">
+  @if (errorMessage(); as err) {
+    <lib-error-card>
+      {{ err }}
+    </lib-error-card>
+  }
+
+  <div class="import-method">
+    <span class="import-method-label">{{ 'DIALOG.CONNECTOR_IMPORT.METHOD_LABEL' | translate }}</span>
+    <div class="import-method-switch" role="group" [attr.aria-label]="'DIALOG.CONNECTOR_IMPORT.METHOD_LABEL' | translate">
+      <lib-btn
+        type="CUSTOM"
+        size="SMALL"
+        icon="data_object"
+        [label]="'DIALOG.CONNECTOR_IMPORT.METHOD_JSON' | translate"
+        [variant]="importMethod() === 'json' ? 'PRIMARY' : 'GHOST'"
+        [attr.aria-pressed]="importMethod() === 'json'"
+        (clicked)="onMethodChange('json')"
+      />
+      <lib-btn
+        type="CUSTOM"
+        size="SMALL"
+        icon="link"
+        [label]="'DIALOG.CONNECTOR_IMPORT.METHOD_URL' | translate"
+        [variant]="importMethod() === 'url' ? 'PRIMARY' : 'GHOST'"
+        [attr.aria-pressed]="importMethod() === 'url'"
+        (clicked)="onMethodChange('url')"
+      />
+    </div>
+  </div>
+
+  @if (importMethod() === 'url') {
+    <lib-info-card
+      type="INFO"
+      variant="NOTICE"
+      size="MEDIUM"
+      [border]="true"
+      [subtitle]="'DIALOG.CONNECTOR_IMPORT.URL_HINT' | translate"
+    />
+
+    <div class="form">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>{{ 'DIALOG.CONNECTOR_IMPORT.URL_LABEL' | translate }}</mat-label>
+        <input matInput type="text" [(ngModel)]="url">
+        <mat-hint>{{ 'DIALOG.CONNECTOR_IMPORT.URL_HINT_FIELD' | translate }}</mat-hint>
+      </mat-form-field>
+    </div>
+  } @else {
+    <lib-info-card
+      type="INFO"
+      variant="NOTICE"
+      size="MEDIUM"
+      [border]="true"
+      [subtitle]="'DIALOG.CONNECTOR_IMPORT.JSON_HINT' | translate"
+    />
+
+    <div class="json-import-toolbar">
+      <input
+        #jsonFileInput
+        class="json-file-input"
+        type="file"
+        accept=".json,application/json"
+        (change)="onJsonFileSelected($event)"
+      >
+      <lib-btn
+        type="IMPORT"
+        variant="SECONDARY"
+        icon="upload_file"
+        [label]="'BUTTON.UPLOAD_JSON_FILE' | translate"
+        (clicked)="jsonFileInput.click()"
+      />
+      @if (jsonFileName(); as fileName) {
+        <span class="json-file-name">{{ fileName }}</span>
+      }
+    </div>
+
+    <lib-json-editor
+      class="json-editor"
+      [jsonString]="jsonFileContent()"
+      [editable]="true"
+      [title]="'DIALOG.CONNECTOR_IMPORT.JSON_EDITOR_TITLE' | translate"
+      (valueChange)="onJsonChanged($event)"
+    />
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <lib-btn type="CREATE" variant="PRIMARY" [disabled]="!canCreate()" (clicked)="create()" />
+</mat-dialog-actions>

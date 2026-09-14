@@ -1,0 +1,67 @@
+@if (loading()) {
+  <lib-skeleton-loader />
+} @else {
+  @if (patient(); as p) {
+    @if (isEditing() && schema(); as schemaRoot) {
+      <div class="patient-edit-shell">
+        <app-patient-editor
+          [mode]="'edit'"
+          [initialPatient]="p"
+          [schema]="schemaRoot"
+          [cohortId]="p.cohortId"
+          [headerTitle]="pageTitle()"
+          [stickyHeader]="true"
+          (saved)="onEditorSaved($event)"
+          (cancelled)="onEditorCancelled()" />
+      </div>
+    } @else {
+      <div class="view-header">
+        <lib-header
+          [title]="p.externalPatientId"
+          [enableGoBack]="true"
+          [locationBack]="true"
+          [mainGap]="false">
+          <div suffix class="view-actions">
+            <lib-btn
+              type="EDIT"
+              variant="GHOST"
+              [iconOnly]="true"
+              (clicked)="startEditing()" />
+            <lib-btn
+              type="EXPORT"
+              variant="GHOST"
+              [iconOnly]="true"
+              (clicked)="exportCohort()" />
+          </div>
+        </lib-header>
+      </div>
+
+      <div class="detail">
+        <div class="patient-data">
+          @if (schema()) {
+            @for (n of sortedTopLevelNodes(); track n.id) {
+              <app-patient-data
+                [patient]="p"
+                [schemaNode]="n"
+                [schemaLevel]="2"
+                (entryCreated)="onEntryCreated($event)"
+                (entryUpdated)="onEntryUpdated($event)"
+                (entryDeleted)="onEntryDeleted($event)" />
+            }
+          }
+        </div>
+
+        <div class="logs">
+          <app-patient-log-traceability [patient]="p" />
+          <app-patient-log-query [patient]="p" />
+          <app-patient-log-training [patient]="p" />
+          <app-patient-log-statistics [patient]="p" />
+        </div>
+      </div>
+    }
+  } @else {
+    <lib-error-card>
+      No patient data
+    </lib-error-card>
+  }
+}

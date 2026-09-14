@@ -1,0 +1,23 @@
+.custom-field {
+  ::ng-deep {
+    .mdc-line-ripple {
+      display: none;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      border-radius: 0.9rem;
+      background: #f7f7f9;
+    }
+
+    mat-mdc-input-element {
+      font-size: 1rem;
+      color: #374151;
+    }
+
+    .mdc-floating-label {
+      color: #6b7280 !important;
+      font-size: 1rem;
+    }
+  }
+
+}

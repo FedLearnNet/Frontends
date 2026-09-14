@@ -1,0 +1,27 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<h3>Queries</h3>
+
+<div class="timeline" role="list" aria-live="polite">
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  } @else {
+    @for (it of items(); track it.id) {
+      @if (getQueryDetail(it); as detail) {
+        <div (click)="openDetail(it)" class="item" role="listitem" @rowIn>
+          <lib-query-overview-card [query]="detail" />
+        </div>
+      }
+    } @empty {
+      <lib-error-card>
+        No query logs found
+      </lib-error-card>
+    }
+  }
+
+  @if (hasMore()) {
+    TODO
+  }
+</div>

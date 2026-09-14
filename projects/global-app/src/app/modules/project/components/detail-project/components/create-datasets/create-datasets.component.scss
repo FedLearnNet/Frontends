@@ -1,0 +1,55 @@
+tr.example-detail-row {
+  height: 0;
+}
+
+.project-data {
+  display: grid;
+  gap: 20px;
+}
+
+.settings-toolbar {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+lib-data-export-config {
+  margin-bottom: 20px;
+  display: block;
+}
+
+.project-data {
+  ::ng-deep .mat-mdc-tab-group {
+    flex-direction: row;
+  }
+
+  ::ng-deep .mat-mdc-tab-header {
+    border-bottom: none;
+
+    .mat-mdc-tab-labels {
+      flex-direction: column !important;
+    }
+
+    .mdc-tab-indicator {
+      display: none !important;
+    }
+  }
+
+
+  ::ng-deep .mat-ink-bar {
+    height: 100%;
+    left: 98% !important;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    flex: 1 1 auto;
+  }
+}
+
+.dataset-preview-note {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.42);
+  border-radius: 18px;
+  color: #475569;
+  background: #ffffff;
+}

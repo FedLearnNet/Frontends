@@ -1,0 +1,100 @@
+<h2 mat-dialog-title>
+  {{ 'MAP_TIME_SERIES_TO_FIELD' | translate: {column: data.column} }}
+</h2>
+
+<mat-dialog-content class="etl-dialog">
+
+  <!-- Section: Visit -->
+  <section class="section">
+    <div class="section-header">
+      <mat-icon aria-hidden="true">badge</mat-icon>
+      <h3 class="section-title">Visit</h3>
+    </div>
+
+    <div class="section-body">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Visit Id</mat-label>
+        <input type="text" aria-describedby="visitIdHint" matInput [formControl]="visitIdControl"
+          [matAutocomplete]="autoVisit" />
+        <mat-autocomplete #autoVisit="matAutocomplete" [autoActiveFirstOption]="false">
+          @for (option of filteredVisitIdOptions | async; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint id="visitIdHint">
+          Groups multiple measurements belonging to the same visit or session.
+        </mat-hint>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <mat-divider />
+
+  <!-- Section: Time -->
+  <section class="section">
+    <div class="section-header">
+      <mat-icon aria-hidden="true">schedule</mat-icon>
+      <h3 class="section-title">Time</h3>
+    </div>
+
+    <div class="section-body grid-2">
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Timestamp</mat-label>
+        <input type="text" aria-describedby="timestampHint" matInput [formControl]="timestampControl"
+          [matAutocomplete]="autoTimestamp" />
+        <mat-autocomplete #autoTimestamp="matAutocomplete" [autoActiveFirstOption]="false">
+          @for (option of filteredTimestampOptions | async; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint id="timestampHint">
+          Used to order records chronologically and align series.
+        </mat-hint>
+      </mat-form-field>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>Timestamp Format</mat-label>
+        <input matInput type="text" [formControl]="timestampFormatControl" [matAutocomplete]="autoTimestampFormat"
+          aria-describedby="formatHint" placeholder="yyyy-MM-dd HH:mm:ss" />
+        <mat-autocomplete #autoTimestampFormat="matAutocomplete" [autoActiveFirstOption]="false">
+          @for (option of filteredTimestampFormatOptions | async; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint id="formatHint">
+          Ensures correct parsing (e.g., yyyy-MM-dd HH:mm:ss, ISO 8601).
+        </mat-hint>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <mat-divider />
+
+  <!-- Section: Apply Scope -->
+  <section class="section">
+    <div class="section-header">
+      <mat-icon aria-hidden="true">tune</mat-icon>
+      <h3 class="section-title">Apply Scope</h3>
+    </div>
+
+    <div class="section-body scope-row">
+      <mat-checkbox [(ngModel)]="mapToAll" aria-label="Apply mapping scope" class="scope-toggle" name="applyScope">
+        <div class="scope-explainer">
+          <span>Apply this mapping only to the current entry or to all entries.</span>
+        </div>
+      </mat-checkbox>
+
+    </div>
+  </section>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="actions">
+  <button mat-button mat-dialog-close>{{ 'BUTTON.CANCEL' | translate }}</button>
+  <button mat-stroked-button color="warn" (click)="clear()">{{ 'BUTTON.CLEAR' | translate }}</button>
+  <span class="spacer"></span>
+  <button mat-flat-button color="primary" [disabled]="!isApplyEnabled()" (click)="apply()">
+    <mat-icon>done</mat-icon>
+    {{ 'BUTTON.APPLY' | translate }}
+  </button>
+</mat-dialog-actions>

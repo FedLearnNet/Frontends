@@ -1,0 +1,137 @@
+<lib-header
+  [title]="appDetail()?.name"
+  [description]="appDetail() ? 'v' + appDetail()!.latestVersion : undefined"
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="loading()">
+  @if (appDetail(); as app) {
+    <div suffix class="header-actions">
+      <a mat-stroked-button [routerLink]="['store', app.id]">
+        <mat-icon fontSet="material-symbols-outlined">view_apps</mat-icon>
+        Store page
+      </a>
+      <button mat-stroked-button (click)="onToggleEdit()">
+        <mat-icon>{{ editMode() ? 'close' : 'edit' }}</mat-icon>
+        {{ editMode() ? 'Cancel' : 'Write audit' }}
+      </button>
+    </div>
+  }
+</lib-header>
+
+@if (appDetail(); as app) {
+  @if (error(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  }
+
+  <div class="grid">
+    <mat-card class="card">
+      <div class="card__head">
+        <div>
+          <div class="label">Status</div>
+          <div class="chips">
+            @if (latestDecision() === 'ACCEPT') {
+              <lib-badge text="ACCEPTED"></lib-badge>
+            } @else if (latestDecision() === 'REJECT') {
+              <lib-badge color="RED" text="ACCEPTED"></lib-badge>
+            } @else {
+              <lib-badge color="GRAY" text="ACCEPTED"></lib-badge>
+            }
+
+            @if (internetRisk()) {
+              <lib-badge color="ORANGE" text="INTERNET" matTooltip="Tool needs internet access"></lib-badge>
+            }
+            @if (hostNetworkRisk()) {
+              <lib-badge color="ORANGE" text="Host-Network" matTooltip="Tool can access host-network"></lib-badge>
+            }
+          </div>
+        </div>
+
+        <div class="meta_right">
+          <div class="label">Latest version</div>
+          <div class="value mono">v{{ app.latestVersion }}</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="card__body">
+        <lib-kv label="Source" [value]="app.sourceUrl"></lib-kv>
+        <lib-kv label="Description" [value]="app.shortDescription"></lib-kv>
+      </div>
+    </mat-card>
+
+    <mat-card class="card">
+      <div class="card__head">
+        <div>
+          <div class="label">Publish summary</div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="card__body">
+        @if (publishInfo(); as publishInfo) {
+          <app-pipeline-publish-info-detail [publishInfo]="publishInfo"></app-pipeline-publish-info-detail>
+        } @else {
+          <div class="muted small">No scans available.</div>
+        }
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="panel__title">Decision</div>
+      <div class="panel__subtitle muted">Audit the latest version (ID: {{ activeAppVersionId() }})</div>
+
+      @if (!editMode()) {
+        <div class="decision__view">
+          <div class="muted small">
+            @if (latestReason(); as r) {
+              {{ r }}
+            } @else {
+              No decision recorded yet.
+            }
+          </div>
+
+          <button mat-stroked-button (click)="onToggleEdit()">
+            <mat-icon>edit</mat-icon>
+            Write audit
+          </button>
+        </div>
+      } @else {
+        <form class="form" [formGroup]="form">
+          <mat-button-toggle-group formControlName="decision" class="toggle">
+            <mat-button-toggle value="ACCEPT">ACCEPT</mat-button-toggle>
+            <mat-button-toggle value="REJECT">REJECT</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Reason</mat-label>
+            <textarea
+              matInput
+              rows="5"
+              formControlName="reason"
+              placeholder="Required for REJECT (e.g., critical CVEs, unsigned image, missing provenance)"
+            ></textarea>
+
+            @if (form.controls.reason.invalid && form.controls.reason.touched) {
+              <mat-error>Reason required for REJECT (min 8 characters).</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form--actions">
+            <button mat-stroked-button type="button" (click)="onToggleEdit()">
+              Cancel
+            </button>
+            <span class="spacer"></span>
+            <button mat-flat-button color="primary" type="button" (click)="onSubmitDecision()"
+                    [disabled]="form.invalid">
+              Submit
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+}

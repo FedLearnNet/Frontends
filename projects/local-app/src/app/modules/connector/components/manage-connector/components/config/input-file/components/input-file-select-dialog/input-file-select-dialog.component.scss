@@ -1,0 +1,51 @@
+.dialog-copy {
+  margin: 0 0 16px;
+  color: #51606f;
+}
+
+.table-shell {
+  border: 1px solid #d9e2ec;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.95) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.file-table {
+  width: 100%;
+}
+
+.file-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-name {
+  font-weight: 600;
+  color: #132238;
+}
+
+.actions-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.selected-row {
+  background: #f0f7ff;
+}
+
+th.mat-mdc-header-cell {
+  background: #f8fafc;
+  color: #4b5c6b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+td.mat-mdc-cell,
+th.mat-mdc-header-cell {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}

@@ -1,0 +1,15 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 24rem;
+}
+
+.state {
+  display: flex;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,8 @@
+<div [class]="className()" [style.width]="widthPx()">
+  @if (iconName()) {
+    <mat-icon>{{ iconName() }}</mat-icon>
+  }
+  @if(!noText()){
+    <span>{{ textFormatted() || formattedType() }}</span>
+  }
+</div>

@@ -1,0 +1,19 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            title="Slect config"/>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <lib-skeleton-loader></lib-skeleton-loader>
+  } @else {
+    <lib-hint-card>Click a config to select</lib-hint-card>
+    <div class="list">
+      @for (config of configs(); track $index) {
+        <app-detail-config-element
+          (click)="select(config)"
+          [editMode]="false"
+          [outputConfig]="config"
+        ></app-detail-config-element>
+      }
+    </div>
+  }
+</mat-dialog-content>

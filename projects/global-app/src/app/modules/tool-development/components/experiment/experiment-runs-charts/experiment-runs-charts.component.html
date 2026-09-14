@@ -1,0 +1,42 @@
+<mat-accordion multi>
+  <mat-expansion-panel expanded>
+    <mat-expansion-panel-header>
+      <mat-panel-title> Key Metrics</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    @for (metricName of getMetricKeys(); track metricName) {
+      <app-experiments-metric-parameter-parallel [experimentRuns]="getRunsByMetric(metricName)"
+        [metricName]="metricName"
+        [hyperParams]="hyperParamKeys" />
+    }
+
+    <app-experiments-metric-parameter-heatmap [experimentRuns]="experimentRuns()"
+     />
+  </mat-expansion-panel>
+
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title> Diagrams</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <div cdkDropList cdkDropListOrientation="mixed" class="example-list" (cdkDropListDropped)="drop($event)">
+      @for (diagram of diagrams; track diagram; let i=$index) {
+        <app-experiments-chart-generic class="box"
+          [experimentRuns]="experimentRuns()"
+          [config]="diagram"
+          (changed)="diagramChange($event, i)"
+         />
+      }
+      <div class="box box--add">
+        <button mat-fab (click)="newChart()">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <button mat-button (click)="save()" class="save-btn">Save</button>
+
+  </mat-expansion-panel>
+
+
+</mat-accordion>

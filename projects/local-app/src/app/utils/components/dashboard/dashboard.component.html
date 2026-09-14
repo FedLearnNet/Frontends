@@ -1,0 +1,31 @@
+<lib-hero
+  [title]="project + ' - your clinic node in the federated network'"
+  [subtitle]="'Curate cohorts, ingest local data into a shared schema, and participate in cross-site training — ' +
+   'without raw patient data ever leaving the clinic, with policy-based access and full traceability.'"
+  [eyebrow]="project + ' — Local Node'"
+  [primaryCtaLabel]="'Browse cohorts'"
+  [secondaryCtaLabel]="'Explore the data schema'"
+  [primaryCtaIcon]="'layers'"
+  [secondaryCtaIcon]="'account_tree'"
+  [badges]="heroBadges()"
+  [kpis]="heroKpis()"
+  (primaryCta)="onBrowseCohorts()"
+  (secondaryCta)="onExploreSchema()"
+/>
+
+<lib-capabilities
+  [title]="'Everything your site needs to participate securely'"
+  [subtitle]="project + ' combines cohort curation, connector-based ingestion, and governed federated execution at the clinic node.'"
+  [items]="capabilities()"
+/>
+
+<lib-problem-solution
+  [title]="'From siloed local data to governed, federated participation'"
+  [subtitle]="'A typical path from “manual exports + ad-hoc scripts” to standardized cohorts and policy-controlled federated runs.'"
+  [problemTitle]="'Problem'"
+  [solutionTitle]="project + ' solution'"
+  [problems]="problems()"
+  [solutions]="solutions()"
+  [ctaLabel]="'Review incoming requests'"
+  (cta)="onReviewRequests()"
+/>

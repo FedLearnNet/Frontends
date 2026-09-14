@@ -1,0 +1,83 @@
+<div class="tool-io">
+  <header class="tool-io__head">
+    <div class="tool-io__app-name">{{ toolLabel() }}</div>
+    <span class="spacer"></span>
+    <lib-badge color="GRAY"
+               iconName="input"
+               [border]="true"
+               [text]="''+ inputs().length">• Inputs
+    </lib-badge>
+    <lib-badge color="GRAY"
+               iconName="tune"
+               [border]="true"
+               [text]="''+ hyperparams().length">• Hyperparams
+    </lib-badge>
+    <lib-badge color="GRAY"
+               iconName="outbox"
+               [border]="true"
+               [text]="''+ outputs().length">• Outputs
+    </lib-badge>
+  </header>
+
+  <section class="tool-io__grid">
+    <aside class="tool-io__col">
+      <div class="tool-io__col-title">
+        <mat-icon>input</mat-icon>
+        Inputs
+      </div>
+
+      @if (inputs().length) {
+        <div class="tool-io__list">
+          @for (n of inputs(); track $index) {
+            <lib-tool-config-card [inputConfig]="n"></lib-tool-config-card>
+          }
+        </div>
+      } @else {
+        <div class="tool-io__empty">
+          <mat-icon>inbox</mat-icon>
+          <span>No inputs</span>
+        </div>
+      }
+    </aside>
+
+    <div class="tool-io__col">
+      <div class="tool-io__col-title">
+        <mat-icon>tune</mat-icon>
+        Hyperparameters
+      </div>
+
+      @if (outputs().length) {
+        <div class="tool-io__list">
+          @for (n of outputs(); track $index) {
+            <lib-tool-config-card [outputConfig]="n"></lib-tool-config-card>
+          }
+        </div>
+      } @else {
+        <div class="tool-io__empty">
+          <mat-icon>outbox</mat-icon>
+          <span>No hyperparams</span>
+        </div>
+      }
+    </div>
+
+    <div class="tool-io__col">
+      <div class="tool-io__col-title">
+        <mat-icon>output</mat-icon>
+        Outputs
+      </div>
+
+      @if (outputs().length) {
+        <div class="tool-io__list">
+          @for (n of outputs(); track $index) {
+            <lib-tool-config-card [outputConfig]="n"></lib-tool-config-card>
+          }
+        </div>
+      } @else {
+        <div class="tool-io__empty">
+          <mat-icon>outbox</mat-icon>
+          <span>No outputs</span>
+        </div>
+      }
+    </div>
+  </section>
+</div>

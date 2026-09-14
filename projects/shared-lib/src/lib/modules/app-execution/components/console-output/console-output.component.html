@@ -1,0 +1,18 @@
+<div class="console" role="log" aria-live="polite">
+  <div class="console__body console-output" #consoleOutput>
+    @if (messages().length === 0) {
+      <div class="console__empty">
+        <span class="console__emptyTitle">No output yet</span>
+        <span class="console__emptyHint">Logs will appear here during execution.</span>
+      </div>
+    } @else {
+      @for (output of messages(); track $index) {
+        <div class="console__row" [attr.data-ln]="$index + 1">
+          <span class="console__line is-default">
+            {{ output }}
+          </span>
+        </div>
+      }
+    }
+  </div>
+</div>

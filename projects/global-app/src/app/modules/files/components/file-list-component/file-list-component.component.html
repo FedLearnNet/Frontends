@@ -1,0 +1,29 @@
+<lib-header
+  class="header"
+  title="My Files"
+  description="Review and manage your files"
+  [enableAddBtn]="true"
+  [enableSkeleton]="loading()"
+  addBtnLabel="Upload new file"
+  (addBtnClick)="toggleUpload()">
+</lib-header>
+<div class="page-wrapper">
+  @if (!loading()) {
+    @if (error(); as err) {
+      <lib-error-card [errorObject]="err"></lib-error-card>
+    } @else if (files(); as files) {
+      @if (showUpload()) {
+        <lib-upload-file-area class="upload-area" [progress]="currentUpload()"
+                              (toUploadFile)="uploadFile($event)"/>
+      }
+      @for (file of files; track file.id) {
+        <a [routerLink]="['/files', file.id]">
+          <lib-file-card
+            [showActions]="false"
+            [forwardClick]="true"
+            [file]="file"></lib-file-card>
+        </a>
+      }
+    }
+  }
+</div>

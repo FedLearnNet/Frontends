@@ -1,0 +1,58 @@
+<lib-header
+  [title]="!filtered() ?('MENU.YOUR_MODELS' | translate): undefined "
+  description="Create, review and manage your tools"
+  [enableSearch]="true"
+  searchLabel="Search models"
+  searchPlaceholder="Names"
+  (searchInput)="applyFilter($event)">
+</lib-header>
+
+<div class="models">
+  <div class="mat-elevation-z0">
+    <table mat-table [dataSource]="dataSource">
+
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.ID' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <a [routerLink]="['/model',row.id]">{{ row.id }}</a></td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
+        <td mat-cell *matCellDef="let row"> {{ row.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="publishStatus">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.PUBLISH_STATUS' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <lib-publish-badge [type]="row.publishStatus"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="shortDescription">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DESCRIPTION' | translate }}</th>
+        <td mat-cell *matCellDef="let row"> {{ row.shortDescription }}</td>
+      </ng-container>
+
+      @if (!filtered()) {
+        <ng-container matColumnDef="appId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.APP_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <a [routerLink]="['/app', row.federatedApp.id]">{{ row.federatedApp.id }}</a></td>
+        </ng-container>
+        <ng-container matColumnDef="appName">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.APP_NAME' | translate }}</th>
+          <td mat-cell *matCellDef="let row"> {{ row.federatedApp.name }}</td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">{{ 'NO_DATA_MATCHING_THE_FILTER' | translate:{filter: latestSearchValue()} }}</td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"/>
+  </div>
+</div>

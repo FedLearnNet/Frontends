@@ -1,0 +1,11 @@
+@use '@angular/material/index' as mat;
+
+$mb-frontend-primary: mat.m2-define-palette(mat.$m2-indigo-palette, 800);
+$mb-frontend-accent: mat.m2-define-palette(mat.$m2-pink-palette, 800);
+$mb-frontend-warn: mat.m2-define-palette(mat.$m2-red-palette);
+
+$primary-color: #000068;
+$secondary-color: #4690BF;
+$warn-color: #EAAFAD;
+$toolbar-color: #D7E3FF;
+

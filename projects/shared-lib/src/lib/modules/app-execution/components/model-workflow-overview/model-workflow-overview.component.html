@@ -1,0 +1,58 @@
+<lib-header
+  title="My Data Analysis"
+  description="Create, review and manage your analysis"
+  [enableAddBtn]="!isEmpty()"
+  [enableSkeleton]="loading()"
+  addBtnLabel="Add Analysis"
+  (addBtnClick)="createModelWorkflow()">
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="loading()"
+  [isEmpty]="isEmpty()"
+  [error]="error()"
+>
+  <lib-empty-state
+    empty
+    [title]="'You dont have any Analysis yet'"
+    [subtitle]="'Start your first analysis.'"
+    [primaryButtonEnabled]="true"
+    [primaryButtonLabel]="'Add Analysis'"
+    (cta)="createModelWorkflow()"
+  ></lib-empty-state>
+  @if (workflows(); as summaries) {
+    <table mat-table [dataSource]="summaries">
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef> Name</th>
+        <td mat-cell *matCellDef="let summary">
+          <a [routerLink]="[summary.id]">
+            {{ summary.name }}
+          </a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions" stickyEnd>
+        <th mat-header-cell *matHeaderCellDef aria-label="row actions" class="actions">&nbsp;</th>
+        <td mat-cell *matCellDef="let project" class="actions">
+          <button mat-icon-button [matMenuTriggerFor]="projectTableMenu"
+                  [matMenuTriggerData]="{project: project}"
+                  aria-label="Context Menu for each project">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    <mat-menu #projectTableMenu="matMenu">
+      <ng-template matMenuContent let-project="project">
+        <button mat-menu-item (click)="deleteModelWorkflow(project)">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </ng-template>
+    </mat-menu>
+  }
+</lib-page-wrapper>

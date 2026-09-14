@@ -1,0 +1,311 @@
+<section class="import-activity" [class.is-finished]="finished()">
+
+  <header class="import-activity__header">
+    <div class="import-activity__file">
+      <mat-icon aria-hidden="true">description</mat-icon>
+      <div>
+        <strong>{{ activity().fileName }}</strong>
+        <span class="import-activity__size">{{ sizeLabel() | number:'1.0-1' }} MB</span>
+      </div>
+    </div>
+
+    @if (succeeded()) {
+      <lib-badge [text]="'IMPORT.STATE.SUCCEEDED' | translate" color="GREEN" iconName="check_circle" [border]="true"/>
+    } @else if (refused()) {
+      <lib-badge [text]="'IMPORT.STATE.REFUSED' | translate" color="ORANGE" iconName="block" [border]="true"/>
+    } @else if (failed()) {
+      <lib-badge [text]="'IMPORT.STATE.FAILED' | translate" color="RED" iconName="error" [border]="true"/>
+    } @else {
+      <lib-badge
+        [text]="'IMPORT.STATE.RUNNING' | translate"
+        color="BLUE"
+        [border]="true"
+        [pulseCircle]="true"
+        animate="PULSE"/>
+    }
+  </header>
+
+  @if (rail().length) {
+    <ol class="rail" [attr.aria-label]="'IMPORT.STATE.RUNNING' | translate">
+      @for (dot of rail(); track dot.phase) {
+        <li class="rail__dot" [class]="'is-' + dot.state">
+          <span class="rail__mark"></span>
+          <span class="rail__label">{{ 'IMPORT.STEP.' + dot.phase + '_TITLE' | translate }}</span>
+        </li>
+      }
+    </ol>
+  }
+
+
+  <div class="stage">
+    @for (step of [step()]; track step?.phase) {
+      @if (step) {
+        <div class="step" @step>
+          <div class="step__icon" [class.is-transfer]="step.percent !== undefined">
+            <mat-icon aria-hidden="true">{{ step.icon }}</mat-icon>
+          </div>
+          <div class="step__body">
+            <div class="step__title">{{ step.title | translate }}</div>
+            <div class="step__detail">{{ step.detail | translate: step.detailParams }}</div>
+            @if (step.percent !== undefined) {
+              <mat-progress-bar mode="determinate" [value]="step.percent"/>
+            } @else {
+              <mat-progress-bar mode="indeterminate"/>
+            }
+          </div>
+          @if (step.percent !== undefined) {
+            <div class="step__meta">{{ step.percent }}%</div>
+          }
+        </div>
+      }
+    }
+
+    @if (succeeded()) {
+      <lib-info-card
+        @step
+        type="SUCCESS"
+        variant="BANNER"
+        size="SMALL"
+        [title]="'IMPORT.OUTCOME.SUCCEEDED_TITLE' | translate"
+        [subtitle]="'IMPORT.OUTCOME.SUCCEEDED_DETAIL' | translate: {
+          tables: tables().length,
+          rows: totalRows()
+        }"/>
+    }
+
+    @if (refused()) {
+      <div class="refusal" @step>
+        <div class="refusal__head">
+          <mat-icon aria-hidden="true">block</mat-icon>
+          <div>
+            <div class="refusal__title">{{ 'IMPORT.OUTCOME.REFUSED_TITLE' | translate }}</div>
+            <p class="refusal__lead">
+              {{ activity().refusal?.message ?? ('IMPORT.OUTCOME.REFUSED_DETAIL' | translate) }}
+            </p>
+          </div>
+        </div>
+
+        <p class="refusal__legend">
+          <span><mat-icon aria-hidden="true">remove_circle_outline</mat-icon>
+            {{ 'IMPORT.OUTCOME.MISSING_HINT' | translate }}</span>
+          <span><mat-icon aria-hidden="true">add_circle_outline</mat-icon>
+            {{ 'IMPORT.OUTCOME.ADDED_HINT' | translate }}</span>
+        </p>
+
+        @if (refusedTables().length) {
+          <div class="refusal__tables">
+            @for (table of refusedTables(); track table.name) {
+              <section class="refusal__table" [class]="'is-' + table.state.toLowerCase()">
+                <header class="refusal__table-head">
+                  <span class="refusal__table-name">{{ table.name }}</span>
+                  <span class="refusal__table-state">
+                    {{ 'IMPORT.OUTCOME.TABLE_' + table.state | translate }}
+                  </span>
+                </header>
+
+                @if (table.missingColumns?.length) {
+                  <ul class="pills pills--missing">
+                    @for (column of table.missingColumns; track column) {
+                      <li>{{ column }}</li>
+                    }
+                  </ul>
+                }
+                @if (table.notFoundColumns?.length) {
+                  <ul class="pills pills--added">
+                    @for (column of table.notFoundColumns; track column) {
+                      <li>{{ column }}</li>
+                    }
+                  </ul>
+                }
+              </section>
+            }
+          </div>
+        } @else {
+          <div class="refusal__lists">
+            @if (missingColumns().length) {
+              <section class="refusal__list">
+                <h4>
+                  <mat-icon aria-hidden="true">remove_circle_outline</mat-icon>
+                  {{ 'IMPORT.OUTCOME.MISSING_TITLE' | translate: {count: missingColumns().length} }}
+                </h4>
+                <ul class="pills pills--missing">
+                  @for (column of missingColumns(); track column) {
+                    <li>{{ column }}</li>
+                  }
+                </ul>
+              </section>
+            }
+
+            @if (addedColumns().length) {
+              <section class="refusal__list">
+                <h4>
+                  <mat-icon aria-hidden="true">add_circle_outline</mat-icon>
+                  {{ 'IMPORT.OUTCOME.ADDED_TITLE' | translate: {count: addedColumns().length} }}
+                </h4>
+                <ul class="pills pills--added">
+                  @for (column of addedColumns(); track column) {
+                    <li>{{ column }}</li>
+                  }
+                </ul>
+              </section>
+            }
+          </div>
+        }
+
+        <p class="refusal__next">{{ 'IMPORT.OUTCOME.REFUSED_NEXT' | translate }}</p>
+      </div>
+    }
+
+    @if (failed()) {
+      <lib-info-card
+        @step
+        type="ERROR"
+        variant="BANNER"
+        size="SMALL"
+        [title]="'IMPORT.OUTCOME.FAILED_TITLE' | translate"
+        [subtitle]="activity().error"/>
+    }
+  </div>
+
+  @if (tables().length) {
+    <div class="tables">
+      <div class="tables__heading">
+        <span>{{ 'IMPORT.TABLES' | translate }}</span>
+        <span class="tables__count">
+          {{ 'IMPORT.TABLES_DONE' | translate: {done: tablesSettled(), total: tables().length} }}
+        </span>
+      </div>
+
+      @for (table of tables(); track table.name) {
+        <div class="table" [class]="'is-' + table.state.toLowerCase()">
+          <button
+            type="button"
+            class="table__row"
+            [attr.aria-expanded]="openTable() === table.name"
+            (click)="toggleTable(table)">
+
+            <span class="table__state" aria-hidden="true">
+              @switch (table.state) {
+                @case ('READ') {
+                  <mat-icon>check_circle</mat-icon>
+                }
+                @case ('READING') {
+                  <mat-icon class="is-spinning">progress_activity</mat-icon>
+                }
+                @case ('SKIPPED') {
+                  <mat-icon>remove_circle_outline</mat-icon>
+                }
+                @case ('FAILED') {
+                  <mat-icon>error_outline</mat-icon>
+                }
+                @default {
+                  <span class="table__waiting"></span>
+                }
+              }
+            </span>
+
+            <span class="table__name">{{ table.name }}</span>
+
+            <span class="table__figures">
+              @switch (table.state) {
+                @case ('READ') {
+                  {{ 'IMPORT.TABLE_FIGURES' | translate: {
+                    rows: table.rows,
+                    columns: table.columns
+                  } }}
+                }
+                @case ('READING') {
+                  @if (table.rows) {
+                    <span class="table__live">
+                      {{ 'IMPORT.TABLE_MEASURING' | translate: {
+                        rows: (table.rows | number),
+                        columns: table.columns ?? 0
+                      } }}
+                      @if (table.rowsPerSecond) {
+                        <span class="table__rate">
+                          {{ 'IMPORT.TABLE_RATE' | translate: {rate: (table.rowsPerSecond | number)} }}
+                        </span>
+                      }
+                    </span>
+                  } @else {
+                    <span class="table__shimmer"></span>
+                  }
+                }
+                @case ('SKIPPED') {
+                  <span class="table__note">{{ 'IMPORT.TABLE_SKIPPED' | translate }}</span>
+                }
+                @case ('FAILED') {
+                  <span class="table__note">{{ 'IMPORT.TABLE_FAILED' | translate }}</span>
+                }
+                @default {
+                  <span class="table__note">{{ 'IMPORT.TABLE_WAITING' | translate }}</span>
+                }
+              }
+            </span>
+
+            <mat-icon class="table__chevron" aria-hidden="true">
+              {{ openTable() === table.name ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+
+          @if (openTable() === table.name) {
+            <dl class="table__detail" @detail>
+              <div>
+                <dt>{{ 'IMPORT.TABLE_POSITION' | translate }}</dt>
+                <dd>{{ table.position }} / {{ table.total }}</dd>
+              </div>
+              @if (table.rows !== undefined) {
+                <div>
+                  <dt>{{ 'IMPORT.TABLE_ROWS' | translate }}</dt>
+                  <dd>{{ table.rows | number }}</dd>
+                </div>
+              }
+              @if (table.columns !== undefined) {
+                <div>
+                  <dt>{{ 'IMPORT.TABLE_COLUMNS' | translate }}</dt>
+                  <dd>{{ table.columns | number }}</dd>
+                </div>
+              }
+              @if (table.missingValues !== undefined) {
+                <div>
+                  <dt>{{ 'IMPORT.TABLE_EMPTY_CELLS' | translate }}</dt>
+                  <dd>{{ table.missingValues | number }}</dd>
+                </div>
+              }
+              @if (table.durationMs !== undefined) {
+                <div>
+                  <dt>{{ 'IMPORT.TABLE_DURATION' | translate }}</dt>
+                  <dd>{{ duration(table) | number:'1.0-1' }} s</dd>
+                </div>
+              }
+              @if (table.note) {
+                <div class="table__detail-note">
+                  <dt>{{ 'IMPORT.TABLE_NOTE' | translate }}</dt>
+                  <dd>{{ table.note }}</dd>
+                </div>
+              }
+            </dl>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  @if (cancellable() && !finished()) {
+    <div class="import-activity__actions">
+      <lib-btn type="CANCEL" size="SMALL" variant="GHOST" (clicked)="cancelled.emit()"/>
+    </div>
+  }
+
+  @if (failed()) {
+    <div class="import-activity__actions">
+      <lib-btn
+        type="CUSTOM"
+        size="SMALL"
+        variant="SECONDARY"
+        icon="refresh"
+        [label]="'BUTTON.RETRY' | translate"
+        (clicked)="retried.emit()"/>
+    </div>
+  }
+</section>

@@ -1,0 +1,67 @@
+<mat-card class="publish-card">
+  <h2 class="publish-title">
+    @if (isPublished()) {
+      Update Workflow
+    } @else {
+      Publish Workflow
+    }
+  </h2>
+
+  @if (workflow(); as wf) {
+    <lib-workflow-overview-card
+      [clickable]="false"
+      [workflow]="wf!">
+    </lib-workflow-overview-card>
+  } @else {
+    @if (loading()) {
+      <lib-skeleton-loader></lib-skeleton-loader>
+    }
+  }
+
+  <form class="publish-form" [formGroup]="form" (ngSubmit)="submit()">
+
+    <mat-form-field appearance="outline" class="publish-field">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name"/>
+      @if (form.controls.name.hasError('required') && form.controls.name.touched) {
+        <mat-error>Name is required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="publish-field">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="4"></textarea>
+      @if (form.controls.description.hasError('required') && form.controls.description.touched) {
+        <mat-error>Description is required</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="publish-actions">
+      @if (isPublished()) {
+        <button
+          mat-stroked-button
+          color="warn"
+          type="button"
+          (click)="unpublish()">
+          Unpublish
+        </button>
+      }
+      <span class="spacer"></span>
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="loading()">
+
+        @if (isPublished()) {
+          Update
+        } @else {
+          Publish
+        }
+      </button>
+
+
+    </div>
+
+  </form>
+</mat-card>

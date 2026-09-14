@@ -1,0 +1,48 @@
+<div class="new-file-upload-container">
+  <mat-checkbox [(ngModel)]="newFile" class="run-mode-radio">
+    <div class="run-mode-radio-label">
+      <strong>{{ 'IMPORT_A_NEW_FILE' | translate }}</strong>
+      <span>{{ 'IF_YOU_WANT_TO_IMPORT_A_NEW_FILE' | translate }}</span>
+    </div>
+  </mat-checkbox>
+  @if (newFile()) {
+    @if (isToolBased()) {
+      <app-input-app-based [config]="config()"></app-input-app-based>
+    } @else {
+      <input class="file-upload-input" type="file" (change)="onFileSelected($event)" #fileInput>
+      <button mat-raised-button color="primary" (click)="fileInput.click()"
+              [disabled]="isUploading()"
+              [matTooltip]="('FILE_CONTAINING_PATIENT_ID' | translate)"
+      >
+        <mat-icon class="input-row-label-icon">cloud_upload</mat-icon>
+        {{ 'NEW_FILE' | translate }}
+      </button>
+
+      @if (hasSelectableFiles()) {
+        <button mat-stroked-button type="button" (click)="openFileSelectionDialog()"
+                [disabled]="isUploading()"
+                [matTooltip]="('TOOLTIP.SELECT_EXISTING_FILE' | translate)">
+          <mat-icon>info</mat-icon>
+          {{ 'TOOLTIP.SELECT_EXISTING_FILE' | translate }}
+        </button>
+      }
+
+      @if (hasSupportFile()) {
+        <button mat-raised-button color="primary" (click)="openUploadDialog()"
+                [disabled]="isUploading()"
+                [matTooltip]="('FILE_CONTAINING_DIFFERENT_DATA' | translate)"
+        >
+          <mat-icon class="input-row-label-icon">publish</mat-icon>
+          {{ 'MULTI_SUPPORTING_IMPORT' | translate }}
+        </button>
+      }
+    }
+  }
+</div>
+<app-file-import
+  [cohortId]="config().cohortId!"
+  [connectorId]="config().id"
+  [settings]="importSettings()"
+  [showPicker]="false"
+  (completed)="onImportCompleted($event)"
+  (failed)="onImportFailed($event)"/>

@@ -1,0 +1,12 @@
+@if (files(); as files) {
+  @for (file of files; track file.id) {
+    <lib-file-detail-card [file]="file"/>
+  }
+}
+@if (params(); as params) {
+  <lib-app-run-output [appId]="appId()"
+                      [runId]="runId()"
+                      [toolConfig]="configs()"
+                      [outputData]="params!"
+                      [runType]="runType"/>
+}

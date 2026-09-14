@@ -1,0 +1,32 @@
+
+.status-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &.has-cert{
+    padding: 12px;
+    border-radius: 8px;
+  }
+}
+
+.certification-level {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  color: #f59e0b;
+}
+
+.star-icon {
+  width: 16px;
+  height: 16px;
+}

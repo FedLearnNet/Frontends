@@ -1,0 +1,15 @@
+@if (!isLoading()) {
+  <div [class.page-wrapper]="margin()">
+    @if (error(); as err) {
+      <lib-error-card [errorObject]="err"></lib-error-card>
+    }
+    @if (isLoading()) {
+      <lib-skeleton-loader></lib-skeleton-loader>
+    }
+    @if (isEmpty()) {
+      <ng-content select="[empty]"></ng-content>
+    } @else {
+      <ng-content></ng-content>
+    }
+  </div>
+}

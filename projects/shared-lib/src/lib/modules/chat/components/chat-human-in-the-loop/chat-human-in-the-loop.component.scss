@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+.hil-card {
+  margin: 10px 0;
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  border-radius: 16px;
+  background: #fff;
+  padding: 4px 16px 16px 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+
+  .hil-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+    .hil-title {
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+    }
+  }
+
+  .hil-section {
+
+    .hil-answer {
+      border: 1px solid rgba(0, 0, 0, 0.10);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.015);
+
+      .hil-answer-text {
+        white-space: pre-wrap;
+        line-height: 1.45;
+        font-size: 13px;
+      }
+    }
+
+    .hil-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+  }
+}
+
+.markdown {
+
+  ::ng-deep {
+    a {
+      color: black;
+      cursor: unset;
+      text-decoration: none;
+    }
+  }
+}

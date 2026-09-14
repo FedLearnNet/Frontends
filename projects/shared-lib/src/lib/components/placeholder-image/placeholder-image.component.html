@@ -1,0 +1,19 @@
+@if (!src()) {
+  <div
+    class="placeholder-circle"
+    [ngStyle]="{ 'background-color': bgColor() }"
+  >
+  <span
+    class="placeholder-text"
+    [ngStyle]="{ 'font-size': fontSize() }"
+  >
+    {{ name() }}
+  </span>
+  </div>
+} @else {
+  <img
+    [src]="src()"
+    [alt]="name() + ' avatar'"
+    class="avatar-img"
+  />
+}

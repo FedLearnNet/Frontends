@@ -1,0 +1,46 @@
+<p>{{ 'PERFORM_QUICK_TEST_SAVE_RUNTIME' | translate }}</p>
+<div class="test-table">
+  <div class="test-table--header">
+    <lib-btn
+      class="add-test-btn"
+      appearance="FAB_EXTENDED"
+      colorVariant="PINK"
+      type="CREATE"
+      [disabled]="!appRunning()"
+      [label]="'BUTTON.ADD_NEW_LOCAL_TEST' | translate"
+      (clicked)="addNewTest()"
+    />
+  </div>
+  <table mat-table [dataSource]="dataSource" class="">
+    <ng-container matColumnDef="position">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NO' | translate }}</th>
+      <td mat-cell *matCellDef="let element; let i = index">{{ dataSource.data.length - i }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</th>
+      <td mat-cell *matCellDef="let element">
+        <lib-status-badge [type]="runStatusToBadgeStatus(element.status)"/>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="error">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.ERROR' | translate }}</th>
+      <td mat-cell *matCellDef="let element">{{ element.error }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="startTime">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.START_TIME' | translate }}</th>
+      <td mat-cell *matCellDef="let element">{{ element.createdAt | date: 'medium' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="appVersion">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.APP_VERSION' | translate }}</th>
+      <td mat-cell *matCellDef="let element">{{ element.federatedAppVersionName }}</td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" (click)="showDetail(row, i)"></tr>
+  </table>
+</div>

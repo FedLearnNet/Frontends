@@ -1,0 +1,65 @@
+<mat-card class="preview-card">
+  <div class="preview-card__header">
+    <div class="preview-card__title-group">
+      <h3>Dataset preview</h3>
+      <p>Feature columns are rendered as an analytical sample based on the current builder configuration.</p>
+    </div>
+
+    <div class="preview-card__actions">
+      @if (previewDirty()) {
+        <lib-badge text="Refresh recommended" color="ORANGE"></lib-badge>
+      } @else if (hasRows()) {
+        <lib-badge text="Preview up to date" color="GREEN"></lib-badge>
+      }
+
+      <lib-btn
+        type="CUSTOM"
+        variant="SECONDARY"
+        icon="sync"
+        label="Refresh preview"
+        [loading]="loading()"
+        (clicked)="refreshRequested.emit()"
+      ></lib-btn>
+      <lib-btn
+        type="DOWNLOAD"
+        label="Download CSV"
+        [disabled]="!hasRows()"
+        (clicked)="downloadRequested.emit()"
+      ></lib-btn>
+    </div>
+  </div>
+
+  <lib-page-wrapper
+    [margin]="false"
+    [error]="error()"
+    [isLoading]="loading()"
+    [skeletonOnLoading]="true"
+    [isEmpty]="!loading() && !error() && (!hasFeatureConfig() || !hasRows())"
+  >
+    @if (hasRows()) {
+      <lib-csv-file-viewer
+        [data]="previewCsv()"
+        [isBase64Encoded]="false"
+      ></lib-csv-file-viewer>
+    }
+    @if (!hasFeatureConfig()) {
+      <lib-empty-state
+        empty
+        icon="dataset"
+        title="No dataset features"
+        subtitle="Add at least one populated feature to generate a dataset preview."
+        [compact]="true"
+        [bordered]="true"
+      ></lib-empty-state>
+    } @else {
+      <lib-empty-state
+        empty
+        icon="table_view"
+        title="No preview rows"
+        subtitle="Refresh the preview after changing your dataset design."
+        [compact]="true"
+        [bordered]="true"
+      ></lib-empty-state>
+    }
+  </lib-page-wrapper>
+</mat-card>

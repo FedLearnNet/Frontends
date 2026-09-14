@@ -1,0 +1,14 @@
+@if (schema(); as schema) {
+  <a [routerLink]="['/data-modelling','schema',schema.id ]">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title> {{ schema.name }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>
+          {{ schema.description }}
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </a>
+}

@@ -1,0 +1,33 @@
+<div class="cohort-create-container">
+  @if (!schemaList.length) {
+    <div>
+      {{ 'BUTTON.NO_AVAILABLE' | translate  | uppercase }} {{ 'SCHEMA' | translate | uppercase }}
+    </div>
+  }
+
+  <div class="schema-list-container">
+    <mat-grid-list [cols]="cols" [rowHeight]="rowHeight" gutterSize="10px"
+                   class="schema-list-container--grid-list">
+      @for (schema of schemaList; track schema.globalId) {
+        <mat-grid-tile class="mat-elevation-z2">
+          <mat-card
+            class="schema-list-container--card"
+          >
+            <mat-card-header>
+              <mat-card-title class="schema-list-container--card-title">{{ schema.name }}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="schema-list-container--card-content">
+              <p [ngClass]="'schema-list-description-' + screenSize">{{ schema.description }}</p>
+              <div class="button-container">
+                <button mat-raised-button color="secondary" (click)="openSchemaDetailDialog(schema, $event)">
+                  {{ 'BUTTON.VIEW' | translate }}
+                </button>
+
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </mat-grid-tile>
+      }
+    </mat-grid-list>
+  </div>
+</div>

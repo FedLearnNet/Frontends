@@ -1,0 +1,95 @@
+<lib-page-wrapper
+  [isEmpty]="request() === null"
+  [isLoading]="isLoadingRequest()"
+  [skeletonOnLoading]="true"
+>
+  <lib-empty-state
+    empty
+    icon="analytics"
+    title="No Metrics Requested Yet"
+    subtitle="Request local performance metrics from all participating clinics. Each clinic can review and accept or decline before sharing."
+    [primaryButtonEnabled]="true"
+    primaryButtonLabel="Request Local Metrics"
+    (cta)="openRequestDialog()"
+  />
+  @if (request(); as request) {
+    <lib-info-grid title="Request Details">
+      <lib-info-item title="Created At">
+        <lib-time-badge [date]="request.createdAt"/>
+      </lib-info-item>
+      <lib-info-item title="Responses Received">
+        <lib-badge color="BLUE"
+                   [text]="'' + request.responsesReceived + ' / ' + request.totalParticipants"/>
+      </lib-info-item>
+    </lib-info-grid>
+
+    @if (responses().length > 0) {
+      <div class="results-section">
+        <div class="results-header">
+          <h3>Results <span class="response-count">({{ acceptedCount() }} clinics)</span></h3>
+          <div class="view-toggle">
+            <button mat-button [class.active]="viewMode() === 'per-clinic'" (click)="viewMode.set('per-clinic')">
+              <mat-icon>table_chart</mat-icon>
+              Per Clinic
+            </button>
+            <button mat-button [class.active]="viewMode() === 'aggregated'" (click)="viewMode.set('aggregated')">
+              <mat-icon>bar_chart</mat-icon>
+              Aggregated
+            </button>
+          </div>
+        </div>
+
+        @if (viewMode() === 'per-clinic') {
+          <div class="clinic-grid">
+            @for (row of clinicSummaries(); track row.clinicId) {
+              <div class="clinic-card" (click)="openClinicDialog(row)">
+                <div>
+                  <span class="card-label">Clinic ID</span>
+                  <span class="card-value">{{ row.clinicId }}</span>
+                </div>
+                <div>
+                  <span class="card-label">Metrics Shared</span>
+                  <div class="metric-names">
+                    @for (name of row.metricNames; track name) {
+                      <lib-badge color="BLUE" [text]="name"/>
+                    } @empty {
+                      <span class="muted">None</span>
+                    }
+                  </div>
+                </div>
+                <div class="clinic-card-footer">
+                  <mat-icon>show_chart</mat-icon>
+                  <span>View charts</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (viewMode() === 'aggregated') {
+          @if (getMetricsNames().length > 0) {
+            <div class="metric-grid">
+              @for (name of getMetricsNames(); track name) {
+                <div class="metric-chart-card">
+                  <div class="metric-chart-title">
+                    <lib-badge color="BLUE" [text]="name"/>
+                    <span class="clinic-count">{{ acceptedCount() }} clinics · avg</span>
+                  </div>
+                  <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)"/>
+                </div>
+              }
+            </div>
+          } @else {
+            <lib-skeleton-loader [variant]="'list'"/>
+          }
+        }
+      </div>
+    } @else {
+      <lib-empty-state
+        icon="hourglass_empty"
+        title="Waiting for Clinic Responses"
+        subtitle="The request has been sent to all participating clinics."
+      />
+    }
+  }
+</lib-page-wrapper>

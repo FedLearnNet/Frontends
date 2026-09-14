@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>{{ 'DIALOG.SAVE_CONNECTOR.TITLE' | translate }}</h2>
+<mat-dialog-content [formGroup]="form">
+    <p>{{ 'DIALOG.SAVE_CONNECTOR.MESSAGE' | translate }}</p>
+    <mat-form-field>
+        <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+        <input matInput formControlName="name"/>
+
+        @if (nameControl?.hasError('required') && nameControl?.touched) {
+            <mat-error>
+                {{ 'VALIDATION.REQUIRED' | translate: { fieldName: ('GRID.NAME' | translate) } }}
+            </mat-error>
+        }
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+        <textarea matInput formControlName="description"
+                  [placeholder]="('DIALOG.SAVE_CONNECTOR.THIS_CONNECTOR_IS_USED_FOR' | translate)"></textarea>
+    </mat-form-field>
+
+    @if (errorMessage) {
+        <div class="error-message">
+            {{ errorMessage }}
+        </div>
+    }
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-button (click)="onNoClick()">{{ 'DIALOG.NO_THANKS' | translate }}</button>
+    <button mat-button (click)="save()">{{ 'DIALOG.OK' | translate }}</button>
+</mat-dialog-actions>

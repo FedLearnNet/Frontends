@@ -1,0 +1,107 @@
+<lib-closeable-dialog-title [title]="'Transformation overview'" [allowMaximize]="false"/>
+
+<mat-dialog-content class="overview-content">
+  <lib-info-card
+    class="overview-intro"
+    type="INFO"
+    variant="BANNER"
+    title="Why preview statistics can be outdated"
+    subtitle="Preview statistics are computed on the original source data, so they become outdated
+      once transformers run. This overview shows how every column flows through the pipeline — which
+      columns are read, overwritten or created at each step."/>
+
+  <div class="summary-strip">
+    <lib-value-card size="MEDIUM" label="Transformer step(s)" [value]="summary().transformerCount"/>
+    <lib-value-card size="MEDIUM" label="Column(s)" [value]="summary().columnCount"/>
+    <lib-value-card size="MEDIUM" color="GREEN" label="Created" [value]="summary().created"/>
+    <lib-value-card size="MEDIUM" color="ORANGE" label="Modified" [value]="summary().modified"/>
+    <lib-value-card size="MEDIUM" color="GRAY" label="Untouched" [value]="summary().untouched"/>
+  </div>
+
+  <div class="legend">
+    @for (entry of legendEntries; track entry) {
+      <span class="legend-item">
+        <span class="legend-dot" [class]="'treatment--' + meta(entry).className"></span>
+        {{ meta(entry).label }}
+      </span>
+    }
+  </div>
+
+  @if (rows().length === 0) {
+    <lib-empty-state
+      icon="insights"
+      title="Nothing to visualize yet"
+      subtitle="No source columns or transformers are configured yet."/>
+  } @else {
+    <div class="matrix-scroll">
+      <div
+        class="matrix"
+        [style.grid-template-columns]="gridTemplateColumns()"
+        role="table"
+        aria-label="Column treatment across transformation steps">
+
+        <!-- Header: pipeline steps as an animated timeline -->
+        <div class="matrix-head" role="row">
+          <div class="corner" role="columnheader">Column</div>
+          @for (step of steps(); track step.index) {
+            <div
+              class="step-head"
+              role="columnheader"
+              [class.step-head--source]="step.isSource"
+              [style.animation-delay.ms]="step.index * 90">
+              <div class="step-node">
+                <mat-icon>{{ step.icon }}</mat-icon>
+              </div>
+              <div class="step-text">
+                <span class="step-title" [matTooltip]="step.title">{{ step.title }}</span>
+                <span class="step-subtitle">{{ step.subtitle }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- One row per column -->
+        @for (row of rows(); track row.column; let rowIndex = $index) {
+          <div
+            class="matrix-row"
+            role="row"
+            [class.is-dimmed]="isDimmed(row.column)"
+            [class.is-focused]="focusedColumn() === row.column"
+            [style.animation-delay.ms]="120 + rowIndex * 45">
+            <button
+              type="button"
+              class="row-head"
+              role="rowheader"
+              (click)="toggleFocus(row.column)"
+              [matTooltip]="'Click to trace this column'">
+              <span class="row-name">{{ row.column }}</span>
+              @if (row.createdAtStep !== null) {
+                <lib-badge text="Derived" color="GREEN" size="X-SMALL" [border]="true" [uppercase]="true"/>
+              } @else if (!row.touched) {
+                <lib-badge text="Untouched" color="GRAY" size="X-SMALL" [border]="true" [uppercase]="true"/>
+              }
+            </button>
+
+            @for (cell of row.cells; track $index; let cellIndex = $index) {
+              <div
+                class="cell"
+                role="cell"
+                [class]="'treatment--' + meta(cell.treatment).className"
+                [class.cell--touched]="cell.treatment !== 'PASSTHROUGH' && cell.treatment !== 'ABSENT' && cell.treatment !== 'ORIGIN'"
+                [style.animation-delay.ms]="120 + rowIndex * 45 + cellIndex * 30"
+                [matTooltip]="row.column + ' — ' + meta(cell.treatment).label">
+                @if (meta(cell.treatment).icon) {
+                  <mat-icon>{{ meta(cell.treatment).icon }}</mat-icon>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</mat-dialog-content>
+
+<div class="overview-actions">
+  <lib-btn type="CLOSE" [label]="'BUTTON.CLOSE' | translate" (clicked)="close()"/>
+</div>

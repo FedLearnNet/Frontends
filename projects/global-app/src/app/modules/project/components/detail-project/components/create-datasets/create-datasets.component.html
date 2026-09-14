@@ -1,0 +1,36 @@
+<lib-page-wrapper
+  [error]="dataTypeError()"
+  [isEmpty]="!hasQuery() || !!dataTypeError()"
+  [isLoading]="!loaded()"
+  [margin]="false"
+  [skeletonOnLoading]="true">
+  <div class="project-data">
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab label="Federated Data">
+        <app-dataset-preview-card
+          [config]="exportConfig()"
+          [queryName]="query()?.name ?? null"
+          [actionLabel]="'Open dataset'"
+          [emptyActionLabel]="'Create new dataset'"
+          (actionClicked)="openDatasetBuilder()"
+        />
+      </mat-tab>
+      <mat-tab label="My Test Data">
+        <app-project-local-experiment-data [project]="project()"/>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+  @if (dataTypeError()) {
+    <lib-empty-state
+      empty
+      [title]="'WARNING.EMPTY' | translate "
+      [subtitle]="'Can not load data types'"
+    ></lib-empty-state>
+  } @else {
+    <lib-empty-state
+      empty
+      [title]="'WARNING.YOU_NEED_TO_SELECT_A_QUERY' | translate "
+    ></lib-empty-state>
+  }
+
+</lib-page-wrapper>

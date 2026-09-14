@@ -1,0 +1,11 @@
+<div [class]="className()">
+  @if (iconName()) {
+    <mat-icon>{{ iconName() }}</mat-icon>
+  }
+  <div class="badge-content">
+    @if (hasClientName()) {
+      <span class="client-name" [attr.title]="displayName()">{{ displayName() }}</span>
+    }
+    <span class="client-type">{{ formattedText() }}</span>
+  </div>
+</div>

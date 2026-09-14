@@ -1,0 +1,98 @@
+<form [formGroup]="editAppForm" (ngSubmit)="onSubmit()">
+
+  <div class="group group--2">
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+      <input matInput [formControl]="editAppForm.controls.name" title="Name">
+      @if (editAppForm.controls.name.hasError('required')) {
+        <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.NAME' | translate)} }}</mat-error>
+      }
+    </mat-form-field>
+
+    <app-tool-slug-input
+      formControlName="slug"
+      [appearance]="'fill'"
+      [toolName]="editAppForm.controls.name.value ?? ''"
+      [showErrors]="editAppForm.controls.slug.touched && editAppForm.controls.slug.invalid"
+      label="Slug"
+      placeholder="e.g. cohort-normalizer"
+    ></app-tool-slug-input>
+  </div>
+  <div class="group group--2">
+
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'GRID.SOURCE_CODE_URL' | translate }}</mat-label>
+      <input matInput [formControl]="editAppForm.controls.sourceUrl" title="Slug">
+      @if (editAppForm.controls.slug.hasError('pattern')) {
+        <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.SOURCE_CODE_URL' | translate)} }}</mat-error>
+      }
+    </mat-form-field>
+    <!--
+       <mat-form-field appearance="fill">
+         <mat-label>{{ 'GRID.APP_TYPE' | translate }}</mat-label>
+         <mat-select [formControl]="editAppForm.controls.type" title="Type">
+           @for (type of appTypes; track type) {
+             <mat-option [value]="type.value">{{ type.name }}</mat-option>
+           }
+         </mat-select>
+         @if (editAppForm.controls.type.hasError('required')) {
+           <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.IMAGE_NAME' | translate)} }}</mat-error>
+         }
+       </mat-form-field>
+         -->
+    <span class="spacer"></span>
+
+    <lib-badge class="image-tag" [color]="'GRAY'" [text]="'Version: ' + editAppForm.controls.latestVersion.value"
+               [matTooltip]="'Can be changed at publishing'"
+               iconName="commit" [size]="'MEDIUM'"/>
+
+
+    <lib-docker-image-tag
+      class="image-tag"
+      [imageName]="app().imageName"
+      [color]="app().imageName && !app().publishInfo ? 'GRAY' : undefined"
+      [border]="!!(app().publishInfo && app().imageName)"
+      [clickable]="!!(app().publishInfo && app().imageName)"
+      size="MEDIUM"
+      (clicked)="showPipelinePublishInfo()"/>
+  </div>
+  <div class="group group--3">
+    <!--
+    <mat-slide-toggle ngModel name="enableWifi" class="i-toggle">Requires Internet access</mat-slide-toggle>
+    -->
+  </div>
+
+  <mat-form-field appearance="fill">
+    <mat-label>{{ 'GRID.SHORT_DESCRIPTION' | translate }}</mat-label>
+    <input matInput [formControl]="editAppForm.controls.shortDescription" title="Slug">
+    @if (editAppForm.controls.shortDescription.hasError('required')) {
+      <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.SHORT_DESCRIPTION' | translate)} }}</mat-error>
+    }
+  </mat-form-field>
+
+  <div>
+    <p>{{ 'README' | translate }}</p>
+    <app-md-editor id="longDescription" formControlName="longDescription"
+                   (newMarkdownEvent)="updateLongDescription($event)"
+                   [defaultValue]="longDescriptionContent()"/>
+
+  </div>
+  @if (!hideActions()) {
+    <div class="buttons">
+      @if (app().imageName) {
+        <button mat-raised-button color="primary" [disabled]="!editAppForm.valid"
+                (click)="publish()">{{ 'BUTTON.PUBLISH' | translate }}
+        </button>
+      } @else {
+        <mat-icon
+          matTooltip="You need an built tool image to publish. Please run the pipeline."
+        >info
+        </mat-icon>
+      }
+      <button mat-raised-button [disabled]="!editAppForm.valid" (click)="update()">{{ 'BUTTON.UPDATE' | translate }}
+      </button>
+      <span class="spacer"></span>
+      <button mat-button (click)="cancelEdit()" color="warn">{{ 'BUTTON.CANCEL' | translate }}</button>
+    </div>
+  }
+</form>

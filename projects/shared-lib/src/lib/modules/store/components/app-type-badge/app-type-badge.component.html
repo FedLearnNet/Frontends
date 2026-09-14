@@ -1,0 +1,13 @@
+<div [class]="className()">
+  @if (iconName()) {
+    <mat-icon>{{ iconName() }}</mat-icon>
+  }
+
+  <span>{{ textFormatted() }}</span>
+
+  @if (supportsFederatedLearning()) {
+    <div class="support-fl">
+      <mat-icon matTooltip="Supports federated learning">hub</mat-icon>
+    </div>
+  }
+</div>

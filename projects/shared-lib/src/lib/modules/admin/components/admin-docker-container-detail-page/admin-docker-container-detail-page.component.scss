@@ -1,0 +1,149 @@
+:host {
+  display: block;
+}
+
+.detail-page {
+  display: grid;
+  gap: 1.25rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.overview {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.summary {
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+}
+
+.summary__label {
+  color: rgba(16, 56, 71, 0.68);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.summary strong {
+  color: #103847;
+  line-height: 1.4;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.panel {
+  border: 1px solid rgba(10, 47, 60, 0.08);
+  box-shadow: 0 14px 32px rgba(11, 34, 46, 0.06);
+  border-radius: 1rem;
+  padding: 1.15rem;
+
+  lib-kv {
+    margin-bottom: 10px;
+  }
+}
+
+.panel h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1.05rem;
+}
+
+.panel--danger {
+  background: #fff8f5;
+}
+
+.panel--logs,
+.panel--raw {
+  grid-column: 1 / -1;
+}
+
+.panel__header {
+  align-items: start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.panel__header p {
+  color: rgba(16, 56, 71, 0.68);
+  margin: 0.35rem 0 0;
+}
+
+
+.kv-card {
+  background: #f7fbfc;
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.32rem;
+  padding: 0.95rem 1rem;
+}
+
+.kv-row {
+  background: #f7fbfc;
+  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.3rem;
+  justify-items: start;
+  padding: 0.9rem 1rem;
+}
+
+.danger-actions,
+.stream-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.stream-indicator {
+  align-items: center;
+  color: #0d6b47;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.stream-indicator--stopped {
+  color: rgba(16, 56, 71, 0.68);
+}
+.btn--stop{
+  color: var(--warning-text);
+}
+
+.empty,
+.empty-state {
+  color: rgba(16, 56, 71, 0.7);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@media (max-width: 920px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero__actions {
+    justify-content: flex-start;
+  }
+
+  .panel__header {
+    flex-direction: column;
+  }
+}

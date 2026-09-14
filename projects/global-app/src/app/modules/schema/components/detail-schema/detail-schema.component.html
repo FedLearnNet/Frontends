@@ -1,0 +1,130 @@
+<lib-header
+  [title]="pageTitle()"
+  [description]="pageDescription()"
+  [enableGoBack]="true"
+  [routerOnePathBack]="true"
+  [enableSkeleton]="loading()">
+  <div suffix class="schema-header__actions">
+    @if (schema()) {
+      <lib-badge color="GRAY" [border]="true" [text]="outlineRows().length + ' nodes'"></lib-badge>
+      <lib-badge color="BLUE" [border]="true" [text]="attributeCount() + ' attributes'"></lib-badge>
+      @if (invalidCount() > 0) {
+        <lib-badge color="ORANGE" [border]="true" [text]="invalidCount() + ' needs attention'"></lib-badge>
+      }
+    }
+  </div>
+</lib-header>
+
+
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="loading()"
+  [isEmpty]="schemaId() === 'new' && !schema()"
+  [skeletonOnLoading]="true">
+  <div empty class="schema-empty">
+    <lib-empty-state [title]="'Start a new schema'"></lib-empty-state>
+    <lib-btn type="CREATE" label="Start schema" (clicked)="createRoot()"></lib-btn>
+  </div>
+
+  @if (schema()) {
+    <section class="schema-detail">
+      <div class="schema-workspace">
+        <div class="schema-outline">
+          <lib-info-card
+            subtitle="Click a group row or its arrow to collapse or expand its children"
+            size="SMALL"
+            icon="unfold_less"
+            type="INFO">
+          </lib-info-card>
+          <div class="schema-outline__head">
+            <div>Schema node</div>
+            <div>Type</div>
+            <div>Mapping</div>
+            <div>Actions</div>
+          </div>
+
+          @for (row of outlineRows(); track row.node.id || row.path) {
+            <div
+              class="schema-outline__row"
+              [class.schema-outline__row--toggleable]="row.expandable"
+              [class.schema-outline__row--collapsed]="row.collapsed"
+              (click)="toggleCollapsed(row)">
+              <div class="schema-outline__node" [ngStyle]="{'padding-left.px': row.depth * 22}">
+                @if (row.expandable) {
+                  <button
+                    mat-icon-button
+                    class="schema-outline__collapse-btn"
+                    type="button"
+                    [attr.aria-label]="row.collapsed ? 'Expand group' : 'Collapse group'"
+                    (click)="$event.stopPropagation(); toggleCollapsed(row)">
+                    <mat-icon
+                      fontSet="material-symbols-outlined">{{ row.collapsed ? 'chevron_right' : 'expand_more' }}
+                    </mat-icon>
+                  </button>
+                } @else {
+                  <span class="schema-outline__collapse-spacer"></span>
+                }
+                <mat-icon
+                  fontSet="material-symbols-outlined">{{ isSchemaAttribute(row.node.type) ? 'tag' : row.node.type === SchemaNodeType.ROOT ? 'home' : 'folder' }}
+                </mat-icon>
+                <div>
+                  <strong>{{ row.node.name || 'Unnamed node' }}</strong>
+                  <span>{{ row.node.description || 'No description yet' }}</span>
+                </div>
+              </div>
+
+              <div>
+                <lib-badge
+                  [color]="typeBadgeColor(row)"
+                  [border]="true"
+                  [text]="getSchemaName(row.node.type)">
+                </lib-badge>
+              </div>
+
+              <div class="schema-outline__mapping">
+                @if (isSchemaAttribute(row.node.type)) {
+                  @if (row.node.ontologyId && row.node.dataTypeId) {
+                    <span><strong>Ontology:</strong> {{ ontologyLabel(row.node) }}</span>
+                    <span><strong>Datatype:</strong> {{ datatypeLabel(row.node) }}</span>
+                  } @else {
+                    <span class="schema-outline__muted">Missing ontology or datatype</span>
+                  }
+                } @else {
+                  <span>{{ row.childCount }} {{ row.childCount === 1 ? 'child' : 'children' }}</span>
+                }
+              </div>
+
+              <div class="schema-outline__actions">
+                <button mat-icon-button (click)="$event.stopPropagation(); editSchema(row)"
+                        aria-label="Edit schema node">
+                  <mat-icon fontSet="material-symbols-outlined">edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  [disabled]="isSchemaAttribute(row.node.type)"
+                  (click)="$event.stopPropagation(); addChildren(row)"
+                  aria-label="Add child node">
+                  <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  [disabled]="row.node.type === SchemaNodeType.ROOT"
+                  (click)="$event.stopPropagation(); deleteSchema(row)"
+                  aria-label="Delete schema node">
+                  <mat-icon fontSet="material-symbols-outlined">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
+  <lib-info-card
+    class="mt-2"
+    subtitle="All changes are saved automatically"
+    size="SMALL"
+    [border]="true"
+    type="INFO">
+  </lib-info-card>
+</lib-page-wrapper>

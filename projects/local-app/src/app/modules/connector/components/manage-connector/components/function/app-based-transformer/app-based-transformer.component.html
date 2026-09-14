@@ -1,0 +1,77 @@
+@if (awaitingRun()) {
+  @if (blockedByStep(); as blocking) {
+    <lib-empty-state
+      class="app-transformer__empty"
+      icon="linear_scale"
+      [bordered]="true"
+      [title]="title()"
+      [subtitle]="'APP_TRANSFORMER.BLOCKED_HINT' | translate: {index: blocking}"
+      [primaryButtonEnabled]="true"
+      [primaryButtonLabel]="'APP_TRANSFORMER.OPEN_BLOCKING_STEP' | translate: {index: blocking}"
+      (cta)="openBlockingStep.emit(blocking)"/>
+  } @else {
+    <lib-empty-state
+      class="app-transformer__empty"
+      icon="memory"
+      [bordered]="true"
+      [title]="title()"
+      [subtitle]="(running() ? 'APP_TRANSFORMER.RUNNING_HINT' : 'APP_TRANSFORMER.NOT_RUN_HINT')
+        | translate: {index: stepIndex()}"
+      [primaryButtonEnabled]="!running()"
+      [primaryButtonLabel]="'APP_TRANSFORMER.RUN' | translate"
+      (cta)="start()">
+
+      <div class="app-transformer__meta">
+        <lib-kv [label]="'APP_TRANSFORMER.STEP_LABEL' | translate" [value]="stepIndex()"/>
+        <lib-kv [label]="'APP_TRANSFORMER.APP' | translate" [value]="appName()" [mono]="true"/>
+        @if (rowCount() !== null) {
+          <lib-kv [label]="'APP_TRANSFORMER.INPUT_ROWS' | translate" [value]="rowCount()"/>
+        }
+      </div>
+
+      @if (error(); as err) {
+        <lib-error-card [errorObject]="err"/>
+      } @else if (running()) {
+        <div class="app-transformer__meta">
+          <lib-status-badge [type]="badge()" size="SMALL"/>
+          @if (lastLog()) {
+            <lib-kv [label]="'APP_TRANSFORMER.LAST_MESSAGE' | translate" [value]="lastLog()" [multiline]="true"/>
+          }
+        </div>
+      }
+    </lib-empty-state>
+  }
+} @else {
+  <div class="app-transformer">
+    <div class="app-transformer__head">
+      <mat-icon class="app-transformer__icon">memory</mat-icon>
+
+      <div class="app-transformer__title">
+        <span class="app-transformer__name">{{ title() }}</span>
+        <span class="app-transformer__image mono" [matTooltip]="appImage()">{{ appName() }}</span>
+      </div>
+
+      <span class="app-transformer__spacer"></span>
+
+      @if (rowCount() !== null) {
+        <lib-kv [label]="'APP_TRANSFORMER.ROWS' | translate" [value]="rowCount()" [border]="false"/>
+      }
+
+      <lib-status-badge [type]="badge()" size="SMALL"/>
+
+      <lib-btn
+        type="CUSTOM"
+        variant="SECONDARY"
+        size="SMALL"
+        icon="play_arrow"
+        [label]="'APP_TRANSFORMER.RUN_AGAIN' | translate"
+        [disabled]="running()"
+        [loading]="running()"
+        (clicked)="start()"/>
+    </div>
+
+    @if (error(); as err) {
+      <lib-error-card [errorObject]="err"/>
+    }
+  </div>
+}

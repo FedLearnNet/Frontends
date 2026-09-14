@@ -1,0 +1,32 @@
+<button
+  type="button"
+  class="import-chip"
+  [class.is-done]="succeeded()"
+  [class.is-failed]="failed()"
+  [attr.aria-label]="('IMPORT.OPEN_DETAIL' | translate) + ': ' + activity().fileName"
+  (click)="open()">
+
+  <mat-icon class="import-chip__icon" [class.is-spinning]="!finished()" aria-hidden="true">
+    {{ icon() }}
+  </mat-icon>
+
+  <div class="import-chip__body">
+    <div class="import-chip__line">
+      <span class="import-chip__file">{{ activity().fileName }}</span>
+      <span class="import-chip__phase">
+        {{ (finished() ? 'IMPORT.STATE.' + activity().phase : 'IMPORT.STEP.' + activity().phase + '_TITLE')
+          | translate }}
+      </span>
+    </div>
+
+    @if (!finished()) {
+      @if (percent() !== undefined) {
+        <mat-progress-bar mode="determinate" [value]="percent()!"/>
+      } @else {
+        <mat-progress-bar mode="indeterminate"/>
+      }
+    }
+  </div>
+
+  <mat-icon class="import-chip__open" aria-hidden="true">open_in_full</mat-icon>
+</button>

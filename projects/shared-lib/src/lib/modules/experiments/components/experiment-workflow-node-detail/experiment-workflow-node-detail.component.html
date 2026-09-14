@@ -1,0 +1,75 @@
+@if (isRunError() && experimentData().error) {
+  <lib-error-card class="error" [oopsError]="experimentData().error" />
+}
+
+<mat-accordion>
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ 'MENU.HYPERPARAMETER' | translate }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    @if (experimentData().hyperParams) {
+      <lib-run-hyper-params [hyperParams]="experimentData().hyperParams!" />
+    }
+  </mat-expansion-panel>
+  @if (!hideInput()) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.INPUT' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        @if (experimentData().inputData) {
+          <lib-experiment-step-data
+            [params]="experimentData().inputData!.data"
+            [files]="experimentData().inputData!.files"
+            [appId]="experimentData().experimentId"
+            [runId]="experimentData().stepId"
+            [configs]="config()?.input ?? []"
+           />
+        }
+      </ng-template>
+    </mat-expansion-panel>
+  }
+  @if (!hideOutput()) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'GRID.OUTPUT' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        @if (experimentData().outputData) {
+          <lib-experiment-step-data
+            [appId]="experimentData().experimentId"
+            [runId]="experimentData().stepId"
+            [configs]="config()?.output ?? []"
+            [params]="experimentData().outputData!.data"
+            [files]="experimentData().outputData!.files" />
+        }
+      </ng-template>
+    </mat-expansion-panel>
+  }
+  @if (!hideMetric() && metricsNames().length > 0) {
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.METRIC' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      @for (name of metricsNames(); track name) {
+        <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)" />
+      }
+    </mat-expansion-panel>
+  }
+  @if (!hideLogs()) {
+    <mat-expansion-panel class="no-padding">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.LOGS' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <lib-run-logs-list [logs]="appLogs()" [showBorder]="false" />
+    </mat-expansion-panel>
+  }
+  @if (!hideController() && controllerLogs().length > 0) {
+    <mat-expansion-panel class="no-padding">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.CONTROLLER_LOGS' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <lib-run-logs-list [logs]="controllerLogs()" [showBorder]="false" />
+    </mat-expansion-panel>
+  }
+</mat-accordion>

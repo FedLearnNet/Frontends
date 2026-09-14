@@ -1,0 +1,27 @@
+<div class="dropzone"
+     [class.over]="dragOver()"
+     [class.disabled]="disabled()"
+     (dragover)="$event.preventDefault()"
+     (dragenter)="onDragEnter()"
+     (dragleave)="onDragLeave()"
+     (drop)="onDrop($event)">
+  <p>
+    {{ label() | translate }}
+    <label class="browse">
+      <input type="file"
+             [multiple]="multiple()"
+             [accept]="accept()"
+             [disabled]="disabled()"
+             (change)="onFileSelect($event)"
+             hidden>
+    </label>
+  </p>
+</div>
+
+@if (progress(); as p) {
+  @if (p.inProgress || p.progress > 0 || p.error !== null) {
+    <div class="progress-wrapper">
+      <lib-upload-progress [progress]="p" />
+    </div>
+  }
+}

@@ -1,0 +1,250 @@
+<div class="schema-editor" [class.invalid]="form.invalid || hasDuplicateKeys()">
+
+  <div class="topbar">
+    <div class="title">
+      <div class="headline">Tabular schema</div>
+      <div class="subline">Define global constraints and per-column rules.</div>
+    </div>
+
+    <div class="top-actions">
+      <button mat-button type="button" class="btn" (click)="addColumn()">
+        <mat-icon>add</mat-icon>
+        Add column
+      </button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title">Global constraints</div>
+
+    <div class="grid grid-4">
+      <mat-form-field>
+        <mat-label>Min rows</mat-label>
+        <input matInput type="number" [formControl]="form.controls.minRows" placeholder="e.g. 1">
+        @if (form.controls.minRows.hasError('nonNegative')) {
+          <mat-error>Must be ≥ 0</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Max rows</mat-label>
+        <input matInput type="number" [formControl]="form.controls.maxRows" placeholder="e.g. 100000">
+        @if (form.controls.maxRows.hasError('nonNegative')) {
+          <mat-error>Must be ≥ 0</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Min columns</mat-label>
+        <input matInput type="number" [formControl]="form.controls.minColumns" placeholder="e.g. 1">
+        @if (form.controls.minColumns.hasError('nonNegative')) {
+          <mat-error>Must be ≥ 0</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Max columns</mat-label>
+        <input matInput type="number" [formControl]="form.controls.maxColumns" placeholder="e.g. 200">
+        @if (form.controls.maxColumns.hasError('nonNegative')) {
+          <mat-error>Must be ≥ 0</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <div class="col-head-actions">
+      <mat-slide-toggle [formControl]="form.controls.allowOnlyNumbers">
+        Require only numbers
+      </mat-slide-toggle>
+
+      <mat-slide-toggle [formControl]="form.controls.prohibitedNulls">
+        Prohibited nulls
+      </mat-slide-toggle>
+    </div>
+    @if (form.controls.prohibitedNulls.value) {
+      <div class="panel">
+        <div class="section-title">Missing / null handling</div>
+        <div class="section-subtitle">
+          Define which missing-value representations are prohibited in table inputs.
+        </div>
+
+        <div class="null-policy" [formGroup]="form.controls.nullPolicy">
+
+          <div class="grid grid-3">
+            <mat-checkbox formControlName="prohibitedEmptyCell">
+              Prohibited empty cell (a,,c)
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="prohibitedEmptyString">
+              Prohibited empty string ("")
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="prohibitedWhitespaceString">
+              Prohibited whitespace-only (" ")
+            </mat-checkbox>
+          </div>
+          <div class="grid grid-3">
+            <mat-checkbox formControlName="prohibitedNaN">
+              Prohibited NaN (numeric)
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="prohibitedZeroAsNull">
+              Prohibited 0 as null sentinel
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="prohibitedNullLiterals">
+              Prohibited null literals (null/none/na…)
+            </mat-checkbox>
+          </div>
+
+          @if (form.controls.nullPolicy.controls.prohibitedNullLiterals.value) {
+            <mat-form-field class="full-width input-chips" appearance="outline">
+              <mat-label>Null literal tokens</mat-label>
+
+              <mat-chip-grid
+                #nullChipGrid
+                aria-label="Enter null literal tokens"
+                [formControl]="form.controls.nullPolicy.controls.nullLiterals"
+              >
+                @for (t of nullLiteralChips(); track t) {
+                  <mat-chip-row (removed)="removeNullLiteral(t)">
+                    {{ t }}
+                    <button matChipRemove [attr.aria-label]="'remove ' + t">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip-row>
+                }
+              </mat-chip-grid>
+
+              <input
+                placeholder="New Add token..."
+                [matChipInputFor]="nullChipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                (matChipInputTokenEnd)="addNullLiteralFromChipInput($event)"
+              />
+              <mat-hint>Case-insensitive matching is recommended.</mat-hint>
+            </mat-form-field>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Columns -->
+  <div class="panel">
+    <div class="section-title">Columns</div>
+
+    @if (hasDuplicateKeys()) {
+      <lib-error-card>
+        Duplicate column keys detected. Keys must be unique.
+      </lib-error-card>
+    }
+
+    @if (columnsArray().length === 0) {
+      <lib-hint-card>
+        <p>No columns defined yet.</p>
+        <button mat-raised-button type="button" (click)="addColumn()">Add the first column</button>
+      </lib-hint-card>
+    } @else {
+
+      <div class="columns">
+        @for (col of columnsArray().controls; track trackByIndex($index)) {
+          <div class="col-card" [formGroup]="col">
+
+            <!-- Column header -->
+            <div class="col-head">
+              <div class="col-key">
+                <mat-form-field>
+                  <mat-label>Column key</mat-label>
+                  <input matInput formControlName="key" placeholder="e.g. patient_id">
+
+                  @if (col.controls.key.hasError('required') && col.controls.key.touched) {
+                    <mat-error>Key is required</mat-error>
+                  }
+                  @if (col.controls.key.hasError('pattern') && col.controls.key.touched) {
+                    <mat-error>No commas, semicolons, or line breaks</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="col-head-actions">
+
+
+                <mat-slide-toggle formControlName="type">Allow nulls</mat-slide-toggle>
+                <mat-slide-toggle formControlName="required">Required</mat-slide-toggle>
+
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="removeColumn($index)"
+                  aria-label="Remove column"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-2">
+              <mat-form-field>
+                <mat-label>Type</mat-label>
+                <mat-select formControlName="type" placeholder="Select type">
+                  <mat-option [value]="null">Unset</mat-option>
+                  @if (form.controls.allowOnlyNumbers.value) {
+                    @for (t of toolConfigDataTypesNumbers; track t.key) {
+                      <mat-option [value]="t.key">{{ t.value }}</mat-option>
+                    }
+                  } @else {
+                    @for (t of toolConfigDataTypes; track t.key) {
+                      <mat-option [value]="t.key">{{ t.value }}</mat-option>
+                    }
+                  }
+
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Description</mat-label>
+                <input matInput formControlName="description" placeholder="Req. column">
+              </mat-form-field>
+            </div>
+
+            @if (col.controls.type.value === 'STRING') {
+              <div class="grid grid-2">
+                <mat-form-field>
+                  <mat-label>Regex</mat-label>
+                  <input matInput formControlName="regex" placeholder="e.g. ^[A-Z0-9]+$">
+                  <mat-hint>Only available for STRING columns.</mat-hint>
+                </mat-form-field>
+              </div>
+            }
+            @if (col.controls.type.value === 'CATEGORICAL') {
+              <div class="grid grid-2">
+                <mat-form-field>
+                  <mat-label>Enum values (categorical)</mat-label>
+                  <input matInput formControlName="enumValuesCsv" placeholder="e.g. A, B, C">
+                  <mat-hint>Comma-separated categories.</mat-hint>
+                </mat-form-field>
+              </div>
+            }
+
+            @if (col.controls.type.value === 'INTEGER' || col.controls.type.value === 'FLOAT') {
+              <div class="grid grid-2">
+                <mat-form-field>
+                  <mat-label>Min</mat-label>
+                  <input matInput formControlName="min" placeholder="numeric lower bound">
+                </mat-form-field>
+
+                <mat-form-field>
+                  <mat-label>Max</mat-label>
+                  <input matInput formControlName="max" placeholder="numeric upper bound">
+                </mat-form-field>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+  </div>
+  <app-app-detail-config-table-preview [schema]="schema()"></app-app-detail-config-table-preview>
+
+</div>

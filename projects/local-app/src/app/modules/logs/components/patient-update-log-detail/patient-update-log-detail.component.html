@@ -1,0 +1,66 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  [title]="'CHANGE_OF_PATIENT' | translate" />
+<mat-dialog-content class="patient-log-detail">
+  <section class="detail-hero">
+    <div>
+      <h2>{{ log().patientId }}</h2>
+      <p>Revision {{ log().revId }} for internal patient {{ log().internalPatientId }}</p>
+    </div>
+    <button
+      mat-stroked-button
+      color="warn"
+      type="button"
+      (click)="openPatientRollbackDialog()">
+      <mat-icon>settings_backup_restore</mat-icon>
+      Rollback patient
+    </button>
+  </section>
+
+  <div class="run-summary-grid-2">
+    <lib-kv [label]="'GRID.CHANGE_AT' | translate">
+      <lib-time-badge [date]="log().createdAt"></lib-time-badge>
+    </lib-kv>
+    <lib-kv [label]="'GRID.DRY_RUN' | translate">
+      <lib-badge [text]="log().dryRun ? 'Yes' : 'No'" [color]="log().dryRun ? 'ORANGE' : 'GRAY'" [border]="true"></lib-badge>
+    </lib-kv>
+    <lib-kv [label]="'GRID.COMMITED' | translate">
+      <lib-badge [text]="log().committed ? 'Committed' : 'Not committed'" [color]="log().committed ? 'GREEN' : 'GRAY'" [border]="true"></lib-badge>
+    </lib-kv>
+    <lib-kv label="Revision" [value]="log().revId"></lib-kv>
+
+    @if (log().connectorId) {
+      <lib-kv [label]="'GRID.CONNECTOR' | translate" [value]="log().connectorId"></lib-kv>
+      <lib-kv [label]="'GRID.RUN' | translate" [value]="log().runId"></lib-kv>
+    } @else {
+      <lib-kv [label]="'GRID.CHANGED_BY' | translate" [value]="log().userId"></lib-kv>
+    }
+  </div>
+
+
+  @if (sortedLog()) {
+    <table mat-table [dataSource]="sortedLog()" class="mat-elevation-z0">
+      <ng-container matColumnDef="changeType">
+        <th mat-header-cell *matHeaderCellDef> {{ 'TYPE' | translate }}</th>
+        <td mat-cell *matCellDef="let element"> {{ element.changeType }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="propertyName">
+        <th mat-header-cell *matHeaderCellDef> {{ 'PROPERTY' | translate }}</th>
+        <td mat-cell *matCellDef="let element"> {{ element.propertyName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="previousData">
+        <th mat-header-cell *matHeaderCellDef> {{ 'PREVIOUS' | translate }}</th>
+        <td mat-cell *matCellDef="let element"> {{ element.previousData }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentData">
+        <th mat-header-cell *matHeaderCellDef> {{ 'CURRENT' | translate }}</th>
+        <td mat-cell *matCellDef="let element"> {{ element.currentData }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  }
+</mat-dialog-content>

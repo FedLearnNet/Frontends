@@ -1,0 +1,24 @@
+<button
+  type="button"
+  class="select-btn"
+  [class.select-btn--selected]="selected()"
+  [class.select-btn--compact]="size() === 'COMPACT'"
+  [disabled]="disabled()"
+  [attr.aria-label]="resolvedAriaLabel()"
+  [attr.aria-pressed]="selected()"
+  (click)="select()">
+  <span class="select-btn__icon" aria-hidden="true">
+    <mat-icon>{{ icon() }}</mat-icon>
+  </span>
+
+  <span class="select-btn__copy">
+    <strong>{{ title() }}</strong>
+    @if (description()) {
+      <small>{{ description() }}</small>
+    }
+  </span>
+
+  <span class="select-btn__indicator" aria-hidden="true">
+    <mat-icon>{{ selected() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+  </span>
+</button>

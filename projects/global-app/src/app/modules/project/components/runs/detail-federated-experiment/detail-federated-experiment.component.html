@@ -1,0 +1,144 @@
+@if (experiment(); as exp) {
+  <app-experiment-header [description]="exp.description"
+                         [experiment]="exp"
+                         (startExperiment)="start()"
+                         (stop)="stop()"
+                         (refresh)="reload()"
+                         [isSSEConnected]="false"
+                         [loading]="loading()"
+                         [name]="exp.name"/>
+
+  <lib-page-wrapper
+    [error]="error()"
+    [isLoading]="loading()"
+    [isEmpty]="exp === undefined"
+    [skeletonOnLoading]="true"
+  >
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab label="Meta">
+        <div class="meta-wrapper">
+          <lib-info-grid title="Meta-Data">
+            <lib-info-item title="Acceptance Count">
+              <lib-badge color="GRAY" [text]="''+exp.acceptanceCount"/>
+            </lib-info-item>
+            <lib-info-item title="Clinics">
+              <lib-badge color="GRAY" [text]="''+exp.participants.length"/>
+            </lib-info-item>
+            <lib-info-item title="public model">
+              @if (exp.modelNeedToBePublic) {
+                @if (exp.modelCanBePublic) {
+                  <lib-badge color="GREEN" [text]="'Yes'"/>
+                } @else {
+                  <lib-badge color="RED" [text]="'Yes'"/>
+                }
+              } @else {
+                @if (exp.modelCanBePublic) {
+                  <lib-badge color="GREEN" [text]="'No'"/>
+                } @else {
+                  <lib-badge color="RED" [text]="'No'"/>
+                }
+              }
+            </lib-info-item>
+            <lib-info-item title="Relay Server">
+              @if (exp.relayServerAddress) {
+                <lib-badge color="GRAY" [text]="exp.relayServerAddress"/>
+              } @else {
+                <lib-badge color="GRAY" [uppercase]="true" [text]="'N/A'"/>
+              }
+            </lib-info-item>
+          </lib-info-grid>
+
+
+          <lib-info-grid
+            title="Participants{{ exp.participants.length > 0 ? ' (' + exp.participants.length + ')' : '' }}">
+            @for (p of exp.participants; track p.id) {
+              <div class="participant-item">
+                <div>
+                  <span class="label">Clinic ID:</span>
+                  <span class="value">{{ p.uniqueRandomClinicId }}</span>
+                </div>
+                <div>
+                  <span class="label">Project Status:</span>
+                  <span class="value">
+                <lib-status-badge [type]="runStatusToBadgeStatus(p.projectStatus)" size="SMALL"
+                                  [animate]="true"/>
+              </span>
+                </div>
+                @if (p.currentStep) {
+                  <div>
+                    <span class="label">Current Step:</span>
+                    <span class="value">{{ p.currentStep }}</span>
+                  </div>
+                }
+                @if (p.stepStatus) {
+                  <div>
+                    <span class="label">Step Status:</span>
+                    <span class="value">
+                          <lib-status-badge [type]="projectStatusToBadgeStatus(p.stepStatus)" size="SMALL"
+                                            [animate]="true"/>
+                </span>
+                  </div>
+                }
+              </div>
+            } @empty {
+              <p>Currently no participants</p>
+            }
+          </lib-info-grid>
+        </div>
+      </mat-tab>
+      @if (exp!.steps && exp!.steps.length > 0) {
+        @if (selectedWorkflow(); as wf) {
+          <mat-tab label="Workflow">
+            <lib-workflow-readonly-view
+              class="detail"
+              [workflow]="wf!"
+              [experiment]="exp!"
+              (selectNode)="showDetail($event)"
+            ></lib-workflow-readonly-view>
+          </mat-tab>
+        }
+      }
+      @if (isFinished()) {
+        <mat-tab label="Local Metrics">
+          <app-local-metrics-tab
+            [projectId]="exp.projectId"
+            [experimentId]="exp.id"
+          />
+        </mat-tab>
+      }
+      @if (isFinished()) {
+        <mat-tab label="Evaluation">
+          <app-evaluation-tab
+            [projectId]="exp.projectId"
+            [experimentId]="exp.id"
+            [experiment]="exp"
+          />
+        </mat-tab>
+      }
+      @if (isFinished()) {
+        <mat-tab label="Training Result">
+
+          @if (trainableApps() === 0) {
+            <lib-empty-state
+              title="No trainiable artefacts"
+              subtitle="As no trainable tools are added to the worklfow you can't see the model"
+            >
+            </lib-empty-state>
+          } @else if (!showResultModel()) {
+            <lib-empty-state
+              title="No trainiable artefacts"
+              subtitle="As no trainable tools are added to the worklfow you can't see the model"
+              icon="model_training"
+              [primaryButtonEnabled]="true"
+              primaryButtonLabel="View Trained Model"
+              (cta)="viewModel()"
+            >
+            </lib-empty-state>
+          } @else {
+            <app-model-version-detail-view [forFederatedExperimentId]="exp.id"/>
+          }
+        </mat-tab>
+      }
+    </mat-tab-group>
+  </lib-page-wrapper>
+}

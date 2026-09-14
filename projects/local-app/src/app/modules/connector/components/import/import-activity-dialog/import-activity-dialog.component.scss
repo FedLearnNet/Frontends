@@ -1,0 +1,11 @@
+mat-dialog-content {
+  padding-top: 0.5rem;
+  width: min(56rem, 88vw);
+  max-width: 100%;
+}
+
+app-import-activity.is-plain ::ng-deep .import-activity {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}

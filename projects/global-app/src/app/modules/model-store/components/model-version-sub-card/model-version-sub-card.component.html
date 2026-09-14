@@ -1,0 +1,41 @@
+<button class="card" (click)="onViewDetails()">
+
+  <header class="card-header">
+    <h3 class="card-title">Variant #{{ id() ?? modelSub().id }}</h3>
+    <lib-status-badge [type]="modelSubStatusToBadgeStatus(modelSub().status)" />
+  </header>
+
+  <section class="card-body">
+    <div class="info-item">
+      <span class="info-label">Model Version ID</span>
+      <span class="info-value">{{ modelSub().modelVersionId }}</span>
+    </div>
+
+    @if (modelSub().experimentRunId) {
+      <div class="info-item">
+        <span class="info-label">Experiment Run ID</span>
+        <span class="info-value">{{ modelSub().experimentRunId }}</span>
+      </div>
+    }
+  </section>
+
+  <footer class="card-footer">
+    <div class="meta-badges">
+      <span class="badge badge-meta">
+        <i class="icon-files"></i>
+        {{ modelSub().files.length }} File(s)
+      </span>
+
+      @if (modelSub().imageName) {
+        <lib-docker-image-tag [imageName]="modelSub().imageName" size="SMALL"/>
+      }
+    </div>
+
+    @if (modelSub().pipelineStatus) {
+      <div class="pipeline-status">
+        <lib-status-badge [type]="pipelineStatusToBadgeStatus(modelSub().pipelineStatus!)" />
+      </div>
+    }
+  </footer>
+
+</button>

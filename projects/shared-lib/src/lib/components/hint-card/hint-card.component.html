@@ -1,0 +1,17 @@
+<div class="hint">
+  <p>
+    <ng-content />
+  </p>
+  <div class="actions">
+    @if (hintButtonText()) {
+      <button mat-raised-button class="warning-btn" (click)="onHintClick()">{{ hintButtonText() }}</button>
+    }
+    @if (hintLink()) {
+      <a mat-raised-button [routerLink]="hintLink()" class="learn-more-btn">
+        <mat-icon>help</mat-icon>
+        Learn more about search query settings
+      </a>
+    }
+  </div>
+
+</div>

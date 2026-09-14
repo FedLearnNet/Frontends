@@ -1,0 +1,115 @@
+:host {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+.select-btn {
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 20px;
+  align-items: start;
+  gap: 12px;
+  width: 100%;
+  min-height: 108px;
+  padding: 14px;
+  border: 1px solid var(--select-btn-border, #dce4f0);
+  border-radius: var(--select-btn-radius, 14px);
+  background: var(--select-btn-background, #fff);
+  color: var(--select-btn-text, #26364e);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--select-btn-hover-border, #9ab4e4);
+    box-shadow: 0 8px 20px rgba(35, 69, 124, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--select-btn-accent, #2f68c7) 22%, transparent);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.58;
+  }
+
+  &--selected {
+    border-color: var(--select-btn-accent, #2f68c7);
+    background: var(--select-btn-selected-background, linear-gradient(145deg, #f3f7ff 0%, #fff 82%));
+    box-shadow: 0 0 0 1px var(--select-btn-accent, #2f68c7) inset;
+  }
+
+  &--compact {
+    min-height: 76px;
+    padding: 12px 14px;
+    border-radius: 12px;
+  }
+}
+
+.select-btn__icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--select-btn-icon-background, #edf3ff);
+  color: var(--select-btn-icon-color, #315f9f);
+  transition: background 150ms ease, color 150ms ease;
+
+  .select-btn--selected & {
+    background: var(--select-btn-accent, #2f68c7);
+    color: #fff;
+  }
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+}
+
+.select-btn__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+
+  strong {
+    color: var(--select-btn-title, #172033);
+    font-size: 0.88rem;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  small {
+    color: var(--select-btn-description, #68758a);
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+}
+
+.select-btn__indicator {
+  display: grid;
+  place-items: center;
+  color: var(--select-btn-unselected-indicator, #a4afbe);
+
+  .select-btn--selected & {
+    color: var(--select-btn-accent, #2f68c7);
+  }
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}

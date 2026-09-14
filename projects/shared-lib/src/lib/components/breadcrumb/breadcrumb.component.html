@@ -1,0 +1,13 @@
+@if (breadcrumbs$ | async; as breadcrumbs) {
+    <ol class="breadcrumb">
+        @for (breadcrumb of breadcrumbs; track breadcrumb.url + '|' + breadcrumb.label; let last = $last) {
+            <li class="breadcrumb-item">
+                @if (!last) {
+                    <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+                } @else {
+                    <span>{{ breadcrumb.label }}</span>
+                }
+            </li>
+        }
+    </ol>
+}

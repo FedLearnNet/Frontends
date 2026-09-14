@@ -1,0 +1,25 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.statistics {
+  margin: 40px;
+
+  .mat-mdc-row:hover {
+    background-color: #f6f6f6;
+    cursor: pointer;
+  }
+}
+
+.requested-data {
+  white-space: pre-line;
+  padding-block: 10px;
+}
+
+.col-entry-padding {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.summary {
+  color: #6b7280;
+  margin-top: 6px;
+}

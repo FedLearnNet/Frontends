@@ -1,0 +1,30 @@
+<mat-dialog-content>
+  <mat-card class="example-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>code</mat-icon>
+      <mat-card-title>{{ 'DIALOG.EDIT_SELECTOR.TITLE' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>{{ 'DIALOG.EDIT_SELECTOR.MESSAGE' | translate }}</p>
+      <mat-divider />
+      <p>{{ 'GRID.ORIGINAL_NAME' | translate }}: {{ data.columnName }}</p>
+      <p>{{ 'GRID.OLD_NAME' | translate }}: {{ data.renamedColumn }}</p>
+      <mat-divider />
+      <mat-form-field class="example-full-width">
+        <mat-label>{{ 'GRID.NEW_NAME' | translate }}</mat-label>
+        <input matInput [placeholder]="('GRID.NAME' | translate)" [(ngModel)]="newName">
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+</mat-dialog-content>
+
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  @if (data.deleted) {
+    <button mat-flat-button (click)="onShowClick()">{{ 'BUTTON.RESTORE' | translate }}</button>
+  } @else {
+    <button mat-flat-button (click)="onDeleteClick()">{{ 'BUTTON.DELETE' | translate }}</button>
+  }
+  <button mat-raised-button (click)="onSaveClick()">{{ 'BUTTON.SAVE' | translate }}</button>
+</mat-dialog-actions>

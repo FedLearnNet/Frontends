@@ -1,0 +1,43 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'DIALOG.PATH_SELECTION' | translate"/>
+
+
+<div class="content">
+  <div class="left-side">
+    @if (graph()) {
+      <lib-store-graph-list [shortestPath]="selectedPath()"></lib-store-graph-list>
+    } @else {
+      @if (isLoading()) {
+        <lib-skeleton-loader></lib-skeleton-loader>
+      } @else {
+        <lib-error-card>
+          Graph can not be loaded
+        </lib-error-card>
+      }
+    }
+  </div>
+  <div class="right-side">
+    @if (shortestPaths(); as paths) {
+      <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="center" [(selectedIndex)]="selectedIndex">
+
+        @for (p of paths; track $index) {
+          <mat-tab [label]="p.name">
+            <lib-store-graph-list
+              [hideToolbar]="true"
+              [shortestPath]="p"></lib-store-graph-list>
+          </mat-tab>
+        }
+      </mat-tab-group>
+
+      <button class="save-btn" mat-raised-button (click)="select()">Select </button>
+    } @else {
+      @if (isLoading()) {
+        <lib-skeleton-loader></lib-skeleton-loader>
+      } @else {
+        <lib-error-card>
+          Paths can not be loaded
+        </lib-error-card>
+      }
+    }
+  </div>
+</div>

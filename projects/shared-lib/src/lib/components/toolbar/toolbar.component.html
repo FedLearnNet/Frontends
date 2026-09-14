@@ -1,0 +1,30 @@
+<mat-toolbar class="toolbar-container">
+  <mat-toolbar-row>
+    @if (isMobile()) {
+      <button mat-icon-button (click)="collapseToggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+    }
+    <button mat-button color="primary" routerLink="/" style="height: 3.2em">
+      <img src="projects/shared-lib/src/assets/images/logo.png"
+           height="48" [alt]="project" loading="lazy"/>
+    </button>
+    <span class="spacer"></span>
+    @if (!isMobile()) {
+      @for (menuItem of menuItems(); track $index) {
+        <a mat-button
+           color="primary"
+           [routerLink]="menuItem.link"
+           routerLinkActive="mat-accent"
+        >
+          {{ ('MENU.' + menuItem.key) | translate }}
+        </a>
+      }
+    }
+    <span class="spacer"></span>
+    <app-lib-user-menu/>
+    @if (showLabel()) {
+      <span class="label">{{ title }}</span>
+    }
+  </mat-toolbar-row>
+</mat-toolbar>

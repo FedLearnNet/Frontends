@@ -1,0 +1,21 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            title="Select file"/>
+
+<div class="content">
+  @if (loading()) {
+    <lib-skeleton-loader></lib-skeleton-loader>
+  } @else {
+    @if (error(); as err) {
+      <lib-error-card [errorObject]="err"></lib-error-card>
+    } @else if (files(); as files) {
+      @for (file of files; track file.id) {
+        <lib-file-card
+          class="link"
+          (click)="selectFile(file)"
+          [showActions]="false"
+          [forwardClick]="true"
+          [file]="file"></lib-file-card>
+      }
+    }
+  }
+</div>

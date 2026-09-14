@@ -1,0 +1,39 @@
+.content {
+  max-height: unset !important;
+}
+
+.content-wrapper {
+  margin: 0 -24px 12px -24px;
+  padding: 24px 48px;
+  border-bottom: 1px solid var(--gray-light-border);
+  background-color: var(--gray-bg);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.detail-section {
+  padding: 24px 0;
+
+  h4 {
+    margin: 0 0 12px;
+  }
+}
+
+.badge-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.muted {
+  color: #6b7280;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}

@@ -1,0 +1,160 @@
+.spacer {
+  flex: 1 1 auto;
+}
+
+.detail-card {
+  border-radius: 18px;
+  padding: 16px 16px 10px 16px;
+  background: var(--gray-bg);
+  border: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 12px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.left h2 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  opacity: .8;
+}
+
+.or-pill,
+.and-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.and-pill {
+  background: #e3f2fd;
+  border: 1px solid rgba(25, 118, 210, .2);
+  color: #0d47a1;
+}
+
+.or-pill {
+  background: #f3e5f5;
+  border: 1px solid rgba(123, 31, 162, .2);
+  color: #4a148c;
+  margin: 0 6px;
+}
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.group {
+  border: 1px solid var(--gray-light-border);
+  border-radius: 16px;
+  padding: 14px;
+  background: white;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, .08);
+  padding: 4px 8px;
+  border-radius: 999px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 8px 0;
+}
+
+.label {
+  font-size: 12px;
+  opacity: .8;
+  padding-top: 6px;
+}
+
+.values {
+  min-height: 36px;
+}
+
+.or-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.cond-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.cond {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+
+.muted {
+  opacity: .7;
+}
+
+.and-connector {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px 4px;
+  opacity: .85;
+}
+
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+  .label {
+    padding-top: 0;
+  }
+}
+
+

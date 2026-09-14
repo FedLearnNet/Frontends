@@ -1,0 +1,59 @@
+<mat-card
+  class="compare-card"
+  [class.compare-card--compact]="density() === 'compact'"
+  appearance="outlined"
+  role="button"
+  tabindex="0"
+  (click)="openDetail()"
+  (keydown.enter)="openDetail()"
+  (keydown.space)="openDetail()">
+  <div class="compare-card__head">
+    <div>
+      <div class="eyebrow">Property</div>
+      <h3>{{ propertyName() }}</h3>
+    </div>
+    <div class="compare-card__head-meta">
+      <lib-badge [color]="typeColor()" [border]="true" [text]="type()" />
+      @if (clinicCount() > 1) {
+        <mat-button-toggle-group
+          class="view-toggle"
+          [value]="viewMode()"
+          (click)="$event.stopPropagation()"
+          (change)="setViewMode($event)">
+          <mat-button-toggle value="summary">Average</mat-button-toggle>
+          <mat-button-toggle value="clinics">Clinics</mat-button-toggle>
+        </mat-button-toggle-group>
+      }
+    </div>
+  </div>
+
+  <mat-divider />
+
+  <div class="compare-card__body">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat__label">Clinics</div>
+        <div class="stat__value">{{ clinicCount() }}</div>
+      </div>
+      @if (isTextType()) {
+        <div class="stat">
+          <div class="stat__label">Top value</div>
+          <div class="stat__value">{{ topCategory() ?? '—' }}</div>
+        </div>
+      } @else {
+        <div class="stat">
+          <div class="stat__label">Average mean</div>
+          <div class="stat__value">{{ averageMean() === null ? '—' : (averageMean()! | number:'1.2-2') }}</div>
+        </div>
+      }
+      <div class="stat">
+        <div class="stat__label">Avg missing</div>
+        <div class="stat__value">{{ (averageMissingRate() * 100) | number:'1.0-1' }}%</div>
+      </div>
+    </div>
+
+    <div class="chart-panel">
+      <echarts [options]="chartOption()" class="chart" />
+    </div>
+  </div>
+</mat-card>

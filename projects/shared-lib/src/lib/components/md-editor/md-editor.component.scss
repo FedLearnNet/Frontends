@@ -1,0 +1,35 @@
+.row {
+    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 5%;
+
+    .markdown-body {
+        border: 1px solid #ced4da;
+        box-sizing: border-box;
+        height: auto;
+        border-radius: 4px;
+        padding: 70px 10px 10px 10px;
+        min-height: 375px;
+        margin-bottom: 30px;
+        align-self: stretch;
+    }
+}
+
+::ng-deep .editor-toolbar {
+    .table {
+        margin-bottom: 0;
+    }
+}
+
+.col {
+    flex-grow: 1;
+    width: 45%;
+}
+
+@media only screen and (max-width: 1024px) {
+    .col {
+        width: 100%;
+    }
+}

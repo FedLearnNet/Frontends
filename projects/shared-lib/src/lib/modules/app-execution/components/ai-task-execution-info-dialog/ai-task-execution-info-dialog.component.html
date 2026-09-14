@@ -1,0 +1,55 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'Detail'"/>
+
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab label="Overview">
+    <div class="overview">
+      <div class="overview__meta">
+        <lib-status-badge class="overview__status"
+                          [type]="runStatusToBadgeStatus(data.status)"></lib-status-badge>
+
+        <div class="overview__times">
+          <lib-time-badge color="GRAY" [date]="data.createdAt"></lib-time-badge>
+          <lib-time-badge color="GRAY" [date]="data.updatedAt"></lib-time-badge>
+          <lib-time-badge color="GRAY"
+                          [date]="data.createdAt"
+                          [dateTo]="data.updatedAt"
+                          [calcDuration]="true"></lib-time-badge>
+        </div>
+      </div>
+
+      <mat-divider class="overview__divider"></mat-divider>
+
+      <div class="overview__details">
+        @if (data.lastLog) {
+          <lib-kv label="Last log" [value]="data.lastLog"></lib-kv>
+        }
+        @if (data.lastError) {
+          <lib-kv label="Last error" [value]="data.lastError"></lib-kv>
+        }
+        @if (data.lastLog) {
+          <lib-kv label="Container Id" [value]="data.containerId"></lib-kv>
+        }
+      </div>
+
+      <mat-divider class="overview__divider"></mat-divider>
+
+      <lib-run-performance [meta]="data.meta"/>
+    </div>
+    @if (isDone) {
+      <div class="done-actions">
+        @if (hasNeededInfoForDelete) {
+          <button mat-raised-button (click)="delete()">
+            <mat-icon class="delete">delete</mat-icon>
+            Delete this run
+          </button>
+        }
+      </div>
+    }
+  </mat-tab>
+  @if (data.rawLog) {
+    <mat-tab label="Console">
+      <lib-console-output [consoleRawMsg]="data.rawLog"></lib-console-output>
+    </mat-tab>
+  }
+</mat-tab-group>

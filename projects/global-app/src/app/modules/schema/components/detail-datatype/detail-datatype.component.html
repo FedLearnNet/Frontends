@@ -1,0 +1,235 @@
+<lib-header
+  [title]="pageTitle()"
+  [description]="pageDescription()"
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="loading()">
+  <div suffix class="datatype-header__actions">
+    @if (data().type) {
+      <lib-badge [text]="data().type" color="GRAY" [border]="true"></lib-badge>
+    }
+    @if (data().isRequired) {
+      <lib-badge text="Required" color="BLUE" [border]="true"></lib-badge>
+    }
+    @if (data().allowNullValues) {
+      <lib-badge text="Nulls allowed" color="GREEN" [border]="true"></lib-badge>
+    } @else {
+      <lib-badge text="No nulls" color="ORANGE" [border]="true"></lib-badge>
+    }
+    @if (!isDisabled()) {
+      <lib-btn type="SAVE" [loading]="saving()" (clicked)="save()"></lib-btn>
+    }
+  </div>
+</lib-header>
+
+<lib-page-wrapper [error]="error()" [isLoading]="loading()" [skeletonOnLoading]="true">
+  <div class="datatype-detail">
+    <section class="datatype-detail__intro">
+      <lib-info-card
+        type="INFO"
+        variant="BANNER"
+        title="Data types are part of the shared data standard">
+        <span subtitle>
+          A data standard describes how data should look so every project and clinic can use the same meaning,
+          structure and quality rules. The null-value setting controls whether empty or missing values are accepted
+          before validators run. Validators then check real values, for example minimum length, patterns or numeric
+          limits.
+        </span>
+      </lib-info-card>
+
+      <div class="standard-summary">
+        <div class="standard-summary__item">
+          <span>Validation rules</span>
+          <strong>{{ data().validations.length }}</strong>
+        </div>
+        <div class="standard-summary__item">
+          <span>Allowed values</span>
+          <strong>{{ data().options.length }}</strong>
+        </div>
+        <div class="standard-summary__item">
+          <span>Linked schemas</span>
+          <strong>{{ data().schemaIds?.length ?? 0 }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="datatype-detail__layout">
+      <mat-card class="datatype-panel" appearance="outlined">
+        <div class="datatype-panel__header">
+          <div>
+            <h2>Definition</h2>
+            <p>Name, description and value family for the shared data standard.</p>
+          </div>
+        </div>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="('GRID.NAME' | translate)"
+            [ngModel]="data().name"
+            (ngModelChange)="data().name = $event"
+            [disabled]="isDisabled()">
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+          <textarea
+            matInput
+            rows="4"
+            [placeholder]="('GRID.DESCRIPTION' | translate)"
+            [ngModel]="data().description"
+            (ngModelChange)="data().description = $event"
+            [disabled]="isDisabled()"></textarea>
+        </mat-form-field>
+
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>{{ 'GRID.TYPE' | translate }}</mat-label>
+          <mat-select
+            [ngModel]="data().type"
+            (ngModelChange)="data().type = $event; onTypeChange()"
+            [disabled]="isDisabled()">
+            @for (type of types; track type.value) {
+              <mat-option [value]="type.value">{{ type.viewValue }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </mat-card>
+
+      <mat-card class="datatype-panel" appearance="outlined">
+        <div class="datatype-panel__header">
+          <div>
+            <h2>Null policy</h2>
+            <p>Control missing values separately from value validations.</p>
+          </div>
+        </div>
+
+        <div class="policy-grid">
+          <label class="policy-option" [class.policy-option--disabled]="isDisabled()">
+            <mat-slide-toggle
+              [ngModel]="data().allowNullValues"
+              (ngModelChange)="data().allowNullValues = $event"
+              [disabled]="isDisabled()">
+              Allow null values
+            </mat-slide-toggle>
+            <span>Accept empty or missing values.</span>
+          </label>
+
+          <label class="policy-option" [class.policy-option--disabled]="isDisabled()">
+            <mat-slide-toggle
+              [ngModel]="data().isRequired"
+              (ngModelChange)="data().isRequired = $event"
+              [disabled]="isDisabled()">
+              Required in standard
+            </mat-slide-toggle>
+            <span>Mark this datatype as mandatory, if no value (or null value if allow null is there) the patient will be not be allowed.</span>
+          </label>
+        </div>
+      </mat-card>
+    </section>
+
+    <section class="datatype-detail__layout">
+      <mat-card class="datatype-panel datatype-panel--wide" appearance="outlined">
+        <div class="datatype-panel__header">
+          <div>
+            <h2>{{ 'MENU.VALIDATIONS' | translate }}</h2>
+            <p>Rules that run after null handling has accepted a concrete value.</p>
+          </div>
+          @if (!isDisabled() && data().type !== DataTypes.CATEGORICAL) {
+            <lib-btn type="ADD" label="Add validator" variant="SECONDARY" (clicked)="addValidator()"></lib-btn>
+          }
+        </div>
+
+        @if (data().type !== DataTypes.CATEGORICAL) {
+          @if (data().validations.length) {
+            <div class="validator-list">
+              @for (validation of data().validations; track validation) {
+                <div class="validator-group">
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{ 'GRID.TYPE' | translate }}</mat-label>
+                    <mat-select [ngModel]="validation.name" (ngModelChange)="validation.name = $event" [disabled]="isDisabled()">
+                      @for (validator of getValidators(); track validator) {
+                        <mat-option [value]="validator">{{ validator }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+
+                  @if (validation.name) {
+                    <mat-form-field appearance="outline">
+                      <mat-label>{{ 'GRID.CHECK_VALUE' | translate }}</mat-label>
+                      <input
+                        matInput
+                        [placeholder]="('GRID.CHECK_VALUE' | translate)"
+                        [ngModel]="validation.validator"
+                        (ngModelChange)="validation.validator = $event"
+                        [disabled]="isDisabled()">
+                    </mat-form-field>
+                  }
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>{{ 'GRID.ERROR_MESSAGE' | translate }}</mat-label>
+                    <input
+                      matInput
+                      [placeholder]="('GRID.ERROR_MESSAGE' | translate)"
+                      [ngModel]="validation.message"
+                      (ngModelChange)="validation.message = $event"
+                      [disabled]="isDisabled()">
+                  </mat-form-field>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="datatype-panel__empty">No validators configured for this datatype.</div>
+          }
+        } @else {
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>{{ 'GRID.ALLOWED_VALUES' | translate }}</mat-label>
+            <mat-chip-grid #chipGrid aria-label="Add allowed Values">
+              @for (option of data().options; track option) {
+                <mat-chip-row
+                  (removed)="removeOption(option)"
+                  [editable]="!isDisabled()"
+                  (edited)="editOption(option, $event)"
+                  [aria-description]="'press enter to edit ' + option">
+                  {{ option }}
+                  @if (!isDisabled()) {
+                    <button matChipRemove [attr.aria-label]="'remove ' + option">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  }
+                </mat-chip-row>
+              }
+              <input
+                [matChipInputFor]="chipGrid"
+                [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                [matChipInputAddOnBlur]="true"
+                (matChipInputTokenEnd)="addOption($event)"
+                [disabled]="isDisabled()" />
+            </mat-chip-grid>
+          </mat-form-field>
+        }
+      </mat-card>
+
+      @if (data().id) {
+        <mat-card class="datatype-panel" appearance="outlined">
+          <div class="datatype-panel__header">
+            <div>
+              <h2>{{ 'CHECK_EXAMPLE_VALUE' | translate }}</h2>
+              <p>Run a sample value against the current datatype rules.</p>
+            </div>
+          </div>
+
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>{{ 'GRID.VALUE' | translate }}</mat-label>
+            <input matInput [placeholder]="('GRID.VALUE' | translate)" type="text" [(ngModel)]="toCheckValue">
+            @if (toCheckValue) {
+              <button matSuffix mat-icon-button aria-label="Check validation" (click)="checkValidation()">
+                <mat-icon>search_check</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </mat-card>
+      }
+    </section>
+  </div>
+</lib-page-wrapper>

@@ -1,0 +1,15 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.CREATE_EXPERIMENT.TITLE_2' | translate"></lib-closeable-dialog-title>
+
+<mat-dialog-content>
+  <app-create-local-experiment [project]="data.project"
+                               [workflow]="data.workflow"
+                               (createDto)="createDto.set($event)"
+                               (isValid)="isValidForm.set($event)"
+  />
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button [disabled]="!isValidForm()" (click)="onSubmit()">{{ 'BUTTON.CREATE' | translate }}</button>
+</mat-dialog-actions>

@@ -1,0 +1,46 @@
+.layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  min-height: calc(100dvh - 106px);
+  padding: 8px;
+  background: #f7f9ff;
+  position: relative;
+
+  .content {
+    background: #fff;
+    border: 1px solid #e8e8ef;
+    border-radius: 16px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+    min-width: 0;
+    //height: max-content;
+    min-height: inherit;
+    padding: 8px;
+  }
+
+  .scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .36);
+    backdrop-filter: saturate(120%) blur(2px);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0;
+
+    .content {
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      height: 100dvh;
+      overflow: auto;
+    }
+
+    &.has-scrim .scrim {
+      display: block;
+    }
+  }
+}

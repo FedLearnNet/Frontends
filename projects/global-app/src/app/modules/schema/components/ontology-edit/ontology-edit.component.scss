@@ -1,0 +1,41 @@
+
+
+.wrapper {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  &-element {
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 5%;
+  }
+  .two-columns{
+    width: 47.5% !important;
+  }
+}
+
+
+.save-btn {
+  float: right;
+}
+
+
+.names-section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 30px;
+  padding-left: 20px;
+
+  .names-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .names-field {
+    flex: 1;
+  }
+}
+

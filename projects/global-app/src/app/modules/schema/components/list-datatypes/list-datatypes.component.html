@@ -1,0 +1,57 @@
+@if (!hideToolbar()) {
+  <lib-header
+    class="header"
+    title="Data Types"
+    description="Review and manage global data types"
+    [enableGoBack]="true"
+    [enableSearch]="true"
+    [locationBack]="true"
+    [enableAddBtn]="true"
+    addBtnLabel="Create datatype"
+    addBtnAriaLabel="Create datatype"
+    searchLabel="Search Data Types"
+    searchPlaceholder="Name"
+    [searchValue]="search()"
+    (searchInput)="onSearchChange($event)"
+    (addBtnClick)="openCreatePage()">
+  </lib-header>
+}
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="loading()"
+  [isEmpty]="items().length === 0"
+  [skeletonOnLoading]="true"
+>
+  <lib-empty-state
+    empty
+    [title]="'No results found'"
+  ></lib-empty-state>
+
+  @if (!hideToolbar()) {
+    <lib-info-card
+      class="data-type-list__info"
+      type="PRIMARY"
+      variant="BANNER"
+      title="Shared datatypes define the contract before data reaches a project"
+      subtitle="Keep requiredness and null handling as explicit datatype properties, then use validators only for concrete non-null values.">
+    </lib-info-card>
+  }
+
+  <div class="data-type-list__items">
+    @for (item of items(); track item.id) {
+      <app-datatype-card [dataType]="item"/>
+    }
+  </div>
+  @if (totalCount() > pageSize()) {
+    <mat-paginator
+      class="data-type-list__paginator"
+      [length]="totalCount()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPageChange($event)"
+      aria-label="Datatype pagination"
+    >
+    </mat-paginator>
+  }
+</lib-page-wrapper>

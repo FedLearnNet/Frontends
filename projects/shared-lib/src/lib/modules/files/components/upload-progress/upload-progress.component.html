@@ -1,0 +1,22 @@
+@if (hasError()) {
+  <div class="upload-progress upload-progress--error">
+    <lib-error-card [errorObject]="errorObject()" />
+  </div>
+} @else {
+  <div class="upload-progress" [class.finished]="finished()">
+    <mat-progress-bar [mode]="mode()" [value]="percent()" />
+    @if (showLabel()) {
+      <span class="upload-progress__label">
+        @if (finished()) {
+          <mat-icon class="upload-progress__check" aria-hidden="true">check_circle</mat-icon>
+          <span class="upload-progress__done">Done</span>
+        } @else {
+          {{ percent() }}%
+          @if (hasBytes()) {
+            <span class="upload-progress__size">({{ loadedMb() }} MB / {{ totalMb() }} MB)</span>
+          }
+        }
+      </span>
+    }
+  </div>
+}

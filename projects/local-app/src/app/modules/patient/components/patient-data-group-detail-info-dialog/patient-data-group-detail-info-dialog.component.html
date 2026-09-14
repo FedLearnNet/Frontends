@@ -1,0 +1,143 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  [title]="schema()?.name || 'Schema Node'" />
+
+
+<mat-dialog-content class="content">
+
+  @if (loading()) {
+    <div class="loading">
+      <mat-progress-spinner mode="indeterminate" diameter="36" />
+      <span>Lade Details…</span>
+    </div>
+  } @else if (error()) {
+    <lib-error-card>
+      {{ error() }}
+    </lib-error-card>
+  } @else {
+    @if (schema(); as d) {
+
+      <section class="grid">
+        <article class="card">
+          <header>
+            <mat-icon>info</mat-icon>
+            <h3>Overview</h3>
+          </header>
+          <div class="rows">
+            <div class="row">
+              <span class="label">{{ 'GRID.NAME' | translate }}</span>
+              <span class="value">{{ d.name }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Typ</span>
+              <span class="value"><span class="pill" [ngClass]="d.dataType.type.toLowerCase()">{{ d.dataType.type }}</span></span>
+            </div>
+            <div class="row">
+              <span class="label">Created</span>
+              <span class="value">{{ d.createdAt | date:'medium' }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Updated</span>
+              <span class="value">{{ d.updatedAt | date:'medium' }}</span>
+            </div>
+            <div class="row">
+              <span class="label">Version</span>
+              <span class="value">{{ d.version }}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <header>
+            <mat-icon>account_tree</mat-icon>
+            <h3>Ontology</h3>
+          </header>
+          @if (d.ontology; as o) {
+            <div class="rows">
+              <div class="row">
+                <span class="label">{{ 'GRID.NAME' | translate }}</span>
+                <span class="value">{{ o.name }}</span>
+              </div>
+              <div class="row">
+                <span class="label">{{ 'GRID.SOURCE' | translate }}</span>
+                <span class="value">{{ o.rootSource || '—' }}</span>
+              </div>
+              <div class="row">
+                <span class="label">{{ 'GRID.DESCRIPTION' | translate }}</span>
+                <span class="value">{{ o.description || '—' }}</span>
+              </div>
+            </div>
+          } @else {
+            <lib-error-card>
+              No ontology found
+            </lib-error-card>
+          }
+        </article>
+
+        <article class="card span2">
+          <header>
+            <mat-icon>data_object</mat-icon>
+            <h3>DataType</h3>
+          </header>
+          @if (d.dataType; as dt) {
+            <div class="rows">
+              <div class="row span2">
+                <span class="label">Typ</span>
+                <span class="value">
+                  <span class="pill"
+                        [ngClass]="dt.type.toLowerCase()">{{ dataTypeLabel(dt) }}
+                  </span>
+                </span>
+              </div>
+              <div class="row span2">
+                <span class="label">{{ 'GRID.NAME' | translate }}</span>
+                <span class="value">{{ dt.name }}</span>
+              </div>
+              <div class="row span2">
+                <span class="label">{{ 'GRID.DESCRIPTION' | translate }}</span>
+                <span class="value">{{ dt.description || '—' }}</span>
+              </div>
+
+              <div class="row span2">
+                <span class="label">{{ 'GRID.ALLOWED_VALUES' | translate }}</span>
+                <span class="value">
+                @if (dt.options?.length) {
+                  <mat-chip-set>
+                    @for (v of dt.options; track $index) {
+                      <mat-chip>{{ v }}</mat-chip>
+                    }
+                  </mat-chip-set>
+                } @else {
+                  —
+                }
+              </span>
+              </div>
+
+              <div class="row span2">
+                <span class="label">Mapping</span>
+                <span class="value">
+                @if (objectKeys(dt.mapping).length) {
+                  <div class="kv">
+                    @for (k of objectKeys(dt.mapping); track $index) {
+                      <div class="kv-row">
+                        <span class="k mono">{{ k }}</span>
+                        <mat-icon>arrow_forward</mat-icon>
+                        <span class="v mono">{{ dt.mapping![k] }}</span>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  —
+                }
+              </span>
+              </div>
+            </div>
+          } @else {
+            <lib-error-card>
+              No datatype found
+            </lib-error-card>
+          }
+        </article>
+      </section>
+    }
+  }
+</mat-dialog-content>

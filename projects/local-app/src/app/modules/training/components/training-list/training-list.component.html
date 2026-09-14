@@ -1,0 +1,47 @@
+<lib-header
+  title="Accepted Trainings"
+  description="Review and manage federated learning trainings">
+</lib-header>
+<section>
+<mat-table [dataSource]="flRequests()" class="mat-elevation-z0">
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let flRequest">
+        <a [routerLink]="['overview/', flRequest.project.id]"> {{ flRequest.project.name }}</a>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.DESCRIPTION' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let flRequest">{{ flRequest.project.description }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="time">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.TIME' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let flRequest">
+        @if (flRequest.experiment.finishedAt) {
+          <lib-time-badge [date]="flRequest.experiment.finishedAt" />
+        } @else {
+          <lib-time-badge [date]="flRequest.experiment.startedAt" />
+          @if (flRequest.experiment.startedAt) {
+            <lib-time-badge [date]="flRequest.experiment.startedAt" [calcDuration]="true" />
+          }
+        }
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let flRequest">
+        <lib-status-badge [text]="flRequest.experiment.experimentStatus" [type]="projectStatusToBadgeStatus(flRequest.experiment.experimentStatus)" size="SMALL"
+                          [animate]="true" />
+      </mat-cell>
+    </ng-container>
+    <mat-header-row *matHeaderRowDef="displayedColumns" />
+    <mat-row *matRowDef="let row; columns: displayedColumns;" />
+  </mat-table>
+  <app-lib-mat-paginator #paginator
+    tableName="flRequests"
+    [length]="totalCount()"
+    (page)="onPageChange($event)" />
+</section>

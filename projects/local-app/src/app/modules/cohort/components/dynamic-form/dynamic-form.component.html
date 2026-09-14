@@ -1,0 +1,32 @@
+<div class="dynamic-form">
+  <form [formGroup]="dynamicForm">
+    <div class="dynamic-form--component">
+      @for (node of schemaNodes(); track getId(node)) {
+        @if (isGroup(node)) {
+          <section class="group-section" [formGroupName]="getId(node)">
+            <mat-expansion-panel
+              #matExpansionPanelElement
+              [attr.data-expansion-id]="getId(node)"
+              [attr.expansion-name]="getId(node)">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{ node.name }}
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <app-local-app-dynamic-form [parentComponent]="this"
+                [nestedFormName]="getId(node)"
+                [schemaNodes]="node.childNodes"
+                [childFormGroup]="dynamicForm.get(getId(node).toString())" />
+              <!-- TODO IF WE GET SOMETHING LIKE THAT <app-local-app-group-list -->
+            </mat-expansion-panel>
+          </section>
+        } @else {
+          <app-patient-data-form-field
+            [node]="node"
+            [control]="dynamicForm.get(getId(node))" />
+        }
+      }
+    </div>
+  </form>
+</div>

@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Resume draft?</h2>
+
+<mat-dialog-content>
+  <div class="resume-dialog-copy">
+    <div class="resume-dialog-icon">
+      <mat-icon>history</mat-icon>
+    </div>
+
+    <div>
+      <p class="resume-dialog-lead">We found an unfinished connector setup for this cohort.</p>
+      <p class="resume-dialog-text">Do you want to continue where you left off, or start a new connector from scratch?</p>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="startFresh()">Start new</button>
+  <button mat-flat-button color="primary" (click)="continueFromDraft()">Continue draft</button>
+</mat-dialog-actions>

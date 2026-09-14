@@ -1,0 +1,273 @@
+
+.connector-step-config-wrapper {
+  padding: 24px 30px;
+  margin-bottom: var(--toolbar-height);
+}
+
+
+.mapper-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+
+  h2 {
+    margin: 6px 0 8px;
+    font-size: 1.8rem;
+    color: #172033;
+  }
+}
+
+.mapper-eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5f7394;
+}
+
+.mapper-subtitle {
+  max-width: 780px;
+  margin: 0;
+  color: #617084;
+}
+
+
+.add-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 220px;
+  min-height: 42px;
+  padding-inline: 14px;
+  border-radius: 12px;
+  background: #f6f9ff;
+  color: #193258;
+  border: 1px solid transparent;
+
+  span {
+    order: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  mat-icon {
+    order: 2;
+  }
+
+  &--success {
+    border-color: color-mix(in srgb, var(--success-text) 35%, transparent);
+    background: var(--success-bg);
+    color: var(--success-text);
+  }
+
+  &--warning {
+    border-color: color-mix(in srgb, var(--warning-text) 35%, transparent);
+    background: var(--warning-bg);
+    color: var(--warning-text);
+  }
+}
+
+.mat-toolbar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 16px 20px;
+  border: 1px solid #dde5f2;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  mat-button-toggle-group {
+    margin-left: 12px;
+  }
+}
+
+.toolbar-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toolbar-title {
+  font-weight: 600;
+  color: #1c2940;
+}
+
+.toolbar-summary {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.suggest-button {
+  border-radius: 12px;
+}
+
+.table-shell {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-gutter: stable;
+  border: 1px solid #dfe6f2;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 36px rgba(17, 34, 68, 0.05);
+
+  &:focus-visible {
+    outline: 3px solid rgba(47, 104, 199, 0.18);
+    outline-offset: 2px;
+  }
+}
+
+.demo-table {
+  width: 100%;
+  min-width: 920px;
+  table-layout: fixed;
+}
+
+.mat-column-column {
+  width: 22%;
+}
+
+.mat-column-data {
+  width: 20%;
+}
+
+.mat-column-mapping {
+  width: 30%;
+}
+
+.mat-column-time_series_mapping {
+  width: 28%;
+}
+
+.column-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.column-warning-indicator {
+  flex: 0 0 auto;
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  color: var(--warning-text);
+  cursor: help;
+}
+
+.column-validation-indicator {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  &--success {
+    background: var(--success-bg);
+    color: var(--success-text);
+  }
+
+  &--warning,
+  &--sync {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+  }
+
+  &--sync mat-icon {
+    animation: mapper-validation-spin 1s linear infinite;
+  }
+}
+
+@keyframes mapper-validation-spin {
+  to { transform: rotate(360deg); }
+}
+
+.sample-value {
+  display: inline-block;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #48556a;
+}
+
+.list-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.row-ignored {
+  opacity: 0.55;
+  pointer-events: none;
+  background-color: #f3f5f8;
+}
+
+th.mat-mdc-header-cell {
+  background: #f7f9fc;
+  color: #53637c;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+td.mat-mdc-cell,
+th.mat-mdc-header-cell {
+  padding: 16px 18px;
+}
+
+tr.mat-mdc-row:hover {
+  background: #fbfcfe;
+}
+
+@media (max-width: 1100px) {
+  .connector-step-config-wrapper {
+    padding-inline: 18px;
+  }
+
+  .mapper-header {
+    flex-direction: column;
+  }
+
+  .mapper-stats {
+    width: 100%;
+  }
+
+  .mat-toolbar {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 1280px) {
+  .mat-toolbar {
+    height: auto;
+    flex-wrap: wrap;
+  }
+
+  .mat-column-column {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fff;
+    box-shadow: 8px 0 12px -12px rgba(23, 32, 51, 0.55);
+  }
+
+  th.mat-column-column {
+    z-index: 4;
+    background: #f7f9fc;
+  }
+}

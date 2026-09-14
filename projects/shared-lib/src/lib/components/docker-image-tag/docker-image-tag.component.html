@@ -1,0 +1,12 @@
+<div class="wrapper"
+     [class.clickable]="clickable() && hasImage()"
+     [matTooltip]="imageName() ?? ''"
+     [matTooltipDisabled]="!imageName()"
+     (click)="onClicked()">
+  <lib-badge
+    [text]="displayTag()"
+    [color]="resolvedColor()"
+    [size]="size()"
+    [border]="border()"
+    [iconName]="resolvedIcon()"/>
+</div>

@@ -1,0 +1,32 @@
+<div class="log-viewer">
+  <div class="log-toolbar">
+    <!--<button mat-icon-button matTooltip="Search logs">
+      <mat-icon>search</mat-icon>
+    </button>-->
+    <div class="spacer"></div>
+    <button mat-icon-button matTooltip="Download raw logs" (click)="downloadLogs()">
+      <mat-icon>download</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Copy raw logs" (click)="copyLogs()">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
+
+  @if (rawLogs()) {
+    <pre class="log-content">
+          <code>
+          @for (line of logsLines(); track $index) {
+            <div class="log-line">
+              <span class="line-number">{{ $index + 1 }}</span>
+              <span class="line-text">{{ line }}</span>
+            </div>
+          }
+          </code>
+        </pre>
+  } @else {
+    <div class="no-logs-message">
+      <mat-icon>description</mat-icon>
+      <span>No logs available for this step.</span>
+    </div>
+  }
+</div>

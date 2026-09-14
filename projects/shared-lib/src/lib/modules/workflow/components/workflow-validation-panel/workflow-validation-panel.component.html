@@ -1,0 +1,40 @@
+<section class="panel" [class.panel--ok]="isOk()">
+  <header class="panel__header">
+    <div class="panel__title">
+      <div>
+        <div class="subtitle">
+          @if (isOk()) {
+            <lib-badge [text]="'No validation Errors'"></lib-badge>
+          } @else {
+            <lib-badge color="RED" [text]="'Errors (' +  errorCount() +')'"></lib-badge>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (!isOk()) {
+      <button mat-icon-button type="button" class="btn--extend" (click)="toggleExpanded()">
+        @if (expanded()) {
+          <mat-icon>close_fullscreen</mat-icon>
+        } @else {
+          <mat-icon>expand_content</mat-icon>
+        }
+      </button>
+    }
+  </header>
+
+  @if (!isOk() && expanded()) {
+
+    <div class="list" role="list">
+      @for (item of items(); track item.key) {
+        <div class="row" role="listitem">
+          <div class="msg">{{ item.message }}</div>
+          <div class="meta">
+            <lib-badge color="GRAY" [border]="true" [text]="item.path"></lib-badge>
+            <lib-badge color="GRAY" [border]="true" [text]="item.code"></lib-badge>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

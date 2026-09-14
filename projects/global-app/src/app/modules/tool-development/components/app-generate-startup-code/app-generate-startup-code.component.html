@@ -1,0 +1,85 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'CONFIG_YOUR_STARTUP' | translate"/>
+
+<mat-dialog-content class="content">
+  <lib-hint-card>
+    This generates a ready-to-use development starter including configuration,
+    project scaffolding, and optional diagnostics.
+  </lib-hint-card>
+
+  <form class="form" [formGroup]="form">
+    <div class="section">
+      <div class="section-title">Options</div>
+      <div class="section-sub">
+        Select which features should be included in the generated startup package.
+      </div>
+    </div>
+
+    <mat-slide-toggle formControlName="enableProjectSetup" class="row">
+      <div class="toggle-text">
+        <div class="toggle-title">Project setup</div>
+        <div class="toggle-sub">
+          Generate app.yml based on platform saved config.
+        </div>
+      </div>
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+
+    <mat-slide-toggle formControlName="enableConfigSync" class="row">
+      <div class="toggle-text">
+        <div class="toggle-title">Configuration sync</div>
+        <div class="toggle-sub">
+          Automatically synchronize configuration changes between local project and platform.
+        </div>
+      </div>
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+
+    <mat-slide-toggle formControlName="prioLocalConfig" class="row">
+      <div class="toggle-text">
+        <div class="toggle-title">Prefer local configuration</div>
+        <div class="toggle-sub">
+          Local values override remote configuration during development.
+        </div>
+      </div>
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+
+    <mat-slide-toggle formControlName="tracePerformance" class="row">
+      <div class="toggle-text">
+        <div class="toggle-title">Performance tracing</div>
+        <div class="toggle-sub">
+          Enable lightweight tracing to help diagnose latency and bottlenecks.
+        </div>
+      </div>
+    </mat-slide-toggle>
+
+    <mat-divider></mat-divider>
+
+    <mat-slide-toggle formControlName="sendConsoleLogs" class="row">
+      <div class="toggle-text">
+        <div class="toggle-title">Send console logs</div>
+        <div class="toggle-sub">
+          Forward client logs to the platform for debugging purposes.
+        </div>
+      </div>
+    </mat-slide-toggle>
+
+    @if (!data.id) {
+      <lib-error-card>
+        This application must be saved first before generating a startup project.
+      </lib-error-card>
+    }
+  </form>
+</mat-dialog-content>
+
+<span class="spacer"></span>
+<mat-dialog-actions [align]="'end'">
+  <button mat-button
+          [disabled]="!data.id"
+          (click)="onSubmit()">{{ 'BUTTON.CREATE' | translate }}
+  </button>
+</mat-dialog-actions>

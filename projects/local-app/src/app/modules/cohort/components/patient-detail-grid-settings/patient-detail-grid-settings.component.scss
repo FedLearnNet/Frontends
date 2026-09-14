@@ -1,0 +1,11 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+mat-tree {
+  width: 100%;
+}
+
+
+::ng-deep mat-form-field {
+  width: 30%;
+  max-width: 300px;
+}

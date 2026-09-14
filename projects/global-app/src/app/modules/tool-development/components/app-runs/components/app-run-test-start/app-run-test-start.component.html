@@ -1,0 +1,70 @@
+<h2 mat-dialog-title>Test {{ data.app.name }}</h2>
+<mat-dialog-content>
+  <lib-app-run-hyperparameter [app]="data.app"
+                              (hyperParamsChange)="onHyperParamsChanged($event)"
+                              (formsValid)="hyperParamsValid = $event"
+   />
+
+  <!-- For not not in use
+  <div class="use-local-files-wrapper">
+    <mat-divider />
+
+    <mat-slide-toggle [(ngModel)]="useLocalFiles">
+        {{ 'DO_YOU_WANT_TO_USE_LOCAL_FILES' | translate }}
+    </mat-slide-toggle>
+
+    <mat-divider />
+  </div>-->
+
+  @if (useLocalFiles) {
+    <h3>{{ 'MENU.INPUT_DATA' | translate }}</h3>
+    <form [formGroup]="testRunControl">
+      @for (input of getInputs(); track input) {
+        <mat-form-field class="example-full-width">
+          <mat-label>{{ input }}</mat-label>
+          <input type="text"
+                 [placeholder]="('SELECT_YOUR_EXPERIMENT_FILE' | translate)"
+                 matInput
+                 [formControl]="getFormControl(input)"
+                 [matAutocomplete]="auto">
+          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            @for (option of (filteredOptions | async); track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (getFormControl(input).hasError('required')) {
+            <mat-error>{{ 'VALIDATION.FILE_FOR_INPUT_IS_REQUIRED' | translate: { input: input } }}</mat-error>
+          }
+        </mat-form-field>
+      } @empty {
+        <lib-hint-card>No Inputs</lib-hint-card>
+      }
+    </form>
+  } @else {
+    <mat-form-field>
+      <mat-label>{{ 'MENU.SELECT_PROJECT' | translate }}</mat-label>
+      <mat-select
+        [(value)]="projectId">
+        @for (p of projectList; track p.id) {
+          <mat-option
+            [value]="p.id"
+            [disabled]="(!isProjectValid(p))"
+          >
+            <span>{{ p.name }} </span>
+            @if (isProjectValid(p)) {
+              <span> ({{ p.exportConfig?.features?.length }} features) </span>
+            } @else {
+              <span> ({{ 'NO_SELECTED_COLUMNS' | translate }}) </span>
+            }
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  <mat-divider />
+
+</mat-dialog-content>
+<mat-dialog-actions class="actions">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.NO_THANKS' | translate }}</button>
+  <button mat-button (click)="onRunClick()" [disabled]="!isValid()">{{ 'BUTTON.RUN' | translate }}</button>
+</mat-dialog-actions>

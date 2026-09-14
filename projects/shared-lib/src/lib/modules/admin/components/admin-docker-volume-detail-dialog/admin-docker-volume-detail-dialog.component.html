@@ -1,0 +1,112 @@
+<lib-closeable-dialog-title title="Volume details" />
+
+<mat-dialog-content class="dialog">
+  @if (loading()) {
+    <div class="loading">
+      <mat-spinner diameter="42" />
+      <p>Loading volume details…</p>
+    </div>
+  } @else if (error()) {
+    <lib-error-card [errorObject]="error()" />
+  } @else if (volume(); as volume) {
+    <section class="hero">
+      <div class="hero__copy">
+        <span class="hero__eyebrow">Docker volume</span>
+        <h2>{{ name(volume) }}</h2>
+        <p>{{ mountpoint(volume) }}</p>
+      </div>
+
+      <div class="hero__meta">
+        <button mat-stroked-button type="button" (click)="copyToClipboard(name(volume), 'Volume name')">
+          <mat-icon>content_copy</mat-icon>
+          Copy name
+        </button>
+      </div>
+    </section>
+
+    <div class="grid">
+      <article class="panel">
+        <h3>Storage</h3>
+        <dl>
+          <div>
+            <dt>Name</dt>
+            <dd>{{ name(volume) }}</dd>
+          </div>
+          <div>
+            <dt>Driver</dt>
+            <dd>{{ driver(volume) }}</dd>
+          </div>
+          <div>
+            <dt>Scope</dt>
+            <dd>{{ scope(volume) }}</dd>
+          </div>
+          <div>
+            <dt>Mountpoint</dt>
+            <dd>{{ mountpoint(volume) }}</dd>
+          </div>
+          <div>
+            <dt>Usage size</dt>
+            <dd>{{ usageSize(volume) }}</dd>
+          </div>
+          <div>
+            <dt>Reference count</dt>
+            <dd>{{ refCount(volume) }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="panel">
+        <h3>Labels</h3>
+        @if (labels().length) {
+          <div class="stack">
+            @for (label of labels(); track label[0]) {
+              <div class="kv-row">
+                <span>{{ label[0] }}</span>
+                <strong>{{ label[1] }}</strong>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty">This volume has no labels.</p>
+        }
+      </article>
+
+      <article class="panel">
+        <h3>Options</h3>
+        @if (options().length) {
+          <div class="stack">
+            @for (option of options(); track option[0]) {
+              <div class="kv-row">
+                <span>{{ option[0] }}</span>
+                <strong>{{ option[1] }}</strong>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="empty">No driver-specific options are reported.</p>
+        }
+      </article>
+
+      <article class="panel panel--danger">
+        <h3>Danger zone</h3>
+        <p>
+          Delete and prune actions are intentionally shown as unavailable until the orchestration relay publishes
+          safe mutating endpoints.
+        </p>
+        <button mat-stroked-button type="button" disabled>
+          <mat-icon>delete</mat-icon>
+          Delete volume
+        </button>
+      </article>
+
+      <article class="panel panel--raw">
+        <h3>Raw payload</h3>
+        <pre>{{ rawJson() }}</pre>
+      </article>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="dialogRef.close()">Close</button>
+</mat-dialog-actions>

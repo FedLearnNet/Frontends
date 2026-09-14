@@ -1,0 +1,38 @@
+@if (experiment(); as exp) {
+  <app-experiment-header
+    [hasActions]="false"
+    [hasGoBack]="false"
+    [experiment]="exp"
+    (refresh)="reload()"
+    [isSSEConnected]="connected()"
+    [loading]="loading()"
+  >
+    <div
+      class="whats-re-wrapper">
+      <button mat-fab extended
+              (click)="newExperiment()">
+        Re-execute test
+      </button>
+
+    </div>
+  </app-experiment-header>
+
+  <lib-workflow-readonly-view
+    [workflow]="workflow()"
+    [experiment]="exp!"
+    (selectNode)="showDetail($event)"
+  ></lib-workflow-readonly-view>
+} @else {
+  <div
+    class="whats-next-wrapper">
+    <lib-empty-state
+      title="New experiment"
+      subtitle="Create a new quick test to test your workflow"
+      icon="not_started"
+      [primaryButtonEnabled]="true"
+      [primaryButtonLabel]="'BUTTON.CREATE_LOCAL_EXPERIMENT' | translate"
+      (cta)="newExperiment()"
+    />
+  </div>
+
+}

@@ -1,0 +1,89 @@
+<h2 mat-dialog-title>Test {{ data.app.name }}</h2>
+<mat-dialog-content>
+  <h3>Config</h3>
+
+  <form [formGroup]="experimentRunControl">
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+      <input matInput [formControl]="experimentRunControl.controls.name"/>
+      @if (experimentRunControl.controls.name.hasError('required')) {
+        <mat-error>Name is <strong>required</strong></mat-error>
+      }
+      <mat-icon matSuffix
+                matTooltip="The name of the experiment"
+      >mode_edit
+      </mat-icon>
+
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+      <input matInput [formControl]="experimentRunControl.controls.description"/>
+      @if (experimentRunControl.controls.description.hasError('required')) {
+        <mat-error>Name is <strong>required</strong></mat-error>
+      }
+      <mat-icon matSuffix
+                matTooltip="The description of the experiment"
+      >mode_edit
+      </mat-icon>
+    </mat-form-field>
+
+    <!-- <mat-form-field appearance="fill">
+       <mat-label>Hyperparameter-Tuning-Methode (NOT USED)</mat-label>
+       <mat-select [formControl]="experimentRunControl.controls.tuningMethod">
+         <mat-option value="gridSearch" disabled>Grid Search</mat-option>
+         <mat-option value="randomSearch" disabled>Random Search</mat-option>
+         <mat-option value="bayesianOptimization" disabled>Bayesian Optimization</mat-option>
+       </mat-select>
+     </mat-form-field> -->
+    <mat-divider/>
+    <h3>Input data</h3>
+    @for (input of inputs(); track input) {
+      <mat-form-field class="example-full-width">
+        <mat-label>{{ input }}</mat-label>
+
+        <input
+          type="text"
+          placeholder="Select your experiment file"
+          matInput
+          [formControl]="getFormControl(input)"
+          [matAutocomplete]="auto"/>
+
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+          @for (option of getFilteredOptionsSignal(input)(); track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-autocomplete>
+
+        @if (getFormControl(input).hasError('required')) {
+          <mat-error>File for {{ input }} is <strong>required</strong></mat-error>
+        }
+      </mat-form-field>
+    } @empty {
+      <lib-hint-card>No Inputs</lib-hint-card>
+    }
+  </form>
+  <mat-divider/>
+  <h3>Hyperparameter</h3>
+  @if (hasHyperparameter) {
+    <lib-app-run-hyperparameter
+      [app]="data.app"
+      [allowMultiple]="true"
+      (multiHyperParamsChanged)="onMultiHyperParamsChanged($event)"
+      (formsValid)="onFormsValid($event)"
+    />
+  } @else {
+    <lib-hint-card>There are no HyperParams</lib-hint-card>
+  }
+  @if (formErrors.length > 0; ) {
+    <lib-error-card>
+      @for (err of formErrors; track $index) {
+        <p>{{ err }}</p>
+      }
+    </lib-error-card>
+  }
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <span class="spacer"></span>
+  <button mat-button (click)="onRunClick()" [disabled]="!isValid()">Run</button>
+</mat-dialog-actions>

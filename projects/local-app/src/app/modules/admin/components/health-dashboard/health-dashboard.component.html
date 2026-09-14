@@ -1,0 +1,56 @@
+<div class="container">
+
+  <h2>System Health</h2>
+  <p class="sub">Overview of services</p>
+
+  @if (loading()) {
+    <div class="loading">Loading health data…</div>
+  }
+
+  @for (b of boxes(); track b.key) {
+    <mat-card class="box">
+      <div class="header">
+        <h3>{{ b.title }}</h3>
+        <span class="chip"
+              [class.up]="b.reachable === 'UP'"
+              [class.down]="b.reachable === 'DOWN'"
+              [class.unknown]="b.reachable === 'UNKNOWN'">
+          <mat-icon>{{ icon(b.reachable) }}</mat-icon>
+          Reachable: {{ b.reachable }}
+        </span>
+      </div>
+
+      @if (entries(b.reachableMeta).length) {
+        <div class="meta">
+          @for (kv of entries(b.reachableMeta); track kv[0]) {
+            <span class="meta-chip"><strong>{{ kv[0] }}:</strong> {{ kv[1] }}</span>
+          }
+        </div>
+      }
+
+      @if (b.items.length > 0) {
+        <div class="items">
+          @for (it of b.items; track it.label) {
+            <div class="row">
+              <span class="label">{{ it.label }}</span>
+              <span class="chip"
+                    [class.up]="it.status === 'UP'"
+                    [class.down]="it.status === 'DOWN'"
+                    [class.unknown]="it.status === 'UNKNOWN'">
+                <mat-icon>{{ icon(it.status) }}</mat-icon>
+                {{ it.status }}
+              </span>
+            </div>
+            @if (entries(it.meta).length) {
+              <div class="meta">
+                @for (kv of entries(it.meta); track kv[0]) {
+                  <span class="meta-chip"><strong>{{ kv[0] }}:</strong> {{ kv[1] }}</span>
+                }
+              </div>
+            }
+          }
+        </div>
+      }
+    </mat-card>
+  }
+</div>

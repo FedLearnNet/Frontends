@@ -1,0 +1,50 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.tab-header-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+mat-tab-nav-panel {
+  display: block;
+  margin-top: 30px;
+  padding: 0 20px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-form {
+  display: grid;
+  gap: 20px;
+  padding: 24px 0;
+  max-width: 720px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.description-text {
+  padding: 20px 0;
+}
+
+.new-pred-btn {
+  display: block;
+  margin-left: auto;
+  margin-right: 20px;
+  margin-bottom: 16px;
+}
+
+.model-header {
+  ::ng-deep {
+    .model-header {
+      margin: 0;
+    }
+  }
+}

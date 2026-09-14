@@ -1,0 +1,56 @@
+.audit-card {
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: var(--surface-card, #ffffff);
+  border: 1px solid #e5e7eb;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  transition: all 0.2s ease;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__divider {
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  &__reason {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__reason-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+  }
+
+  &__reason-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--pending-text);
+  }
+
+
+  &.accept {
+    border-left: 4px solid var(--success-text);
+
+  }
+
+  &.reject {
+    border-left: 4px solid var(--failed-text);
+  }
+}

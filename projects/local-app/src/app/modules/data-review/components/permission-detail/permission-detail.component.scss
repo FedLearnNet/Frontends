@@ -1,0 +1,62 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.dialog--header {
+  /* Make the "Add Permission" label bold */
+  font-weight: bold;
+}
+
+.settings-title {
+  /* Left-align and decrease font size of "Settings" label */
+  text-align: left;
+  font-size: 1.2em;
+  margin-bottom: 16px;
+  margin-top: 0;
+}
+
+
+.permissive-hint {
+  text-align: left;
+  width: 100%;
+}
+
+.dialog--content {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+mat-slide-toggle {
+  margin-bottom: 16px;
+  float: left;
+}
+
+.settings-section h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.mat-slide-toggle {
+  margin-right: 8px;
+}
+
+.full-width {
+  width: 100%;
+  max-width: 100%;
+}
+
+.date-range-row {
+  display: flex;
+  gap: 16px;
+
+  .half-width {
+    flex: 1;
+  }
+}
+

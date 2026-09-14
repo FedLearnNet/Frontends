@@ -1,0 +1,56 @@
+<div class="dynamic-container" [style.height.px]="dynamicHeight()">
+  @if (isVisible()) {
+    <div
+      class="resize-handle"
+      (mousedown)="onResizeStart($event)"
+      [matTooltip]="'RESIZE_CONSOLE_OUTPUT' | translate"
+    ></div>
+  }
+
+  <mat-toolbar>
+    @if (clientConnected()) {
+      <mat-icon class="connected-success" [matTooltip]="'WEB_UI_CONNECTED' | translate">sensors</mat-icon>
+    } @else {
+      <mat-icon class="connected-error" [matTooltip]="'WEB_UI_DISCONNECTED' | translate">error</mat-icon>
+    }
+
+    @if (appConnected()) {
+      <mat-icon class="connected-success" [matTooltip]="'APP_CONNECTED' | translate">stream</mat-icon>
+    } @else {
+      <mat-icon class="connected-warn" [matTooltip]="'APP_DISCONNECTED' | translate">sync</mat-icon>
+    }
+
+    @if (appConnected()) {
+      <button mat-icon-button (click)="toggleConsole()">
+        @if (!isVisible()) {
+          <mat-icon>keyboard_arrow_up</mat-icon>
+        } @else {
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        }
+      </button>
+    }
+
+    @if (isVisible()) {
+      <span class="spacer"></span>
+
+      <button mat-icon-button [matTooltip]="'DELETE_OUTPUT' | translate" (click)="deleteOutputs()">
+        <mat-icon class="connected-error">delete</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="toggleFollow()">
+        @if (followConsole()) {
+          <mat-icon [matTooltip]="'UNFOLLOW_OUTPUT' | translate" class="connected-success">play_circle</mat-icon>
+        } @else {
+          <mat-icon [matTooltip]="'FOLLOW_OUTPUT' | translate" class="connected-warn">stop_circle</mat-icon>
+        }
+      </button>
+    }
+  </mat-toolbar>
+
+  @if (isVisible()) {
+    <lib-console-output
+      [consoleStdOut]="consoleOutputs()"
+      [followConsole]="followConsole()"
+    ></lib-console-output>
+  }
+</div>

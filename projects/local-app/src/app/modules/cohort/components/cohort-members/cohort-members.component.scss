@@ -1,0 +1,97 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.cohort-members-container {
+  margin-top: 20px;
+}
+
+.member-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.user-field {
+  flex: 1 1 320px;
+}
+
+.type-field {
+  flex: 0 1 180px;
+}
+
+.option-detail {
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  padding: 10px;
+}
+
+mat-table {
+  min-width: 760px;
+  border-radius: 4px;
+}
+
+mat-header-cell,
+mat-cell {
+  min-width: 160px;
+}
+
+.mat-column-actions {
+  max-width: 120px;
+}
+
+.mat-column-type {
+  min-width: 260px;
+}
+
+.user-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.user-id {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 280px;
+}
+
+.row-type-field {
+  width: 150px;
+  margin-right: 10px;
+}
+
+.error {
+  color: var(--mat-sys-error);
+}
+
+lib-empty-state {
+  display: block;
+  margin: 24px 10px 0;
+}
+
+@media (max-width: 700px) {
+  .member-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-field,
+  .type-field,
+  .member-form button {
+    width: 100%;
+  }
+}

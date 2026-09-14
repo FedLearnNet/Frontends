@@ -1,0 +1,442 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  title="Orchestration dashboard"
+  description="Inspect engine health, running containers, persisted execution runs, attached volumes and live runtime logs
+        from one workspace.">
+  <button suffix mat-raised-button type="button" (click)="refreshAll()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="loading()"
+  [skeletonOnLoading]="true"
+  [error]="error()"
+>
+  <section class="stats">
+    <mat-card class="stat-card">
+      <span class="stat-card__label">Engine version</span>
+      <strong>{{ dockerInfo()?.ServerVersion || '—' }}</strong>
+      <small>{{ systemLabel(dockerInfo()) }}</small>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <span class="stat-card__label">Running containers</span>
+      <strong>{{ dockerInfo()?.ContainersRunning ?? runningContainers().length }}</strong>
+      <small>{{ dockerInfo()?.Containers ?? runningContainers().length }} total known</small>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <span class="stat-card__label">Saved runs</span>
+      <strong>{{ runs().length }}</strong>
+      <small>Execution history snapshots</small>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <span class="stat-card__label">Volumes</span>
+      <strong>{{ volumes().length }}</strong>
+      <small>Mounted data stores</small>
+    </mat-card>
+  </section>
+
+  <mat-tab-group class="tabs">
+    <mat-tab label="Engine">
+      <div class="tab-grid">
+        <mat-card class="panel panel--soft">
+          <div class="panel__header">
+            <div>
+              <h2>Engine overview</h2>
+              <p>Deep system and runtime metadata exposed by the orchestrator relay.</p>
+            </div>
+          </div>
+
+          @if (dockerInfo(); as info) {
+            <lib-admin-docker-kpis [info]="info"/>
+          } @else {
+            <div class="empty-state">Engine metadata is not available yet.</div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Containers">
+      <div class="tab-grid">
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Running containers</h2>
+              <p>Search, inspect and jump into live logs for currently active workloads.</p>
+            </div>
+
+            <mat-form-field appearance="outline" class="search">
+              <mat-label>Search containers</mat-label>
+              <input
+                matInput
+                [value]="containerSearch()"
+                (input)="containerSearch.set($any($event.target).value)"
+                placeholder="Name, image or ID">
+            </mat-form-field>
+          </div>
+
+          <div class="table-wrap">
+            <table mat-table [dataSource]="filteredContainers()" class="table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let container">
+                  <div class="primary">
+                    <strong>{{ containerName(container) }}</strong>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="image">
+                <th mat-header-cell *matHeaderCellDef>Image</th>
+                <td mat-cell *matCellDef="let container">{{ container.Image || '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="ports">
+                <th mat-header-cell *matHeaderCellDef>Ports</th>
+                <td mat-cell *matCellDef="let container">{{ containerPorts(container) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let container">
+                  <lib-status-badge [text]="container.State || container.Status"
+                                    [type]="dockerStatusToBadgeStatus(container.State || container.Status)"></lib-status-badge>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="created">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let container">
+                  <lib-time-badge [date]="containerCreated(container)"
+                                  format="SHORT"
+                                  color="GRAY" size="SMALL"></lib-time-badge>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let container">
+                  <div class="row-actions">
+                    <a mat-icon-button type="button"
+                       [routerLink]="['container',container.Id ]"
+                       aria-label="Inspect container">
+                      <mat-icon>visibility</mat-icon>
+                    </a>
+                    <button
+                      mat-icon-button type="button" (click)="copyToClipboard(container.Id, 'Container ID')"
+                      [matTooltip]="container.Id" aria-label="Copy container ID">
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['name', 'image', 'ports', 'status', 'created', 'actions']"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: ['name', 'image', 'ports', 'status', 'created', 'actions']"
+                [class.row--active]="runningLogsContainerId() === row.Id"></tr>
+            </table>
+          </div>
+
+          @if (!filteredContainers().length) {
+            <div class="empty-state">No running containers match the current filter.</div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Runs">
+      <div class="tab-grid">
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Saved execution runs</h2>
+              <p>Inspect completed orchestration records, metadata and captured logs.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table mat-table [dataSource]="sortedRuns()" class="table">
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>Run</th>
+                <td mat-cell *matCellDef="let run">
+                  <div class="primary">
+                    <strong>#{{ run.id }}</strong>
+                    <small>{{ run.containerName || run.containerId || 'No container ID' }}</small>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="image">
+                <th mat-header-cell *matHeaderCellDef>Image</th>
+                <td mat-cell *matCellDef="let run">{{ run.appImage || '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="workflow">
+                <th mat-header-cell *matHeaderCellDef>Workflow</th>
+                <td mat-cell *matCellDef="let run">#{{ run.workflowId ?? '—' }} · {{ run.workflowStep ?? '—' }}
+                  /{{ run.workflowMaxSteps ?? '—' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let run">
+                  <lib-status-badge [text]="run.status"
+                                    [type]="dockerStatusToBadgeStatus(run.status)"></lib-status-badge>
+
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="created">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let run">
+                  <lib-time-badge [date]="run.createdAt" color="GRAY" size="SMALL"></lib-time-badge>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let run">
+                  <div class="row-actions">
+                    <button mat-icon-button type="button" (click)="openRunDetail(run.id)" aria-label="Inspect run">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    @if (run.containerId) {
+                      <button mat-icon-button type="button" (click)="copyToClipboard(run.containerId, 'Container ID')"
+                              aria-label="Copy container ID">
+                        <mat-icon>content_copy</mat-icon>
+                      </button>
+                    }
+                    @if (downloadHref(run); as href) {
+                      <a mat-icon-button [href]="href" target="_blank" rel="noopener"
+                         aria-label="Download output bundle">
+                        <mat-icon>download</mat-icon>
+                      </a>
+                    }
+                    <button mat-icon-button type="button"
+                            [disabled]="!run.containerId"
+                            (click)="stopRunContainer(run)"
+                            [matTooltip]="run.containerId ? 'Stop container' : 'No container ID'"
+                            aria-label="Stop container">
+                      <mat-icon>stop_circle</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['id', 'image', 'workflow', 'status', 'created', 'actions']"></tr>
+              <tr mat-row
+                  *matRowDef="let row; columns: ['id', 'image', 'workflow', 'status', 'created', 'actions']"></tr>
+            </table>
+          </div>
+
+          @if (!sortedRuns().length) {
+            <div class="empty-state">No persisted orchestration runs have been reported yet.</div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Volumes">
+      <div class="tab-grid">
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Volumes</h2>
+              <p>Inspect attached storage, drivers, mountpoints and basic usage data.</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table mat-table [dataSource]="sortedVolumes()" class="table">
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let volume">
+                  <div class="primary">
+                    <strong>{{ volumeName(volume) }}</strong>
+                    <small>{{ volumeMountpoint(volume) }}</small>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="driver">
+                <th mat-header-cell *matHeaderCellDef>Driver</th>
+                <td mat-cell *matCellDef="let volume">{{ volumeDriver(volume) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="size">
+                <th mat-header-cell *matHeaderCellDef>Usage size</th>
+                <td mat-cell *matCellDef="let volume">{{ volumeSize(volume) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let volume">
+                  <div class="row-actions">
+                    <button mat-icon-button type="button" (click)="openVolumeDetail(volumeName(volume))"
+                            aria-label="Inspect volume">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" (click)="copyToClipboard(volumeName(volume), 'Volume name')"
+                            aria-label="Copy volume name">
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" color="warn"
+                            [disabled]="volumeRemoving()"
+                            (click)="removeVolume(volumeName(volume))"
+                            matTooltip="Remove volume"
+                            aria-label="Remove volume">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['name', 'driver', 'size', 'actions']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['name', 'driver', 'size', 'actions']"></tr>
+            </table>
+          </div>
+
+          @if (!sortedVolumes().length) {
+            <div class="empty-state">No volumes were returned by the relay.</div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+    <mat-tab label="Tool Containers">
+      <div class="tab-grid">
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <h2>Tool containers</h2>
+              <p>All tool containers. Select one or more and clean them up.</p>
+            </div>
+
+            <div class="row-actions">
+              <mat-checkbox
+                [checked]="fcAllSelected"
+                [indeterminate]="fcIndeterminate"
+                (change)="toggleFcAll()"
+                [disabled]="!fcContainers().length">
+                Select all
+              </mat-checkbox>
+
+              <mat-checkbox
+                [checked]="fcHardCleanup()"
+                (change)="fcHardCleanup.set($event.checked)">
+                Hard cleanup (remove volumes)
+              </mat-checkbox>
+
+              <button
+                mat-flat-button
+                color="warn"
+                type="button"
+                [disabled]="!fcSelection.selected.length || fcContainersCleaning()"
+                (click)="cleanupSelectedFc()">
+                <mat-icon>delete_sweep</mat-icon>
+                Delete selected ({{ fcSelection.selected.length }})
+              </button>
+            </div>
+          </div>
+
+          @if (fcContainersLoading() || fcContainersCleaning()) {
+            <mat-progress-bar mode="indeterminate"/>
+          }
+
+          <div class="table-wrap">
+            <table mat-table [dataSource]="fcContainers()" class="table">
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let container">
+                  <mat-checkbox
+                    [checked]="fcSelection.isSelected(container.Id)"
+                    (change)="fcSelection.toggle(container.Id)"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let container">
+                  <div class="primary">
+                    <strong>{{ containerName(container) }}</strong>
+                    <small>{{ container.Id | slice:0:12 }}</small>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="image">
+                <th mat-header-cell *matHeaderCellDef>Image</th>
+                <td mat-cell *matCellDef="let container">{{ container.Image || '—' }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let container">
+                  <lib-status-badge
+                    [text]="container.State || container.Status"
+                    [type]="dockerStatusToBadgeStatus(container.State || container.Status)">
+                  </lib-status-badge>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="created">
+                <th mat-header-cell *matHeaderCellDef>Created</th>
+                <td mat-cell *matCellDef="let container">
+                  <lib-time-badge [date]="containerCreated(container)" format="SHORT" color="GRAY" size="SMALL">
+                  </lib-time-badge>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let container">
+                  <div class="row-actions">
+                    <a mat-icon-button type="button"
+                       [routerLink]="['container', container.Id]"
+                       matTooltip="Inspect container"
+                       aria-label="Inspect container">
+                      <mat-icon>visibility</mat-icon>
+                    </a>
+                    <button mat-icon-button type="button"
+                            (click)="copyToClipboard(container.Id, 'Container ID')"
+                            [matTooltip]="container.Id"
+                            aria-label="Copy container ID">
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                    <button mat-icon-button type="button" color="warn"
+                            (click)="fcSelection.select(container.Id); cleanupSelectedFc()"
+                            matTooltip="Stop and remove this container"
+                            aria-label="Delete container">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['select', 'name', 'image', 'status', 'created', 'actions']"></tr>
+              <tr mat-row
+                  *matRowDef="let row; columns: ['select', 'name', 'image', 'status', 'created', 'actions']"
+                  (click)="fcSelection.toggle(row.Id)"
+                  class="row--clickable">
+              </tr>
+            </table>
+          </div>
+
+          @if (!fcContainersLoading() && !fcContainers().length) {
+            <div class="empty-state">No tool containers found.</div>
+          }
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+</lib-page-wrapper>

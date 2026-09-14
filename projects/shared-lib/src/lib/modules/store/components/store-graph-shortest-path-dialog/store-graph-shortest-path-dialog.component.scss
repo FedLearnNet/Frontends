@@ -1,0 +1,25 @@
+.content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  max-height: calc(100% - 50px);
+
+  .left-side {
+    width: 65%;
+  }
+
+  .right-side {
+    padding-top: 22px;
+    width: 35%;
+
+    height: calc(100% - 22px);
+    overflow: hidden;
+    position: relative;
+
+    .save-btn{
+      position: absolute;
+      right: 0;
+      bottom: 0;
+    }
+  }
+}

@@ -1,0 +1,91 @@
+<div class="query-builder-item">
+  <div class="item">
+    <form [formGroup]="queryBuilderFormGroup">
+      <mat-form-field class="columns">
+        <mat-label>{{ 'OPTIONS' | translate }}</mat-label>
+        <input type="text"
+               [placeholder]="('CHOOSE_AN_OPTION' | translate)"
+               aria-label="Property"
+               matInput
+               [matAutocomplete]="auto"
+               formControlName="name"
+        >
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
+                          [displayWith]="displayColumnName"
+                          (optionSelected)="onColumnSelected()"
+        >
+          @for (column of filteredOptions(); track column) {
+            <mat-option [value]="column.value">{{ column.label }}</mat-option>
+          }
+        </mat-autocomplete>
+        @if (queryBuilderFormGroup.getRawValue().name !== '') {
+          <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSelectedColumn()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="options">
+        <mat-select [placeholder]="('OPTIONS' | translate)" formControlName="operator">
+          @for (queryOption of queryOptions; track queryOption) {
+            <mat-option [value]="queryOption.value">
+              {{ queryOption.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (!isValuelessOperator) {
+        @switch (selectedQueryConfig?.queryOperatorOption?.type) {
+          @case (dataType.CATEGORICAL) {
+            <mat-form-field>
+              <mat-select formControlName="value">
+                @for (selectOption of selectedQueryConfig ? selectedQueryConfig.options : []; track selectOption) {
+                  <mat-option [value]="selectOption.value">
+                    {{ selectOption.label }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+          @case (dataType.BOOLEAN) {
+            <section>
+              <mat-radio-group formControlName="value">
+                @for (radioOption of selectedQueryConfig ? selectedQueryConfig.options : []; track radioOption) {
+                  <mat-radio-button
+                    color="primary"
+                    [value]="radioOption.value">
+                    {{ radioOption.label }}
+                  </mat-radio-button>
+                }
+              </mat-radio-group>
+            </section>
+          }
+          @default {
+            <mat-form-field>
+              <input
+                matInput
+                [placeholder]="('VALUE' | translate)"
+                formControlName="value">
+            </mat-form-field>
+          }
+        }
+      }
+
+      <mat-form-field class="connector" [ngClass]="{ 'hidden': isLastItem() }">
+        <mat-select [placeholder]="('GRID.CONNECTOR' | translate)" formControlName="connector">
+          @for (connectorOption of connectorOptions; track connectorOption) {
+            <mat-option [value]="connectorOption">
+              {{ connectorOption }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <div class="item-buttons">
+    <button mat-icon-button (click)="onRemoveQueryItem()">
+      <mat-icon>remove_circle_outline</mat-icon>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="statistics">
+  @for (item of [
+    {label: 'Mean', value: statistics().mean},
+    {label: 'Median', value: statistics().median},
+    {label: 'Min', value: statistics().min},
+    {label: 'Max', value: statistics().max},
+    {label: 'Q1', value: statistics().q1},
+    {label: 'Q3', value: statistics().q3},
+    {label: 'Std', value: statistics().std},
+    {label: 'IQR', value: statistics().iqr}
+  ]; track item.label) {
+    @if (item.value !== undefined) {
+      <div class="profile">
+        <span class="label">{{ item.label }} </span>
+        <span class="value">{{ item.value | number:'1.2-2' }}</span>
+      </div>
+    }
+  }
+
+  @for (item of [
+    {label: 'Count', value: statistics().count},
+    {label: 'Missing', value: statistics().missing},
+    {label: 'Distinct Count', value: statistics().distinctCount},
+  ]; track item.label) {
+    @if (item.value !== undefined) {
+      <div class="profile">
+        <span class="label">{{ item.label }}</span>
+        <span class="value">{{ item.value }}</span>
+      </div>
+    }
+  }
+
+  @if (statistics().topCategories) {
+    <div class="top-categories">
+      <span class="top-categories--headline">Top Categories</span>
+      <div class="categories-list">
+        @for (category of statistics().topCategories; track category.value) {
+          <div class="category-row">
+            <span class="cat-label"
+                  [title]="category.value">{{ category.value }}</span>
+            <span class="cat-count">{{ category.count }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+
+@if (currentOption()) {
+  <echarts [options]="currentOption()" class="chart" />
+}

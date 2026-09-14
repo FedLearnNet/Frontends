@@ -1,0 +1,10 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'Tabular schema'" />
+
+<mat-dialog-content>
+  <app-app-detail-config-table-element [(schema)]="schema"></app-app-detail-config-table-element>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button matButton [mat-dialog-close]="schema()">Ok</button>
+</mat-dialog-actions>

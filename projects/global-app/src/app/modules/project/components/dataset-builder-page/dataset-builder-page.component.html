@@ -1,0 +1,194 @@
+<lib-header
+  [title]="project()?.name +' dataset builder'"
+  description="Plan your dataset"
+  [enableSkeleton]="projectLoading()"
+  [locationBack]="true"
+  [enableGoBack]="true">
+  <div suffix class="builder-hero__chips">
+    <lib-badge [text]="queryResultSummary()" color="WHITE" [border]="true"></lib-badge>
+    <lib-badge [text]="featureCount() + ' features'" color="BLUE"></lib-badge>
+    <lib-badge [text]="selectionOptions().length + ' available selections'" color="GREEN"></lib-badge>
+    <lib-btn type="SAVE" (clicked)="saveDesign()"/>
+  </div>
+</lib-header>
+
+
+<lib-page-wrapper
+  [isLoading]="projectLoading()"
+  [skeletonOnLoading]="true"
+  [error]="loadError()"
+  [isEmpty]="project() === null"
+>
+
+  <section class="design-section">
+    <div class="overview-grid">
+      <mat-card class="overview-card">
+        <div class="overview-card__label">Project query</div>
+        <div class="overview-card__value">{{ query()?.name || 'Loading query...' }}</div>
+        <div
+          class="overview-card__hint">{{ query()?.description || 'This project query defines the data universe available to the builder.' }}
+        </div>
+      </mat-card>
+
+      <mat-card class="overview-card">
+        <div class="overview-card__label">Export mode</div>
+        <div class="overview-card__value">{{ exportConfig().appBased ? 'App-based export' : 'Native export' }}</div>
+        <div class="overview-card__hint">
+          {{ exportConfig().appBased ? 'Use a selected app version and hyperparameters.' : 'Use pivot rules, duplicate handling and join fields.' }}
+        </div>
+      </mat-card>
+
+      <mat-card class="overview-card">
+        <div class="overview-card__label">Current dataset state</div>
+        <div class="overview-card__value">{{ hasConfiguredFeatures() ? 'Features configured' : 'No features yet' }}
+        </div>
+        <div class="overview-card__hint">Saved designs are persisted in the project export configuration.</div>
+      </mat-card>
+    </div>
+
+    <lib-data-export-config [(config)]="exportConfig"></lib-data-export-config>
+  </section>
+
+  <mat-stepper class="dataset-builder-stepper">
+
+    <mat-step [completed]="hasConfiguredFeatures()">
+      <ng-template matStepLabel>Feature builder</ng-template>
+
+      <div class="builder-layout">
+        <mat-card class="builder-panel">
+          <div class="builder-panel__header">
+            <div>
+              <h3>Available data selections</h3>
+              <p>Drag a card into a feature on the right, or use the select field inside a feature to add it
+                manually.</p>
+            </div>
+            <lib-btn
+              type="CUSTOM"
+              variant="SECONDARY"
+              icon="playlist_add_check"
+              label="Add all as features"
+              (clicked)="addAllAsFeatures()"
+            ></lib-btn>
+          </div>
+
+          <div class="builder-panel__focus">
+            <span class="builder-panel__focus-label">Current feature</span>
+            <strong>{{ selectedFeatureLabel() }}</strong>
+          </div>
+
+          <mat-form-field appearance="outline" class="builder-panel__search">
+            <mat-label>Search data selections</mat-label>
+            <input
+              matInput
+              [ngModel]="selectionFilter()"
+              (ngModelChange)="selectionFilter.set($event)"
+              placeholder="Search by datatype or ontology"
+            />
+          </mat-form-field>
+
+          @if (dataSelectionsLoading()) {
+            <div class="builder-panel__empty">Loading query-backed data selections...</div>
+          } @else if (!filteredSelectionOptions().length) {
+            <div class="builder-panel__empty">No data selections match the current filter.</div>
+          } @else {
+            <div class="selection-list">
+              @for (selection of filteredSelectionOptions(); track selection.key) {
+                <app-selectable-data-card
+                  class="selection-card"
+                  draggable="true"
+                  [dataType]="selection.dataTypeNode"
+                  [ontologyNode]="selection.ontologyNode"
+                  [clinicCount]="selection.clinicCount"
+                  [showDragIndicator]="true"
+                  [showDetailButton]="false"
+                  (dragstart)="startSelectionDrag(selection, $event)"
+                  (dragend)="finishSelectionDrag()"
+                >
+                  @if (selection.statisticsClinicCount > 0) {
+                    <lib-badge
+                      card-badges
+                      [text]="'Stats ' + selection.statisticsClinicCount + ' clinics'"
+                      color="ORANGE"
+                    ></lib-badge>
+                  }
+                  @if (assignedFeatureNames(selection.key).length > 0) {
+                    <button
+                      card-badges
+                      type="button"
+                      class="selection-card__assignment-btn"
+                      (click)="focusFeatureFromSelection(selection.key, $event)"
+                    >
+                      <lib-badge
+                        [text]="assignedFeatureNames(selection.key).length + ' feature assignments'"
+                        color="BLUE"
+                      ></lib-badge>
+                    </button>
+                  }
+                </app-selectable-data-card>
+              }
+            </div>
+          }
+        </mat-card>
+
+        <mat-card class="builder-panel">
+          <div class="builder-panel__header">
+            <div>
+              <h3>Feature layout</h3>
+              <p>Each feature becomes a later dataset variable. Reorder with drag and drop and combine multiple sources
+                per feature.</p>
+            </div>
+            <lib-btn type="ADD" label="Add feature" (clicked)="addFeature()"></lib-btn>
+          </div>
+
+          @if (features().length) {
+            <div
+              cdkDropList
+              class="feature-list"
+              (cdkDropListDropped)="dropFeature($event)"
+            >
+              @for (feature of features(); track trackFeature($index, feature)) {
+                <div cdkDrag class="feature-list__item" [attr.id]="'dataset-feature-' + feature.order">
+                  <app-dataset-feature-card
+                    [feature]="feature"
+                    [selectionOptions]="selectionOptions()"
+                    [draggedSelection]="draggedSelection()?.selection ?? null"
+                    [active]="feature.order === activeFeatureOrder()"
+                    (featureSelected)="focusFeature(feature.order)"
+                    (featureRemoved)="removeFeature(feature.order)"
+                    (nameChanged)="renameFeature(feature.order, $event)"
+                    (targetDatatypeChanged)="changeFeatureTargetDatatype(feature.order, $event)"
+                    (selectionRemoved)="removeSelectionFromFeature(feature.order, $event)"
+                    (selectionAdded)="assignSelectionToFeature(feature.order, $event)"
+                  />
+                </div>
+              }
+            </div>
+          }
+
+          <div
+            class="builder-panel__empty builder-panel__empty--drop-target"
+            (dragover)="allowFeatureCreationDrop($event)"
+            (drop)="createFeatureFromDrop($event)"
+          >
+            {{ featureCreationDropLabel() }}
+          </div>
+        </mat-card>
+      </div>
+    </mat-step>
+
+    <mat-step>
+      <ng-template matStepLabel>Preview and download</ng-template>
+
+      <app-dataset-preview
+        [columns]="previewColumns()"
+        [rows]="previewRows()"
+        [loading]="previewLoading()"
+        [error]="previewError()"
+        [hasFeatureConfig]="hasConfiguredFeatures()"
+        [previewDirty]="previewDirty()"
+        (refreshRequested)="refreshPreview()"
+        (downloadRequested)="downloadPreview()"
+      />
+    </mat-step>
+  </mat-stepper>
+</lib-page-wrapper>

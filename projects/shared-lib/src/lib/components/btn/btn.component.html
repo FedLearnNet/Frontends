@@ -1,0 +1,79 @@
+@if (hasMenu()) {
+  <div [class]="splitClassName()">
+    <button
+      [class]="className()"
+      [disabled]="isDisabled()"
+      [type]="btnType()"
+      [attr.aria-label]="ariaLabel()"
+      (click)="onButtonClick()">
+
+      @if (loading()) {
+        <span class="btn-spinner" aria-hidden="true"></span>
+      } @else if (resolvedIcon()) {
+        <mat-icon fontSet="material-symbols-outlined">{{ resolvedIcon() }}</mat-icon>
+      }
+
+      @if (!iconOnly()) {
+        @if (label()) {
+          <span class="btn-label">{{ label() }}</span>
+        } @else if (defaultLabelKey()) {
+          <span class="btn-label">{{ defaultLabelKey() | translate }}</span>
+        }
+      }
+    </button>
+
+    <button
+      [class]="menuClassName()"
+      [disabled]="isDisabled()"
+      type="button"
+      [matMenuTriggerFor]="menuTriggerFor()"
+      [attr.aria-label]="menuAriaLabel()"
+      (click)="$event.stopPropagation()">
+      <mat-icon fontSet="material-symbols-outlined">{{ menuIcon() }}</mat-icon>
+    </button>
+  </div>
+} @else if (appearance() === 'FAB_EXTENDED') {
+  <button
+    mat-fab
+    extended
+    [class]="fabClassName()"
+    [disabled]="isDisabled()"
+    [type]="btnType()"
+    [attr.aria-label]="ariaLabel()"
+    (click)="onButtonClick()">
+
+    @if (loading()) {
+      <span class="btn-spinner" aria-hidden="true"></span>
+    } @else if (resolvedIcon()) {
+      <mat-icon fontSet="material-symbols-outlined">{{ resolvedIcon() }}</mat-icon>
+    }
+
+    @if (label()) {
+      <span class="btn-label">{{ label() }}</span>
+    } @else if (defaultLabelKey()) {
+      <span class="btn-label">{{ defaultLabelKey() | translate }}</span>
+    }
+  </button>
+} @else {
+  <button
+    [class]="className()"
+    [disabled]="isDisabled()"
+    [type]="btnType()"
+    [attr.aria-label]="ariaLabel()"
+    (click)="onButtonClick()">
+
+    @if (loading()) {
+      <span class="btn-spinner" aria-hidden="true"></span>
+    } @else if (resolvedIcon()) {
+      <mat-icon fontSet="material-symbols-outlined">{{ resolvedIcon() }}</mat-icon>
+    }
+
+    @if (!iconOnly()) {
+      @if (label()) {
+        <span class="btn-label">{{ label() }}</span>
+      } @else if (defaultLabelKey()) {
+        <span class="btn-label">{{ defaultLabelKey() | translate }}</span>
+      }
+    }
+  </button>
+}

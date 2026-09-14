@@ -1,0 +1,40 @@
+.output-image {
+  display: block;
+  width: auto;
+  max-width: 650px;
+  height: auto;
+  max-height: 500px;
+  margin: 0 auto;
+}
+
+.outputs {
+  .output-card {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 40px;
+    row-gap: 0;
+    margin: 0 20px;
+
+    .output{
+      width: 100%;
+    }
+  }
+
+  .output-title {
+    width: 100%;
+    padding-right: 30px;
+  }
+  .output-title-wrapper{
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: end;
+  }
+}
+
+.no-output {
+  text-align: center;
+  font-size: 1rem;
+  color: #888888;
+  padding: 2rem;
+}

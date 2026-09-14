@@ -1,0 +1,2011 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "local-app": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/local-app",
+      "sourceRoot": "projects/local-app/src",
+      "prefix": "app",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/local-app/**/*.ts",
+              "projects/local-app/**/*.html"
+            ]
+          }
+        },
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/local-app",
+            "index": "projects/local-app/src/index.html",
+            "browser": "projects/local-app/src/main.ts",
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "projects/local-app/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/local-app/src/favicon.png",
+              "projects/local-app/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./projects/shared-lib/src/assets",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/shared-lib/src/assets/i18n",
+                "output": "assets/i18n"
+              }
+            ],
+            "styles": [
+              "projects/local-app/src/styles.scss",
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+            ],
+            "scripts": [
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-python.js",
+              "node_modules/prismjs/components/prism-json.js",
+              "node_modules/clipboard/dist/clipboard.min.js",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "easymde",
+              "lodash",
+              "papaparse"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "projects/shared-lib/src/lib/styles"
+              ]
+            }
+          },
+          "configurations": {
+            "microb-AI-ome-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "microb-AI-ome-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "microb-AI-ome-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/microb-AI-ome/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "dAIbetes-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/dAIbetes/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "FLNet-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-staging-localhost": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.local-staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.local-staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/local-app/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/local-app/src/environments/FLNet/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/local-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/local-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/local-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/local-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "local-app:build:FLNet-production"
+            },
+            "staging": {
+              "buildTarget": "local-app:build:FLNet-staging"
+            },
+            "staging-localhost": {
+              "buildTarget": "local-app:build:FLNet-staging-localhost"
+            },
+            "development": {
+              "buildTarget": "local-app:build:FLNet-development"
+            },
+            "microb-AI-ome": {
+              "buildTarget": "local-app:build:microb-AI-ome-development"
+            },
+            "dAIbetes": {
+              "buildTarget": "local-app:build:dAIbetes-development"
+            },
+            "FLNet": {
+              "buildTarget": "local-app:build:FLNet-development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "local-app:build"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "projects/local-app/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/local-app/src/favicon.png",
+              "projects/local-app/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./projects/shared-lib/src/assets",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/shared-lib/src/assets/i18n",
+                "output": "assets/i18n"
+              }
+            ],
+            "styles": [
+              "projects/local-app/src/styles.scss",
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "global-app": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/global-app",
+      "sourceRoot": "projects/global-app/src",
+      "prefix": "app",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/global-app/**/*.ts",
+              "projects/global-app/**/*.html"
+            ]
+          }
+        },
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/global-app",
+            "index": "projects/global-app/src/index.html",
+            "browser": "projects/global-app/src/main.ts",
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "projects/global-app/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/global-app/src/favicon.png",
+              "projects/global-app/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./projects/shared-lib/src/assets",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/shared-lib/src/assets/i18n",
+                "output": "assets/i18n"
+              }
+            ],
+            "styles": [
+              "projects/global-app/src/styles.scss",
+              "projects/shared-lib/src/lib/styles/styles.scss",
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+            ],
+            "scripts": [
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-python.js",
+              "node_modules/prismjs/components/prism-json.js",
+              "node_modules/clipboard/dist/clipboard.min.js",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "easymde",
+              "lodash",
+              "papaparse"
+            ]
+          },
+          "configurations": {
+            "posymed-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "baseHref": "/posymed/",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/posymed",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/posymed/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "posymed-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "baseHref": "/posymed/",
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/posymed",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/posymed/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/posymed"
+                ]
+              }
+            },
+            "posymed-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/posymed/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/posymed",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/posymed",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/posymed/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/posymed"
+                ]
+              }
+            },
+            "microb-AI-ome-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "microb-AI-ome-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "microb-AI-ome-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/microb-AI-ome/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/microb-AI-ome",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/microb-AI-ome",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/microb-AI-ome/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/microb-AI-ome"
+                ]
+              }
+            },
+            "dAIbetes-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/dAIbetes",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "dAIbetes-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/dAIbetes/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/dAIbetes",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/dAIbetes/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/dAIbetes"
+                ]
+              }
+            },
+            "FLNet-production": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.prod.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.prod.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-staging": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-staging-relative": {
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "aot": true,
+              "extractLicenses": true,
+              "outputHashing": "all",
+              "outputPath": "dist/app",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3.5mb",
+                  "maximumError": "4mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "200kb",
+                  "maximumError": "400kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.relative-staging.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.relative-staging.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            },
+            "FLNet-development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "projects/global-app/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.ts"
+                },
+                {
+                  "replace": "projects/shared-lib/src/environments/environment.ts",
+                  "with": "projects/global-app/src/environments/FLNet/environment.ts"
+                }
+              ],
+              "assets": [
+                "projects/global-app/src/assets",
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/global-app/src/assets/images/"
+                },
+                {
+                  "glob": "**/*.html",
+                  "input": "./projects/shared-lib/src/assets",
+                  "output": "/assets/"
+                },
+                {
+                  "glob": "**/*.scss",
+                  "input": "projects/shared-lib/src/lib/styles/FLNet",
+                  "output": "projects/shared-lib/src/lib/styles"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/images/FLNet",
+                  "output": "projects/shared-lib/src/assets/images/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "projects/shared-lib/src/assets/i18n",
+                  "output": "assets/i18n"
+                }
+              ],
+              "styles": [
+                "projects/global-app/src/styles.scss",
+                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
+                "node_modules/easymde/dist/easymde.min.css",
+                "node_modules/prismjs/themes/prism-okaidia.css",
+                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+              ],
+              "stylePreprocessorOptions": {
+                "includePaths": [
+                  "projects/global-app/src/assets/styles",
+                  "projects/shared-lib/src/lib/styles/FLNet"
+                ]
+              }
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "global-app:build:FLNet-production"
+            },
+            "staging": {
+              "buildTarget": "global-app:build:FLNet-staging"
+            },
+            "staging-relative": {
+              "buildTarget": "global-app:build:FLNet-staging-relative"
+            },
+            "development": {
+              "buildTarget": "global-app:build:FLNet-development"
+            },
+            "microb-AI-ome": {
+              "buildTarget": "global-app:build:microb-AI-ome-development"
+            },
+            "dAIbetes": {
+              "buildTarget": "global-app:build:dAIbetes-development"
+            },
+            "posymed": {
+              "buildTarget": "global-app:build:posymed-development"
+            },
+            "FLNet": {
+              "buildTarget": "global-app:build:FLNet-development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n",
+          "options": {
+            "buildTarget": "global-app:build"
+          }
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "projects/global-app/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/global-app/src/favicon.png",
+              "projects/global-app/src/assets",
+              {
+                "glob": "**/*",
+                "input": "./projects/shared-lib/src/assets",
+                "output": "/assets/"
+              },
+              {
+                "glob": "**/*",
+                "input": "projects/shared-lib/src/assets/i18n",
+                "output": "assets/i18n"
+              }
+            ],
+            "styles": [
+              "projects/global-app/src/styles.scss",
+              "projects/shared-lib/src/lib/styles/styles.scss",
+
+              "node_modules/easymde/dist/easymde.min.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    },
+    "shared-lib": {
+      "projectType": "library",
+      "root": "projects/shared-lib",
+      "sourceRoot": "projects/shared-lib/src",
+      "prefix": "lib",
+      "architect": {
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/shared-lib/**/*.ts",
+              "projects/shared-lib/**/*.html"
+            ]
+          }
+        },
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/shared-lib/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-lib/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-lib/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "tsConfig": "projects/shared-lib/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "aa50a5d2-c15b-487b-9327-3884e3095653"
+  },
+  "schematics": {
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
+    }
+  }
+}

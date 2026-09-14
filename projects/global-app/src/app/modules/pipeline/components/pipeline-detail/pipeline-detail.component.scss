@@ -1,0 +1,156 @@
+
+.pipeline-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin: 1rem;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 1rem;
+
+    > div:first-child {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.9rem;
+      color: #757575;
+    }
+
+    > div:last-child {
+      flex-shrink: 0;
+    }
+  }
+
+
+  &__body {
+    padding: 1rem;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-weight: 500;
+      color: #212121;
+    }
+    section{
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+
+
+.pipeline-steps-table {
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    background-color: #fafafa;
+  }
+
+  .mat-mdc-row {
+    transition: background-color 0.2s ease-in-out;
+    &:hover {
+      cursor: pointer;
+      background-color: #f7f8fc;
+    }
+  }
+
+  // General cell styling
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    color: #757575;
+    padding: 0.75rem 1rem;
+  }
+
+  .mat-mdc-header-cell {
+    font-weight: 500;
+    color: #212121;
+  }
+
+  .mat-mdc-cell {
+    mat-icon {
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    &.mat-column-status {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+}
+
+.status-td{
+  width: 250px;
+  display: table-cell !important;
+}
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 36px;
+  border-radius: 25px;
+
+  mat-icon {
+    margin: 0;
+    font-size: 1.125rem; // 18px
+    height: 1.125rem;
+    width: 1.125rem;
+  }
+
+  &.success {
+    background-color: #d7f1d8;
+    color: #338a3e;
+  }
+  &.failed {
+    background-color: #fdd6d4;
+    color: #d62828;
+  }
+  &.warning {
+    background-color: #ffb12f;
+    color: #854900;
+  }
+  &.running {
+    background-color: #ffe7bf;
+    color: #c66900;
+
+    mat-icon {
+      animation: spin 2s linear infinite;
+    }
+  }
+  &.pending {
+    background-color: #f0f0f0;
+    color: #545454;
+  }
+}
+
+.btns{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.btn--stop{
+  color: var(--warning-text);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+

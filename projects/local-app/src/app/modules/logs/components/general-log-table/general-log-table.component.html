@@ -1,0 +1,70 @@
+<div class="generic-table-wrapper">
+  @if (allowSearch() || filters().length > 0) {
+    <div class="filter-wrapper">
+
+      @if (allowSearch()) {
+        <mat-form-field class="filter-wrapper--search">
+          <mat-label>{{ 'GRID.SEARCH' | translate }}</mat-label>
+          <input matInput (keyup)="applySearch($event)" [placeholder]="('TERM' | translate)">
+        </mat-form-field>
+      }
+      @if (filters().length > 0) {
+        <div class="filter-wrapper--filter">
+          <p>{{ 'GRID.FILTER' | translate }}</p>
+          <mat-chip-listbox>
+            @for (filter of filters(); track filter) {
+              <mat-chip-option [selected]="selectedFilter()[$index]"
+                               (selectionChange)="applyFilter($event, $index)"
+              >{{ filter }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+          <button mat-raised-button (click)="clearFilters()">{{ 'BUTTON.CLEAR' | translate }}</button>
+        </div>
+      }
+    </div>
+  }
+  <div class="table-container">
+
+    <table mat-table [dataSource]="data()" class="example-table"
+           matSort matSortActive="created" matSortDisableClear matSortDirection="desc">
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'GRID.ACTION' | translate }}</th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button color="primary" (click)="openDetailEvent(row.id)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      @for (column of additionalColumns(); track column) {
+        <ng-container [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ column }}</th>
+          <td mat-cell *matCellDef="let row">{{ row[column] }}</td>
+        </ng-container>
+      }
+      @if (hasCreatedAtColumn()) {
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+            {{ 'GRID.CREATED_AT' | translate }}
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <lib-time-badge [date]="row.createdAt" [color]="'GRAY'"></lib-time-badge>
+          </td>
+        </ng-container>
+      }
+      <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns();"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [pageIndex]="currentPage()"
+    [length]="resultsLength()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    aria-label="Select page of logs"
+    (page)="onPageChange($event)"
+  />
+</div>

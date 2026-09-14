@@ -1,0 +1,177 @@
+<lib-header
+  [title]="file()?.fileName ?? 'Connector File'"
+  description="Review file metadata, import runs and profiled sheet previews."
+  [enableGoBack]="true"
+  [locationBack]="true">
+  @if (file()) {
+    <div suffix class="header-actions">
+      <lib-btn
+        type="CUSTOM"
+        variant="GHOST"
+        icon="refresh"
+        [iconOnly]="true"
+        (clicked)="refresh()"
+        matTooltip="Reload file preview"/>
+      <lib-btn
+        type="DOWNLOAD"
+        variant="GHOST"
+        [iconOnly]="true"
+        (clicked)="downloadFile()"
+        matTooltip="Download file"/>
+      <lib-btn
+        type="DELETE"
+        variant="GHOST"
+        [iconOnly]="true"
+        (clicked)="deleteFile()"
+        matTooltip="Delete file"/>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="loading()"
+  [error]="error()"
+  [isEmpty]="!file()"
+  [skeletonOnLoading]="true">
+
+
+  <lib-empty-state
+    empty
+    title="File not found"
+    icon="draft"
+    subtitle="No file detail is available">
+  </lib-empty-state>
+
+  @if (file(); as file) {
+    <!-- A replacement on its way in is the one thing about this file that can change while the page
+         is open; the chip opens the same panel the import was started in. -->
+    @if (imports().length) {
+      <div class="import-list">
+        @for (activity of imports(); track activity.importId) {
+          <app-import-activity-chip [activity]="activity"/>
+        }
+      </div>
+    }
+
+    <div class="detail-grid">
+      <div class="summary-column">
+        <section class="summary-card">
+          <lib-kv label="File ID" [value]="file.id"></lib-kv>
+          <lib-kv label="Size" [value]="file.size | bytes:1"></lib-kv>
+          @if (file.connectorId) {
+            <lib-kv label="Connector ID" [value]="file.connectorId"></lib-kv>
+          }
+          @if (file.cohortId) {
+            <lib-kv label="Cohort ID" [value]="file.cohortId"></lib-kv>
+          }
+          <lib-kv label="Uploaded">
+            <lib-time-badge [date]="file.createdAt" color="GRAY"></lib-time-badge>
+          </lib-kv>
+          <lib-kv label="File-Type">
+            <lib-badge color="GRAY" [text]="file.contentType || 'Unknown'"></lib-badge>
+          </lib-kv>
+          <lib-kv label="Tables">
+            <lib-badge color="GRAY" [text]="sheetViews().length + ' table(s)'"></lib-badge>
+          </lib-kv>
+          <lib-kv label="Rows">
+            <lib-badge color="GRAY" [text]="(rowsScanned() | number) + ' profiled row(s)'"></lib-badge>
+          </lib-kv>
+          <lib-kv label="Columns">
+            <lib-badge color="GRAY" [text]="(columnCount() | number) + ' column(s)'"></lib-badge>
+          </lib-kv>
+          <lib-kv label="Empty cells">
+            <lib-badge
+              [color]="missingValues() ? 'ORANGE' : 'GRAY'"
+              [text]="(missingValues() | number) + ' empty cell(s)'"></lib-badge>
+          </lib-kv>
+        </section>
+
+        <!-- How the file is read. It travels with the file rather than with whoever reads it,
+             because changing any of it changes what the rows and columns mean - and it is what a
+             replacement will be read with. -->
+        @if (parsing(); as parsing) {
+          <section class="summary-card">
+            <div class="section-title">
+              <h2>Read as</h2>
+            </div>
+            <lib-kv label="Format">
+              <lib-badge color="BLUE" [text]="parsing.fileType"></lib-badge>
+            </lib-kv>
+            @if (parsing.fileType === 'CSV' || parsing.fileType === 'MULTIPLE_CSV_ZIP') {
+              <lib-kv label="Delimiter" [value]="delimiterLabel()"></lib-kv>
+            }
+            <lib-kv label="Header row" [value]="parsing.hasHeader ? 'First row is the header' : 'No header row'"></lib-kv>
+            @if (parsing.fileType === 'EXCEL') {
+              <lib-kv label="Sheets read" [value]="parsing.firstSheetOnly ? 'First sheet only' : 'All sheets'"></lib-kv>
+            }
+            @if (parsing.fileType === 'MULTIPLE_CSV_ZIP') {
+              <lib-kv label="Archive" value="Every table in the archive"></lib-kv>
+            }
+          </section>
+        }
+
+        <section class="runs-card">
+          <div class="section-title">
+            <h2>Runs</h2>
+            <lib-badge color="GRAY" [text]="runs().length + ' run(s)'"></lib-badge>
+          </div>
+
+          @if (runs().length > 0) {
+            <div class="run-list">
+              @for (run of runs(); track run.id) {
+                <a class="run-row"
+                   [routerLink]="['/cohort', run.cohortId,'connector','view',run.connectorId, 'run', run.id]">
+                  <div class="run-row__main">
+                    <strong>Run #{{ run.id }}</strong>
+                    <lib-status-badge
+                      size="SMALL"
+                      [text]="run.status || 'UNKNOWN'"
+                      [type]="convertStatus(run.status)"/>
+                  </div>
+                  <div class="run-row__meta">
+                    <lib-kv label="New" [value]="run.newEntities || 0"></lib-kv>
+                    <lib-kv label="Updated" [value]="run.updatedEntities || 0"></lib-kv>
+                    <lib-kv label="Failed" [value]="run.failedEntities || 0"></lib-kv>
+                    <lib-kv label="Started">
+                      <lib-time-badge [date]="run.createdAt" color="GRAY"></lib-time-badge>
+                    </lib-kv>
+
+                  </div>
+                </a>
+              }
+            </div>
+          } @else {
+            <lib-empty-state
+              title="No runs"
+              icon="history"
+              subtitle="No connector runs are linked to this file yet.">
+            </lib-empty-state>
+          }
+        </section>
+      </div>
+
+      <section class="preview-card">
+        @if (sheetViews().length > 0) {
+          <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+            @for (sheet of sheetViews(); track sheet.name) {
+              <mat-tab [label]="sheet.name">
+                <div class="sheet-content">
+                  <app-connector-file-sheet-detail-card
+                    [fileName]="file.fileName"
+                    [sheet]="sheet"
+                  />
+                </div>
+              </mat-tab>
+            }
+          </mat-tab-group>
+        } @else {
+          <lib-empty-state
+            title="No preview"
+            icon="table_rows_narrow"
+            subtitle="No preview data is available for this file.">
+          </lib-empty-state>
+        }
+      </section>
+    </div>
+  }
+</lib-page-wrapper>

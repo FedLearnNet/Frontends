@@ -1,0 +1,17 @@
+<div class="logs-container">
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start"
+                   [(selectedIndex)]="selectedIndex" (selectedTabChange)="onTabChange($event)">
+      <mat-tab [label]="('MENU.PATIENT_UPDATE' | translate)">
+        <app-patient-update-log />
+      </mat-tab>
+      <mat-tab [label]="('MENU.QUERY_ACCESS' | translate)">
+        <app-patient-query-log />
+      </mat-tab>
+      <mat-tab [label]="('MENU.TRAINING_ACCESS' | translate)">
+        <app-patient-learning-log />
+      </mat-tab>
+      <mat-tab [label]="('MENU.STATISTICS_ACCESS' | translate)">
+        <app-statistics-access-log />
+      </mat-tab>
+    </mat-tab-group>
+</div>

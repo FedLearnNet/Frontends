@@ -1,0 +1,11 @@
+<div [class]="classList()">
+  <div class="card-label">{{ label() }}</div>
+  <div class="card-value">
+
+    @if (hasValue()) {
+      {{ formatedValue() }}
+    } @else {
+      <ng-content></ng-content>
+    }
+  </div>
+</div>

@@ -1,0 +1,53 @@
+<div class="start-warning" role="status" aria-live="polite">
+  <div class="sw-grid">
+
+    <div class="sw-card sw-client">
+      <div class="sw-card__top">
+        <mat-icon class="sw-icon">computer</mat-icon>
+        <div class="sw-meta">
+          <div class="sw-title">APP</div>
+        </div>
+      </div>
+
+      <div class="sw-card__body">
+        <lib-badge color="ORANGE" [border]="true" [pulseCircle]="true" text="App not started"></lib-badge>
+      </div>
+    </div>
+
+    <div class="sw-link">
+      <div class="sw-wire">
+        <span class="sw-packet"></span>
+        <span class="sw-packet delay-1"></span>
+        <span class="sw-packet delay-2"></span>
+      </div>
+
+      <div class="sw-break">
+        <mat-icon>link_off</mat-icon>
+      </div>
+
+      <div class="sw-caption">app not running</div>
+    </div>
+
+    <div class="sw-card sw-server">
+      <div class="sw-card__top">
+        <mat-icon class="sw-icon sw-ok">dns</mat-icon>
+        <div class="sw-meta">
+          <div class="sw-title">Server</div>
+        </div>
+      </div>
+
+      <div class="sw-card__body">
+        @if (!uiConnected()) {
+          <lib-badge color="ORANGE" [border]="true" [pulseCircle]="true" text="UI not connected"></lib-badge>
+        } @else {
+          <lib-badge [border]="true" [pulseCircle]="true" text="UI connected"></lib-badge>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <lib-error-card class="error-card">
+    <ng-content></ng-content>
+  </lib-error-card>
+</div>

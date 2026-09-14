@@ -1,0 +1,38 @@
+.run-performance {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .runtime-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+
+    .label {
+      font-weight: 600;
+    }
+
+    .value {
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .overhead-table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 360px;
+
+    td {
+      padding: 2px 8px 2px 0;
+
+      &.label {
+        color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+      }
+
+      &.value {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+    }
+  }
+}

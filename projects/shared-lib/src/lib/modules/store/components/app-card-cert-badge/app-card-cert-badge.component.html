@@ -1,0 +1,19 @@
+<div class="status-section" [class.has-cert]="!hasNoCertification()">
+  @if (hasNoCertification()) {
+    <lib-status-badge type="FAILED"
+                      [animate]="false"
+                      [text]="('DIALOG.APP_TAG.NOT_CERTIFIED_APP_SHORT' | translate)" size="SMALL"
+                      [matTooltip]="('DIALOG.APP_TAG.NOT_CERTIFIED_APP' | translate)"
+     />
+  } @else {
+    <div class="certification-level">
+      <span>Cert. Level</span>
+      <div class="stars">
+        @for (_ of [].constructor(certificationLevel()); track $index) {
+          <mat-icon>star</mat-icon>
+        }
+      </div>
+    </div>
+  }
+  <ng-content />
+</div>

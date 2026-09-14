@@ -1,0 +1,43 @@
+@if (isUserMessage()) {
+  <div class="msg msg--user">
+    <div class="msg__bubble msg__bubble--user">
+      @if (message()) {
+        <p class="msg__text">{{message()}}</p>
+      }
+      <span class="msg__meta">{{ createdAt() | date:'shortTime' }}</span>
+    </div>
+  </div>
+} @else {
+  <div class="msg msg--ai">
+    <div class="msg__bubble msg__bubble--ai"
+         [class.msg__bubble--pending]="!done() && !error()"
+         [class.msg__bubble--error]="!!error()"
+         (click)="messageClicked.emit($event)">
+
+      @if (error()) {
+        <div class="msg__error" role="alert">
+          <span class="msg__error-icon" aria-hidden="true">!</span>
+          <span class="msg__error-text">{{ error() }}</span>
+        </div>
+      } @else {
+        @if (!done() && statusMessage()) {
+          <div class="msg__status" aria-live="polite">
+            <span class="msg__status-dot" aria-hidden="true"></span>
+            <span class="msg__status-text">{{ statusMessage() }}</span>
+          </div>
+        }
+
+        @if (message()) {
+          <markdown class="msg__text" [data]="message()"
+                    [disableSanitizer]="true" />
+        }
+
+        <span class="msg__meta">{{ createdAt() | date:'shortTime' }}</span>
+
+        @if (!done() && !error()) {
+          <div class="msg__progress" role="progressbar" aria-label="Processing"></div>
+        }
+      }
+    </div>
+  </div>
+}

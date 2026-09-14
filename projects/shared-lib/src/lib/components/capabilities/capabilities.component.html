@@ -1,0 +1,39 @@
+<section class="capabilities">
+  <header class="capabilities__header">
+    <h2 class="capabilities__title">{{ title() }}</h2>
+    @if (hasSubtitle()) {
+      <p class="capabilities__subtitle">{{ subtitle() }}</p>
+    }
+  </header>
+
+  @if (hasItems()) {
+    <div class="capabilities__items" role="list">
+      @for (it of items(); track it.title) {
+        <article class="capabilities__card" role="listitem">
+          @if (it.tag) {
+            <lib-badge class="capabilities__tag"  [text]="it.tag" [border]="true" color="WHITE"></lib-badge>
+          }
+
+          <header class="capabilities__cardHead">
+            @if (it.icon) {
+              <span class="capabilities__icon" aria-hidden="true">
+                <mat-icon>{{ it.icon }}</mat-icon>
+              </span>
+            }
+            <h3 class="capabilities__cardTitle">{{ it.title }}</h3>
+          </header>
+
+          <p class="capabilities__desc">{{ it.description }}</p>
+
+          @if (it.bullets?.length) {
+            <ul class="capabilities__bullets">
+              @for (b of it.bullets!; track b) {
+                <li class="capabilities__bullet">{{ b }}</li>
+              }
+            </ul>
+          }
+        </article>
+      }
+    </div>
+  }
+</section>

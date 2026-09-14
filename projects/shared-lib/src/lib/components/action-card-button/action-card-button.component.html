@@ -1,0 +1,53 @@
+@if (isLink()) {
+  <a
+    class="action-card"
+    [class.rounded]="rounded()"
+    [class.disabled]="disabled()"
+    [routerLink]="routerLink() || null"
+    [attr.href]="externalUrl() || null"
+    [attr.target]="externalUrl() ? '_blank' : null"
+    [attr.rel]="externalUrl() ? 'noopener' : null"
+    [attr.aria-label]="ariaLabel()"
+    [attr.tabindex]="disabled() ? -1 : null"
+    [attr.aria-disabled]="disabled()"
+    (click)="handleClick($event)"
+  >
+    @if (showIcon()) {
+      <span class="icon-wrap" aria-hidden="true">
+        <mat-icon class="icon">{{ icon() }}</mat-icon>
+      </span>
+    }
+
+    <span class="content">
+      <span class="title">{{ title() }}</span>
+
+      @if (subtitle()) {
+        <span class="subtitle">{{ subtitle() }}</span>
+      }
+    </span>
+  </a>
+} @else {
+  <button
+    type="button"
+    class="action-card"
+    [class.rounded]="rounded()"
+    [class.disabled]="disabled()"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel()"
+    (click)="handleClick($event)"
+  >
+    @if (showIcon()) {
+      <span class="icon-wrap" aria-hidden="true">
+        <mat-icon class="icon">{{ icon() }}</mat-icon>
+      </span>
+    }
+
+    <span class="content">
+      <span class="title">{{ title() }}</span>
+
+      @if (subtitle()) {
+        <span class="subtitle">{{ subtitle() }}</span>
+      }
+    </span>
+  </button>
+}

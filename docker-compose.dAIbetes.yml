@@ -1,0 +1,15 @@
+services:
+  local-app-daibetes:
+    build:
+      context: .
+      dockerfile: Dockerfile.dAIbetes.local
+    container_name: local-frontend-daibetes
+    ports:
+      - "4021:80"
+  global-app-daibetes:
+    build:
+      context: .
+      dockerfile: Dockerfile.dAIbetes.global
+    container_name: global-frontend-daibetes
+    ports:
+      - "4020:80"

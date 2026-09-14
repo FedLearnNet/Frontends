@@ -1,0 +1,50 @@
+<mat-card class="selectable-card">
+  <div class="selectable-card__header">
+    <div class="selectable-card__identity">
+      <h3 class="selectable-card__title">{{ primaryOntologyName() }}</h3>
+      @if (secondaryOntologyName()) {
+        <p class="selectable-card__subtitle">{{ secondaryOntologyName() }}</p>
+      }
+      <p class="selectable-card__secondary">{{ dataType().name }}</p>
+    </div>
+
+    <div class="selectable-card__actions">
+      @if (showDragIndicator()) {
+        <div class="selectable-card__drag-indicator" aria-hidden="true">
+          <mat-icon>drag_indicator</mat-icon>
+        </div>
+      }
+
+      @if (showDetailButton()) {
+        <button mat-icon-button type="button" class="selectable-card__detail-button" (click)="emitDetailClick($event)">
+          <mat-icon>open_in_new</mat-icon>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="selectable-card__badges">
+    <lib-badge [text]="typeLabel(dataType().type)" [color]="typeColor(dataType().type)"></lib-badge>
+    @if (clinicCount() !== null) {
+      <lib-badge [text]="clinicCount() + ' clinics'" color="GREEN"></lib-badge>
+    }
+    <lib-badge [text]="ontologySource()" color="GRAY"></lib-badge>
+    <ng-content select="[card-badges]"></ng-content>
+  </div>
+
+  <div class="selectable-card__grid">
+    <div class="meta-card">
+      <span class="meta-card__label">Ontology code</span>
+      <div class="meta-card__value">{{ ontologyCode() }}</div>
+      <div class="meta-card__hint">Primary code or identifier used for this ontology node.</div>
+    </div>
+
+    <div class="meta-card">
+      <span class="meta-card__label">Datatype</span>
+      <div class="meta-card__value">{{ dataType().name }}</div>
+      <div class="meta-card__hint">{{ shortDescription() }}</div>
+    </div>
+  </div>
+
+  <ng-content></ng-content>
+</mat-card>

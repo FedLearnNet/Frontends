@@ -1,0 +1,91 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="isLoading()"
+  [hasCustomTitle]="storeElement() !== null"
+  [mainGap]="false">
+  @if (storeElement(); as storeElement) {
+    <lib-store-card title
+                    [enableHover]="false"
+                    [linkToShop]="false"
+                    [border]="false"
+                    [storeElement]="storeElement" size="x-large"/>
+  }
+
+  @if (appDetail()) {
+    <div class="tab-header-row">
+      @let si = selectedIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="si === 0" (click)="setSelectedIndex(0)">
+          {{ 'GRID.DESCRIPTION' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 1" (click)="setSelectedIndex(1)">
+          {{ 'GRID.CONFIG' | translate }}
+        </a>
+        @if (appDetail()?.publishInfo) {
+          <a mat-tab-link [active]="si === 2" (click)="setSelectedIndex(2)">
+            {{ 'GRID.PIPELINE_INFO' | translate }}
+          </a>
+        }
+        <a mat-tab-link [active]="si === 3" (click)="setSelectedIndex(3)">
+          {{ 'GRID.APP_VERSIONS' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 4" (click)="setSelectedIndex(4)">
+          {{ 'GRID.REVIEWS' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 5" (click)="setSelectedIndex(5)">
+          {{ 'GRID.AUDITS' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 6" (click)="setSelectedIndex(6)">
+          {{ 'GRID.WORKFLOWS' | translate }}
+        </a>
+      </nav>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="isLoading()"
+  [isEmpty]="appDetail() === null"
+>
+  <mat-tab-nav-panel #panel>
+    @if (appDetail(); as detail) {
+      @switch (selectedIndex()) {
+        @case (0) {
+          <markdown [data]="detail.longDescription"/>
+        }
+        @case (1) {
+          <lib-store-app-config [config]="detail.appConfig"/>
+        }
+        @case (2) {
+          @if (detail.publishInfo) {
+            <app-pipeline-publish-info-detail [publishInfo]="detail.publishInfo"/>
+          }
+        }
+        @case (3) {
+          <lib-store-version-list [(detail)]="appDetail"/>
+        }
+        @case (4) {
+          <lib-store-reviews [app]="detail"/>
+        }
+        @case (5) {
+          <div class="flex">
+            @for (audit of getAudits(detail); track audit.id) {
+              <app-audit-card [audit]="audit"/>
+            } @empty {
+              <lib-hint-card>No Audits yet.</lib-hint-card>
+            }
+          </div>
+        }
+        @case (6) {
+          <lib-workflow-list/>
+        }
+      }
+    } @else {
+      @if (!isLoading()) {
+        <lib-error-card>App not loaded</lib-error-card>
+      }
+    }
+  </mat-tab-nav-panel>
+</lib-page-wrapper>

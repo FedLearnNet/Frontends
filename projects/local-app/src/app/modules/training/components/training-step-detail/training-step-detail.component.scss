@@ -1,0 +1,9 @@
+mat-dialog-content {
+  max-height: 100% !important;
+}
+
+.no-padding {
+  ::ng-deep .mat-expansion-panel-body {
+    padding: 0 !important;
+  }
+}

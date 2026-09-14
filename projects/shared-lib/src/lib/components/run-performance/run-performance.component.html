@@ -1,0 +1,33 @@
+<div class="run-performance">
+  <div class="runtime-row">
+    <span class="label">Runtime</span>
+    <span class="value">{{ runtimeLabel() }}</span>
+  </div>
+
+  @if (hasOverhead()) {
+    <table class="overhead-table">
+      <tbody>
+        <tr>
+          <td class="label">Startup overhead</td>
+          <td class="value">{{ startupLabel() }}</td>
+        </tr>
+        <tr>
+          <td class="label">Teardown overhead</td>
+          <td class="value">{{ teardownLabel() }}</td>
+        </tr>
+        <tr>
+          <td class="label">Total overhead</td>
+          <td class="value">{{ totalOverheadLabel() }}</td>
+        </tr>
+        <tr>
+          <td class="label">Wall-clock total</td>
+          <td class="value">{{ wallTotalLabel() }}</td>
+        </tr>
+        <tr>
+          <td class="label">Overhead of total</td>
+          <td class="value">{{ overheadPercentLabel() }}</td>
+        </tr>
+      </tbody>
+    </table>
+  }
+</div>

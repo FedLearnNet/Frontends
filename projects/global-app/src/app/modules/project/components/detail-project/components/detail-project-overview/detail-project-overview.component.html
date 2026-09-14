@@ -1,0 +1,115 @@
+<div class="project-detail">
+  <mat-card appearance="outlined" class="detail-card">
+    <mat-card-header class="detail-card-header">
+      <div mat-card-avatar class="header-avatar">
+        <mat-icon>assignment</mat-icon>
+      </div>
+      <mat-card-title>{{ 'GRID.PROJECT_DETAIL' | translate }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content class="card-content">
+      <mat-form-field class="full-width custom-field">
+        <mat-label>{{ 'GRID.PROJECT_NAME' | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="('PROJECT_NAME_EXAMPLE' | translate)"
+          [formControl]="name"
+          [readonly]="!editModeName()"
+          required
+        />
+
+        @if (!editModeName()) {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Edit project name"
+            (click)="onEditName($event)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        } @else {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Save project name"
+            (click)="onSaveName($event)">
+            <mat-icon>save</mat-icon>
+          </button>
+        }
+
+        @if (name.invalid) {
+          <mat-error>
+            {{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.NAME' | translate)} }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field class="full-width custom-field description-field">
+        <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+        <textarea
+          matInput
+          rows="4"
+          [placeholder]="('PROJECT_DESCRIPTION_EXAMPLE' | translate)"
+          [formControl]="description"
+          [readonly]="!editModeDescription()"
+          required
+        ></textarea>
+
+        @if (!editModeDescription()) {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Edit description"
+            (click)="onEditDescription($event)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        } @else {
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Save description"
+            (click)="onSaveDescription($event)">
+            <mat-icon>save</mat-icon>
+          </button>
+        }
+
+        @if (description.invalid) {
+          <mat-error>
+            {{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.DESCRIPTION' | translate)} }}
+          </mat-error>
+        }
+      </mat-form-field>
+
+      <p class="edit-hint">
+        {{ 'Click the pencil icon to edit' }}
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="detail-card">
+    <mat-card-header class="detail-card-header">
+      <div mat-card-avatar class="header-avatar">
+        <mat-icon>search</mat-icon>
+      </div>
+      <mat-card-title>{{ 'BUTTON.LINK_QUERY' | translate }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content class="card-content">
+      <app-select-query
+        [queryId]="queryId()"
+        (queryIdChange)="setQueryId($event)"
+        (queryIdSave)="save()">
+      </app-select-query>
+      <p class="edit-hint">
+        {{ 'Click the pencil icon to edit' }}
+      </p>
+    </mat-card-content>
+  </mat-card>
+</div>

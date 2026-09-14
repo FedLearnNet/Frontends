@@ -1,0 +1,33 @@
+
+.umls-container {
+
+
+  mat-card {
+    width: 400px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 50%;
+    transform: translateX(-50%);
+
+    mat-card-content {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}
+
+tr.detail-row {
+  height: 0;
+}
+.input-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+
+  margin-bottom: 30px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}

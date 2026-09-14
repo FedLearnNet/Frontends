@@ -1,0 +1,53 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="dialogTitle()"/>
+
+@if (workflow(); as wf) {
+  @if (experiment(); as exp) {
+    <lib-workflow-readonly-view
+      class="detail"
+      [workflow]="wf!"
+      [experiment]="exp"
+      (selectNode)="showDetail($event)"
+    ></lib-workflow-readonly-view>
+  } @else {
+    <lib-error-card>
+      Workflow run not found
+    </lib-error-card>
+  }
+} @else {
+  <lib-error-card>
+    Workflow not found
+  </lib-error-card>
+}
+
+@if (selectedNode(); as node) {
+  <div class="detail-step">
+
+    @if (selectedStep(); as step) {
+      <lib-status-title [type]="runStatusToBadgeStatus(step.stepStatus!)">
+        #{{ node.executionOrder }} {{ getStepName() }}
+        <div ngProjectAs="right">
+          <button mat-icon-button (click)="hideDetail()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </lib-status-title>
+    } @else {
+      <mat-toolbar class="toolbar">
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="hideDetail()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-toolbar>
+    }
+    @if (experimentData(); as data) {
+      <lib-experiment-workflow-node-detail [experimentData]="data!"
+                                           [hideMetric]="true"
+                                           [hideOutput]="false"
+                                           [hideInput]="false"/>
+    } @else {
+      <lib-skeleton-loader></lib-skeleton-loader>
+    }
+  </div>
+}
+

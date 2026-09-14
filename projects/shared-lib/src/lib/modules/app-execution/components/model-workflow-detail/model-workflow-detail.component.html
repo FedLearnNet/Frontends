@@ -1,0 +1,83 @@
+@if (loading()) {
+  <lib-skeleton-loader title="Loading this analysis">
+  </lib-skeleton-loader>
+} @else {
+  @if (workflow(); as workflow) {
+
+    @if (workflow) {
+      <mat-toolbar>
+        <button mat-icon-button (click)="drawer.toggle()" aria-label="Open and close experiment sidenav">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span>{{ workflow.name }}</span>
+        <span class="spacer"></span>
+        @if (workflow.llmSummary) {
+          <button mat-icon-button
+                  matTooltip="Open LLM generated summary"
+                  (click)="openSummary()">
+            <mat-icon>article_shortcut</mat-icon>
+          </button>
+        }
+        <button mat-icon-button
+                matTooltip="Generate and download report"
+                (click)="downloadReport()">
+          <mat-icon>picture_as_pdf</mat-icon>
+        </button>
+      </mat-toolbar>
+
+      <mat-drawer-container class="drawer-container">
+        <mat-drawer #drawer mode="side" opened class="drawer-container--side">
+          <lib-model-workflow-data-file-management/>
+        </mat-drawer>
+        <mat-drawer-content>
+          <div class="drawer-container--main">
+            <lib-model-workflow-chat-thread [workflowId]="workflow.id"/>
+
+            @if ((!workflow.messages.length) && !executionTool()) {
+              <lib-empty-state title="Start your first analysis"
+                               subtitle="You can select any tool you would like to use"
+                               icon="not_started"
+                               [primaryButtonLabel]="'Run Tool'"
+                               [primaryButtonEnabled]="true"
+                               (cta)="selectModelDialog()"
+              />
+            } @else {
+              @if (!workflowRunning() && !executionTool()) {
+                <lib-empty-state class="next-model-selection"
+                                 icon="add"
+                                 subtitle=""
+                                 title=""
+                                 [iconBtn]="true"
+                                 (cta)="selectModelDialog()"
+                />
+              }
+            }
+            @if (workflowPending()) {
+              <div class="workflow-pending-state">
+                <mat-icon>hourglass_top</mat-icon>
+                <div>
+                  <div class="workflow-pending-state__title">Calculation pending</div>
+                  <div class="workflow-pending-state__subtitle">
+                    Another workflow step is still running or queued. The next result will appear automatically.
+                  </div>
+                </div>
+              </div>
+            }
+            @if (executionTool()) {
+              <lib-ai-task-execution [modelWorkflow]="workflow.id"
+                                     [workflowFiles]="files()"
+                                     [inputHyperParams]="executionToolHyperParams()"
+                                     [storeElement]="executionTool()!"/>
+            }
+            <lib-user-prompt-input/>
+          </div>
+        </mat-drawer-content>
+      </mat-drawer-container>
+    } @else {
+      <p>nothing load</p>
+    }
+  }
+  @if (error(); as error) {
+    <lib-error-card [errorObject]="error"></lib-error-card>
+  }
+}

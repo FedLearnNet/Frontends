@@ -1,0 +1,6 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="title"/>
+
+@if (data.markdown; as md) {
+  <markdown [clipboard]="data.copyToClipboard ?? false" class="markdown" [data]="md"/>
+}

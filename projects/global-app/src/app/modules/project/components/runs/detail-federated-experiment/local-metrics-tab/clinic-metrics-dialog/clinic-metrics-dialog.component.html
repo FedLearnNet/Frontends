@@ -1,0 +1,29 @@
+<h2 mat-dialog-title class="dialog-title">
+  Clinic
+  <lib-badge color="GRAY" [text]="data.clinicId"/>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  @if (getMetricNames().length > 0) {
+    <div class="metric-grid">
+      @for (name of getMetricNames(); track name) {
+        <div class="metric-chart-card">
+          <div class="metric-chart-title">
+            <lib-badge color="BLUE" [text]="name"/>
+          </div>
+          <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)"/>
+        </div>
+      }
+    </div>
+  } @else {
+    <lib-empty-state
+      title="No metrics"
+      subtitle="No metrics available for this clinic."
+    >
+    </lib-empty-state>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

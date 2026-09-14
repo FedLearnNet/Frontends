@@ -1,0 +1,55 @@
+<mat-card class="property-card" [class.compact]="density() === 'compact'" appearance="outlined">
+  <div class="property-card__head">
+    <div class="property-card__title">
+      <div class="eyebrow">Property</div>
+      <h3>{{ profile().name }}</h3>
+      <div class="meta">
+        <lib-badge [text]="typeLabel()" [color]="typeColor(profile().type)" [border]="true"/>
+        <span>{{ profile().count }} rows</span>
+        <span>•</span>
+        <span>{{ profile().missing }} missing</span>
+        @if (profile().uniqueValues !== null) {
+          <span>•</span>
+          <span>{{ profile().uniqueValues }} unique</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <mat-divider/>
+
+  <div class="property-card__body">
+    <div class="stats-grid">
+      @for (item of visibleStatItems(); track item.label) {
+        <div class="stat-item">
+          <div class="stat-label">{{ item.label }}</div>
+          <div class="stat-value">{{ item.value }}</div>
+        </div>
+      }
+    </div>
+
+    <div class="chart-panel">
+      <div class="panel-title">
+        @if (topCategories().length) {
+          Top Values
+        } @else if (profile().type.toUpperCase() === 'INTEGER' || profile().type.toUpperCase() === 'NUMBER') {
+          Distribution Snapshot
+        } @else {
+          Coverage Snapshot
+        }
+      </div>
+      <echarts [options]="chartOption()" class="chart"/>
+    </div>
+
+    @if (visibleTopCategories().length) {
+      <div class="top-values">
+        @for (entry of visibleTopCategories(); track entry[0]) {
+          <div class="top-values__row">
+            <span class="top-values__label" [title]="entry[0]">{{ entry[0] }}</span>
+            <span class="top-values__count">{{ entry[1] }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</mat-card>

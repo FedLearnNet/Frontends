@@ -1,0 +1,113 @@
+<div
+  class="result" #result>
+  <div
+    class="result--wrapper">
+    @if (prediction(); as p) {
+      @if (p.runMode === DataAnalysisRunModesEnum.WORKFLOW) {
+        <div
+          class="result--workflow-header">
+          @if (p.status === RunStatusTypes.STOPPED || p.status === RunStatusTypes.ERROR) {
+            <lib-badge [text]="p.status" color="RED" [border]="true" [pulseCircle]="true"></lib-badge>
+          }
+          <mat-icon class="wf-icon">rebase_edit</mat-icon>
+          <span>Node {{ p.currentWorkflowStep }}/{{ p.maxWorkflowSteps }}</span>
+
+          <div>
+            <button mat-icon-button
+                    [matTooltip]="'Show run details'"
+                    (click)="openDetail()"
+            >
+              <mat-icon>history</mat-icon>
+            </button>
+            <button mat-icon-button
+                    [matTooltip]="'Download complete workflow'"
+                    (click)="downloadWorkflowDetail()"
+            >
+              <mat-icon>download</mat-icon>
+            </button>
+            <button mat-icon-button
+                    [matTooltip]="'View workflow in detail'"
+                    (click)="showWorkflowDetail()"
+            >
+              <mat-icon>view_timeline</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @else {
+        @if (p.status === RunStatusTypes.STOPPED || p.status === RunStatusTypes.ERROR) {
+          <lib-badge [text]="p.status" color="RED" [border]="true" [pulseCircle]="true"></lib-badge>
+        }
+        <button mat-icon-button
+                [matTooltip]="'Show run details'"
+                (click)="openDetail()"
+                class="btn--detail"
+        >
+          <mat-icon>history</mat-icon>
+        </button>
+      }
+    }
+    <div
+      class="result--output">
+      @switch (currentView()) {
+        @case (0) {
+
+          <lib-app-run-output
+            [showAnalyzeBtn]="true"
+            [showDownloadBtn]="false"
+            [appId]="appId"
+            [runId]="runId"
+            [runType]="runType"
+            [outputData]="prediction().result"
+            [outputFiles]="prediction().outputFiles"
+            (analyzeClicked)="openModelAnalyzeDialog($event)"
+          />
+          @if (isError()) {
+            <lib-error-card
+              class="error-card"
+            >
+              <span> {{ prediction().lastError }}</span>
+            </lib-error-card>
+          }
+        }
+        @case (1) {
+          <lib-app-run-param-list [params]="prediction().hyperParams"/>
+        }
+        @case (2) {
+          <lib-app-run-param-list [noParamsText]="'NO_INPUT'"
+                                  [inputFiles]="prediction().inputFiles"
+                                  [params]="prediction().inputs"/>
+        }
+      }
+    </div>
+  </div>
+  <mat-toolbar>
+    <span>{{ prediction().updatedAt | date }} </span>
+    <span class="spacer"></span>
+    <button mat-icon-button
+            [matTooltip]="'BUTTON.DOWNLOAD_OUTPUT' | translate"
+            (click)="downloadOutput()">
+      <mat-icon>download</mat-icon>
+    </button>
+    @if (currentView() !== 0) {
+      <button mat-icon-button
+              [matTooltip]="'MENU.OUTPUTS' | translate"
+              (click)="showOutput()">
+        <mat-icon>output</mat-icon>
+      </button>
+    }
+    @if (currentView() !== 2) {
+      <button mat-icon-button
+              [matTooltip]="'MENU.INPUTS' | translate"
+              (click)="showInput()">
+        <mat-icon>input</mat-icon>
+      </button>
+    }
+    @if (currentView() !== 1) {
+      <button mat-icon-button
+              [matTooltip]="'MENU.HYPERPARAMETER' | translate"
+              (click)="showHyperParam()">
+        <mat-icon>settings_applications</mat-icon>
+      </button>
+    }
+  </mat-toolbar>
+</div>

@@ -1,0 +1,21 @@
+<div class="hil-card">
+  @if (answer()) {
+    <div class="hil-header">
+      <div class="hil-title">Please review and provide an answer.</div>
+    </div>
+  }
+  <markdown class="markdown" [data]="markdownQuestion()"></markdown>
+
+  <div class="hil-section">
+
+    @if (answer()) {
+      <div class="hil-answer">
+        <div class="hil-answer-text">{{ answer() }}</div>
+      </div>
+    } @else {
+      <div class="hil-answer">
+        <div class="hil-answer-text">Please answer in the normal chat input</div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,15 @@
+.experiment-header {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  padding: 0 20px 20px 20px;
+
+  &--body{
+    display: flex;
+    flex-direction: row;
+    gap: 70px;
+
+  }
+}

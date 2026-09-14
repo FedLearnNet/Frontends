@@ -1,0 +1,106 @@
+<mat-toolbar class="toolbar">
+
+  <mat-icon class="toolbar__icon">memory</mat-icon>
+  <div class="toolbar__title">
+    <div class="toolbar__name" [matTooltip]="appBasedConfig().appImage">{{ appBasedConfig().appTitle }}</div>
+    <div class="toolbar__meta mono">
+      cohort {{ config().cohortId ?? '—' }}
+    </div>
+  </div>
+
+  <span class="spacer"></span>
+  @if (!isProduction) {
+    @if (connectorAppBasedExtractorService.connected()) {
+      <lib-badge color="GREEN" iconName="wifi" text="connected"></lib-badge>
+    } @else {
+      <lib-badge color="GRAY" iconName="wifi_off" text="disconnected"></lib-badge>
+    }
+  }
+  @if (connectorAppBasedExtractorService.running()) {
+    <lib-status-badge type="RUNNING"></lib-status-badge>
+  } @else {
+    <lib-status-badge type="PENDING"></lib-status-badge>
+  }
+  <button mat-stroked-button class="toolbar__btn"
+          (click)="showConfig.set(!showConfig())">
+    <mat-icon>tune</mat-icon>
+    {{ showConfig() ? 'Hide config' : 'Show config' }}
+  </button>
+
+  <button mat-raised-button color="accent" class="toolbar__btn"
+          [disabled]="connectorAppBasedExtractorService.running()"
+          (click)="startAppBasedExtractor()">
+    <mat-icon>play_arrow</mat-icon>
+    Start
+  </button>
+</mat-toolbar>
+
+<div class="page">
+  @if (connectorAppBasedExtractorService.error(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  }
+
+  @if (showConfig()) {
+    <div class="grid">
+      <mat-card class="card">
+        <mat-card-content class="config">
+          <div class="config__section">
+            <div class="config__label">Hyper params</div>
+
+            @if (hyperParamKeys().length === 0) {
+              <div class="muted">No hyper parameters configured.</div>
+            } @else {
+              <div class="kv">
+                @for (k of hyperParamKeys(); track k) {
+                  <lib-kv [label]="k" [value]="appBasedConfig().hyperParams[k]"></lib-kv>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="config__section">
+            <div class="config__label">Input data</div>
+
+            @if (inputDataKeys().length === 0) {
+              <div class="muted">No inputs configured.</div>
+            } @else {
+              <div class="inputs">
+                @for (k of inputDataKeys(); track k) {
+                  <lib-kv [label]="k" [value]="getFileName(appBasedConfig().inputData[k])"></lib-kv>
+                }
+              </div>
+            }
+          </div>
+
+        </mat-card-content>
+      </mat-card>
+
+      <div class="runtime">
+        <mat-card class="card">
+          <mat-card-content>
+            @if (last(); as l) {
+              <p>Last message</p>
+
+              <div class="runtime">
+                <lib-kv label="Status" [value]="l.status"></lib-kv>
+                @if (l.lastLog) {
+                  <lib-kv label="Message" [value]="l.lastLog"></lib-kv>
+                }
+              </div>
+            } @else if (hasStoredOutputs()) {
+              <div class="muted">
+                Showing the output of the last run. Press <b>Start</b> to run the extractor again.
+              </div>
+            } @else {
+              <div class="muted">
+                Press <b>Start</b> to run the extractor and stream logs.
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,74 @@
+<div class="patient-editor" [class.has-pinned-toolbar]="stickyHeader() && showHeader()">
+  @if (showHeader()) {
+    <div class="editor-toolbar" [class.is-pinned]="stickyHeader()">
+      <lib-header
+        [title]="pageTitle()"
+        [enableGoBack]="enableGoBack()"
+        [locationBack]="enableGoBack()"
+        [mainGap]="false">
+        <div suffix class="form-actions">
+          <lib-btn
+            type="CANCEL"
+            variant="SECONDARY"
+            btnType="button"
+            [disabled]="submitting()"
+            (clicked)="onCancel()" />
+          <lib-btn
+            [type]="isCreate() ? 'SAVE' : 'UPDATE'"
+            variant="PRIMARY"
+            [disabled]="submitting()"
+            (clicked)="onSubmit()" />
+        </div>
+      </lib-header>
+
+      <section #patientIdSection class="patient-id-section" [attr.data-patient-field-anchor]="'external-patient-id'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'GRID.EXTERNAL_PATIENT_ID' | translate }}</mat-label>
+          <input
+            matInput
+            [formControl]="externalPatientIdControl"
+            [placeholder]="'GRID.EXTERNAL_PATIENT_ID' | translate"
+            autocomplete="off" />
+          @if (externalPatientIdControl.hasError('required') && (externalPatientIdControl.touched || externalPatientIdControl.dirty)) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.EXTERNAL_PATIENT_ID' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+      </section>
+    </div>
+  } @else {
+    <section class="patient-id-section" [attr.data-patient-field-anchor]="'external-patient-id'">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'GRID.EXTERNAL_PATIENT_ID' | translate }}</mat-label>
+        <input
+          matInput
+          [formControl]="externalPatientIdControl"
+          [placeholder]="'GRID.EXTERNAL_PATIENT_ID' | translate"
+          autocomplete="off" />
+        @if (externalPatientIdControl.hasError('required') && (externalPatientIdControl.touched || externalPatientIdControl.dirty)) {
+          <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.EXTERNAL_PATIENT_ID' | translate) } }}</mat-error>
+        }
+      </mat-form-field>
+    </section>
+  }
+
+  <div class="patient-editor-content">
+    @if (draftPatient(); as patient) {
+      <div class="patient-data">
+        @for (node of sortedTopLevelNodes(); track node.id) {
+          <app-patient-data
+            [patient]="patient"
+            [schemaNode]="node"
+            [schemaLevel]="2"
+            [formMode]="isCreate()"
+            [editable]="true"
+            [defaultExpanded]="false"
+            [autoOpenAdd]="isCreate()"
+            [singleValuePerNode]="isCreate()"
+            (entryCreated)="onEntryCreated($event)"
+            (entryUpdated)="onEntryUpdated($event)"
+            (entryDeleted)="onEntryDeleted($event)" />
+        }
+      </div>
+    }
+  </div>
+</div>

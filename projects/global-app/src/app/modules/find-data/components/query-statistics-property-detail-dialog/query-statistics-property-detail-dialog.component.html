@@ -1,0 +1,58 @@
+<lib-closeable-dialog-title
+  title="Property comparison"
+  (maximizedChanged)="toggleMaximize($event)"/>
+
+<mat-dialog-content class="dialog-content">
+  <lib-header
+    [title]="data.propertyName"
+    description="Compare clinic-level distributions against the cross-clinic average and review the strongest deviations.">
+    <lib-badge suffix color="BLUE" [border]="true" [text]="data.clinicProfiles.length + ' clinics'"/>
+    <lib-badge suffix color="GRAY" [border]="true"
+               [text]="'Avg missing ' + ((averageMissingRate() * 100) | number:'1.1-1') + '%'"/>
+    <lib-badge suffix [color]="typeColor()" [border]="true" [text]="type()"/>
+
+  </lib-header>
+
+  <div class="summary-grid">
+    <div class="chart-card">
+      <div class="chart-title">Clinic comparison</div>
+      <div class="chart-subtitle">
+        Distributions per clinic with an additional average reference.
+      </div>
+      <echarts [options]="comparisonChartOption()" class="chart chart--large"/>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Deviation ranking</div>
+      <div class="chart-subtitle">
+        Largest deviations from the average across responding clinics.
+      </div>
+      <echarts [options]="deviationChartOption()" class="chart chart--medium"/>
+    </div>
+
+  </div>
+
+  <div class="detail-grid">
+    <div class="deviation-list">
+      @for (row of deviationRows(); track row.clinicId) {
+        <div class="deviation-row">
+          <div class="deviation-row__head">
+            <strong>{{ row.clinicId }}</strong>
+            <span class="delta" [class.delta--positive]="row.deltaToAverage > 0"
+                  [class.delta--negative]="row.deltaToAverage < 0">
+              {{
+                isNumeric(type()) ? (row.deltaToAverage >= 0 ? '+' : '') +
+                  (row.deltaToAverage | number:'1.2-2') : (row.deltaToAverage * 100 >= 0 ? '+' : '') +
+                  ((row.deltaToAverage * 100) | number:'1.1-1') + '%'
+              }}
+            </span>
+          </div>
+          <div class="deviation-row__meta">
+            <span>Mean: {{ row.mean === null ? '—' : (row.mean | number:'1.2-2') }}</span>
+            <span>Median: {{ row.median === null ? '—' : (row.median | number:'1.2-2') }}</span>
+            <span>Missing: {{ (row.missingRate * 100) | number:'1.1-1' }}%</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</mat-dialog-content>

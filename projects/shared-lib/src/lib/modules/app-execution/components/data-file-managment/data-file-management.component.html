@@ -1,0 +1,81 @@
+@if (loading()) {
+  <mat-toolbar>
+    <span>Data Management Loading...</span>
+  </mat-toolbar>
+} @else {
+  <mat-toolbar>
+    <span>Data Management</span>
+    <span class="spacer"></span>
+    <button mat-icon-button (click)="linkFile()" matTooltip="Add files">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-icon-button (click)="toggleUpload()" matTooltip="Upload files">
+      <mat-icon>upload</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div class="uploader">
+    @if (showUpload) {
+      <div class="dropzone"
+           [class.over]="dragOver"
+           (dragover)="$event.preventDefault()"
+           (dragenter)="onDragEnter()"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)">
+        <p>
+          Drag & Drop files here or
+          <label class="browse">
+            browse
+            <input type="file" (change)="onFileSelect($event)" hidden>
+          </label>
+        </p>
+      </div>
+    }
+
+    @if (uploadResponse().inProgress) {
+      <div class="progress-container">
+        <mat-progress-bar mode="determinate"
+                          [value]="(uploadResponse())?.progress"/>
+        <span>{{ (uploadResponse())?.progress }}%</span>
+      </div>
+    }
+
+    @if (files(); as files) {
+      <div class="file-list">
+        @for (file of files; track file.id) {
+          @if (!file.predictionId) {
+            <div class="file-entry">
+              <span class="name" (click)="openDetailDialog(file)">{{ file.file.fileName }}</span>
+              <span class="size">{{ file.file.size }} bytes</span>
+              <button mat-icon-button color="warn"
+                      (click)="delete(file); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        }
+      </div>
+      <p>Output</p>
+      <div class="file-list">
+        @for (file of files; track file.id) {
+          @if (file.predictionId) {
+            <div class="file-entry">
+              <span class="name" (click)="openDetailDialog(file)">{{ file.file.fileName }}</span>
+              <span class="size">{{ file.file.size }} bytes</span>
+              <button mat-icon-button color="warn"
+                      (click)="delete(file); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        }
+      </div>
+    }
+
+  </div>
+}
+@if (error(); as error) {
+  <div class="error">
+    Error: {{ error | json }}
+  </div>
+}

@@ -1,0 +1,45 @@
+<lib-page-wrapper
+  [isEmpty]="!hasStatistics()"
+  [error]="error()"
+  [isLoading]="isLoading()"
+  [skeletonOnLoading]="true">
+
+  <lib-empty-state
+    empty
+    title="No custom statistics yet"
+    subtitle="Create your first custom statistic to compare distributions, group properties, or surface patterns specific to this cohort."
+    icon="bar_chart"
+    [primaryButtonEnabled]="true"
+    primaryButtonLabel="Add custom statistic"
+    [hasBackground]="true"
+    [bordered]="true"
+    (cta)="openCreateDialog()"
+  />
+
+  <div class="custom-statistics-grid">
+    @for (stat of statistics(); track stat.id) {
+      <div class="custom-statistic-card">
+        <div class="custom-statistic-card__head">
+          <div class="custom-statistic-card__title-block">
+            <div class="custom-statistic-card__title">{{ stat.name }}</div>
+            <div class="custom-statistic-card__type">{{ typeLabel(stat.type) }}</div>
+          </div>
+          <lib-btn
+            type="DELETE"
+            variant="GHOST"
+            [iconOnly]="true"
+            (clicked)="remove(stat)"/>
+        </div>
+
+        @if (stat.data) {
+          <echarts [options]="chartOption(stat)" class="custom-statistic-card__chart"/>
+        } @else {
+          <div class="custom-statistic-card__no-data">
+            <mat-icon>hourglass_empty</mat-icon>
+            <span>Waiting for computed data…</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</lib-page-wrapper>

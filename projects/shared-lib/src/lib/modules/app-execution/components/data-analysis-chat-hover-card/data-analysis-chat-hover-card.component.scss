@@ -1,0 +1,22 @@
+:host {
+  z-index: 99;
+}
+.hc-card {
+  width: 360px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+  padding: 12px 14px;
+}
+
+.hc-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.hc-sub {
+  font-size: 12px;
+  opacity: .8;
+  margin-top: 6px;
+  line-height: 1.35;
+}

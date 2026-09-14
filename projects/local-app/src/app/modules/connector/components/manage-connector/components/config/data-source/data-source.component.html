@@ -1,0 +1,39 @@
+<h2>{{ 'SELECT_A_DATA_SOURCE' | translate }}</h2>
+<p>{{ 'SELECT_A_DATA_SOURCE_DESC' | translate }}</p>
+
+<mat-divider/>
+<h3>{{ 'GENERIC_SOURCE' | translate }}</h3>
+<p>{{ 'GENERIC_SOURCE_DESC' | translate }}</p>
+
+
+<div class="source-wrapper">
+  @for (card of genericSource; track card) {
+    <mat-card [class.selected]="selected() && card.id === selected()!.id" (click)="toggleSelect(card)">
+      <mat-card-header>
+        @if (selected() && card.id === selected()!.id) {
+          <mat-icon class="material-icons" mat-card-avatar>check</mat-icon>
+        } @else {
+          <mat-icon class="material-icons" mat-card-avatar>{{ card.icon }}</mat-icon>
+        }
+        <mat-card-title>{{ card.title }}</mat-card-title>
+        <mat-card-subtitle> {{ card.description }}</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+  }
+</div>
+
+<mat-divider/>
+<h3>{{ 'SPECIFIC_SOURCE' | translate }}</h3>
+<p>{{ 'SPECIFIC_SOURCE_DESC' | translate }}</p>
+
+<div class="source-wrapper">
+  @for (card of storeItems(); track $index) {
+    <lib-store-card
+      [class.selected]="selected() && getStoreItemId(card) === selected()!.id"
+      (click)="toggleAppSelect(card)"
+      [linkToShop]="false"
+      [storeElement]="card"></lib-store-card>
+  }
+
+
+</div>

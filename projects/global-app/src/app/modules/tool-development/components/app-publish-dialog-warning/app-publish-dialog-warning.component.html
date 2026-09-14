@@ -1,0 +1,199 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.PUBLISH_NEW_VERSION.TITLE' | translate:{name: data.name}"
+></lib-closeable-dialog-title>
+
+<mat-dialog-content class="dlg-content">
+  <form class="publish-form" [formGroup]="publishAppForm">
+    <mat-stepper class="publish-stepper" [linear]="true" #stepper>
+
+      <!-- STEP 1: Version + Changelog -->
+      <mat-step [stepControl]="stepVersionChangelog">
+        <ng-template matStepLabel>Version & changelog</ng-template>
+
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">{{ 'GRID.VERSION' | translate }}</div>
+            <div class="section-desc">New version of your tool</div>
+          </div>
+
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>{{ 'GRID.VERSION' | translate }}</mat-label>
+            <input
+              matInput
+              formControlName="latestVersion"
+              placeholder="1.0.1"
+              inputmode="numeric"
+              autocomplete="off"
+            />
+            <mat-hint>Must be larger</mat-hint>
+
+            @if (publishAppForm.controls.latestVersion.hasError('pattern') && !publishAppForm.controls.latestVersion.hasError('required')) {
+              <mat-error>{{ 'VALIDATION.INVALID_VERSION' | translate }}</mat-error>
+            }
+            @if (publishAppForm.controls.latestVersion.hasError('required')) {
+              <mat-error>
+                {{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.VERSION' | translate)} }}
+              </mat-error>
+            }
+            @if (publishAppForm.controls.latestVersion.hasError('versionTooLow')) {
+              <mat-error>{{ 'VALIDATION.VERSION_MUST_BE_LARGER' | translate }}</mat-error>
+            }
+          </mat-form-field>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">{{ 'GRID.CHANGELOG' | translate }}</div>
+            <div class="section-desc">If you want to track your changes</div>
+          </div>
+
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>{{ 'GRID.CHANGELOG' | translate }}</mat-label>
+            <textarea
+              matInput
+              formControlName="changelog"
+              rows="5"
+              [placeholder]="('GRID.FIX_A_BUG_FOR' | translate)"
+            ></textarea>
+            <mat-hint align="end">
+              {{ publishAppForm.controls.changelog.value.length }} / 2000
+            </mat-hint>
+          </mat-form-field>
+        </section>
+
+
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">Network access</div>
+            <div class="section-desc">Declare whether this tool requires outbound internet access</div>
+          </div>
+
+          <div class="model-row">
+            <mat-checkbox class="full-width" formControlName="needsInternetAccess">
+              Needs internet access
+            </mat-checkbox>
+
+            <mat-checkbox class="full-width" formControlName="needsHostAccess">
+              Needs Host-system access
+            </mat-checkbox>
+
+            <lib-hint-card>
+              This flag will be shown to users and reviewers. Enabling internet access increases the security risk
+              (e.g., data exfiltration, untrusted downloads, or contacting external services). Only enable it if
+              the tool strictly requires outbound network access.
+            </lib-hint-card>
+          </div>
+        </section>
+      </mat-step>
+
+      @if (isTrainable) {
+        <mat-step [stepControl]="stepCreateModel">
+          <ng-template matStepLabel>Create model</ng-template>
+
+          <section class="section">
+            <div class="section-head">
+              <div class="section-title">Create a model</div>
+              <div class="section-desc">You can directly create a model based on this tool</div>
+            </div>
+
+            <div class="model-row">
+              <mat-checkbox class="full-width" formControlName="createModel">
+                Create a model
+              </mat-checkbox>
+
+              <lib-hint-card>
+                If the Docker image is already built and no federated trained model is required, you can create a model
+                here.
+              </lib-hint-card>
+            </div>
+          </section>
+        </mat-step>
+      }
+      @if (data.publishInfo) {
+        <mat-step>
+          <ng-template matStepLabel>Review pipeline info</ng-template>
+
+          <section class="section">
+            <div class="section-head">
+              <div class="section-title">Publish Info</div>
+            </div>
+
+            <app-pipeline-publish-info-detail [publishInfo]="data.publishInfo"></app-pipeline-publish-info-detail>
+          </section>
+
+        </mat-step>
+      }
+      <mat-step>
+        <ng-template matStepLabel>Review IO</ng-template>
+
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">IO</div>
+          </div>
+
+          <lib-tool-io-graph [app]="data"></lib-tool-io-graph>
+        </section>
+
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Publish</ng-template>
+
+        <section class="section">
+          <div class="section-head">
+            <div class="section-title">Warning</div>
+          </div>
+
+          <lib-error-card class="full-width">
+            <div>
+              <h4>{{ 'DIALOG.PUBLISH_NEW_VERSION.MESSAGE' | translate }}</h4>
+              <p>{{ 'DIALOG.PUBLISH_NEW_VERSION.EXTRA_INFO' | translate }}</p>
+              <p>
+                {{ 'DIALOG.PUBLISH_NEW_VERSION.YOU_CAN_NOT_CHANGE_THE_VERSION' | translate:{version: publishAppForm.controls.latestVersion.value} }}
+              </p>
+            </div>
+          </lib-error-card>
+        </section>
+
+        @if (errorText()) {
+          <lib-error-card class="full-width">
+            {{ errorText() }}
+          </lib-error-card>
+        }
+      </mat-step>
+
+    </mat-stepper>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dlg-actions">
+  @if (stepper.selectedIndex > 0) {
+    <button mat-button type="button" (click)="stepper.previous()">
+      Back
+    </button>
+  }
+  <span class="spacer"></span>
+  @if (stepper.selectedIndex < 2) {
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      (click)="stepper.next()"
+      [disabled]="(stepper.selectedIndex === 0 && stepVersionChangelog.invalid) || (stepper.selectedIndex === 1 && stepCreateModel.invalid)"
+    >
+      Next
+    </button>
+  } @else {
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      [disabled]="!canPublish()"
+      (click)="publish()"
+    >
+      {{ 'BUTTON.PUBLISH' | translate }}
+    </button>
+  }
+</mat-dialog-actions>

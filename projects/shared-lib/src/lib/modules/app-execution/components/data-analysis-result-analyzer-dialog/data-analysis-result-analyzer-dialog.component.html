@@ -1,0 +1,60 @@
+<div class="analysis-dialog">
+  <lib-closeable-dialog-title
+    class="analysis-dialog__title"
+    (maximizedChanged)="toggleMaximize($event)"
+    [title]="data.title"
+  />
+
+  <div class="analysis-dialog__wrapper">
+    <lib-file-detail-card class="file" [file]="data.file"></lib-file-detail-card>
+    <div class="analysis-dialog__content">
+      @if (resultState(); as state) {
+        @if (state.loading) {
+          <div class="analysis-dialog__loading">
+            <lib-skeleton-loader class="analysis-dialog__skeleton"/>
+          </div>
+        } @else {
+          @if (state.loaded) {
+            <div class="analysis-dialog__header">
+              @if (state.updatedAt) {
+                <lib-time-badge
+                  class="analysis-dialog__time"
+                  [color]="'GRAY'"
+                  [date]="state.updatedAt"
+                />
+              }
+              <button
+                class="analysis-dialog__retry"
+                mat-icon-button
+                type="button"
+                (click)="generate()"
+                aria-label="Retry analysis"
+              >
+                <mat-icon>replay</mat-icon>
+              </button>
+            </div>
+          }
+
+          @if (markdown(); as md) {
+            <div class="analysis-dialog__result">
+              <markdown class="analysis-dialog__markdown" [data]="md"/>
+            </div>
+          }
+
+
+          @if (state.error) {
+            <div class="analysis-dialog__error">
+              <lib-error-card class="analysis-dialog__error-card">
+                {{ state.error }}
+              </lib-error-card>
+            </div>
+          }
+        }
+      } @else {
+        <div class="analysis-dialog__loading">
+          <lib-skeleton-loader class="analysis-dialog__skeleton"/>
+        </div>
+      }
+    </div>
+  </div>
+</div>

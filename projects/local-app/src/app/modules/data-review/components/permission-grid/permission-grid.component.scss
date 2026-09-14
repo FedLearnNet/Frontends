@@ -1,0 +1,63 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.permission-container {
+  .action-buttons-row {
+    margin-bottom: 20px;
+  }
+
+  .group-or-user,
+  .permissions {
+    padding-block: 10px;
+    display: flex;
+    align-items: flex-start;
+    white-space: pre-line;
+    justify-content: center;
+  }
+
+  .group-or-user:not(.is-x-small-screen),
+  .permissions:not(.is-x-small-screen) {
+    flex-direction: column;
+  }
+
+  .permissions-cell {
+    display: inline;
+    line-height: 1.5;
+
+    .disabled-input {
+      width: auto;
+      padding-inline: 10px;
+      background-color: #ececec;
+      border: solid 1px #d2d2d2;
+    }
+  }
+
+  /* New styles for vertical scrolling with fixed header */
+  .table-container {
+    max-height: 500px; /* Adjust the height as needed */
+    overflow: auto;
+  }
+
+  .mat-table {
+    position: relative;
+  }
+
+  .mat-header-row {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #fff; /* Adjust background color if necessary */
+  }
+
+  .mat-cell,
+  .mat-header-cell {
+    white-space: nowrap;
+  }
+
+  .mat-header-cell.sticky,
+  .mat-cell.sticky {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background-color: #fff; /* Adjust background color if necessary */
+  }
+}

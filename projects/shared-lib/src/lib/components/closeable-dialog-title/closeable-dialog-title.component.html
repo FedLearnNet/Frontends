@@ -1,0 +1,18 @@
+<div mat-dialog-title class="dialog-title">
+  <h2>{{ title() }}</h2>
+  <span class="spacer"></span>
+  <div class="dialog-title--actions">
+    @if (allowMaximize()) {
+      <button class="dialog-title--btn" mat-icon-button aria-label="maximize" (click)="toggleMaximize()">
+        @if (isMaximized) {
+          <mat-icon>fullscreen_exit</mat-icon>
+        } @else {
+          <mat-icon>fullscreen</mat-icon>
+        }
+      </button>
+    }
+    <button class="dialog-title--btn" mat-icon-button aria-label="close dialog" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

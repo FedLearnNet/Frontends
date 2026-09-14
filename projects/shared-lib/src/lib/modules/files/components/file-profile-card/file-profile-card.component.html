@@ -1,0 +1,163 @@
+<mat-card class="card" appearance="outlined">
+  <mat-card-header class="header">
+    <div class="title-wrap">
+      <div class="title-row">
+        <mat-icon class="title-icon">description</mat-icon>
+        <div class="title">{{ profile().fileName }}</div>
+      </div>
+
+      @if (path()) {
+        <span class="sub mono">{{ path() }}</span>
+      } @else {
+        <span class="sub muted">No path provided</span>
+      }
+    </div>
+    <span class="spacer"></span>
+    <div class="badge">
+      <div class="badge-label">Rows scanned</div>
+      <div class="badge-value">{{ fmtInt(profile().rowsScanned) }}</div>
+    </div>
+
+    <button mat-icon-button (click)="toggleExpanded()">
+      @if(expand()){
+        <mat-icon>keyboard_arrow_up</mat-icon>
+
+      } @else {
+        <mat-icon>keyboard_arrow_down</mat-icon>
+      }
+    </button>
+  </mat-card-header>
+
+  <mat-divider></mat-divider>
+  @if (expand()) {
+
+    <mat-card-content class="content">
+      <div class="grid">
+        <section class="panel">
+          <div class="panel-title">Overview</div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="kpi-label">Columns</div>
+              <div class="kpi-value">{{ fmtInt(colCount()) }}</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-label">Missing (total)</div>
+              <div class="kpi-value">{{ fmtInt(missingTotal()) }}</div>
+              <div class="kpi-hint">{{ fmtPct(missingRatio()) }} overall</div>
+            </div>
+          </div>
+
+          <div class="chips">
+            <lib-badge color="GRAY" [border]="true" iconName="numbers"
+                       [text]="primaryStats().numeric + ' numeric'"></lib-badge>
+            <lib-badge color="GRAY" [border]="true" iconName="category"
+                       [text]="primaryStats().categorical + ' categorical'"></lib-badge>
+            <lib-badge color="GRAY" [border]="true" iconName="text_fields"
+                       [text]="primaryStats().text + ' text'"></lib-badge>
+            <lib-badge color="GRAY" [border]="true" iconName="event"
+                       [text]="primaryStats().datetime + ' datetime'"></lib-badge>
+            <lib-badge color="GRAY" [border]="true" iconName="toggle_on"
+                       [text]="primaryStats().boolean + ' boolean'"></lib-badge>
+          </div>
+        </section>
+
+        <!-- Column health -->
+        <section class="panel">
+          <div class="panel-title">Columns (risk-based)</div>
+
+          @if (topProblemColumns().length === 0) {
+            <div class="empty">
+              <mat-icon>check_circle</mat-icon>
+              <div>
+                <div class="empty-title">No column data</div>
+                <div class="empty-sub">Profile has no columns.</div>
+              </div>
+            </div>
+          } @else {
+            <div class="col-list">
+              @for (c of topProblemColumns(); track trackByCol($index, c)) {
+                <div class="col-row">
+                  <div class="col-left">
+                    <div class="col-name">{{ c.name }}</div>
+                    <div class="col-meta">
+                      <mat-icon class="meta-icon">{{ typeIcon(c.type) }}</mat-icon>
+                      <span class="meta-text">{{ typeLabel(c.type) }}</span>
+                      <span class="dot">•</span>
+                      <span class="meta-text">count: {{ fmtInt(c.count) }}</span>
+                      @if (c.uniqueValues !== undefined) {
+                        <span class="dot">•</span>
+                        <span class="meta-text">unique: {{ fmtInt(c.uniqueValues) }}</span>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-right">
+                    <div class="metric">
+                      <div class="metric-label">missing</div>
+                      <div class="metric-value">
+                        {{ fmtInt(c.missing) }}
+                        <span class="metric-sub">
+                        ({{ fmtPct((profile().rowsScanned ? (c.missing / profile().rowsScanned) : 0)) }})
+                      </span>
+                      </div>
+                    </div>
+
+                    @if (c.mean !== undefined || c.min !== undefined || c.max !== undefined) {
+                      <div class="metric">
+                        <div class="metric-label">range</div>
+                        <div class="metric-value">
+                          {{ fmtNum(c.min) }} → {{ fmtNum(c.max) }}
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="metric subtle">
+                        <div class="metric-label">range</div>
+                        <div class="metric-value">—</div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                @if (c.topCategories?.length) {
+                  <div class="chips">
+                    @for (pair of c.topCategories!; track $index) {
+                      <lib-badge [text]="pair[0]" color="GRAY" size="X-SMALL">
+                        <b>{{ fmtInt(pair[1]) }}</b>
+                      </lib-badge>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          }
+        </section>
+        @if (fileDetailParserError()) {
+          <section class="panel span-2">
+            <div class="panel-title">Sample rows</div>
+
+            @if (samplePreview().length === 0) {
+              <div class="empty">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <div class="empty-title">No samples</div>
+                  <div class="empty-sub">The profile did not include sample rows.</div>
+                </div>
+              </div>
+            } @else {
+              <div class="samples">
+                @for (row of samplePreview(); track $index) {
+                  <pre class="sample mono">{{ row }}</pre>
+                }
+              </div>
+            }
+          </section>
+        } @else {
+          <lib-csv-file-viewer class="span-2" [data]="sampleContentColumns()" [isBase64Encoded]="false"
+                               [(error)]="fileDetailParserError"/>
+        }
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

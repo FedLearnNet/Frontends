@@ -1,0 +1,16 @@
+.change-view{
+  display: flex;
+  gap: 30px;
+  justify-content: space-between;
+
+  &-list{
+    width: 30%;
+    max-width: 30%;
+    min-width: 30%;
+    height: 1px;
+  }
+
+  &-datail{
+    width: calc(70% - 30px);
+  }
+}

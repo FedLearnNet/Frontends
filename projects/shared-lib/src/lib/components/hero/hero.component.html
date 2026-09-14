@@ -1,0 +1,48 @@
+<section class="hero">
+  <div class="hero__bg" aria-hidden="true"></div>
+
+  <header class="hero__inner">
+    @if (hasEyebrow()) {
+      <lib-badge class="hero__chip" [pulseCircle]="true" [text]="eyebrow()!" [border]="true" color="WHITE"></lib-badge>
+
+    }
+
+    <h1 class="hero__title" data-anim>
+      <span class="hero__titleGlow" aria-hidden="true"></span>
+      {{ title() }}
+    </h1>
+
+    <p class="hero__subtitle">{{ subtitle() }}</p>
+
+    @if (hasBadges()) {
+      <div class="hero__badges" aria-label="Highlights">
+        @for (b of badges(); track b.label) {
+          <lib-badge class="hero__chip" [iconName]="b.icon" [text]="b.label" [border]="true" color="WHITE"></lib-badge>
+        }
+      </div>
+    }
+
+    <nav class="hero__cta" aria-label="Primary actions">
+      <button mat-flat-button color="primary" class="hero__btn hero__btn--primary" (click)="primaryCta.emit()">
+        <span>{{ primaryCtaLabel() }}</span>
+        <mat-icon aria-hidden="true">{{ primaryCtaIcon() }}</mat-icon>
+      </button>
+
+      <button mat-stroked-button class="hero__btn hero__btn--secondary" (click)="secondaryCta.emit()">
+        <mat-icon aria-hidden="true">{{ secondaryCtaIcon() }}</mat-icon>
+        <span>{{ secondaryCtaLabel() }}</span>
+      </button>
+    </nav>
+
+    @if (hasKpis()) {
+      <dl class="hero__kpis" aria-label="Key metrics">
+        @for (k of kpis(); track k.label) {
+          <div class="hero__kpi">
+            <dt class="hero__kpiLabel">{{ k.label }}</dt>
+            <dd class="hero__kpiValue">{{ k.value }}</dd>
+          </div>
+        }
+      </dl>
+    }
+  </header>
+</section>

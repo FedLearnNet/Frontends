@@ -1,0 +1,101 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.SCHEMA_DETAIL.TITLE' | translate" />
+
+<mat-dialog-content>
+  @if (schema()) {
+
+    @if (currentStep() === 1) {
+      <app-schema-detail [schema]="schema()!" />
+    } @else {
+      <section class="form-wrap">
+        <p>You can customize your Cohort by setting up evidence metadata and eligibility criteria</p>
+
+        <form [formGroup]="form" class="cohort-form" (ngSubmit)="create()">
+          <mat-form-field class="full-width" [class.name-field-invalid]="nameExists()">
+            <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+            <input matInput formControlName="name" maxlength="80" autocomplete="off"/>
+            <mat-hint align="start">{{ 'REQUIRED' | translate }}</mat-hint>
+            <mat-hint align="end">{{ form.controls.name.value.length }} / 80</mat-hint>
+
+            @if (createDisabledHint(); as hintKey) {
+              <mat-error>{{ hintKey | translate }}</mat-error>
+            }
+
+            @if (form.controls.name.hasError('required')) {
+              <mat-error>
+                {{ 'REQUIRED' | translate }}
+              </mat-error>
+            }
+
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+            <textarea matInput formControlName="description" rows="5" maxlength="1000"></textarea>
+            <mat-hint align="end">{{ form.controls.description.value.length }} / 1000</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option [value]="''">Not set</mat-option>
+              @for (status of publicationStatuses; track status) {
+                <mat-option [value]="status">{{ status }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Cite as</mat-label>
+            <textarea matInput formControlName="citeAs" rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Purpose</mat-label>
+            <textarea matInput formControlName="purpose" rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Copyright</mat-label>
+            <textarea matInput formControlName="copyright" rows="3"></textarea>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Copyright label</mat-label>
+            <input matInput formControlName="copyrightLabel">
+          </mat-form-field>
+
+          <app-cohort-criteria-editor
+            [criteria]="criteria"
+            [schema]="schema()">
+          </app-cohort-criteria-editor>
+        </form>
+      </section>
+    }
+  } @else {
+    <lib-skeleton-loader />
+  }
+</mat-dialog-content>
+
+<mat-divider />
+
+<mat-dialog-actions align="start">
+  @if (currentStep() === 1) {
+    <span class="spacer"></span>
+    <button mat-stroked-button color="primary" (click)="next()">
+      {{ 'BUTTON.CONTINUE' | translate }}
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  } @else {
+    <button mat-button (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+      {{ 'BUTTON.BACK' | translate }}
+    </button>
+    <span class="spacer"></span>
+
+    <button mat-flat-button color="primary" [disabled]="!canCreate()" (click)="create()">
+      <mat-icon>check_circle</mat-icon>
+      {{ 'BUTTON.CREATE' | translate }}
+    </button>
+  }
+</mat-dialog-actions>

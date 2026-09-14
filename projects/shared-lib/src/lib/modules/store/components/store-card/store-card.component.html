@@ -1,0 +1,87 @@
+@if (routerLink(); as link) {
+  <a class="card-link"
+     [routerLink]="link"
+     (click)="itemClick()"
+     [attr.aria-label]="displayData().name">
+    <ng-container *ngTemplateOutlet="cardContent"/>
+  </a>
+} @else {
+  <div class="card-link"
+       role="button"
+       tabindex="0"
+       (click)="itemClick()"
+       [attr.aria-label]="displayData().name">
+    <ng-container *ngTemplateOutlet="cardContent"/>
+  </div>
+}
+
+<ng-template #cardContent>
+  @if (displayData(); as data) {
+    <mat-card class="shop-card" appearance="outlined"
+              [class.no-border]="!border()"
+              [@cardHover]="animationState">
+
+      <div class="shop-card-main-content">
+        <lib-placeholder-image class="img-wrp"
+                               [src]="data.icon" [name]="data.name"/>
+
+        <div class="shop-card-text-content">
+          <h4 class="shop-card-title">
+            {{ data.name }}
+            @if (data.isModel && size() !== 'x-large') {
+              <span class="muted">({{ data.app!.name }})</span>
+            }
+          </h4>
+          @if (data.isWorkflow) {
+            <lib-app-type-badge [isWorkflow]="true"/>
+          } @else {
+            <lib-app-type-badge [isModel]="data.isModel" [type]="data.app!.type"/>
+          }
+          @if (!data.isWorkflow && size() === 'x-large') {
+            <lib-app-card-tags [app]="data.app!"/>
+          }
+          @if (size() !== 'x-small') {
+            <p class="shop-card-desc">{{ data.shortDescription }}</p>
+            @if (data.isModel && size() === 'x-large') {
+              <mat-divider/>
+              <p class="shop-card-desc">{{ data.app!.shortDescription }}</p>
+            }
+          }
+        </div>
+        @if (size() === 'x-large') {
+          <div class="right-side">
+            <div class="right-side--top">
+              @if (data.isModel) {
+                <a mat-stroked-button [routerLink]="appLink()">
+                  <mat-icon>link</mat-icon>
+                  {{ data.app!.name }}
+                </a>
+              }
+
+              @if (data.app?.sourceUrl) {
+                <a mat-stroked-button [href]="data.app!.sourceUrl">
+                  <mat-icon>code</mat-icon>
+                  {{ 'BUTTON.SOURCE_CODE' | translate }}
+                </a>
+              }
+            </div>
+            <div class="right-side--bottom">
+              <lib-docker-image-tag [imageName]="data.image" size="MEDIUM" [border]="true"/>
+              <lib-store-rating [editMode]="false"
+                                [rating]="data.rating"/>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (data.isModel && (size() !== 'x-small' && size() !== 'small' && size() !== 'x-large')) {
+        <p class="shop-card-subdesc">{{ data.app!.shortDescription }}</p>
+      }
+      @if (size() !== 'x-small' && size() !== 'x-large' && !data.isWorkflow) {
+        <mat-card-footer class="app-card-footer">
+          <lib-app-card-tags [app]="data.app!"/>
+        </mat-card-footer>
+      }
+    </mat-card>
+  }
+</ng-template>

@@ -1,0 +1,138 @@
+:host {
+  display: block;
+  max-width: 560px;
+}
+
+
+.onto-card {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 1rem 1.25rem 1.1rem;
+  background: #ffffff;
+  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &--empty {
+    align-items: center;
+    text-align: center;
+    gap: 0.35rem;
+  }
+}
+
+.onto-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.onto-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.05rem;
+  background: #16a34a1a;
+  color: #15803d;
+  border: 1px solid #16a34a40;
+  flex-shrink: 0;
+}
+
+.onto-card__title-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.onto-card__title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.onto-card__subtitle {
+  margin-top: 0.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.onto-card__id {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: #e5e7eb80;
+}
+
+.onto-card__cui {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+
+.onto-card__aliases {
+  margin-top: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+
+.onto-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.onto-card__description {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  color: #111827;
+
+  &--muted {
+    color: #9ca3af;
+    font-style: italic;
+  }
+}
+
+
+.onto-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.onto-card__meta-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.onto-card__meta-label {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #6b7280;
+  min-width: 72px;
+}
+
+
+
+.onto-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}

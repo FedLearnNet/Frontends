@@ -1,0 +1,86 @@
+@if (app() || version() || workflow()) {
+  @for (param of getInputs(); track param) {
+
+    @if (isFile(param)) {
+      <div class="wrap"
+           [class.valid]="fileIsValid(param)"
+           [class.invalid]="fileHasErrors(param)">
+
+        @if (workflowFiles() && workflowFiles()!.length && currentCustom() !== $index) {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ param.name }}</mat-label>
+
+            <mat-select
+              [value]="getInputValueWorkflowFiles(param)"
+              (selectionChange)="emitInputChanged(param, $event.value)">
+
+              @for (workflowFile of workflowFiles(); track workflowFile.id) {
+                <mat-option [value]="FILE_PREFIX +workflowFile.id">
+                  {{ workflowFile.file.fileName }}
+                </mat-option>
+              }
+            </mat-select>
+
+            @if (fileIsValid(param)) {
+              <mat-icon matSuffix class="ok">check</mat-icon>
+            }
+            @if (fileHasErrors(param)) {
+              <mat-icon matSuffix class="err">error</mat-icon>
+            }
+
+            <button mat-icon-button matSuffix class="custom-btn" (click)="enableCustom($index)" aria-label="new file">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </mat-form-field>
+
+        } @else {
+          <mat-toolbar>
+            <p>{{ param.name }}</p>
+            <span class="spacer"></span>
+            <button mat-icon-button class="custom-btn" (click)="enableCustom(-1)" aria-label="close">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-toolbar>
+
+          <lib-app-input-input class="full-width"
+                               [inputModel]="param"
+                               [value]="getInputValue(param)"
+                               (valuesChanged)="emitMultiInputChanged(param, $event)"
+                               (validChanged)="validateForms(param, $event)"
+                               (valueChanged)="emitInputChanged(param, $event)"/>
+
+          @if ((uploadResponse$ | async)?.inProgress) {
+            <div class="progress-container">
+              <mat-progress-bar mode="determinate" [value]="(uploadResponse$ | async)?.progress"/>
+              <span>{{ (uploadResponse$ | async)?.progress }}%</span>
+            </div>
+          }
+        }
+        @if (fileHasErrors(param)) {
+          <lib-error-card>
+            <ul class="errors">
+              @for (msg of fileErrorMessages(param); track msg) {
+                <li>{{ msg }}</li>
+              }
+            </ul>
+          </lib-error-card>
+        }
+
+        @if (fileValidatingRemote(param)) {
+          <lib-skeleton-loader [showHeader]="false" [variant]="'list'" [showActions]="false"
+                               [cards]="1"></lib-skeleton-loader>
+        }
+      </div>
+
+    } @else {
+      <lib-app-input-input class="full-width"
+                           [inputModel]="param"
+                           [value]="getInputValue(param)"
+                           (valuesChanged)="emitMultiInputChanged(param, $event)"
+                           (validChanged)="validateForms(param, $event)"
+                           (valueChanged)="emitInputChanged(param, $event)"/>
+    }
+  }
+} @else {
+  <lib-skeleton-loader></lib-skeleton-loader>
+}

@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>{{ 'DIALOG.SELECT_A_FILE_MODAL.TITLE' | translate }}</h2>
+
+<mat-dialog-content>
+  <p class="dialog-copy">
+      {{ 'DIALOG.SELECT_A_FILE_MODAL.MESSAGE' | translate }}
+  </p>
+
+  <div class="table-shell">
+    <table mat-table [dataSource]="data.files" class="file-table">
+      <ng-container matColumnDef="fileName">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.FILE_NAME' | translate }}</th>
+        <td mat-cell *matCellDef="let file">
+          <div class="file-name-cell">
+            <span class="file-name">{{ file.fileName }}</span>
+            @if (isSelected(file)) {
+              <mat-chip>{{ 'GRID.CURRENT' | translate }}</mat-chip>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="contentType">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.CONTENT_TYPE' | translate }}</th>
+        <td mat-cell *matCellDef="let file">
+          <lib-badge [text]="file.contentType || 'Unknown'" color="GRAY"></lib-badge>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="size">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.SIZE' | translate }}</th>
+        <td mat-cell *matCellDef="let file">{{ (file.size / 1024) | number:'1.0-1' }} KB</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.UPLOADED' | translate }}</th>
+        <td mat-cell *matCellDef="let file">
+          <lib-time-badge [date]="file.createdAt" color="GRAY">
+          </lib-time-badge>
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let file" class="actions-cell">
+          <button mat-flat-button color="primary" type="button" (click)="selectFile(file)" [disabled]="isSelected(file)">
+            <mat-icon>task_alt</mat-icon>
+              {{ 'BUTTON.SELECT' | translate }}
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.selected-row]="isSelected(row)"></tr>
+    </table>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">{{ 'BUTTON.CLOSE' | translate }}</button>
+</mat-dialog-actions>

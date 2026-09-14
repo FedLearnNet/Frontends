@@ -1,0 +1,40 @@
+<div class="shop">
+  <div class="filter-wrapper" [class.active]="isMobileFilterActive()">
+    <lib-store-filter
+            [storeConfig]="storeConfig()"
+     />
+  </div>
+
+  <div class="main-content">
+    @if (isMobile()) {
+      <button
+        mat-raised-button
+        class="filter-toggle-button"
+        (click)="toggleMobileFilter()"
+      >
+        {{ 'OPEN_FILTER' | translate }}
+      </button>
+    }
+
+    <div class="app-list">
+      @for (item of storeItems(); track $index) {
+        <lib-store-card [storeElement]="item"
+          [linkToShop]="useLink()"
+          (itemClicked)="itemClick($event)"
+         />
+      }
+    </div>
+
+    @if (storeItems().length > 0) {
+      <div class="item-counter">
+        {{ 'SHOWING_X_OF_Y' | translate: { current: storeItems().length, total: totalItems() } }}
+      </div>
+    }
+
+    @if (isLoading() && storeItems().length > 0) {
+      <div class="infinite-scroll-loader">
+        <mat-spinner diameter="40" />
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,23 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.head {
+  .detail {
+    p {
+      margin-top: 0;
+    }
+
+    mat-divider {
+      margin-bottom: 1em;
+    }
+  }
+}
+
+.export-bar {
+  margin-top: 10px;
+  padding-right: 10px;
+  display: flex;
+
+  button {
+    margin-left: auto;
+  }
+}

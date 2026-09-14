@@ -1,0 +1,35 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  title="Request Local Metrics"/>
+
+<mat-dialog-content class="content">
+  <lib-info-card
+    subtitle="Each clinic will receive a notification and can review what will be shared
+        before accepting or declining."
+    type="PRIMARY"
+    title="Request performance metrics from participating clinics">
+  </lib-info-card>
+
+  <lib-info-grid title="What will be requested">
+    <lib-info-item title="Data Type">
+      Training metrics (loss, accuracy, and any custom metrics recorded per step)
+    </lib-info-item>
+    <lib-info-item title="Scope">
+      Metrics from this federated experiment only - no patient-level data
+    </lib-info-item>
+    <lib-info-item title="Experiment">
+      <lib-badge color="GRAY" [text]="'#' + data.experimentId"/>
+    </lib-info-item>
+  </lib-info-grid>
+
+  <lib-info-card
+    subtitle="This request can only be sent once per experiment. All participating clinics will be notified immediately."
+    size="SMALL"
+    type="INFO">
+  </lib-info-card>
+</mat-dialog-content>
+
+<mat-dialog-actions class="margin-top-auto" align="end">
+  <lib-btn type="SEND"
+           label="Send Request to All Clinics" (clicked)="confirm()"/>
+</mat-dialog-actions>

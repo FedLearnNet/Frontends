@@ -1,0 +1,23 @@
+<lib-closeable-dialog-title [title]="title()" [allowMaximize]="false"/>
+
+<mat-dialog-content class="dialog-content">
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Name</mat-label>
+    <input
+      matInput
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      maxlength="120"
+      autocomplete="off"
+      (keydown.enter)="submit()"
+      cdkFocusInitial>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-divider/>
+
+<mat-dialog-actions class="dialog-actions">
+  <lib-btn type="CANCEL" (clicked)="cancel()"/>
+  <span class="spacer"></span>
+  <lib-btn [type]="submitType()" [disabled]="!canSubmit()" (clicked)="submit()"/>
+</mat-dialog-actions>

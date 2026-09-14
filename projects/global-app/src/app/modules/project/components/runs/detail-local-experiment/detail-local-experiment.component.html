@@ -1,0 +1,28 @@
+@if (experiment(); as exp) {
+  @if (selectedWorkflow(); as wf) {
+    <div class="wrapper">
+      <div class="head">
+        <app-experiment-header [description]="exp.description"
+          [experiment]="exp"
+          (onStart)="start()"
+          (onStop)="stop()"
+          (onRefresh)="reload()"
+          [isSSEConnected]="connected()"
+          [loading]="loading()"
+          [name]="exp.name" />
+      </div>
+      <lib-workflow-readonly-view
+        class="detail"
+        [workflow]="wf!"
+        [experiment]="exp!"
+        (selectNode)="showDetail($event)"
+      ></lib-workflow-readonly-view>
+
+    </div>
+  } @else {
+    <lib-skeleton-loader />
+  }
+
+} @else {
+  <lib-skeleton-loader />
+}

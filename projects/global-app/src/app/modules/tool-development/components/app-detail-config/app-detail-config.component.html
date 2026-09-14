@@ -1,0 +1,128 @@
+@if (app(); as app) {
+  <div class="app-configs">
+    <div class="tab-header-row">
+      @let si = selectedIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="si === 0" (click)="setSelectedIndex(0)">
+          @if (appConnected() && clientConfig() && clientConfig().ENABLE_CONFIG_SYNC) {
+            <mat-icon>sync</mat-icon>
+          }
+          {{ 'MENU.APP_CONFIG' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 1" (click)="setSelectedIndex(1)">
+          @if (appConnected() && clientConfig() && clientConfig().ENABLE_CONFIG_SYNC) {
+            <mat-icon>sync</mat-icon>
+          }
+          {{ 'MENU.HYPERPARAMETER' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 2" (click)="setSelectedIndex(2)">
+          @if (appConnected() && clientConfig() && clientConfig().ENABLE_CONFIG_SYNC) {
+            <mat-icon>sync</mat-icon>
+          }
+          {{ 'MENU.INPUTS' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 3" (click)="setSelectedIndex(3)">
+          @if (appConnected() && clientConfig() && clientConfig().ENABLE_CONFIG_SYNC) {
+            <mat-icon>sync</mat-icon>
+          }
+          {{ 'MENU.OUTPUTS' | translate }}
+        </a>
+
+        <a mat-tab-link [active]="si === 4" (click)="setSelectedIndex(4)" class="local-config-link"
+           [class.local-config-tap-warning]="!appConnected()">
+          @if (!appConnected()) {
+            <mat-icon>warning</mat-icon>
+          }
+          {{ 'MENU.LOCAL_CONFIG' | translate }}
+        </a>
+      </nav>
+
+      <span class="spacer"></span>
+      @if (selectedIndex() === 0 && hideAppEditActions()) {
+        <lib-btn
+          type="CANCEL"
+          variant="SECONDARY"
+          label="Cancel" (clicked)="cancel()"/>
+        <lib-btn
+          type="UPDATE"
+          variant="SECONDARY"
+          [disabled]="!appEditFormValid()"
+          label="Update" (clicked)="updateApp()"/>
+        @if (!isProduction) {
+          <lib-btn
+            type="SAVE"
+            variant="SECONDARY"
+            icon="file_export"
+            label="Save as Json" (clicked)="saveToolAsJson()"/>
+          <lib-btn
+            type="IMPORT"
+            variant="SECONDARY"
+            label="Replace build information" (clicked)="replaceBuildInfoInJson()"/>
+        }
+
+        <lib-btn
+          [disabled]="!appEditFormValid()"
+          type="PUBLISH"
+          label="Publish" (clicked)="publishApp()"/>
+      }
+    </div>
+
+    <mat-tab-nav-panel #panel class="panel">
+      @switch (selectedIndex()) {
+        @case (0) {
+          <app-app-edit
+            #appEdit
+            [app]="app"
+            (appChange)="configInfoChanged($event)"
+            (isValid)="appEditFormValid.set($event)"
+            [hideActions]="hideAppEditActions()"
+            (published)="configInfoChanged($event)"
+          />
+        }
+        @case (1) {
+          <app-app-detail-config-hyperparam
+            [hyperparams]="app.appConfig.hyperparams"
+            [pydanticClass]="pydanticClass()"
+            [toolType]="app.type"
+            (configChanged)="configHyperparamChanged($event)"
+          />
+        }
+        @case (2) {
+          <app-app-detail-config-input
+            [configs]="app.appConfig.input"
+            [pydanticClass]="pydanticClass()"
+            [files]="files()"
+            [toolType]="app.type"
+            (configsChange)="configInputChanged($event)"
+          />
+        }
+        @case (3) {
+          <app-app-detail-config-output
+            [configs]="app.appConfig.output"
+            [pydanticClass]="pydanticClass()"
+            [files]="files()"
+            [toolType]="app.type"
+            (configsChange)="configOutputChanged($event)"
+          />
+        }
+        @case (4) {
+          @if (appConnected()) {
+            <app-app-client-config [datafiles]="datafiles()" [config]="clientConfig()"/>
+          } @else {
+            <app-start-app-warning [uiConnected]="uiConnected()">
+              {{ 'WARNING.YOU_NEED_TO_START_YOUR_APP_TO_SEE_LOCAL_CONFIGS' | translate }}
+            </app-start-app-warning>
+          }
+        }
+      }
+    </mat-tab-nav-panel>
+  </div>
+} @else {
+  <lib-error-card>No app found</lib-error-card>
+}
+
+
+

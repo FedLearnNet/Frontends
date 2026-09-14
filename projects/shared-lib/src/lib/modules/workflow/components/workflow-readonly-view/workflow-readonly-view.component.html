@@ -1,0 +1,58 @@
+<f-flow fDraggable (fLoaded)="onLoaded()"
+        [vCellSize]="100"
+        [hCellSize]="50">
+  <f-background>
+    <f-circle-pattern/>
+  </f-background>
+  <f-selection-area/>
+
+  <f-canvas [fZoom]="false">
+    <f-connection-for-create/>
+
+    @for (connection of workflow().connections; track connection.inputId) {
+      <f-connection [fReassignDisabled]="true"
+                    fBehavior="fixed"
+                    [fOffset]="32"
+                    fType="segment"
+                    [fOutputId]="connection.outputId" [fInputId]="connection.inputId">
+        <svg viewBox="0 0 6 7" fMarker [type]="eMarkerType.END" class="connection-marker"
+             [height]="7" [width]="6"
+             [refX]="5.5" [refY]="3.5" markerUnits="strokeWidth" orient="auto">
+          <path d="M0.000391006 0L6 3.5L0.000391006 7L0.000391006 0Z"/>
+        </svg>
+
+        <div fConnectionContent [position]="0.5">
+          <lib-workflow-connection-content [connection]="connection"
+                                           [workflow]="workflow()"/>
+
+        </div>
+      </f-connection>
+    }
+
+
+    @for (node of nodes(); track node.id) {
+      <div fNode [fNodePosition]="node.position" [fNodeId]="node.nodeId">
+        <lib-experiment-workflow-node-card (click)="toggleSelectedNode(node)"
+                                           [node]="node"
+                                           [workflow]="workflow()"
+                                           [step]="getStepForNode(node)!"/>
+        @if (!node.extended) {
+          <lib-workflow-node-connectors [workflow]="workflow()"
+                                        [inputMode]="true"
+                                        [node]="node"/>
+
+          <lib-workflow-node-connectors [workflow]="workflow()"
+                                        [node]="node"/>
+        }
+      </div>
+    }
+    @for (input of workflow().inputs; track $index) {
+      <div fNode [fNodePosition]="input.position" [fNodeId]="input.nodeId">
+        <lib-workflow-input-card [node]="input" [index]="$index + 1">
+        </lib-workflow-input-card>
+        <lib-workflow-input-node-connectors [workflow]="workflow()"
+                                            [inputNode]="input"/>
+      </div>
+    }
+  </f-canvas>
+</f-flow>

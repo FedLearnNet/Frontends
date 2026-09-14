@@ -1,0 +1,38 @@
+@use "sass:meta";
+@use '../../styles/variables' as var;
+
+mat-toolbar {
+  height: var(--toolbar-height);
+}
+
+mat-toolbar,
+mat-drawer {
+  background-color: var.$secondary-color;
+  button {
+    font-size: large;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  img {
+    width: auto;
+  }
+
+  .label{
+    background-color:  var.$primary-color;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    position: absolute;
+    top: 54px;
+    font-size: 14px;
+    left: 20px;
+    z-index: 99;
+  }
+}
+
+.debug{
+  color: #006026;
+}

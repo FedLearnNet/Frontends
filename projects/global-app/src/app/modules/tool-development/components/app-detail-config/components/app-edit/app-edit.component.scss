@@ -1,0 +1,48 @@
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 100%;
+  padding-right: 40px;
+  margin-bottom: 80px;
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.group {
+  display: flex;
+  gap: 0 2%;
+  flex-wrap: wrap;
+  align-items: center;
+
+  mat-form-field {
+    min-width: 350px;
+  }
+
+  .image-tag {
+    margin-bottom: 20px;
+  }
+
+  &--3 {
+    mat-form-field {
+      width: 32%;
+    }
+  }
+
+  &--2 {
+    app-tool-slug-input,
+    mat-form-field {
+      width: 49%;
+    }
+  }
+}
+
+.i-toggle {
+  margin-left: 10px;
+}

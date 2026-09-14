@@ -1,0 +1,141 @@
+<div class="cohort-members-container">
+  <lib-header
+    [title]="('COHORT_MEMBERS.TITLE' | translate)"
+    [description]="('COHORT_MEMBERS.DESCRIPTION' | translate)">
+    <button
+      suffix
+      mat-icon-button
+      color="primary"
+      (click)="toggleAddingMode()"
+      [disabled]="actionsDisabled()"
+      [matTooltip]="('COHORT_MEMBERS.ADD_MEMBER' | translate)">
+      <mat-icon>
+        @if (addingMode()) {
+          person_add_disabled
+        } @else {
+          person_add
+        }
+      </mat-icon>
+    </button>
+  </lib-header>
+
+  <lib-page-wrapper
+    [error]="loadError()"
+    [isLoading]="isLoadingUsers()"
+    [skeletonOnLoading]="true"
+    [isEmpty]="availableUsers().length === 0 && !isLoadingUsers()"
+    [margin]="false">
+    <lib-empty-state
+      empty
+      icon="groups"
+      [title]="('COHORT_MEMBERS.NO_MEMBERS_TITLE' | translate)"
+      [subtitle]="('COHORT_MEMBERS.NO_MEMBERS_SUBTITLE' | translate)"/>
+
+    <div class="table-wrapper">
+      @if (addingMode()) {
+        <form class="member-form" [formGroup]="addMemberForm" (ngSubmit)="addMember()">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="user-field">
+            <mat-label>{{ 'COHORT_MEMBERS.ADD_USER' | translate }}</mat-label>
+            <input
+              matInput
+              formControlName="keycloakId"
+              [placeholder]="('COHORT_MEMBERS.USER_PLACEHOLDER' | translate)"
+              [matAutocomplete]="userAutocomplete">
+            <mat-autocomplete #userAutocomplete="matAutocomplete">
+              @for (user of filteredUsersAvailableForAdd(); track user.id) {
+                <mat-option [value]="user.id">
+                  {{ getUserDisplayName(user) }}
+                  @if (getUserSecondaryText(user) !== getUserDisplayName(user)) {
+                    <span class="option-detail">{{ getUserSecondaryText(user) }}</span>
+                  }
+                </mat-option>
+              }
+            </mat-autocomplete>
+            @if (addMemberForm.controls.keycloakId.touched && addMemberForm.controls.keycloakId.hasError('required')) {
+              <mat-hint class="error">{{ 'VALIDATION.REQUIRED' | translate: {fieldName: ('GRID.USER' | translate)} }}
+              </mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="type-field">
+            <mat-label>{{ 'GRID.TYPE' | translate }}</mat-label>
+            <mat-select formControlName="type">
+              @for (type of memberTypes; track type) {
+                <mat-option [value]="type">{{ type }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <span class="spacer"></span>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="addMemberForm.invalid || isSaving() || actionsDisabled()"
+            [matTooltip]="('COHORT_MEMBERS.ADD_MEMBER' | translate)">
+            <mat-icon>person_add</mat-icon>
+            {{ 'COHORT_MEMBERS.ADD_MEMBER' | translate }}
+          </button>
+        </form>
+      }
+      <mat-table [dataSource]="members()">
+        <ng-container matColumnDef="user">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.USER' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <div class="user-cell">
+              <span class="user-name">{{ getMemberDisplayName(element) }}</span>
+              <span class="user-id">{{ element.keycloakId }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <mat-header-cell *matHeaderCellDef>{{ 'EMAIL' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ getMemberEmail(element) }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.TYPE' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="row-type-field">
+              <mat-select
+                [value]="getPendingMemberType(element)"
+                [disabled]="actionsDisabled()"
+                (valueChange)="setPendingMemberType(element.id, $event)">
+                @for (type of memberTypes; track type) {
+                  <mat-option [value]="type">
+                    {{ type }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.ACTION' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="updateMember(element)"
+              [disabled]="!isMemberDirty(element) || isSaving() || actionsDisabled()"
+              [matTooltip]="('BUTTON.SAVE' | translate)">
+              <mat-icon>save</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteMember(element)"
+              [disabled]="isSaving() || actionsDisabled()"
+              [matTooltip]="('BUTTON.DELETE' | translate)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"/>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"/>
+      </mat-table>
+    </div>
+  </lib-page-wrapper>
+</div>

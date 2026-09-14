@@ -1,0 +1,37 @@
+<mat-form-field
+  class="custom-field full-width">
+  <mat-label>
+      {{ 'BUTTON.SELECT_QUERY' | translate }}
+  </mat-label>
+  <mat-select
+    [(value)]="queryId"
+    [disabled]="!editMode()">
+    @for (q of queryList(); track q.id) {
+      <mat-option
+        [value]="q.id"
+        [disabled]="!q.hasResult"
+      >
+        <span>{{ q.name }} </span>
+        @if (q.hasResult) {
+          <span> ({{ q.result }}) </span>
+        } @else {
+          <span> ({{ 'NO_RESULT' | translate }}) </span>
+        }
+        @if (q.projectIds) {
+          @for (pIds of q.projectIds; track pIds) {
+            <span> - ({{ 'LINKED_TO' | translate: { name: pIds } }}) </span>
+          }
+        }
+      </mat-option>
+    }
+  </mat-select>
+  @if (!editMode()) {
+    <button mat-icon-button matSuffix (click)="onEdit($event)">
+      <mat-icon>edit</mat-icon>
+    </button>
+  } @else {
+    <button mat-icon-button matSuffix (click)="onSave($event)">
+      <mat-icon>save</mat-icon>
+    </button>
+  }
+</mat-form-field>

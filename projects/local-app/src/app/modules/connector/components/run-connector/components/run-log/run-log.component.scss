@@ -1,0 +1,36 @@
+.filter-box {
+  display: flex;
+  align-items: center;
+  border: #d2d2d2 1px solid;
+  gap: 20px;
+
+  &-name {
+    width: 60px;
+    padding: 10px;
+  }
+
+  &-input {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+  }
+
+  &-search{
+    flex: 1;
+  }
+}
+
+
+table{
+  border: #d2d2d2 1px solid !important;
+  border-top: none !important;
+
+  th{
+    background: rgb(241, 243, 247) !important;
+  }
+
+  .no-data-row td{
+    text-align: center;
+    padding: 16px;
+  }
+}

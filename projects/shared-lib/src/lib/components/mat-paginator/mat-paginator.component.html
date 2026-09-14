@@ -1,0 +1,8 @@
+<mat-paginator class="mat-elevation-z0"
+   [length]="length()"
+   [pageSize]="pageSize()"
+   [disabled]="disabled()"
+   [pageIndex]="pageIndex()"
+   [pageSizeOptions]="pageSizeOptions()"
+   [showFirstLastButtons]="showFirstLastButtons()"
+   (page)="onPageEvent($event)" />

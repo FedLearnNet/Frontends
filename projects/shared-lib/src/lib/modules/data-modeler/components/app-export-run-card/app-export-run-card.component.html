@@ -1,0 +1,44 @@
+<article class="run" [class.run--done]="status() === 'FINISHED'" [class.run--failed]="failed()">
+  <header class="run__head">
+    <lib-status-badge [type]="statusBadge()" size="SMALL" [noText]="true"/>
+    <div class="run__title">
+      <span class="run__status">{{ statusText() }}</span>
+      @if (runId() !== null) {
+        <span class="run__meta">Run #{{ runId() }}</span>
+      }
+    </div>
+    @if (startedAt()) {
+      <lib-time-badge [date]="startedAt()" [dateTo]="endedAt()" [calcDuration]="true"/>
+    }
+  </header>
+
+  <lib-progress-steps [steps]="steps" [active]="stepIndex()" [running]="running()" [failed]="failed()"
+                      ariaLabel="Export progress"/>
+
+  @if (running()) {
+    @if (determinate()) {
+      <mat-progress-bar mode="determinate" [value]="progress()! * 100"/>
+    } @else {
+      <mat-progress-bar mode="indeterminate"/>
+    }
+  }
+
+  @if (error(); as error) {
+    <lib-error-card [errorObject]="error"/>
+  }
+
+  <lib-run-logs-list [logs]="logs()"/>
+
+  @if (outputs().length > 0) {
+    <div class="run__outputs">
+      @for (output of outputs(); track output.key) {
+        <lib-badge [text]="output.fileName + ' · ' + (output.size | bytes)" [iconName]="outputIcon(output)"
+                   color="BLUE"/>
+      }
+    </div>
+  }
+
+  @if (downloadReady()) {
+    <lib-btn class="run__download" type="DOWNLOAD" [loading]="downloading()" (clicked)="download.emit()"/>
+  }
+</article>

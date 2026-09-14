@@ -1,0 +1,59 @@
+.form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.content{
+  height: 100%;
+}
+.section {
+  margin-top: 4px;
+
+  .section-title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  .section-sub {
+    margin-top: 2px;
+    font-size: 12.5px;
+    opacity: 0.75;
+    line-height: 1.3;
+  }
+}
+
+.row {
+  padding: 6px 0;
+
+
+  ::ng-deep .mdc-form-field {
+    align-items: flex-start;
+  }
+
+  .toggle-text {
+    display: grid;
+    gap: 2px;
+    padding-left: 6px;
+
+    .toggle-title {
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    .toggle-sub {
+      font-size: 12px;
+      opacity: 0.75;
+      line-height: 1.3;
+      max-width: 80ch;
+    }
+  }
+}
+
+mat-divider {
+  opacity: 0.5;
+}
+
+lib-error-card {
+  margin-top: 8px;
+}

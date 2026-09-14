@@ -1,0 +1,47 @@
+<lib-header
+  [title]="fileName()"
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="loading()">
+  @if (file(); as file) {
+    <div suffix>
+      <lib-badge [color]="'GRAY'" [text]="file.contentType" class="badge-type"></lib-badge>
+      <lib-badge [color]="'GRAY'" [text]="(file.size | number) + ' bytes'"></lib-badge>
+      <button mat-icon-button (click)="deleteFile()" matTooltip="Delete File" aria-label="Delete File">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-icon-button (click)="downloadFile()" matTooltip="Download File" aria-label="Download File">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button (click)="toggleEditing()" matTooltip="Edit File" aria-label="Edit file name toggle">
+        @if (isEditing()) {
+          <mat-icon>edit_off</mat-icon>
+        } @else {
+          <mat-icon>edit</mat-icon>
+        }
+      </button>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [error]="error()" [isLoading]="loading()">
+  @if (isEditing()) {
+    <div class="file-name-container">
+      <mat-form-field appearance="outline" class="file-name-edit">
+        <mat-label>File Name</mat-label>
+        <input matInput [(ngModel)]="fileName" placeholder="Enter file name">
+        <div matSuffix>
+          <button mat-icon-button (click)="saveFileName()" aria-label="Save file name">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button (click)="cancelEditing()" aria-label="Cancel editing">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </mat-form-field>
+    </div>
+  }
+  @if (file(); as file) {
+    <lib-file-detail-card [file]="file"></lib-file-detail-card>
+  }
+</lib-page-wrapper>

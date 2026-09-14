@@ -1,0 +1,18 @@
+<div class="chat">
+  <div class="chat__list" role="log" aria-live="polite">
+    @for (chat of messages(); track $index) {
+      <lib-chat-bubble [createdAt]="chat.createdAt"
+        [done]="chat.done"
+        [isUserMessage]="chat.request"
+        [message]="chat.message"
+        [error]="chat.errorMessage"
+        [statusMessage]="chat.statusMessage"
+       />
+    }
+  </div>
+  <lib-chat-input [connected]="connected()"
+    [positionAbsolute]="false"
+    (content)="submit($event)"
+   />
+
+</div>

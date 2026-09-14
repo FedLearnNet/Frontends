@@ -1,0 +1,253 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'DIALOG.TRANSFORMER_MANAGER.TITLE' | translate"></lib-closeable-dialog-title>
+
+<mat-dialog-content>
+  <section class="manager-shell" [class.manager-shell--with-rail]="hasSelection()">
+    <div class="picker-panel">
+      <div class="picker-section">
+        <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.TRANSFORMATION_SOURCE' | translate }}</span>
+        <div class="source-cards">
+          <lib-select-btn
+            size="COMPACT"
+            icon="extension"
+            [title]="'DIALOG.TRANSFORMER_MANAGER.BUILT_IN_TRANSFORMATIONS' | translate"
+            [description]="'DIALOG.TRANSFORMER_MANAGER.BUILT_IN_TRANSFORMATIONS_DESCRIPTION' | translate"
+            [selected]="source() === 'builtin'"
+            (clicked)="onSourceChange('builtin')"/>
+
+          <lib-select-btn
+            size="COMPACT"
+            icon="construction"
+            [title]="'DIALOG.TRANSFORMER_MANAGER.APP_TOOLS' | translate"
+            [description]="'DIALOG.TRANSFORMER_MANAGER.APP_TOOLS_DESCRIPTION' | translate"
+            [selected]="source() === 'tools'"
+            (clicked)="onSourceChange('tools')"/>
+        </div>
+      </div>
+
+      @if (!isToolsTransformer()) {
+        <mat-chip-listbox
+          class="scope-filter"
+          [attr.aria-label]="'DIALOG.TRANSFORMER_MANAGER.FILTER_BY_SCOPE' | translate"
+          [value]="modeFilter() ?? 'ALL'"
+          [hideSingleSelectionIndicator]="true"
+          (change)="onScopeFilterChange($event.value)"
+        >
+          <mat-chip-option value="ALL" [matTooltip]="modeDescription(null)">
+            <mat-icon matChipAvatar>{{ modeIcon(null) }}</mat-icon>
+            {{ modeLabel(null) }}
+          </mat-chip-option>
+          @for (mode of availableModes(); track mode) {
+            <mat-chip-option
+              [value]="mode"
+              [attr.data-mode]="mode.toLowerCase()"
+              [disabled]="isPatientModeUnavailable(mode)"
+              [matTooltip]="isPatientModeUnavailable(mode)
+                ? ('DIALOG.TRANSFORMER_MANAGER.PATIENT_ID_REQUIRED' | translate)
+                : modeDescription(mode)"
+            >
+              <mat-icon matChipAvatar>{{ modeIcon(mode) }}</mat-icon>
+              {{ modeLabel(mode) }}
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+
+        <div class="search-bar">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            autocomplete="off"
+            [attr.aria-label]="'DIALOG.TRANSFORMER_MANAGER.SEARCH_METHOD' | translate"
+            [placeholder]="'DIALOG.TRANSFORMER_MANAGER.SEARCH_METHOD_PLACEHOLDER' | translate"
+            [ngModel]="search()"
+            (ngModelChange)="search.set($event)"
+          >
+          <span class="search-bar__count">
+            {{ filteredFunctions().length }} {{ 'DIALOG.TRANSFORMER_MANAGER.MATCHING_METHODS' | translate }}
+          </span>
+        </div>
+
+        <div class="tool-list">
+          @for (fn of filteredFunctions(); track fn.moduleName + fn.methodName) {
+            <app-transformer-tool-list-item
+              [function]="fn"
+              [showModule]="hasMultipleModules()"
+              [selected]="isFunctionSelected(fn)"
+              [disabled]="isPatientModeUnavailable(fn.mode)"
+              [disabledReason]="isPatientModeUnavailable(fn.mode)
+                ? ('DIALOG.TRANSFORMER_MANAGER.PATIENT_ID_REQUIRED' | translate)
+                : ''"
+              (activated)="selectFunction(fn)"
+            />
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <span>{{ 'DIALOG.TRANSFORMER_MANAGER.NO_METHODS_FOUND' | translate }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="picker-section">
+          <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.INSTALLED_APPS' | translate }}</span>
+
+          @if (storeLoading() && !storeTools().length) {
+            <div class="loading-state">
+              <mat-spinner diameter="28"></mat-spinner>
+            </div>
+          } @else {
+            <div class="tool-list">
+              @for (item of storeTools(); track item.app!.id) {
+                <app-transformer-tool-list-item
+                  [store]="item"
+                  [selected]="isToolSelected(item)"
+                  (activated)="selectStoreTool(item)"
+                />
+              } @empty {
+                <div class="empty-state">
+                  <mat-icon>search_off</mat-icon>
+                  <span>{{ 'DIALOG.TRANSFORMER_MANAGER.NO_METHODS_FOUND' | translate }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <button type="button" class="marketplace-banner" (click)="showTools()">
+            <mat-icon>storefront</mat-icon>
+            <span>{{ 'DIALOG.TRANSFORMER_MANAGER.BROWSE_MARKETPLACE' | translate }}</span>
+            <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (!hasSelection() && hasError()) {
+        <lib-error-card>
+          {{ errorMessage() }}
+        </lib-error-card>
+      }
+    </div>
+
+    @if (hasSelection()) {
+      <aside class="config-rail">
+        @if (!isToolsTransformer() && selectedFunction(); as fn) {
+          <div class="rail-section rail-head-block">
+            <div class="rail-head">
+              <strong>{{ fn.methodName }}</strong>
+            </div>
+            <p class="rail-head__description">
+              {{ fn.description || ('DIALOG.TRANSFORMER_MANAGER.NO_DESCRIPTION' | translate) }}
+            </p>
+          </div>
+
+          <div class="rail-section scope-card">
+            <div class="execution-scope" [attr.data-mode]="fn.mode.toLowerCase()">
+              <span class="execution-scope__icon">
+                <mat-icon>{{ modeIcon(fn.mode) }}</mat-icon>
+              </span>
+              <span class="execution-scope__copy">
+                <strong>{{ modeLabel(fn.mode) }}</strong>
+              </span>
+            </div>
+            <p class="scope-description">{{ modeDescription(fn.mode) }}</p>
+
+            @if (isPatientFunction()) {
+              <div
+                class="patient-grouping"
+                role="status"
+                [class.patient-grouping--warning]="!patientIdColumn()"
+              >
+                <mat-icon>{{ patientIdColumn() ? 'group_work' : 'warning' }}</mat-icon>
+                <span>
+                  @if (patientIdColumn()) {
+                    {{ 'DIALOG.TRANSFORMER_MANAGER.PATIENT_GROUPED_BY' | translate:{column: patientIdColumn()} }}
+                  } @else {
+                    {{ 'DIALOG.TRANSFORMER_MANAGER.PATIENT_ID_REQUIRED' | translate }}
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (isToolsTransformer() && selectedTool(); as tool) {
+          <div class="rail-section rail-head-block">
+            <div class="rail-head">
+              <span class="rail-head__icon"><mat-icon>widgets</mat-icon></span>
+              <span class="rail-head__copy">
+                <strong>{{ tool.name }}</strong>
+                <small>{{ tool.latestVersion ? 'v' + tool.latestVersion : ('DIALOG.TRANSFORMER_MANAGER.APP_TOOLS' | translate) }}</small>
+              </span>
+            </div>
+            @if (tool.shortDescription) {
+              <p class="rail-head__description">{{ tool.shortDescription }}</p>
+            }
+          </div>
+
+          @if (tool.longDescription) {
+            <div class="rail-section markdown-card">
+              <markdown [data]="tool.longDescription"></markdown>
+            </div>
+          }
+        }
+
+        @if (showsUnresolvedApp()) {
+          <div class="rail-section rail-head-block">
+            <div class="rail-head">
+              <span class="rail-head__icon"><mat-icon>widgets</mat-icon></span>
+              <span class="rail-head__copy">
+                <strong>{{ configuredAppName() || ('DIALOG.TRANSFORMER_MANAGER.APP_TOOLS' | translate) }}</strong>
+                <small>{{ configuredApp()?.appVersionId ? 'v' + configuredApp()!.appVersionId : '' }}</small>
+              </span>
+            </div>
+            <p class="rail-head__description">
+              {{ 'DIALOG.TRANSFORMER_MANAGER.APP_NOT_IN_STORE' | translate }}
+            </p>
+          </div>
+
+          @if (configuredMappingRows().length) {
+            <div class="rail-section">
+              @for (row of configuredMappingRows(); track row.key) {
+                <lib-kv
+                  [label]="(row.input
+                    ? 'DIALOG.TRANSFORMER_MANAGER.INPUT_FIELD'
+                    : 'DIALOG.TRANSFORMER_MANAGER.OUTPUT_FIELD') | translate"
+                  [value]="row.key + ' → ' + row.value"/>
+              }
+            </div>
+          }
+        }
+
+        <lib-app-run-transformer-row-mapping
+          #mapper
+          [function]="isToolsTransformer() ? undefined : selectedFunction()"
+          [selectedTool]="isToolsTransformer() ? selectedTool() : undefined"
+          [columns]="columns()"
+          [(mapping)]="mapping"
+        />
+
+        @if (hasError()) {
+          <lib-error-card>
+            {{ errorMessage() }}
+          </lib-error-card>
+        }
+      </aside>
+    }
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <lib-btn type="CANCEL" (clicked)="cancel()"></lib-btn>
+  <lib-btn type="DELETE" (clicked)="onDeleteClick()"></lib-btn>
+  <span class="spacer"></span>
+  @if (hasSelection() && !canApply()) {
+    <lib-badge
+      iconName="error"
+      color="RED"
+      [text]="(showsUnresolvedApp()
+        ? 'DIALOG.TRANSFORMER_MANAGER.APP_NOT_IN_STORE_SHORT'
+        : 'WARNING.PLEASE_FILL_REQUIRED_FIELDS') | translate"
+    />
+  }
+  <lib-btn type="CREATE" [label]="'BUTTON.APPLY' | translate"
+           [disabled]="!canApply()" (clicked)="apply()"></lib-btn>
+</mat-dialog-actions>

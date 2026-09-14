@@ -1,0 +1,19 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+
+.model {
+  margin-left: 5%;
+  max-width: 90%;
+}
+
+
+.new-pred-btn {
+  display: block;
+  margin-left: auto;
+  margin-right: 20px;
+}

@@ -1,0 +1,31 @@
+:host {
+  display: block;
+
+  .workflow-add-btn{
+    display: block;
+    margin: 5px 0 10px auto;
+  }
+
+  a{
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+    &:focus,
+    &:active {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+
+.workflow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  margin: 1rem;
+}
+
+.workflow-list__item {
+  width: 100%;
+}

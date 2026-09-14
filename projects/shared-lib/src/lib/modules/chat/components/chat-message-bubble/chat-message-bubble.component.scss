@@ -1,0 +1,149 @@
+.msg {
+  display: flex;
+  align-items: flex-end;
+  animation: fadeInUp .25s ease both;
+
+  &.msg--ai {
+    justify-content: flex-start;
+
+    .msg__bubble {
+      min-width: 50%;
+    }
+  }
+
+  &.msg--user {
+    justify-content: flex-end;
+  }
+
+  .msg__bubble {
+    max-width: min(720px, 80%);
+    padding: .75rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+    position: relative;
+    transition: box-shadow .2s ease, transform .2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+      transform: translateY(-1px);
+    }
+
+    .msg__text {
+      margin: 0 0 .25rem 0;
+      line-height: 1.45;
+    }
+
+    .msg__meta {
+      font-size: .75rem;
+      opacity: .6;
+      display: inline-block;
+    }
+
+    .msg__status-wrapper {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  &.msg--user .msg__bubble {
+    background: #e9f2ff;
+  }
+
+  &.msg--ai .msg__bubble {
+    background: #F4F4F4;
+  }
+
+  .msg__bubble--pending {
+    box-shadow: 0 0 0 2px rgba(11, 109, 255, .08) inset, 0 1px 2px rgba(0, 0, 0, .06);
+  }
+
+  .msg__bubble--error {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, .12) inset, 0 1px 2px rgba(0, 0, 0, .06);
+    background: #fff7f7;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+  }
+}
+
+@keyframes progressSlide {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg, .msg .msg__bubble, .msg .msg__progress, .msg .msg__status-dot {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:host ::ng-deep a.app-action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .38rem .8rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .875rem;
+  line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .02s;
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #c3c8d0;
+  }
+}
+
+.tabs {
+  ::ng-deep {
+    .file-tab-icon,
+    .file-tab-label {
+      color: var(--running-text);
+    }
+  }
+
+  .file-tab-count {
+    position: absolute;
+    top: 3px;
+    right: -24px;
+  }
+}
+
+
+.done-footer{
+  display: flex;
+  align-items: center;
+}

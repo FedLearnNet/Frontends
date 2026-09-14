@@ -1,0 +1,13 @@
+<div class="output-flex">
+  @if (connectorId(); as con) {
+    <div fNodeOutput
+         [fCanBeConnectedInputs]="[getOutputType()]"
+         (click)="openOutputDialogOrDelete()"
+         [fOutputId]="con.outputId"
+         fOutputConnectableSide="bottom"
+         [fOutputMultiple]="true"
+         [isSelfConnectable]="false">
+      <mat-icon>close</mat-icon>
+    </div>
+  }
+</div>

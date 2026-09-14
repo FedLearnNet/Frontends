@@ -1,0 +1,33 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<h3>Statistics</h3>
+
+<div class="timeline" role="list" aria-live="polite">
+  @if (error()) {
+    <div class="state error">{{ error() }}</div>
+  } @else {
+    @for (item of items(); track item.id) {
+      <button type="button" class="item" role="listitem" (click)="openDetail(item)" @rowIn>
+        <span class="content">
+          <span class="row">
+            <strong># {{ item.queryId }}</strong>
+            <span class="timestamp">{{ item.createdAt | date }}</span>
+          </span>
+          <span class="meta">
+            <span>{{ item.requestKeycloakId }}</span>
+            <lib-status-badge
+              [text]="item.status"
+              [type]="getStatusType(item.status)"
+              size="SMALL" />
+          </span>
+        </span>
+      </button>
+    } @empty {
+      @if (!loading()) {
+        <lib-error-card>No statistics requests found</lib-error-card>
+      }
+    }
+  }
+</div>

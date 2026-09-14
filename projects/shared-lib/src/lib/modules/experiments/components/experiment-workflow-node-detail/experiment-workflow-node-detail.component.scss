@@ -1,0 +1,10 @@
+.no-padding{
+  ::ng-deep .mat-expansion-panel-body{
+    padding: 0 !important;
+  }
+}
+
+.error{
+  display: block;
+  margin-bottom: 20px;
+}

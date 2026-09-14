@@ -1,0 +1,58 @@
+<div class="workflow-node-card">
+
+  @if (step()) {
+    <lib-status-badge class="status" [text]="experimentStatusText()" [type]="experimentStatus()"/>
+  }
+
+  <button class="extend-btn" (click)="toggleExtendedMode()">
+    @if (node().extended) {
+      <mat-icon>keyboard_arrow_up</mat-icon>
+    } @else {
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    }
+  </button>
+
+  @if (appData(); as app) {
+
+
+    <div class="card-header">
+      @if (app!.icon) {
+        <div class="icon-container">
+          <mat-icon>settings</mat-icon>
+        </div>
+      }
+      <div class="header-text">
+        <h2 class="app-name">
+          @if (isModel()) {
+            {{ modelData()!.name }} ({{ app!.name }})
+          } @else {
+            {{ app!.name }}
+          }
+        </h2>
+        <div class="tags-container">
+          <lib-app-type-badge [isModel]="isModel()" [type]="app!.type"/>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <lib-app-card-tags [app]="app" [onlyTags]="true"/>
+
+      @if (node().extended) {
+        <span>{{ app!.shortDescription }}</span>
+        @if (isModel()) {
+          <mat-divider/>
+          <span>{{ modelData()!.shortDescription }}</span>
+        }
+      }
+
+      <lib-app-card-cert-badge [app]="app">
+        <lib-publish-badge [animate]="false" [type]="publishStatus()"/>
+      </lib-app-card-cert-badge>
+    </div>
+  }
+
+  @if (node().extended) {
+    <lib-workflow-node-connectors [node]="node()" [workflow]="workflow()"/>
+  }
+</div>

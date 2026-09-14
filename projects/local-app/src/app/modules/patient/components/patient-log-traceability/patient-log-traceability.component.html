@@ -1,0 +1,41 @@
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+
+<h3>Traceability</h3>
+
+<div class="timeline" role="list" aria-live="polite">
+  @if (error) {
+    <div class="state error">{{ error }}</div>
+  } @else {
+    @for (it of items(); track it.id) {
+      <div (click)="openDetail(it)" class="item" role="listitem" @rowIn>
+        <div class="content">
+          <div class="row">
+            <p>Version: <strong>{{ it.dataEntriesVersion }}</strong></p>
+            <p class="ts">{{ it.createdAt | date }}</p>
+          </div>
+          <div class="meta">
+            @if (it.userId) {
+              <p>Changed by: <strong>{{ it.userId }}</strong></p>
+            }
+            @if (it.connectorId) {
+              <p>Changed by connector: <strong>{{ it.connectorId }}</strong></p>
+            }
+            @if (it.runId) {
+              <p>Changed in run: <strong>{{ it.runId }}</strong></p>
+            }
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <lib-error-card>
+        No traceability logs found
+      </lib-error-card>
+    }
+  }
+
+  @if (hasMore()) {
+    TODO
+  }
+</div>

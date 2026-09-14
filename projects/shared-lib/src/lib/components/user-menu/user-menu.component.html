@@ -1,0 +1,89 @@
+<button
+  mat-button
+  class="user-btn"
+  [class.user-btn--logged-in]="isLoggedIn()"
+  [class.user-btn--admin]="isAdmin()"
+  [matMenuTriggerFor]="userMenu"
+  aria-label="User Profile">
+  <span class="user-btn__avatar">{{ initials() }}</span>
+  <span class="user-btn__meta">
+    <span class="user-btn__name">{{ displayName() }}</span>
+    <span
+      class="user-btn__status"
+      [class.user-btn__status--admin]="isAdmin()"
+      [class.user-btn__status--guest]="!isLoggedIn()">
+      {{ statusKey() | translate }}
+    </span>
+  </span>
+  <mat-icon class="user-btn__icon">{{ isLoggedIn() ? 'expand_more' : 'login' }}</mat-icon>
+</button>
+
+<mat-menu #userMenu="matMenu">
+  @if (userProfile()) {
+    <section class="user-panel">
+      <div class="user-panel__header">
+        <div class="user-panel__avatar">{{ initials() }}</div>
+        <div class="user-panel__identity">
+          <div class="user-panel__name">{{ fullName() }}</div>
+          @if (userProfile()?.username) {
+            <div class="user-panel__username">@{{ userProfile()?.username }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="user-panel__badges">
+        <lib-badge
+          [text]="statusKey() | translate"
+          [color]="getStatusBadgeColor()"
+          size="X-SMALL"
+          [border]="true"
+        />
+        @if (userProfile()?.email) {
+          <lib-badge
+            [text]="(userProfile()?.emailVerified ? 'VERIFIED' : 'NOT_VERIFIED') | translate"
+            [color]="getVerificationBadgeColor()"
+            size="X-SMALL"
+            [border]="true"
+          />
+        }
+      </div>
+
+      <div class="user-panel__facts">
+        @if (userProfile()?.email) {
+          <lib-kv [label]="'EMAIL' | translate ">{{ userProfile()?.email }}</lib-kv>
+        }
+
+        @if (userRoles().length) {
+          <lib-kv [label]="'ROLES' | translate ">
+            @for (role of userRoles(); track role) {
+              <lib-badge
+                [text]="role"
+                [color]="getRoleBadgeColor(role)"
+                size="X-SMALL"
+                [border]="true"
+              />
+            }
+          </lib-kv>
+        }
+      </div>
+    </section>
+  }
+
+  @if (!isLoggedIn()) {
+    <button mat-menu-item (click)="login()">
+      <mat-icon>login</mat-icon>
+      <span>{{ 'BUTTON.LOGIN' | translate }}</span>
+    </button>
+  }
+
+  @if (isLoggedIn()) {
+    <button mat-menu-item (click)="accountManagement()">
+      <mat-icon>settings</mat-icon>
+      <span>{{ 'BUTTON.ACCOUNT_MANAGEMENT' | translate }}</span>
+    </button>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>{{ 'BUTTON.LOGOUT' | translate }}</span>
+    </button>
+  }
+</mat-menu>

@@ -1,0 +1,79 @@
+<!-- gitlab-create-issue-dialog.component.html -->
+<h2 mat-dialog-title>GitLab Issue erstellen</h2>
+
+<div mat-dialog-content [formGroup]="form" class="dialog-content">
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Title</mat-label>
+    <input matInput formControlName="title"/>
+
+    @if (form.controls.title.hasError('required')) {
+      <mat-error>Title must not be blank.</mat-error>
+    } @else if (form.controls.title.hasError('minlength')) {
+      <mat-error>Title is too short.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Description</mat-label>
+    <textarea
+      matInput
+      rows="5"
+      formControlName="description"
+    ></textarea>
+
+    @if (form.controls.description.hasError('required')) {
+      <mat-error>Description must not be blank.</mat-error>
+    } @else if (form.controls.description.hasError('minlength')) {
+      <mat-error>Description is too short.</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- LATEST ERROR HISTORY -->
+  @if (errors().length > 0) {
+    <div class="error-history">
+      <h3>Previous errors</h3>
+
+      <ul>
+        @for (err of errors(); track $index) {
+          <li>
+            <strong>{{ $index + 1 }}.</strong> {{ err }}
+          </li>
+        }
+      </ul>
+
+      <p class="hint">
+        These errors will be appended to the description on the next submit.
+      </p>
+    </div>
+  }
+
+</div>
+
+<div mat-dialog-actions align="end">
+
+  <button
+    mat-button
+    type="button"
+    (click)="cancel()"
+    [disabled]="loading()"
+  >
+    Cancel
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="loading() || form.invalid"
+  >
+
+    @if (!loading()) {
+      Create Issue
+    } @else {
+      Creating...
+    }
+
+  </button>
+</div>

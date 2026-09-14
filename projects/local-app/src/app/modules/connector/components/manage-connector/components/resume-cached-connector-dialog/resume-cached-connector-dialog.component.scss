@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+.resume-dialog-copy {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding-top: 8px;
+}
+
+.resume-dialog-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #e8f0ff 0%, #d8e7ff 100%);
+  color: #2452a6;
+}
+
+.resume-dialog-lead {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #172033;
+}
+
+.resume-dialog-text {
+  margin: 0;
+  color: #566074;
+  line-height: 1.5;
+}

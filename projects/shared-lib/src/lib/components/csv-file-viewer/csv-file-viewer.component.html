@@ -1,0 +1,99 @@
+@if (showToolbar()) {
+  <mat-toolbar color="primary">
+    <mat-icon>table_chart</mat-icon>
+    <span class="toolbar-title">CSV/TSV Viewer</span>
+    <span class="spacer"></span>
+    @if (error()) {
+      <button
+        mat-icon-button
+        aria-label="Retry"
+        (click)="retry()"
+      >
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
+  </mat-toolbar>
+}
+<div class="content-container">
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-progress-spinner mode="indeterminate" />
+    </div>
+  }
+  @if (error() && !loading()) {
+    <div class="error-container">
+      <mat-icon class="error-icon">error</mat-icon>
+      <span class="error-text">{{ error() }}</span>
+    </div>
+  }
+  @if (!loading() && !error()) {
+
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">table</mat-icon>
+          Table
+        </ng-template>
+
+        <mat-toolbar>
+          <span class="spacer"></span>
+          <button type="button" matIconButton (click)="drawer.toggle()">
+            <mat-icon>schema</mat-icon>
+          </button>
+        </mat-toolbar>
+        <mat-drawer-container class="example-container">
+          <mat-drawer-content>
+
+            <div class="table-viewport-wrapper">
+              <cdk-virtual-scroll-viewport
+                #scrollViewport
+                class="vs-viewport"
+                [itemSize]="rowHeight"
+                [minBufferPx]="rowHeight * 5"
+                [maxBufferPx]="rowHeight * 15"
+                [style.height.px]="viewportHeight()"
+              >
+                <table class="data-table">
+                  <thead>
+                  <tr (click)="toggleStatistics()">
+                    @for (column of columns(); track column) {
+                      <th [style.top]="inverseOfTranslation">
+                        {{ column }}
+                        @if (showStatistics() && statistics().has(column)) {
+                          <lib-csv-file-statistics [statistics]="statistics().get(column)!" />
+                        }
+                      </th>
+                    }
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr *cdkVirtualFor="let row of rows()">
+                    @for (column of columns(); track column) {
+                      <td libExpandableCell>{{ row[column] }}</td>
+                    }
+                  </tr>
+                  </tbody>
+                </table>
+              </cdk-virtual-scroll-viewport>
+            </div>
+          </mat-drawer-content>
+          <mat-drawer #drawer position="end" mode="side">
+            <lib-csv-file-schema-card [rows]="rows()"
+              [columns]="columns()" />
+          </mat-drawer>
+
+        </mat-drawer-container>
+      </mat-tab>
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon">add_chart</mat-icon>
+          Diagram
+        </ng-template>
+
+        @if (rows().length && statistics().size) {
+          <lib-csv-file-diagram [rows]="rows()" [statistics]="statistics()" />
+        }
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

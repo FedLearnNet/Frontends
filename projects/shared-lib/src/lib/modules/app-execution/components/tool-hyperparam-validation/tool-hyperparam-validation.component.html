@@ -1,0 +1,53 @@
+<div
+  class="wrap"
+  [class.valid]="!hasErrors() && lastValidatedAt()"
+  [class.invalid]="hasErrors()"
+>
+  <div class="head">
+    <div class="title">
+      <div class="name">{{ hyperparam().name }}</div>
+      <div class="meta">
+        <lib-badge color="GRAY" [text]="hyperparam().type"></lib-badge>
+      </div>
+    </div>
+  </div>
+
+  <mat-divider/>
+
+  <div class="body">
+    <mat-form-field appearance="outline" class="field">
+      <mat-label>Test input</mat-label>
+      <input matInput [formControl]="formControl" placeholder="Enter a value…"/>
+      @if (!hasErrors() && formControl.value) {
+        <mat-icon matSuffix class="ok">check</mat-icon>
+      }
+      @if (hasErrors()) {
+        <mat-icon matSuffix class="err">error</mat-icon>
+      }
+    </mat-form-field>
+
+    @if (hasErrors()) {
+      <lib-error-card>
+        <ul class="errors">
+          @for (msg of errorMessages(); track msg) {
+            <li>{{ msg }}</li>
+          }
+        </ul>
+      </lib-error-card>
+    } @else {
+      <lib-hint-card>
+        @if (lastValidatedAt()) {
+          <span>Looks good.</span>
+        } @else {
+          <span>Type to validate locally.</span>
+        }</lib-hint-card>
+    }
+
+    @if (validatingRemote()) {
+      <div class="remote">
+        <mat-icon>sync</mat-icon>
+        <span>Validating remotely…</span>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,65 @@
+:host {
+  display: block;
+  overflow-x: auto;
+}
+
+table {
+  min-width: max-content;
+}
+
+.cdk-header-cell:hover,
+.element-row:hover {
+  background: #e1e5e8;
+}
+
+.deleted {
+  background: linear-gradient(45deg,
+    #ffcccc 25%,
+    transparent 25%,
+    transparent 50%,
+    #ffcccc 50%,
+    #ffcccc 75%,
+    transparent 75%,
+    transparent) 0 0 / 50px 50px, #ff9999 !important;
+  text-decoration: line-through;
+}
+
+.hideDeleted {
+  .deleted {
+    display: none;
+  }
+}
+
+.element-header-el {
+
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  gap: 16px;
+  .element-header-el-edit {
+    display: none;
+  }
+
+
+}
+
+.cdk-header-cell:hover {
+  cursor: pointer;
+
+  .element-header-el {
+    gap: 16px;
+    margin-right: 0;
+
+    .element-header-el-edit {
+      display: block;
+    }
+  }
+}
+
+
+.list-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}

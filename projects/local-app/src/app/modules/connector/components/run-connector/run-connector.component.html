@@ -1,0 +1,165 @@
+<lib-header
+  [title]="run ? 'Run ' + run.id : ('BUTTON.LOADING' | translate)"
+  [description]="connector?.name ? 'Connector: ' + connector?.name : 'Review run results, errors and execution logs.'"
+  [enableGoBack]="true"
+  [locationBack]="true">
+  @if (run && connector) {
+    <div suffix class="run-header-actions">
+      <lib-btn
+        type="REMOVE"
+        icon="settings_backup_restore"
+        label="Rollback run"
+        (click)="openRollbackDialog()"
+        [matTooltip]="'Rollback all committed patient changes created by this run'"
+      ></lib-btn>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [isLoading]="!run" [isEmpty]="!run" [skeletonOnLoading]="true">
+  <div class="run-content">
+    @if (run) {
+      <div class="run-overview">
+        <mat-card class="run-overview-summary">
+          <mat-card-header>
+            <mat-card-title>{{ 'RUN_SUMMARY' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="run-summary-grid-2">
+              <lib-kv [label]="'GRID.STATUS' | translate ">
+                <lib-status-badge
+                  [size]="'SMALL'"
+                  [text]="run.status"
+                  [type]="convertStatus(run.status)"></lib-status-badge>
+              </lib-kv><!--
+            <lib-kv [label]="'GRID.TRIGGER' | translate ">
+              <lib-badge [border]=true color="GRAY" size="SMALL" [text]="run.trigger || 'System'"></lib-badge>
+            </lib-kv>-->
+              <lib-kv [label]="'GRID.START_TIME' | translate ">
+                @if (convertStatus(run.status) === 'RUNNING') {
+                  <lib-time-badge
+                    [date]="run.createdAt"
+                    [calcDuration]="true"></lib-time-badge>
+                } @else {
+                  @if (convertStatus(run.status) === 'FAILED') {
+                    <lib-time-badge [date]="run.createdAt" [color]="'RED'"></lib-time-badge>
+                  } @else {
+                    <lib-time-badge [date]="run.createdAt"></lib-time-badge>
+                  }
+                }
+              </lib-kv>
+              <!--   <lib-kv [label]="'GRID.RUN_STEP' | translate ">
+                   <lib-badge [border]=true color="GRAY" size="SMALL" [text]="run.currentStep || ''"></lib-badge>
+                 </lib-kv> -->
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="run-overview-overview">
+          <mat-card-header>
+            <mat-card-title>{{ 'ENTITY_OVERVIEW' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="run-summary-grid">
+              <lib-kv [label]="'GRID.NEW' | translate " [value]=" run.newEntities || 0"></lib-kv>
+              <lib-kv [label]="'GRID.UPDATED' | translate " [value]=" run.updatedEntities || 0"></lib-kv>
+              <lib-kv [label]="'GRID.DELETED' | translate " [value]=" run.deletedEntities || 0"></lib-kv>
+              <lib-kv [label]="'GRID.FAILED' | translate " [value]=" run.failedEntities || 0"></lib-kv>
+              <lib-kv [label]="'GRID.UNCHANGED' | translate " [value]=" run.unchangedEntities || 0"></lib-kv>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      @if (run.status === ImportStatusEnum.RUNNING) {
+        <section class="run-progress-panel" aria-label="Run progress">
+          <div class="run-progress-header">
+            <div class="run-progress-title-group">
+              <span class="run-progress-eyebrow">Run progress</span>
+              <strong class="run-progress-title">{{ stepLabel() }}</strong>
+              @if (run.currentStep === ConnectorRunStep.EXTRACTING) {
+                @if (run.progressExtracting !== null && run.progressExtracting !== undefined) {
+                  <span class="run-progress-subtitle">{{ run.progressExtracting }} rows read</span>
+                }
+              } @else if (hasPatientProgress()) {
+                <span class="run-progress-subtitle">
+                     Patient {{ run.currentElementNr }} of {{ run.expectedElements }}@if (run.currentRowNr !== null && run.currentRowNr !== undefined) {
+                  · {{ run.currentRowNr }} rows processed
+                }
+                   </span>
+              }
+            </div>
+            <span class="run-progress-metric">{{ overallProgress() }}%</span>
+          </div>
+
+          <mat-progress-bar
+            class="run-progress-track"
+            mode="determinate"
+            [value]="overallProgress()"></mat-progress-bar>
+        </section>
+      }
+
+      @if (run.status === ImportStatusEnum.ERROR && run.errorMessage) {
+        <section class="run-error-panel" aria-label="Run error">
+          <span class="run-progress-eyebrow">{{ 'GRID.RUN_ERRORS' | translate }}</span>
+          <span class="run-error-message">{{ run.errorMessage }}</span>
+        </section>
+      }
+
+      <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+        <mat-tab>
+          <ng-template matTabLabel>
+            <label [matTooltip]="('TOOLTIP.PATIENT_RESULTS' | translate)">
+              {{ 'GRID.PATIENT_RESULTS' | translate }}
+            </label>
+          </ng-template>
+
+          <ng-template matTabContent>
+            <app-run-change-log [runId]="run.id" [cohortId]="connectorCohortId"/>
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template matTabLabel>
+            <label [matTooltip]="('TOOLTIP.PATIENT_ERRORS' | translate)">
+              {{ 'GRID.PATIENT_ERRORS' | translate }}
+            </label>
+          </ng-template>
+
+          <ng-template matTabContent>
+            <app-run-error-log
+              [showPatientId]="true"
+              [runId]="run.id"
+              [type]="RunLogsType.HARMONIZER"
+              [schemaRoot]="cohort().schemaRoot"
+            />
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template matTabLabel>
+            <label [matTooltip]="('TOOLTIP.RUN_ERRORS' | translate)">
+              {{ 'GRID.RUN_ERRORS' | translate }}
+            </label>
+          </ng-template>
+
+          <ng-template matTabContent>
+            <app-run-error-log [runId]="run.id" [type]="RunLogsType.RUN_ERROR"/>
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab>
+          <ng-template matTabLabel>
+            <label [matTooltip]="('TOOLTIP.RUN_LOGS' | translate)">
+              {{ 'GRID.RUN_LOGS' | translate }}
+            </label>
+          </ng-template>
+
+          <ng-template matTabContent>
+            <app-run-error-log [runId]="run.id" [type]="RunLogsType.ERROR"/>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    }
+  </div>
+</lib-page-wrapper>

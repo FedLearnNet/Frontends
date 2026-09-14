@@ -1,0 +1,101 @@
+<header [class]="className()">
+  <div class="hero-navbar__glow" aria-hidden="true"></div>
+
+  @if (enableSkeleton()) {
+    <div class="hero-navbar__skeleton">
+      <div class="hero-navbar__skeleton-copy">
+        <span class="hero-navbar__skeleton-line hero-navbar__skeleton-line--eyebrow"></span>
+        <span class="hero-navbar__skeleton-line hero-navbar__skeleton-line--title"></span>
+        <span class="hero-navbar__skeleton-line hero-navbar__skeleton-line--description"></span>
+        <span class="hero-navbar__skeleton-line hero-navbar__skeleton-line--description short"></span>
+      </div>
+
+      <div class="hero-navbar__skeleton-actions">
+        <span class="hero-navbar__skeleton-pill"></span>
+        <span class="hero-navbar__skeleton-pill"></span>
+      </div>
+    </div>
+  } @else {
+    <div class="hero-navbar__main">
+      <div class="hero-navbar__identity">
+        @if (enableGoBack() || showHeading()) {
+          <div class="hero-navbar__heading-row">
+            @if (enableGoBack()) {
+              <button
+                class="hero-navbar__back"
+                mat-stroked-button
+                type="button"
+                (click)="goBack.emit()"
+                [attr.aria-label]="goBackAriaLabel()">
+                <mat-icon>{{ goBackIcon() }}</mat-icon>
+                @if (showGoBackLabel()) {
+                  <span>{{ goBackLabel() }}</span>
+                }
+              </button>
+            }
+
+            <div class="hero-navbar__slot hero-navbar__slot--prefix">
+              <ng-content select="[prefix]"></ng-content>
+            </div>
+
+            @if (showHeading()) {
+              <div class="hero-navbar__content">
+                @if (eyebrow()) {
+                  <span class="hero-navbar__eyebrow">{{ formattedEyebrow() }}</span>
+                }
+
+                @if (title()) {
+                  <h1 class="hero-navbar__title">{{ title() }}</h1>
+                }
+
+                @if (description()) {
+                  <p class="hero-navbar__description">{{ description() }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <div class="hero-navbar__supporting">
+          <ng-content></ng-content>
+        </div>
+      </div>
+
+      <div class="hero-navbar__utility">
+        @if (enableSearch()) {
+          <mat-form-field class="hero-navbar__search" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ searchLabel() }}</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              [type]="searchInputType()"
+              [value]="searchValue()"
+              [placeholder]="searchPlaceholder()"
+              [disabled]="searchDisabled()"
+              (input)="handleSearchInput($event)"
+              (keydown)="handleSearchKeydown($event)" />
+
+            @if (searchValue()) {
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Clear search"
+                (click)="clearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+
+            @if (searchHint()) {
+              <mat-hint>{{ searchHint() }}</mat-hint>
+            }
+          </mat-form-field>
+        }
+
+        <div class="hero-navbar__slot hero-navbar__slot--suffix">
+          <ng-content select="[suffix]"></ng-content>
+        </div>
+      </div>
+    </div>
+  }
+</header>

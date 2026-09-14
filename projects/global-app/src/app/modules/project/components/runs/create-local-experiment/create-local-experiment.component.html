@@ -1,0 +1,12 @@
+<form [formGroup]="newExperimentForm">
+  <mat-form-field>
+    <mat-label>{{ 'GRID.NAME_OF_THE_EXPERIMENT' | translate }}</mat-label>
+    <input matInput [placeholder]="('GRID.NAME_OF_THE_EXPERIMENT' | translate)" formControlName="name" required>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>{{ 'GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate }}</mat-label>
+    <textarea matInput [placeholder]="('GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate)" formControlName="description"
+              required rows="5"></textarea>
+  </mat-form-field>
+</form>

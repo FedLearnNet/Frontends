@@ -1,0 +1,97 @@
+@if (selectedStep()) {
+  <app-pipeline-step [step]="selectedStep()!" (backClicked)="unselectStep()"/>
+} @else {
+  <div class="pipeline-card">
+    <div class="pipeline-card__header">
+      <div>
+        @if (pipelineStatus(); as pipelineStatus) {
+          <lib-status-badge [size]="'SMALL'"
+                            [type]="pipelineStatusToBadgeStatus(pipelineStatus)"/>
+
+          <div>Pipeline #{{ pipelineId() }}</div>
+        }
+      </div>
+      <div class="btns">
+        @if (pipelineStatus(); as pipelineStatus) {
+          @if (pipelineStatus === PipelineStatus.RUNNING || pipelineStatus === PipelineStatus.PENDING) {
+            @if (stopClicked()) {
+              <button mat-icon-button
+                      [matTooltip]="'Stop current run processing'"
+                      class="btn--stop"
+              >
+                <mat-icon>av_timer</mat-icon>
+              </button>
+            } @else {
+              <button mat-icon-button
+                      [matTooltip]="'Stop current run'"
+                      (click)="stopExecution()"
+                      class="btn--stop"
+              >
+                <mat-icon>stop_circle</mat-icon>
+              </button>
+            }
+          }
+        }
+        <lib-sse-refresh-btn [btnText]="undefined"
+                             [streaming]="streaming()"
+                             (clicked)="refreshPipeline()"/>
+      </div>
+    </div>
+
+    <div class="pipeline-card__body">
+      <section>
+        <h3>Steps</h3>
+        @if (pipelineSteps().length) {
+          <table mat-table [dataSource]="pipelineSteps()" [trackBy]="trackByStep" class="pipeline-steps-table">
+
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let element" class="status-td">
+                <lib-status-badge [size]="'SMALL'"
+                                  [width]="200"
+                                  [type]="pipelineStatusToBadgeStatus(element?.stepStatus)"/>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Step</th>
+              <td mat-cell *matCellDef="let element">
+                <div class="step-name">
+                  <div class="title">
+                    {{ getName(element) }}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="started">
+              <th mat-header-cell *matHeaderCellDef>Started</th>
+              <td mat-cell *matCellDef="let element">
+                <lib-time-badge color="GRAY" [date]="element?.startedAt"/>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="duration">
+              <th mat-header-cell *matHeaderCellDef>Duration</th>
+              <td mat-cell *matCellDef="let element">
+                <lib-time-badge [date]="element?.startedAt" [dateTo]="element.finishedAt" [calcDuration]="true"/>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns:displayedColumns;" (click)="selectStep(row)"></tr>
+          </table>
+        } @else {
+          <div style="opacity:.75; padding:1rem;">No steps found.</div>
+        }
+      </section>
+
+      @if (publishInfo(); as publishInfo) {
+        <section>
+          <h3>Result</h3>
+          <app-pipeline-publish-info-detail [publishInfo]="publishInfo"></app-pipeline-publish-info-detail>
+        </section>
+      }
+    </div>
+  </div>
+}

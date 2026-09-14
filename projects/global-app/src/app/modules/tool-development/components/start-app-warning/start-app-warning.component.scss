@@ -1,0 +1,137 @@
+.start-warning {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--gray-light-border);
+}
+
+
+.sw-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(200px, 260px) 1fr;
+  gap: 16px;
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sw-card {
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--gray-light-bg);
+  border: 1px solid var(--gray-light-border);;
+}
+
+.sw-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sw-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: black;
+}
+
+.sw-ok {
+  color: var(--success-text);
+}
+
+.sw-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+
+.sw-card__body {
+  margin-top: 14px;
+}
+
+
+.sw-link {
+  position: relative;
+  height: 110px;
+  border-radius: 16px;
+  background: #fafafa;
+  border: 2px dashed #d1d5db;
+  display: grid;
+  place-items: center;
+}
+
+.sw-caption {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 11px;
+  color: var(--gray-text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sw-wire {
+  position: relative;
+  width: 80%;
+  height: 10px;
+  background: repeating-linear-gradient(
+      90deg,
+      #9ca3af 0 12px,
+      transparent 12px 22px
+  );
+}
+
+.sw-packet {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: var(--warning-text);
+  border-radius: 3px;
+  transform: translateY(-50%);
+  animation: packetMove 1.6s infinite;
+}
+
+.delay-1 { animation-delay: .4s; }
+.delay-2 { animation-delay: .8s; }
+
+.sw-break {
+  position: absolute;
+  right: 44%;
+  top: 36%;
+  background: #fee2e2;
+  border: 2px solid #fca5a5;
+  border-radius: 50%;
+  animation: breakPulse 1.4s infinite;
+}
+
+.sw-break mat-icon {
+  color: var(--failed-text);
+  font-size: 24px;
+}
+
+.error-card{
+  display: block;
+  width: 100%;
+}
+
+
+@keyframes packetMove {
+  0% { left: 0; opacity: 0; }
+  15% { opacity: 1; }
+  60% { left: 55%; opacity: 1; }
+  80% { opacity: 0; }
+  100% { opacity: 0; left: 55%; }
+}
+
+@keyframes breakPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+  50% { box-shadow: 0 0 0 12px rgba(220,38,38,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; }
+}

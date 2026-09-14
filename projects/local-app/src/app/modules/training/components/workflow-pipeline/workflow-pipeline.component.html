@@ -1,0 +1,49 @@
+<div class="wf">
+  <header class="wf__header">
+    <h4 class="wf__title">Workflow</h4>
+    <div class="wf__meta">
+      <span class="pill">Steps: {{ sortedApps().length }}</span>
+    </div>
+  </header>
+
+  @if (sortedApps().length === 0) {
+    <div class="wf__empty">
+      <div class="wf__empty-icon">🧩</div>
+      <div class="wf__empty-text">No apps in the workflow yet. Add apps to define the flow.</div>
+    </div>
+  } @else {
+    <div class="timeline">
+
+      <!-- Start node -->
+      <div class="timeline__row timeline__row--endpoint">
+        <div class="timeline__node">
+          <div class="timeline__dot timeline__dot--start" aria-hidden="true"></div>
+          <div class="timeline__line"></div>
+        </div>
+        <div class="timeline__label">Start</div>
+      </div>
+
+      <!-- Steps -->
+      @for (app of sortedApps(); track $index; let i = $index; let last = $last) {
+        <div class="timeline__row">
+          <div class="timeline__node">
+            <div class="timeline__dot">{{ i + 1 }}</div>
+            @if (!last) {
+              <div class="timeline__line"></div>
+            }
+          </div>
+
+          <app-workflow-app [app]="app" [project]="project()" />
+        </div>
+      }
+
+      <!-- End node -->
+      <div class="timeline__row timeline__row--endpoint">
+        <div class="timeline__node">
+          <div class="timeline__dot timeline__dot--end" aria-hidden="true"></div>
+        </div>
+        <div class="timeline__label">End</div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,88 @@
+.connector-container-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: calc(100vh - var(--toolbar-height)*2 - var(--breadcrumb-height) - 64px);
+}
+
+.connector-container {
+  width: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 10px;
+  background: #f8f9fc;
+}
+
+mat-drawer {
+  width: 300px;
+  padding-inline-end: 10px;
+}
+
+mat-toolbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 11;
+  height: var(--toolbar-height);
+  flex-shrink: 0;
+  margin: 0 10px 10px;
+  border: 1px solid #e8e8ef;
+  border-radius: 8px;
+  box-shadow: 0 -6px 18px rgba(15, 23, 42, .08);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.connector-step-config-wrapper{
+  padding: 20px 30px;
+}
+
+.divider-mb{
+  margin-bottom: 20px;
+}
+
+.divider-mt{
+  margin-top: 20px;
+}
+
+.drop-list{
+  background: #f8f9fc;
+  &-add{
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    padding: 10px 0;
+    flex-direction: column;
+  }
+}
+
+.connector-toolbar {
+  height: var(--toolbar-height);
+}
+
+.connector-imports {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0;
+}
+
+.step-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  h2 {
+    margin: 0;
+  }
+
+  .cache-indicator mat-icon.cached {
+    color: var(--mat-sys-primary, #1a73e8);
+  }
+}

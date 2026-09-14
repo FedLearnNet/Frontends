@@ -1,0 +1,595 @@
+.import-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-bg);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--gray-text) 8%, transparent);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+
+    mat-icon {
+      color: var(--gray-text);
+    }
+
+    strong {
+      display: block;
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  &__size {
+    font-size: 0.78rem;
+    color: var(--gray-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* Position on the way through, kept deliberately quiet: it is context for the step below it. */
+.rail {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  &__dot {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.3rem;
+      left: calc(-50% + 0.35rem);
+      width: calc(100% - 0.7rem);
+      height: 2px;
+      background: var(--gray-light-border);
+    }
+
+    &:first-child::before {
+      display: none;
+    }
+
+    &.is-done::before {
+      background: var(--success-text);
+    }
+  }
+
+  &__mark {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--gray-light-border);
+    z-index: 1;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  &__label {
+    font-size: 0.68rem;
+    color: var(--gray-text);
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .is-done &__mark {
+    background: var(--success-text);
+  }
+
+  .is-active &__mark {
+    background: var(--running-text);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--running-text) 15%, transparent);
+    animation: import-pulse 1.6s ease-in-out infinite;
+  }
+
+  .is-active &__label {
+    color: inherit;
+    font-weight: 600;
+  }
+}
+
+/* One cell, so the step leaving and the step arriving overlap in place. */
+.stage {
+  display: grid;
+  min-height: 4.25rem;
+
+  > * {
+    grid-area: 1 / 1;
+  }
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  &__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 50%;
+    background: var(--running-bg);
+    color: var(--running-text);
+
+    mat-icon {
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    &:not(.is-transfer) mat-icon {
+      animation: import-breathe 1.8s ease-in-out infinite;
+    }
+  }
+
+  &__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  &__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: inherit;
+  }
+
+  &__detail {
+    font-size: 0.8rem;
+    color: var(--gray-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__meta {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* A refusal is the one outcome the user has to act on, so it is written out rather than tucked
+   into a tinted strip: dark text on white, the two column lists side by side, each saying what it
+   means for the file. */
+.refusal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--failed-text) 25%, transparent);
+  border-left: 4px solid var(--failed-text);
+  border-radius: 10px;
+  background: var(--surface-bg);
+  color: inherit;
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+
+    mat-icon {
+      flex: 0 0 auto;
+      color: var(--failed-text);
+    }
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  &__lead {
+    margin: 0.2rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-text);
+  }
+
+  &__lists {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.85rem;
+  }
+
+  /* What the two kinds of difference mean, said once above the tables. */
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--gray-text);
+
+    span {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.3rem;
+    }
+
+    mat-icon {
+      flex: 0 0 auto;
+      font-size: 0.95rem;
+      width: 0.95rem;
+      height: 0.95rem;
+    }
+  }
+
+  &__tables {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  /* One block per table, worst first; the ones that lined up stay quiet at the end. */
+  &__table {
+    padding: 0.55rem 0.7rem;
+    border-left: 3px solid var(--gray-light-border);
+    border-radius: 0 8px 8px 0;
+    background: var(--gray-bg);
+
+    &.is-missing {
+      border-left-color: var(--failed-text);
+    }
+
+    &.is-changed {
+      border-left-color: var(--warning-text);
+    }
+
+    &.is-added {
+      border-left-color: var(--running-text);
+    }
+
+    &.is-matched {
+      opacity: 0.65;
+    }
+
+    .pills {
+      margin-top: 0.35rem;
+    }
+  }
+
+  &__table-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__table-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__table-state {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    color: var(--gray-text);
+  }
+
+  &__list {
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    background: var(--gray-bg);
+
+    h4 {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+      }
+    }
+
+    p {
+      margin: 0.2rem 0 0.5rem;
+      font-size: 0.75rem;
+      color: var(--gray-text);
+      line-height: 1.35;
+    }
+  }
+
+  &__next {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--gray-text);
+  }
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    word-break: break-word;
+  }
+
+  &--missing li {
+    background: var(--failed-bg);
+    color: var(--failed-text);
+  }
+
+  &--added li {
+    background: var(--running-bg);
+    color: var(--running-text);
+  }
+}
+
+.tables {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--line);
+
+  &__heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gray-text);
+  }
+
+  &__count {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}
+
+/* One row per table, filling in as it is read; the figures open underneath it. */
+.table {
+  border-radius: 8px;
+  animation: import-row-in 0.25s ease-out both;
+
+  &:hover {
+    background: var(--gray-bg);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.35rem 0.4rem;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__state {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--pending-text);
+
+    mat-icon {
+      font-size: 1.1rem;
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+  }
+
+  /* Not started: a quiet pulse, so the row reads as queued rather than broken. */
+  &__waiting {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--gray-light-border);
+    animation: import-waiting 1.8s ease-in-out infinite;
+  }
+
+  &__name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__figures {
+    flex: 0 0 auto;
+    font-size: 0.78rem;
+    color: var(--gray-text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The statistics are being gathered; the bar stands in for the numbers until they arrive. */
+  &__shimmer {
+    display: block;
+    width: 6rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--gray-light-border) 25%,
+      var(--gray-bg) 37%,
+      var(--gray-light-border) 63%
+    );
+    background-size: 400% 100%;
+    animation: import-shimmer 1.4s ease-in-out infinite;
+  }
+
+  &__note {
+    font-size: 0.75rem;
+    color: var(--gray-text);
+  }
+
+  &__chevron {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--pending-text);
+  }
+
+  &__detail {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.5rem 1rem;
+    margin: 0;
+    padding: 0.5rem 0.6rem 0.7rem 2.1rem;
+    overflow: hidden;
+
+    dt {
+      font-size: 0.7rem;
+      color: var(--gray-text);
+    }
+
+    dd {
+      margin: 0.1rem 0 0;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: inherit;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &__detail-note {
+    grid-column: 1 / -1;
+
+    dd {
+      font-weight: 400;
+      color: var(--gray-text);
+    }
+  }
+
+  &.is-read &__state {
+    color: var(--success-text);
+  }
+
+  &.is-reading &__state {
+    color: var(--running-text);
+  }
+
+  &.is-failed &__state {
+    color: var(--failed-text);
+  }
+
+  &.is-pending &__name,
+  &.is-skipped &__name {
+    color: var(--gray-text);
+    font-weight: 400;
+  }
+}
+
+@keyframes import-waiting {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes import-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@keyframes import-spin {
+  to { transform: rotate(360deg); }
+}
+
+.is-spinning {
+  animation: import-spin 1.1s linear infinite;
+}
+
+@keyframes import-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--running-text) 15%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 7px color-mix(in srgb, var(--running-text) 6%, transparent);
+  }
+}
+
+@keyframes import-breathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.88); opacity: 0.7; }
+}
+
+@keyframes import-row-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail .is-active .rail__mark,
+  .step__icon mat-icon,
+  .table,
+  .table__waiting,
+  .table__shimmer,
+  .is-spinning {
+    animation: none;
+  }
+}
+
+/* Live figures while a table is being measured; the rate is the quieter of the two. */
+.table__live {
+  color: var(--running-text);
+}
+
+.table__rate {
+  margin-left: 0.35rem;
+  color: var(--gray-text);
+}

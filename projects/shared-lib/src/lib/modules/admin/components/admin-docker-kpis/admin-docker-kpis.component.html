@@ -1,0 +1,44 @@
+@if (info(); as _info) {
+  <section class="docker-kpi">
+    @for (section of sections(); track section.title) {
+      <article class="section">
+        <h3 class="section__title">{{ section.title }}</h3>
+
+        <div class="content">
+          @for (item of section.items; track item.label) {
+            <div class="row">
+              <span class="row__label">{{ item.label }}</span>
+
+              <div class="row__value">
+                @switch (true) {
+                  @case (isArrayArray(item.value)) {
+                    <table class="kv-table">
+                      <tbody>
+                        @for (line of item.value; track $index) {
+                          <tr>
+                            <td class="kv-key">{{ line[0] }}</td>
+                            <td class="kv-val">{{ line[1] }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                  @case (isArray(item.value)) {
+                    <ul class="list">
+                      @for (value of item.value; track $index) {
+                        <li>{{ value }}</li>
+                      }
+                    </ul>
+                  }
+                  @default {
+                    <strong>{{ item.value }}</strong>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </section>
+}

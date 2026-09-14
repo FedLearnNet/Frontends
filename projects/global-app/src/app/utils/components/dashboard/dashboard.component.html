@@ -1,0 +1,75 @@
+@if (isPoSyMed) {
+  <lib-hero
+    [title]="'PoSyMed - controlled biomedical tooling, built for clinical reality'"
+    [subtitle]="'Run complex analyses without local installs: PoSyMed builds, scans, and publishes tools as ' +
+     'reproducible container images, with registry-only execution and full audit trails.'"
+    [primaryCtaLabel]="'Start Experiment'"
+    [secondaryCtaLabel]="'Develop your own tool'"
+    [badges]="heroBadges()"
+    [kpis]="heroKpis()"
+    [eyebrow]="'PoSyMed — Secure Research Platform'"
+    (primaryCta)="onExperiment()"
+    (secondaryCta)="onToolDevelopment()"
+  />
+
+  <lib-capabilities
+    [title]="'Everything you need for clinical-grade tool execution'"
+    [subtitle]="'PoSyMed combines controlled builds, policy-based execution, and transparent provenance across sites.'"
+    [items]="items()"
+  />
+  <div class="video">
+    <iframe src="https://share.synthesia.io/embeds/videos/8b5433d6-2e38-45cf-88be-a832271e2e1e" loading="lazy"
+            title="Synthesia video player - PosyMed Tool Development Introduction" allowfullscreen
+            allow="encrypted-media; fullscreen; microphone; screen-wake-lock;"
+            class="iframe"></iframe>
+  </div>
+  <lib-problem-solution
+    [title]="'From fragmented tooling to controlled, reproducible execution'"
+    [subtitle]="'A typical path from “random containers + hidden changes” to PoSyMed’s centralized pipeline and ' +
+     'policy-based runtime.'"
+    [problemTitle]="'Problem'"
+    [solutionTitle]="'PoSyMed solution'"
+    [problems]="problems()"
+    [solutions]="solutions()"
+    [ctaLabel]="'Explore our docs'"
+    (cta)="onViewDocs()"
+  />
+  <div class="video">
+    <iframe src="https://share.synthesia.io/embeds/videos/ff4821b2-bbc2-47be-8770-48d68c5af119" loading="lazy"
+            title="Synthesia video player - PosyMed Data Analysis Tutorial" allowfullscreen
+            allow="encrypted-media; fullscreen; microphone; screen-wake-lock;"
+            class="iframe"></iframe>
+  </div>
+} @else {
+  <lib-hero
+    [title]="project + ' - from federated query to federated learning'"
+    [subtitle]="'Run cross-site analyses without local installs: '+project+' provisions, validates, and executes ' +
+     'federated workflows with policy-based access, reproducible runs, and end-to-end traceability.'"
+    [primaryCtaLabel]="'Start a federated project'"
+    [secondaryCtaLabel]="'Integrate your site'"
+    [badges]="flnetHeroBadges()"
+    [kpis]="flnetHeroKpis()"
+    [eyebrow]="project +' — Secure Privacy-Preserving Federated Learning Network'"
+    (primaryCta)="onProject()"
+    (secondaryCta)="onViewDocs()"
+  />
+
+  <lib-capabilities
+    [title]="'Everything you need for privacy-preserving, cross-site learning'"
+    [subtitle]="project + ' combines secure site onboarding, governance-aware data access, and reproducible federated ' +
+     'execution across institutions.'"
+    [items]="flnetCapabilities()"
+  />
+
+  <lib-problem-solution
+    [title]="'From siloed data to governed, federated execution'"
+    [subtitle]="'A typical path from “manual exports + ad-hoc scripts” to FLNet’s controlled federation with auditable ' +
+     'runs and site-level enforcement.'"
+    [problemTitle]="'Problem'"
+    [solutionTitle]="project +' solution'"
+    [problems]="flnetProblems()"
+    [solutions]="flnetSolutions()"
+    [ctaLabel]="'Explore the FLNet workflow'"
+    (cta)="onViewDocs()"
+  />
+}

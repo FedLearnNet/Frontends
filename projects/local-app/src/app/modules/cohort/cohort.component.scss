@@ -1,0 +1,94 @@
+$actions-col-width: 15%;
+$id-col-width: 15%;
+$files-col-width: 30%;
+$dietary-score-col-width: 20%;
+$colorectal-cancer-col-width: 20%;
+$title-col-width: $actions-col-width + $id-col-width;
+
+.queryability-buttons-row.is-x-small-screen {
+  .queryability-buttons-row--form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &--title {
+      width: 100%;
+      min-height: 60px;
+      padding-left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+}
+
+.queryability-buttons-row--form {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: row;
+
+  form {
+    width: 100%;
+  }
+
+  &--title {
+    width: $title-col-width;
+    min-height: 60px;
+    padding-left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &--files {
+    width: $files-col-width;
+  }
+
+  &--dietary-score {
+    width: $dietary-score-col-width;
+  }
+
+  &--colorectal-cancer {
+    width: $colorectal-cancer-col-width;
+  }
+
+  mat-form-field {
+    min-height: 60px;
+  }
+}
+
+mat-table {
+  mat-form-field {
+    display: block;
+  }
+
+  .file-names {
+    white-space: pre-line;
+  }
+
+  //.mat-column-actions {
+  //  width: $actions-col-width;
+  //}
+
+  .mat-column-id {
+    width: $id-col-width;
+  }
+
+  .mat-column-files {
+    width: $files-col-width;
+  }
+
+  .mat-column-dietaryScore {
+    width: $dietary-score-col-width;
+  }
+
+  .mat-column-colorectal-cancer {
+    width: $colorectal-cancer-col-width;
+  }
+}

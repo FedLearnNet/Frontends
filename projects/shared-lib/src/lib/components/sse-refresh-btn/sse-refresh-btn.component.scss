@@ -1,0 +1,64 @@
+.wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.refresh-btn {
+
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s ease-in-out;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+
+  .spinner {
+    animation: spin 1.5s linear infinite;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background-color: #f0f0f0;
+
+  &.live {
+    background-color: #e8eaf6;
+    color: #3f51b5;
+  }
+
+  mat-icon {
+    font-size: 1.1rem;
+    height: 1.1rem;
+    width: 1.1rem;
+  }
+
+  .pulse-icon {
+    animation: pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}

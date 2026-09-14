@@ -1,0 +1,202 @@
+.msg {
+  display: flex;
+  align-items: flex-end;
+  animation: fadeInUp .25s ease both;
+
+  &.msg--ai {
+    justify-content: flex-start;
+  }
+
+  &.msg--user {
+    justify-content: flex-end;
+  }
+
+  .msg__bubble {
+    max-width: min(720px, 80%);
+    padding: .75rem 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .06);
+    position: relative;
+    transition: box-shadow .2s ease, transform .2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+      transform: translateY(-1px);
+    }
+
+    .msg__text {
+      margin: 0 0 .25rem 0;
+      line-height: 1.45;
+    }
+
+    .msg__meta {
+      font-size: .75rem;
+      opacity: .6;
+      display: inline-block;
+    }
+
+    .msg__status {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .375rem .625rem;
+      border-radius: .625rem;
+      color: var(--running-text);
+      background: var(--running-bg);
+      border: 1px solid var(--running-text);
+      font-size: .85rem;
+      margin: 0 15px .5rem 0;
+
+      .msg__status-dot {
+        width: .5rem;
+        height: .5rem;
+        border-radius: 50%;
+        background: var(--running-text);
+        box-shadow: 0 0 0 0 var(--running-text);
+        animation: pulse 1.6s infinite;
+      }
+
+      .msg__status-text {
+        opacity: .9;
+      }
+    }
+
+    .msg__error {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .5rem;
+      align-items: start;
+      background: var(--failed-bg);
+      border: 1px solid var(--failed-text);
+      color: var(--failed-text);
+      padding: .5rem .625rem;
+      border-radius: .625rem;
+      margin: 0 0 .5rem 0;
+      animation: fadeIn .2s ease both;
+
+      .msg__error-icon {
+        display: inline-grid;
+        place-items: center;
+        width: 1.25rem;
+        height: 1.25rem;
+        border-radius: 50%;
+        background: var(--failed-bg);
+        color: var(--failed-text);
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .msg__error-text {
+        font-size: .9rem;
+      }
+    }
+
+    .msg__progress {
+      height: 3px;
+      width: 100%;
+      margin-top: .5rem;
+      border-radius: 999px;
+      overflow: hidden;
+      background: linear-gradient(
+          90deg,
+          rgba(0, 0, 0, .06) 0%,
+          rgba(0, 0, 0, .12) 50%,
+          rgba(0, 0, 0, .06) 100%
+      );
+      background-size: 200% 100%;
+      animation: progressSlide 1.1s linear infinite;
+    }
+  }
+
+  &.msg--user .msg__bubble {
+    background: #e9f2ff;
+  }
+
+  &.msg--ai .msg__bubble {
+    background: #F4F4F4;
+  }
+
+  .msg__bubble--pending {
+    box-shadow: 0 0 0 2px rgba(11, 109, 255, .08) inset, 0 1px 2px rgba(0, 0, 0, .06);
+  }
+
+  .msg__bubble--error {
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, .12) inset, 0 1px 2px rgba(0, 0, 0, .06);
+    background: #fff7f7;
+  }
+}
+
+@keyframes progressSlide {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(.95);
+    box-shadow: 0 0 0 0 rgba(11, 109, 255, .45);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(11, 109, 255, 0);
+  }
+  100% {
+    transform: scale(.95);
+    box-shadow: 0 0 0 0 rgba(11, 109, 255, 0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msg, .msg .msg__bubble, .msg .msg__progress, .msg .msg__status-dot {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+:host ::ng-deep a.app-action {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .38rem .8rem;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: .875rem;
+  line-height: 1.2;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
+  transition: background .2s, border-color .2s, box-shadow .2s, transform .02s;
+  cursor: pointer;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #c3c8d0;
+  }
+}

@@ -1,0 +1,6 @@
+<h2 class="title" [class]="headClassName()">
+  <ng-content />
+  <span class="spacer"></span>
+  <lib-status-badge [type]="type()" [border]="true" />
+  <ng-content select="right"/>
+</h2>

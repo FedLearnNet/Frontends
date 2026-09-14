@@ -1,0 +1,17 @@
+<mat-dialog-content class="content">
+  <lib-store-card [linkToShop]="false" [storeElement]="storeElement" size="large" />
+
+  <h3>Selected Hyperparams</h3>
+  <lib-run-hyper-params [hyperParams]="hyperParams" />
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (storeUrl) {
+    <a mat-raised-button [href]="storeUrl" target="_blank" rel="noopener noreferrer">
+      <mat-icon>link</mat-icon>
+      View in Store
+    </a>
+  }
+  <span class="spacer"></span>
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CLOSE' | translate }}</button>
+</mat-dialog-actions>

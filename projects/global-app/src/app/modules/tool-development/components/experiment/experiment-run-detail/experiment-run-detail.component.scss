@@ -1,0 +1,13 @@
+.detail{
+  padding: 10px 30px;
+}
+
+.metric-group{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+
+  app-simple-metric-line{
+    width: 600px;
+  }
+}

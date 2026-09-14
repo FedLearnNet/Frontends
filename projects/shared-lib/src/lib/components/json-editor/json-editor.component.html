@@ -1,0 +1,64 @@
+<div class="je-card">
+  <div class="je-header">
+    <div class="je-title">
+      <div class="je-title-text">{{ title() }}</div>
+
+      @if (mode() === 'edit') {
+        <div class="je-subtitle">Edit mode</div>
+      } @else {
+        <div class="je-subtitle">Read-only</div>
+      }
+    </div>
+
+    @if (mode() === 'edit' && showToolbar()) {
+      <div class="je-toolbar">
+        <button mat-stroked-button type="button" (click)="format()">
+          Format
+        </button>
+
+        <button mat-stroked-button type="button" (click)="validate()">
+          Validate
+        </button>
+
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="!dirty()"
+          (click)="reset()"
+        >
+          Reset
+        </button>
+
+        <button mat-flat-button type="button" (click)="apply()">
+          Apply
+        </button>
+      </div>
+    }
+  </div>
+  <div class="je-body">
+
+    @if (mode() === 'edit') {
+      @if (parseError(); as err) {
+        <div class="je-error" role="alert">
+          <div class="je-error-title">Invalid JSON</div>
+          <div class="je-error-msg">{{ err }}</div>
+        </div>
+      }
+
+      <div class="je-overlay">
+        <pre class="je-pre language-json"><code [innerHTML]="highlightedJson()"></code></pre>
+
+        <textarea
+          #editorTextarea
+          class="je-textarea je-textarea--overlay"
+          spellcheck="false"
+          [ngModel]="editorText()"
+          (ngModelChange)="onEditorInput($event)"
+          (scroll)="syncScroll($event)"
+        ></textarea>
+      </div>
+    } @else {
+      <markdown clipboard [data]="markdown() | language : 'json'"></markdown>
+    }
+  </div>
+</div>

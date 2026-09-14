@@ -1,0 +1,17 @@
+@if (schema(); as schemaRoot) {
+  @if (initialPatient(); as patient) {
+    <lib-page-wrapper [margin]="false">
+      <div class="patient-form-shell">
+        <app-patient-editor
+          [mode]="isCreate() ? 'create' : 'edit'"
+          [initialPatient]="patient"
+          [schema]="schemaRoot"
+          [cohortId]="cohortId()"
+          [enableGoBack]="true"
+          [stickyHeader]="true"
+          (saved)="onSaved($event)"
+          (cancelled)="onCancelled()" />
+      </div>
+    </lib-page-wrapper>
+  }
+}

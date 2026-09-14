@@ -1,0 +1,118 @@
+<mat-card class="entry" appearance="outlined">
+  <div class="row head" (click)="expanded.set(!expanded())">
+    <div class="left">
+      <span class="badge" matTooltip="Schema Node ID">#{{ item().schemaNodeId }}</span>
+
+      <div class="value" [matTooltip]="valuePreview()">
+        <mat-icon class="v-icon" aria-hidden="true">description</mat-icon>
+        <span class="v-text">{{ valuePreview() }}</span>
+        @if (isObject()) {
+          <span class="tag">JSON</span>
+        }
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="meta-inline">
+        @if (item().visitId) {
+          <span class="pill" [matTooltip]="('GRID.VISIT_ID' | translate)">
+            <mat-icon>badge</mat-icon>
+            {{ item().visitId }}
+          </span>
+        }
+        @if (item().visitTimestamp) {
+          <span class="pill" [matTooltip]="('GRID.VISIT_TIMESTAMP' | translate)">
+            <mat-icon>event</mat-icon>
+            {{ item().visitTimestamp | date:'medium' }}
+          </span>
+        }
+      </div>
+
+      <div class="actions">
+        <button mat-icon-button [attr.aria-expanded]="expanded()" [matTooltip]="('GRID.VIEW_DETAILS' | translate)">
+          <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (item().metaData?.length) {
+    <div class="row chips">
+      <mat-chip-set aria-label="Meta Data">
+        @for (m of metaPreview().items; track m.id ?? m.schemaNodeId) {
+          <mat-chip>
+            <mat-icon matChipAvatar>tune</mat-icon>
+            {{ m.schemaNodeId ?? '—' }}: {{ (m.value | json) ?? '—' }}
+          </mat-chip>
+        }
+        @if (metaPreview().more > 0) {
+          <mat-chip class="more" [matTooltip]="('ADDITIONAL_METADATA' | translate)">
+            +{{ metaPreview().more }} {{ 'BUTTON.MORE' | translate | lowercase }}
+          </mat-chip>
+        }
+      </mat-chip-set>
+    </div>
+  }
+
+  @if (expanded() && itemPreview()) {
+    <mat-divider />
+    <div class="row details">
+      @if (editable()) {
+        <div class="col">
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" (input)="onFormChanged()" class="visit-form">
+            <app-patient-data-form-field
+              [node]="schemaNode()"
+              [control]="form.get(schemaNode().id.toString())"
+            />
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'GRID.VISIT_ID' | translate }}</mat-label>
+              <input matInput formControlName="visitId" placeholder="e.g. VISIT_001">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ 'GRID.VISIT_TIMESTAMP' | translate }}</mat-label>
+              <input matInput type="datetime-local" formControlName="visitTimestamp">
+              <mat-hint>Stored as ISO-8601 (UTC)</mat-hint>
+            </mat-form-field>
+            <div class="actions">
+              <button mat-icon-button class="delete" type="button" (click)="onDelete()" [matTooltip]="('BUTTON.DELETE_THIS_ELEMENT' | translate)">
+                <mat-icon>delete_forever</mat-icon>
+              </button>
+              <button mat-raised-button type="submit" [disabled]="!canSubmit()" [matTooltip]="('BUTTON.UPDATE_THIS_ELEMENT' | translate)">
+                <mat-icon>check</mat-icon>
+                {{ 'BUTTON.UPDATE' | translate }}
+              </button>
+            </div>
+          </form>
+        </div>
+      } @else {
+        <div class="col read-only-details">
+          <dl class="read-only-fields">
+            <div class="read-only-field">
+              <dt>{{ schemaNode().name }}</dt>
+              <dd>{{ valuePreview() }}</dd>
+            </div>
+            @if (item().visitId) {
+              <div class="read-only-field">
+                <dt>{{ 'GRID.VISIT_ID' | translate }}</dt>
+                <dd>{{ item().visitId }}</dd>
+              </div>
+            }
+            @if (item().visitTimestamp) {
+              <div class="read-only-field">
+                <dt>{{ 'GRID.VISIT_TIMESTAMP' | translate }}</dt>
+                <dd>{{ item().visitTimestamp | date:'medium' }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+      }
+      <div class="col">
+        <h4>{{ 'GRID.DEEP_DATA_VIEW' | translate }}</h4>
+
+        <pre class="code">{{ itemPreview() | json }}</pre>
+      </div>
+    </div>
+  }
+</mat-card>

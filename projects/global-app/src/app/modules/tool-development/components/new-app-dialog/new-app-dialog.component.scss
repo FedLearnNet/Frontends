@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.mt-2{
+  display: block;
+  margin-top: 20px;
+}
+.stepper {
+  margin-top: 10px;
+}
+
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section {
+  margin-top: 12px;
+}
+
+
+.federated-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 4%, transparent);
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+
+  mat-checkbox {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__description {
+    font-size: 13px;
+    line-height: 1.45;
+    opacity: 0.78;
+  }
+}
+
+.inline-error {
+  display: block;
+  margin-top: 12px;
+}
+
+.primary-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &.valid {
+    mat-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+.content {
+  height: calc(100% - 110px);
+}
+
+.mb-2 {
+  display: block;
+  margin-bottom: 20px;
+}
+
+::ng-deep {
+  .mat-mdc-dialog-content {
+    max-height: unset !important;
+  }
+
+  .mat-step-header .mat-step-label {
+    font-weight: 600;
+  }
+}

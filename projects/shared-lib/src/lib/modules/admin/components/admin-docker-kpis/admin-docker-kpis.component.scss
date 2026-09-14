@@ -1,0 +1,81 @@
+:host {
+  display: block;
+}
+
+.docker-kpi {
+  display: grid;
+  gap: 1rem;
+}
+
+.section {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(12, 54, 69, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 10px 24px rgba(15, 44, 56, 0.05);
+  padding: 1rem 1.1rem;
+}
+
+.section__title {
+  color: #103847;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.85rem;
+}
+
+.content {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.row {
+  align-items: start;
+  border-bottom: 1px dashed rgba(12, 54, 69, 0.08);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  padding: 0.55rem 0.1rem;
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row__label {
+  color: rgba(16, 56, 71, 0.64);
+  font-weight: 600;
+}
+
+.row__value {
+  color: #173947;
+  min-width: 0;
+}
+
+.list {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.kv-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.kv-table td {
+  border-bottom: 1px solid rgba(12, 54, 69, 0.06);
+  padding: 0.25rem 0.4rem;
+}
+
+.kv-key {
+  color: rgba(16, 56, 71, 0.68);
+  width: 40%;
+}
+
+.kv-val {
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

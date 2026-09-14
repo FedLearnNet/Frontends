@@ -1,0 +1,49 @@
+<div class="palette" (keydown)="onKeydown($event)">
+  <div class="palette__search">
+    <mat-icon class="palette__search-icon">search</mat-icon>
+    <input
+      #searchInput
+      cdkFocusInitial
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      [placeholder]="'SEARCH.PLACEHOLDER' | translate"
+      [ngModel]="term()"
+      (ngModelChange)="onTermChange($event)"/>
+    @if (loading()) {
+      <mat-progress-spinner class="palette__spinner" mode="indeterminate" diameter="18"/>
+    }
+    <span class="palette__kbd">ESC</span>
+  </div>
+
+  <div class="palette__body">
+    @if (!hasTerm()) {
+      <div class="palette__hint">
+        <mat-icon>travel_explore</mat-icon>
+        <p>{{ 'SEARCH.START_TYPING' | translate }}</p>
+      </div>
+    } @else if (showEmpty()) {
+      <div class="palette__hint">
+        <mat-icon>search_off</mat-icon>
+        <p>{{ 'SEARCH.NO_RESULTS' | translate:{query: term()} }}</p>
+      </div>
+    } @else {
+      <ul class="palette__results">
+        @for (item of results(); track $index) {
+          <li>
+            <app-search-result-card
+              [item]="item"
+              [active]="$index === activeIndex()"
+              (selected)="open($event)"/>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="palette__footer">
+    <span><kbd>↑</kbd><kbd>↓</kbd> {{ 'SEARCH.NAV' | translate }}</span>
+    <span><kbd>↵</kbd> {{ 'SEARCH.OPEN' | translate }}</span>
+    <span><kbd>esc</kbd> {{ 'SEARCH.CLOSE' | translate }}</span>
+  </div>
+</div>

@@ -1,0 +1,71 @@
+@if (showFilter()) {
+  <div class="sticky-toolbar">
+    <div class="toolbar-row">
+      <mat-chip-listbox>
+        <mat-chip-option [selected]="statusFilter()==='ALL'" (click)="statusFilter.set('ALL')">All</mat-chip-option>
+        <mat-chip-option [selected]="statusFilter()==='RUNNING'" (click)="statusFilter.set(PipelineStatus.RUNNING)">
+          Running
+        </mat-chip-option>
+        <mat-chip-option [selected]="statusFilter()==='PENDING'" (click)="statusFilter.set(PipelineStatus.PENDING)">
+          Pending
+        </mat-chip-option>
+        <mat-chip-option [selected]="statusFilter()==='SUCCESS'" (click)="statusFilter.set(PipelineStatus.SUCCESS)">
+          Success
+        </mat-chip-option>
+        <mat-chip-option [selected]="statusFilter()==='FAILED'" (click)="statusFilter.set(PipelineStatus.FAILED)">
+          Failed
+        </mat-chip-option>
+      </mat-chip-listbox>
+
+      <mat-chip-listbox>
+        <mat-chip-option [selected]="typeFilter()==='ALL'" (click)="typeFilter.set('ALL')">Any Type</mat-chip-option>
+        <mat-chip-option [selected]="typeFilter()==='MODEL'" (click)="typeFilter.set(PipelineType.MODEL)">
+          Model
+        </mat-chip-option>
+        <mat-chip-option [selected]="typeFilter()==='APP'" (click)="typeFilter.set(PipelineType.APP)">
+          App
+        </mat-chip-option>
+      </mat-chip-listbox>
+
+      <span class="spacer"></span>
+    </div>
+  </div>
+}
+<div class="pipeline-card card-mt">
+  <div class="pipeline-card__header">
+    <div class="title-strong">Pipelines</div>
+    <span class="spacer"></span>
+    @if (canCreate()) {
+      <lib-btn
+        type="START"
+        label="Start new pipeline" (clicked)="create()"/>
+    }
+    <lib-sse-refresh-btn [btnText]="undefined"
+      [refreshing]="loading()"
+      (clicked)="ngOnInit()" />
+  </div>
+
+  <div class="pipeline-card__body card-body-col-gap">
+    @for (p of filtered(); track p.id) {
+      <div class="pipeline-row" (click)="openDetail(p)">
+        <lib-status-badge [size]="'SMALL'"
+          [type]="pipelineStatusToBadgeStatus(p.pipelineStatus)"  />
+
+        <div class="row-flex">
+          <div class="row-title">
+            #{{ filtered().length - $index }}
+            <span class="chip">{{ p.pipelineType }}</span>
+          </div>
+
+          <div class="pipeline-meta">
+            @if (p.createdAt) {
+              <span>Created: {{ p.createdAt | date:'medium' }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="empty-hint">No pipelines match your filters.</div>
+    }
+  </div>
+</div>

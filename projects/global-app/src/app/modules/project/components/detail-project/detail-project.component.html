@@ -1,0 +1,81 @@
+<lib-header
+  [title]="project()?.name"
+  [description]="project()?.description"
+  [enableGoBack]="true"
+  [routerOnePathBack]="true"
+  [enableSkeleton]="loading()"
+  [mainGap]="false">
+  <div suffix>
+    @if (query(); as query) {
+      @if (query.result) {
+        <lib-badge text="Patients:">{{ query.result }}</lib-badge>
+      } @else {
+        <lib-badge text="No Patients" color="RED"></lib-badge>
+      }
+    } @else if (project()?.queryId) {
+      <lib-badge text="No Query" color="RED"></lib-badge>
+    }
+  </div>
+  @if (project()) {
+    <div class="tab-header-row">
+      @let si = selectedIndex();
+      <nav mat-tab-nav-bar [tabPanel]="panel">
+        <a mat-tab-link [active]="si === 0" (click)="setSelectedIndex(0)">
+          1. {{ 'GRID.OVERVIEW' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 1" (click)="setSelectedIndex(1)">
+          2. {{ 'GRID.DATA' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 2" (click)="setSelectedIndex(2)">
+          3. {{ 'GRID.WORKFLOW' | translate }}
+        </a>
+        <a mat-tab-link [active]="si === 3" (click)="setSelectedIndex(3)">
+          4. {{ 'GRID.RUN' | translate }}
+        </a>
+      </nav>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper [error]="error()" [isLoading]="loading()">
+  <mat-tab-nav-panel #panel>
+    @if (project(); as p) {
+      @switch (selectedIndex()) {
+        @case (0) {
+          <app-detail-project-overview [project]="p"/>
+        }
+        @case (1) {
+          <app-create-datasets [project]="p"/>
+        }
+        @case (2) {
+          <lib-workflow-view [workflowId]="p.workflowId" [projectId]="p.id"
+                             [isForFederatedLearning]="true"
+                             (workflowChange)="workflow.set($event)"/>
+        }
+        @case (3) {
+          @if (workflow(); as w) {
+            @if (p.file || (p.exportConfig?.features?.length ?? 0) > 0 || (p.exportConfig?.features?.length ?? 0) > 0) {
+              <app-project-runs [project]="p" [workflow]="w"/>
+            } @else {
+              <lib-empty-state
+                title="No data standart found"
+                subtitle="You need to create a dataset for your training"
+                [primaryButtonEnabled]="true"
+                primaryButtonLabel="Add dataset"
+                (cta)="setSelectedIndex(1)"
+              />
+            }
+          } @else {
+            <lib-empty-state
+              title="No workflow found"
+              subtitle="You need to add an workflow to run a training"
+              [primaryButtonEnabled]="true"
+              primaryButtonLabel="Add workflow"
+              (cta)="setSelectedIndex(2)"
+            />
+          }
+        }
+      }
+    }
+  </mat-tab-nav-panel>
+</lib-page-wrapper>

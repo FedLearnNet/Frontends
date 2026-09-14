@@ -1,0 +1,186 @@
+@if (validationLoading()) {
+  <lib-skeleton-loader/>
+} @else {
+<div class="connector-step-config-wrapper">
+  <div class="mapper-header">
+    <div>
+      <p class="mapper-eyebrow">Schema mapping</p>
+      <h2>{{ 'MAP_FIELDS' | translate }}</h2>
+      <p class="mapper-subtitle">Map source headers to schema fields, review validation instantly, and use preview to
+        spot gaps before saving.</p>
+    </div>
+    <lib-btn
+      class="suggest-button"
+      type="CUSTOM"
+      icon="auto_fix_high"
+      label="Suggest mapping"
+      (clicked)="suggestMappings()"/>
+  </div>
+
+  @if (patientIdConflictColumn(); as conflictColumn) {
+    <lib-info-card
+      type="ERROR"
+      title="Conflicting patient ID">
+      The unique patient ID is mapped to <strong>{{ conflictColumn }}</strong>, which is created or
+      modified by a transformer. Map the patient ID to an original source column that no transformer
+      produces or overwrites.
+    </lib-info-card>
+  }
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [selectedIndex]="selectedTabIndex()">
+    <mat-tab label="Fields">
+      <mat-toolbar class="mapper-toolbar">
+        <div class="toolbar-intro">
+          <span class="toolbar-title">{{ 'FILTER_TABLE' | translate }}</span>
+          <span class="toolbar-summary">{{ unmappedCount() }} unmapped, {{ validCount() }}
+            validated, {{ pendingCount() }} pending</span>
+        </div>
+        <span class="spacer"></span>
+
+
+        <mat-button-toggle-group
+          multiple
+          [(ngModel)]="filterMapped"
+        >
+          <mat-button-toggle value="Unmapped">{{ 'UNMAPPED' | translate }}</mat-button-toggle>
+          <mat-button-toggle value="Mapped">{{ 'MAPPED' | translate }}</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-button-toggle-group
+          multiple
+          [(ngModel)]="filterMappedStatus"
+        >
+          <mat-button-toggle value="Valid">{{ 'VALID' | translate }}</mat-button-toggle>
+          <mat-button-toggle value="Invalid">{{ 'INVALID' | translate }}</mat-button-toggle>
+        </mat-button-toggle-group>
+      </mat-toolbar>
+
+      <div class="table-shell" tabindex="0" aria-label="Schema mapping table">
+        <table mat-table [dataSource]="tableDataSource()" class="mat-elevation-z0 demo-table">
+          <ng-container matColumnDef="column">
+            <th mat-header-cell *matHeaderCellDef>{{ 'GRID.COLUMN_HEADER' | translate }}</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="column-cell">
+                @if (getValidationState(element); as validationState) {
+                  @if (validationState === 'SYNC') {
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="column-validation-indicator column-validation-indicator--sync"
+                      [attr.aria-label]="'VALIDATING_PREVIEW_DATA' | translate"
+                      (click)="viewSelectedColumn(element)">
+                      <mat-icon>sync</mat-icon>
+                    </button>
+                  } @else if (validationState === 'VALID') {
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="column-validation-indicator column-validation-indicator--success"
+                      [attr.aria-label]="getColumnWarnings(element).length > 0
+                        ? ('DIALOG.MAPPER.VIEW_VALIDATION_DETAILS' | translate)
+                        : ('VALIDATION.VALIDATION_SUCCESSFUL' | translate)"
+                      (click)="viewSelectedColumn(element)">
+                      <mat-icon>{{ getValidValidationIcon(element) }}</mat-icon>
+                    </button>
+                  } @else {
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="column-validation-indicator column-validation-indicator--warning"
+                      [attr.aria-label]="'DIALOG.MAPPER.VIEW_VALIDATION_DETAILS' | translate"
+                      (click)="viewSelectedColumn(element)">
+                      <mat-icon>warning</mat-icon>
+                    </button>
+                  }
+                }
+                <span class="column-name">{{ element.column }}</span>
+                @if (getMappingType(element); as mappingType) {
+                  @if (mappingType !== 'Direct') {
+                    <lib-badge
+                      [text]="mappingType"
+                      color="BLUE"
+                      size="X-SMALL"
+                      [border]="true"
+                      [uppercase]="true"/>
+                  }
+                }
+                @if (element.disabled) {
+                  <lib-badge
+                    text="Time mapping column"
+                    iconName="schedule"
+                    color="ORANGE"
+                    size="X-SMALL"
+                    [border]="true"/>
+                }
+                @if (getColumnWarnings(element).length > 0) {
+                  <mat-icon
+                    class="column-warning-indicator"
+                    [matTooltip]="getColumnWarningText(element)"
+                    matTooltipClass="column-warning-tooltip">warning_amber</mat-icon>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="data">
+            <th mat-header-cell *matHeaderCellDef>{{ 'GRID.SAMPLE_DATA' | translate }}</th>
+            <td mat-cell *matCellDef="let element">
+              @if (isList(element.data)) {
+                <div class="list-view-btn">
+                  <span class="sample-value">{{ getValue(element.data) }}</span>
+                  <button (click)="openArrayDialog(element.data, element.column)" mat-icon-button>
+                    <mat-icon>view_array</mat-icon>
+                  </button>
+                </div>
+              } @else {
+                <span class="sample-value">{{ getValue(element.data) }}</span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="mapping">
+            <th mat-header-cell *matHeaderCellDef>{{ 'GRID.MAP_TO_FIELD' | translate }}</th>
+            <td mat-cell *matCellDef="let element">
+              <button
+                mat-button
+                class="add-field"
+                [class.add-field--success]="getValidationState(element) === 'VALID'"
+                [class.add-field--warning]="getValidationState(element) === 'WARNING' || getValidationState(element) === 'SYNC'"
+                (click)="viewSelectedColumn(element)">
+                <span>{{ getMappingSummary(element) }}</span>
+                <mat-icon>keyboard_arrow_down</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="time_series_mapping">
+            <th mat-header-cell *matHeaderCellDef>{{ 'GRID.MAP_TO_TIME_SERIES' | translate }}</th>
+            <td mat-cell *matCellDef="let element">
+              <button mat-button class="add-field" (click)="viewTimeSeriesMapping(element)">
+                <span>{{ getTimeSeriesMappingName(element) }}</span>
+                <mat-icon>keyboard_arrow_down</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns;"
+            [class.row-ignored]="row.disabled"
+          ></tr>
+        </table>
+      </div>
+    </mat-tab>
+
+    @if (cohort(); as detailDto) {
+      <mat-tab [label]="('PREVIEW' | translate)">
+        <app-preview-mapper
+          [cohort]="detailDto!"
+          [mappingConfig]="dataSource()"
+        />
+      </mat-tab>
+    }
+  </mat-tab-group>
+</div>
+}

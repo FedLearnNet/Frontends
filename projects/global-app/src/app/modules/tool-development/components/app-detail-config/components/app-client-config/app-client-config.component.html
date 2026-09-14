@@ -1,0 +1,42 @@
+@if (config(); as config) {
+  <h2>{{ 'MENU.CLIENT_CONFIG' | translate }}</h2>
+  <mat-accordion>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.APP_KEY' | translate }}</mat-panel-title>
+        <mat-panel-description> {{ config.APP_KEY }}</mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>{{ 'CLIENT_CONFIG_KEY_INFO' | translate }}</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.ENABLE_CONFIG_SYNC' | translate }}</mat-panel-title>
+        <mat-panel-description> {{ config.ENABLE_CONFIG_SYNC }}</mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>{{ 'CONFIG_SYNC_ENABLED_INFO' | translate }}</p>
+      <p><b>{{ 'DEFAULT' | translate }}:</b> {{ 'TRUE' | translate }}</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.TRACE_PERFORMANCE' | translate }}</mat-panel-title>
+        <mat-panel-description> {{ config.TRACE_PERFORMANCE }}</mat-panel-description>
+      </mat-expansion-panel-header>
+      <p>{{ 'TRACE_PERFORMANCE_INFO' | translate }}</p>
+      <p><b>{{ 'DEFAULT' | translate }}:</b> {{ 'FALSE' | translate }}</p>
+    </mat-expansion-panel>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'MENU.DATA_FILES' | translate }}</mat-panel-title>
+        <mat-panel-description>{{ 'COUNT_FILES_FOUND' | translate: {count: datafiles().length} }}</mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="profile-files">
+      @for (file of datafiles(); track file.path) {
+        <lib-file-profile-card [profile]="file" [path]="file.path"></lib-file-profile-card>
+      }
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+} @else {
+  <p>{{ 'WARNING.NO_CONFIG_RECEIVED' | translate }}</p>
+}
+

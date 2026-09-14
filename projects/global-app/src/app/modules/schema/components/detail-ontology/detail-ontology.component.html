@@ -1,0 +1,56 @@
+<lib-header
+  class="header"
+  [title]="firstName() ? firstName() : 'Ontology'"
+  description="Review and manage this ontology node"
+  [enableGoBack]="true"
+  [enableSearch]="false"
+  [routerOnePathBack]="true">
+</lib-header>
+
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="loading()"
+  [isEmpty]="!ontology()"
+  [skeletonOnLoading]="true"
+>
+  <lib-empty-state
+    empty
+    [title]="'No results found'"
+  ></lib-empty-state>
+
+  @if (ontology(); as foundOntology) {
+    <div class="wrapper">
+      <div class="wrapper-element">
+
+        <div class="relations">
+          <app-detail-ontology-relation-lists [headerName]="('GRID.PARENTS' | translate)"
+                                              [placeholder]="('BUTTON.ADD_PARENT' | translate)"
+                                              [ontologyNode]="foundOntology">
+            >
+          </app-detail-ontology-relation-lists>
+        </div>
+        <mat-divider/>
+        <app-ontology-edit [ontology]="foundOntology"></app-ontology-edit>
+
+        <button class="save-btn" mat-flat-button aria-label="Save" [disabled]="saving()" (click)="saveOntology()">
+          <mat-icon>save</mat-icon>
+          @if (saving()) {
+            {{ 'GRID.LOADING' | translate }}...
+          } @else if (foundOntology.id) {
+            {{ 'BUTTON.UPDATE' | translate }}
+          } @else {
+            {{ 'BUTTON.SAVE' | translate }}
+          }
+        </button>
+      </div>
+      <div class="wrapper-element">
+        <h3>{{ 'GRID.RELATED_DATA_TYPES' | translate }}</h3>
+        <app-list-datatypes [ontologyId]="ontologyId()" [hideToolbar]="true"/>
+        <app-datatype-card [showAddBtn]="true" [ontologyId]="ontologyId()"/>
+
+        <h3>{{ 'GRID.RELATED_SCHEMAS' | translate }}</h3>
+        <app-schema-card-list [ontologyId]="ontologyId()"/>
+      </div>
+    </div>
+  }
+</lib-page-wrapper>

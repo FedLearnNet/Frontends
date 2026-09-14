@@ -1,0 +1,21 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'BUTTON.ADD_ONTOLOGY_CUSTOM' | translate"/>
+
+
+<mat-dialog-content>
+  <app-ontology-edit
+    [limitWidth]="false"
+    [twoColumns]="true"
+    [ontology]="ontology()"></app-ontology-edit>
+  @if (error(); as err) {
+    <lib-error-card>
+      {{ err | json }}
+    </lib-error-card>
+  }
+</mat-dialog-content>
+<mat-dialog-actions [align]="'end'">
+  <button mat-raised-button color="primary" (click)="create()">
+    <mat-icon>add</mat-icon>
+    {{ 'BUTTON.CREATE' | translate }}
+  </button>
+</mat-dialog-actions>

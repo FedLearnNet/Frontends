@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{ app()?.name }}</h2>
+<mat-dialog-content>
+  <lib-store-card [linkToShop]="false" [storeElement]="storeElement()" size="x-large" />
+
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+    <mat-tab [label]="('GRID.SETUP' | translate)">
+      @if (selectedVersion(); as sv) {
+        <lib-app-run-hyperparameter [version]="sv"
+                                    (hyperParamsChange)="onHyperParamsChanged($event)"
+                                    [hyperParams]="node().hyperParams || {}"
+                                    (formsValid)="hyperParamsValid.set($event)"
+         />
+      } @else {
+        <p>{{ 'WARNING.NO_VALID_VERSION' | translate }}</p>
+      }
+    </mat-tab>
+    <mat-tab [label]="('GRID.VERSION' | translate)">
+      <lib-store-version-list [detail]="this.node().appDetail" (detailChange)="updateAppDetail($event)" (selectedVersion)="versionChanged($event)" />
+    </mat-tab>
+    <mat-tab [label]="('GRID.CONFIG' | translate)">
+      @if (selectedVersion(); as sv) {
+        <lib-store-app-config [config]="sv.appConfig" />
+      } @else {
+        <p>{{ 'WARNING.NO_VALID_VERSION' | translate }}</p>
+      }
+    </mat-tab>
+
+  </mat-tab-group>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  <button mat-button (click)="onRemoveClick()">{{ 'BUTTON.DELETE' | translate }}</button>
+  <button mat-button (click)="onOkClick()" [disabled]="!doesAppHaveValidHyperParamsConfig()">Ok</button>
+</mat-dialog-actions>

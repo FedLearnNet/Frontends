@@ -1,0 +1,52 @@
+<lib-closeable-dialog-title [title]="'PREVIEW_CACHE.TITLE' | translate" [allowMaximize]="false"/>
+
+<mat-dialog-content class="content">
+
+  <div class="state">
+    @if (notRun()) {
+      <lib-badge color="ORANGE" iconName="play_circle" size="MEDIUM"
+                 [text]="'PREVIEW_CACHE.NOT_RUN' | translate"></lib-badge>
+    } @else if (isCached()) {
+      <lib-badge color="BLUE" iconName="bolt" size="MEDIUM"
+                 [text]="'PREVIEW_CACHE.FROM_CACHE' | translate"></lib-badge>
+    } @else {
+      <lib-badge color="GRAY" iconName="autorenew" size="MEDIUM"
+                 [text]="'PREVIEW_CACHE.COMPUTED_NOW' | translate"></lib-badge>
+    }
+  </div>
+
+  <lib-hint-card>
+    {{ explanationKey() | translate }}
+  </lib-hint-card>
+
+  <div class="meta">
+    <lib-kv [label]="'PREVIEW_CACHE.STEP' | translate" [value]="data.stepTitle"></lib-kv>
+    <lib-kv [label]="'PREVIEW_CACHE.STEP_INDEX' | translate" [value]="stage().stepIndex"></lib-kv>
+    @if (stage().transformerName) {
+      <lib-kv [label]="'PREVIEW_CACHE.TRANSFORMER' | translate" [value]="stage().transformerName"></lib-kv>
+    }
+    <lib-kv [label]="'PREVIEW_CACHE.ROWS' | translate" [value]="stage().rowCount ?? 0"></lib-kv>
+    <lib-kv [label]="'PREVIEW_CACHE.FINGERPRINT' | translate" [value]="shortFingerprint()" [mono]="true"></lib-kv>
+    @if (stage().cachedAt) {
+      <lib-kv [label]="'PREVIEW_CACHE.CACHED_AT' | translate"
+              [value]="stage().cachedAt | date: 'medium'"></lib-kv>
+    }
+  </div>
+
+  @if (data.followingSteps > 0) {
+    <lib-hint-card>
+      {{ 'PREVIEW_CACHE.ALSO_DROPS' | translate: {count: data.followingSteps} }}
+    </lib-hint-card>
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <lib-btn type="CLOSE" (clicked)="close()"></lib-btn>
+  <lib-btn type="CUSTOM"
+           variant="DANGER"
+           icon="delete_sweep"
+           [label]="'PREVIEW_CACHE.INVALIDATE' | translate"
+           [loading]="invalidating()"
+           (clicked)="invalidate()"></lib-btn>
+</mat-dialog-actions>

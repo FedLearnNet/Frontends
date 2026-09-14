@@ -1,0 +1,38 @@
+<div class="drag-and-drop">
+  <div class="drag-and-drop--container" [ngClass]="{'invalid': isInvalid(), 'disabled': disabled() }"
+       appDragAndDrop (fileDropped)="onFileDropped($event)">
+    <input type="file" id="fileDropRef" [multiple]="multiple()"
+           [accept]="accept()"
+           (change)="fileBrowseHandler($event.target)"/>
+
+    <mat-icon aria-hidden="false" aria-label="Upload" fontIcon="upload"/>
+
+    <label>
+      @if (label()) {
+        <strong>{{ label() }}</strong>
+        <br>
+      }
+      {{ 'DRAG_AND_DROP_TOOLTIP' | translate }}
+      {{ isRequired() ? '*' : '' }}
+      @if (accept()) {
+        {{ accept() }}
+      }
+    </label>
+  </div>
+
+  <div class="drag-and-drop--files-list" [ngClass]="{'disabled': disabled()}">
+    @for (file of uploadedFiles; track $index) {
+      <div class="single-file">
+        <div class="info">
+          <h4 class="name">{{ file?.name }}</h4>
+          <p class="size">{{ formatBytes(file?.size) }}</p>
+        </div>
+
+        <div class="delete" (click)="deleteFile($index)">
+          <mat-icon aria-hidden="false" aria-label="Delete" fontIcon="delete"/>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

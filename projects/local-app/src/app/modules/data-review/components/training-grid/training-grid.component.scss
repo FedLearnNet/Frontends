@@ -1,0 +1,39 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+table {
+  .mat-column-actions {
+    width: 10%;
+  }
+}
+
+.hide {
+  visibility: hidden;
+}
+
+.actions{
+  color: black;
+}
+
+.pending {
+  mat-icon{
+    color: green;
+  }
+}
+
+.requested-data {
+  white-space: pre-line;
+  padding-block: 10px;
+}
+
+.col-entry-padding {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.training {
+  margin: 40px;
+  .mat-mdc-row:hover {
+    background-color: #F6F6F6;
+    cursor: pointer;
+  }
+}

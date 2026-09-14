@@ -1,0 +1,39 @@
+<div class="history">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"/>
+  }
+  @if (error(); as error) {
+    <lib-info-card type="ERROR" variant="NOTICE" size="SMALL" [title]="error"/>
+  }
+
+  @for (run of runs(); track run.id) {
+    <div class="history__item">
+      <lib-status-badge [type]="badge(run)" size="X-SMALL" [noText]="true" [animate]="false"/>
+      <div class="history__main">
+        <div class="history__name">{{ run.appName || 'Export app' }}</div>
+        <div class="history__meta">
+          <lib-time-badge [date]="toDate(run.startedAt)" format="SHORT" color="GRAY" size="X-SMALL"/>
+          @if (run.outputSize) {
+            <span>{{ run.outputSize | bytes }}</span>
+          }
+        </div>
+        @if (run.runStatus === 'ERROR' && run.lastError) {
+          <div class="history__reason" [matTooltip]="run.lastError">{{ run.lastError }}</div>
+        }
+      </div>
+      @if (run.downloadReady) {
+        <lib-btn type="DOWNLOAD" variant="GHOST" size="SMALL" [iconOnly]="true"
+                 [loading]="downloadingRunId() === run.id"
+                 [ariaLabel]="'Download ' + (run.outputFileName || 'zip')"
+                 [matTooltip]="'Download ' + (run.outputFileName || 'zip')"
+                 (clicked)="download.emit(run.id)"/>
+      }
+    </div>
+  } @empty {
+    @if (!loading()) {
+      <lib-empty-state icon="history" title="No app exports yet"
+                       subtitle="Exports of this cohort show up here and can be downloaded again."
+                       size="SMALL"/>
+    }
+  }
+</div>

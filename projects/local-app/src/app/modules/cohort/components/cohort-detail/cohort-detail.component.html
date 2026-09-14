@@ -1,0 +1,132 @@
+<lib-page-wrapper>
+  @if (isEditing()) {
+    <form [formGroup]="cohortDetailForm" [ngClass]="'cohort-detail-form-' + screenSize()">
+      <input type="hidden" formControlName="id">
+
+      <mat-form-field appearance="outline" class="full-width" [class.name-field-invalid]="nameExists()">
+        <mat-label>{{ 'GRID.NAME_OF_THE_COHORT' | translate }}</mat-label>
+        <input matInput [placeholder]="('GRID.NAME_OF_THE_COHORT' | translate)" formControlName="name" required>
+        @if (updateDisabledHint(); as hintKey) {
+          <mat-error>{{ hintKey | translate }}</mat-error>
+        }
+        @if (cohortDetailForm.controls["name"].touched && cohortDetailForm.controls["name"].hasError('required')) {
+          <mat-hint class="error">{{ 'VALIDATION.REQUIRED' | translate }}</mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+        <textarea
+          matInput
+          [placeholder]="('GRID.DESCRIPTION' | translate)"
+          formControlName="description"
+          rows="5">
+          </textarea>
+      </mat-form-field>
+
+      <div class="cohort-detail-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option [value]="''">Not set</mat-option>
+            @for (status of publicationStatuses; track status) {
+              <mat-option [value]="status">{{ status }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Cite as</mat-label>
+        <textarea matInput formControlName="citeAs" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Purpose</mat-label>
+        <textarea matInput formControlName="purpose" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Copyright</mat-label>
+        <textarea matInput formControlName="copyright" rows="3"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Copyright label</mat-label>
+        <input matInput formControlName="copyrightLabel">
+      </mat-form-field>
+
+      <app-cohort-criteria-editor
+        [criteria]="criteria"
+        [schema]="cohort()?.schemaRoot">
+      </app-cohort-criteria-editor>
+    </form>
+
+    <div class="actions">
+      <lib-btn type="UPDATE"
+               [label]="'BUTTON.UPDATE_COHORT_DETAILS' | translate"
+               (clicked)="onUpdateCohort()"
+               [disabled]="!canSubmit()">
+      </lib-btn>
+    </div>
+  } @else {
+    <div class="cohort-view" [ngClass]="'cohort-view-' + screenSize()">
+      <div class="cohort-view__meta">
+        <div class="cohort-view__meta-item">
+          <span>Status</span>
+          <lib-badge
+            [text]="cohort()?.status || 'Not set'"
+            [color]="statusBadgeColor(cohort()?.status)"
+            [border]="true">
+          </lib-badge>
+        </div>
+        <div class="cohort-view__meta-item cohort-view__meta-item--subtle" [class.is-empty]="!cohort()?.approvalDate">
+          <span>Approval date</span>
+          <lib-time-badge [date]="cohort()?.approvalDate" color="GRAY" format="DATE" ></lib-time-badge>
+        </div>
+        <div class="cohort-view__meta-item cohort-view__meta-item--subtle" [class.is-empty]="!cohort()?.copyrightLabel">
+          <span>Copyright label</span>
+          <strong>{{ cohort()?.copyrightLabel || 'Not set' }}</strong>
+        </div>
+      </div>
+
+      <section class="cohort-view__section" [class.is-empty]="!cohort()?.citeAs">
+        <h3>Cite as</h3>
+        <p>{{ cohort()?.citeAs || 'No citation text configured.' }}</p>
+      </section>
+
+      <section class="cohort-view__section" [class.is-empty]="!cohort()?.purpose">
+        <h3>Purpose</h3>
+        <p>{{ cohort()?.purpose || 'No purpose configured.' }}</p>
+      </section>
+
+      <section class="cohort-view__section" [class.is-empty]="!cohort()?.copyright">
+        <h3>Copyright</h3>
+        <p>{{ cohort()?.copyright || 'No copyright text configured.' }}</p>
+      </section>
+
+      <section class="cohort-view__section" [class.is-empty]="!cohort()?.criteria?.length">
+        <h3>Eligibility criteria</h3>
+        @if (cohort()?.criteria?.length) {
+          <div class="criterion-summary-list">
+            @for (criterion of cohort()?.criteria; track $index) {
+              <div class="criterion-summary">
+                <strong>{{ criterion.type }}</strong>
+                <span>{{ criterion.variableRole }}</span>
+                <span>{{ criterion.ontologyId }} / {{ criterion.dataTypeId }}</span>
+                @if (criterion.operator?.length) {
+                  <span>{{ criterion.operator![0].operator }} {{ criterion.operator![0].value }}</span>
+                }
+                @if (criterion.description) {
+                  <p>{{ criterion.description }}</p>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p>No inclusion or exclusion criteria configured.</p>
+        }
+      </section>
+    </div>
+  }
+</lib-page-wrapper>

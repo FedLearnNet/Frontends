@@ -1,0 +1,66 @@
+<div class="statistics">
+  <h2>{{ 'MENU.STATISTICS_REVIEW' | translate }}</h2>
+
+  @if (error) {
+    <lib-error-card>
+      {{ error }}
+    </lib-error-card>
+  }
+
+  <mat-table [dataSource]="requests" class="mat-elevation-z0" [class.is-x-small-screen]="isXSmallScreen">
+    <ng-container matColumnDef="query">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">{{ 'GRID.QUERY' | translate }}:</span>
+        }
+        <span>#{{ element.queryId }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="requestedData">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.REQUESTED_DATA' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element" class="requested-data">
+        @if (isXSmallScreen) {
+          <span class="column-name">{{ 'GRID.REQUESTED_DATA' | translate }}:</span>
+        }
+        <span>
+          @for (cohort of getRequestCohorts(element); track cohort.id) {
+            <div class="col-entry-padding">
+              {{ cohort.name }}
+            </div>
+          } @empty {
+            <div class="col-entry-padding">
+              {{ 'EMPTY_VALUE' | translate }}
+            </div>
+          }
+          <div class="summary">
+            {{ (element.patientIds?.length ?? 0) + ' ' + ('SAMPLES' | translate) }}
+          </div>
+        </span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.DATE' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">{{ 'GRID.DATE' | translate }}:</span>
+        }
+        <span>{{ element.createdAt | date }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns" />
+    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="openStatisticsRequestModal(row.id)" />
+  </mat-table>
+
+  <mat-paginator
+    [length]="resultsLength"
+    [pageSize]="currentPageSize"
+    aria-label="Select page of statistics review results" />
+
+  @if (isLoadingResults) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+</div>

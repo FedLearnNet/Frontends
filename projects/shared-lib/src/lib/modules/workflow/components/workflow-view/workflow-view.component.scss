@@ -1,0 +1,60 @@
+@use "../flow-common";
+
+:host {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  max-height: calc(100vh - 83px);
+}
+
+::ng-deep f-flow {
+  @include flow-common.connection;
+}
+
+.f-selected {
+  // border-left: #7a7a7a 3px solid;
+  //  border-right: #7a7a7a 3px solid;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #a8adbd;
+}
+
+
+.f-connections-dragging {
+  ::ng-deep {
+    .f-selected {
+      .f-node-input {
+        background-color: #C5221F !important;
+      }
+    }
+
+    .f-node-input {
+      background-color: #1E8E3E;
+
+      &:not(.f-connector-connectable) {
+        background-color: #AF6000;
+      }
+    }
+  }
+}
+
+.workflow-overlay {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  ::ng-deep {
+    .wn-card {
+      width: 400px;
+    }
+  }
+}
+
+.error-panel {
+  z-index: 99;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+}

@@ -1,0 +1,50 @@
+@if (showDownloadBtn()) {
+  <button mat-raised-button
+          (click)="downloadOutput()">
+    <mat-icon>zip</mat-icon>
+    {{ 'BUTTON.DOWNLOAD_OUTPUT' | translate }}
+  </button>
+}
+
+<div class="outputs">
+  <div class="output-card">
+    @for (param of getOutputNames(); track param) {
+      <div class="output">
+        <h4 class="output-title">
+          {{ param }}
+        </h4>
+        <lib-file-content [fileContent]="getFileContent(param)" [name]="param"></lib-file-content>
+      </div>
+    }
+
+    @for (outputFile of outputFiles(); track $index) {
+      <div class="output">
+        <div class="output-title-wrapper">
+          <h4 class="output-title">
+            {{ outputFile.outputName }}
+          </h4>
+          <button mat-raised-button (click)="openDetailDialog(outputFile.file)">
+            <mat-icon>expand_content</mat-icon>
+            Open
+          </button>
+          @if (showAnalyzeBtn()) {
+            <button mat-raised-button (click)="clickAnalyze(outputFile)">
+              <mat-icon>online_prediction</mat-icon>
+              Analyze
+            </button>
+          }
+        </div>
+        <lib-file-detail-card [file]="outputFile.file"/>
+      </div>
+    }
+
+    @for (viz of visualisation(); track $index) {
+      <lib-app-run-output-visualization [appOutputVisualisations]="viz"></lib-app-run-output-visualization>
+    }
+
+  </div>
+
+  @if (getOutputNames().length === 0 && outputFiles()?.length === 0) {
+    <p class="no-output">{{ 'NO_OUTPUT' | translate }}</p>
+  }
+</div>

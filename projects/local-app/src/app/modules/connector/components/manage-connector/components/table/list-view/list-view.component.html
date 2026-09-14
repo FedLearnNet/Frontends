@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>{{ 'LIST_VIEW_FOR' | translate:{ name: data.name } }}</h2>
+<mat-dialog-content class="list-wrapper">
+  <mat-list role="list">
+
+    @for (item of data.list; track item; let i = $index) {
+      <mat-list-item role="listitem" >
+        <div class="list-item">
+          <strong>{{ i + 1 }}</strong>
+          <span>{{ item }}</span>
+        </div>
+      </mat-list-item>
+    }
+  </mat-list>
+
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button [mat-dialog-close]="true">{{ 'BUTTON.CLOSE' | translate }}</button>
+</mat-dialog-actions>

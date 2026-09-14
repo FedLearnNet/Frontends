@@ -1,0 +1,33 @@
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+  padding: 0 20px 0 30px;
+  margin: 0;
+
+  &.success {
+    background-color: var(--success-bg);
+    color: var(--success-text);
+  }
+
+  &.failed {
+    background-color: var(--failed-bg);
+    color: var(--failed-text);
+  }
+
+  &.warning {
+    background-color: var(--warning-bg);
+    color: var(--warning-text);
+  }
+
+  &.running {
+    background-color: var(--running-bg);
+    color: var(--running-text);
+  }
+
+  &.pending, &.init {
+    background-color: var(--pending-bg);
+    color: var(--pending-text);
+  }
+}

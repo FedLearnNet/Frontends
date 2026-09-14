@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.slug {
+  .slug__field {
+    width: 100%;
+  }
+
+  .slug__prefix {
+    font-size: 12px;
+    opacity: 0.7;
+    padding-right: 6px;
+    white-space: nowrap;
+  }
+
+  ::ng-deep {
+    .mat-form-field-hide-placeholder {
+      .mdc-floating-label {
+        margin-left: 30px;
+      }
+    }
+  }
+
+}

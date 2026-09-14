@@ -1,0 +1,24 @@
+<lib-closeable-dialog-title [title]="'File Info'"></lib-closeable-dialog-title>
+
+<div class="content">
+  <lib-kv label="File name" [value]="data.fileName"></lib-kv>
+  <lib-kv label="Content type" [value]="data.contentType"></lib-kv>
+  <lib-kv label="Size" [value]="data.size"></lib-kv>
+  <lib-kv label="Download URL" [value]="data.downloadUrl"></lib-kv>
+  <lib-kv label="Sheets" [value]="data.uploadInfo.length"></lib-kv>
+  @if (uploadedAt) {
+    <lib-kv label="Last uploaded" [value]="uploadedAt | date:'medium'"></lib-kv>
+  }
+  @if (data.connectorId) {
+    <lib-kv label="Connector ID" [value]="data.connectorId"></lib-kv>
+  }
+  @if (data.cohortId) {
+    <lib-kv label="Cohort ID" [value]="data.cohortId"></lib-kv>
+  }
+
+  <div class="actions">
+    <button mat-raised-button color="primary" type="button" (click)="renewDefaultSelector()">
+      Renew default selector
+    </button>
+  </div>
+</div>

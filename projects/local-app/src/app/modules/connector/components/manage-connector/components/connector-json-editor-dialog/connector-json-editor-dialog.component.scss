@@ -1,0 +1,14 @@
+mat-dialog-content {
+  max-height: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+}
+
+.view-actions {
+  justify-content: flex-end;
+}

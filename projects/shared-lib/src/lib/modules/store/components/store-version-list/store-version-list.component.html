@@ -1,0 +1,78 @@
+<table mat-table [dataSource]="versions()" class="version-table mat-elevation-z0">
+
+  <ng-container matColumnDef="version">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.VERSION' | translate }}</th>
+    <td mat-cell *matCellDef="let element">
+      <div class="version-cell">
+        <span class="version-number">{{ element.version }}</span>
+        @if (element.selected) {
+          <lib-badge [text]="'GRID.CURRENT' | translate" color="GREEN" size="X-SMALL"/>
+        }
+      </div>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="createdAt">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.CREATED_AT' | translate }}</th>
+    <td mat-cell *matCellDef="let element" class="date-cell">
+      <lib-time-badge color="GRAY" format="SHORT" [date]="element.createdAt"></lib-time-badge>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="publishStatus">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.PUBLISH_STATUS' | translate }}</th>
+    <td mat-cell *matCellDef="let element">
+      <lib-publish-badge [type]="element.publishStatus"/>
+    </td>
+  </ng-container>
+
+  @if (detailView()) {
+    <ng-container matColumnDef="imageName">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.SELECTED_MODEL' | translate }}</th>
+      <td mat-cell *matCellDef="let element">
+        <lib-docker-image-tag [imageName]="element.imageName" size="SMALL"/>
+      </td>
+    </ng-container>
+  }
+
+  <ng-container matColumnDef="changelog">
+    <th mat-header-cell *matHeaderCellDef>{{ 'GRID.CHANGELOG' | translate }}</th>
+    <td mat-cell *matCellDef="let element">
+      <span class="changelog-text">{{ element.changelog }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions" stickyEnd>
+    <th mat-header-cell *matHeaderCellDef class="action-col"></th>
+    <td mat-cell *matCellDef="let element" class="action-col">
+      <button mat-icon-button [matMenuTriggerFor]="appTableMenu"
+              [matMenuTriggerData]="{version: element}"
+              aria-label="Version actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+      [class.selected-row]="row.selected"></tr>
+</table>
+
+<mat-menu #appTableMenu="matMenu">
+  <ng-template matMenuContent let-version="version">
+    <button mat-menu-item (click)="openVersion(version)">
+      <mat-icon>fullscreen</mat-icon>
+      <span>{{ 'BUTTON.VIEW' | translate }}</span>
+    </button>
+    @if (!version.selected) {
+      <button mat-menu-item (click)="useSpecificVersion(version)">
+        <mat-icon>check_box</mat-icon>
+        <span>{{ 'BUTTON.SELECT' | translate }}</span>
+      </button>
+    }
+    <button mat-menu-item (click)="showRawJSON(version)">
+      <mat-icon fontSet="material-symbols-outlined">file_json</mat-icon>
+      <span>{{ 'BUTTON.VIEW_JSON' | translate }}</span>
+    </button>
+  </ng-template>
+</mat-menu>

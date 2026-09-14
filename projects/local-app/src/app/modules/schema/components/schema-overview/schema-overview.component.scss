@@ -1,0 +1,28 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.mat-column-name {
+  width: 28%;
+}
+
+.mat-column-description {
+  min-width: 44%;
+}
+
+.num-cell {
+  flex: 0 0 120px !important;
+  width: 120px !important;
+  justify-content: center;
+}
+
+.schema-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #6366f1;
+  }
+}

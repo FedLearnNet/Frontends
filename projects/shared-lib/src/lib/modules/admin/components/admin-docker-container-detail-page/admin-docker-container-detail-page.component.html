@@ -1,0 +1,179 @@
+<section class="detail-page">
+  <lib-hero-navbar
+    color="DARK-TEAL"
+    size="LARGE"
+    eyebrow="Container detail"
+    [title]="containerName()"
+    [border]="false"
+    description="Inspect networking, mounts, labels and live logs for a single running workload.">
+    <button prefix mat-stroked-button type="button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back
+    </button>
+
+    <button suffix mat-stroked-button type="button" (click)="copyToClipboard(container()?.Id, 'Container ID')">
+      <mat-icon>content_copy</mat-icon>
+      Copy ID
+    </button>
+  </lib-hero-navbar>
+
+  @if (loading()) {
+    <lib-skeleton-loader></lib-skeleton-loader>
+  }
+
+  @if (error()) {
+    <lib-error-card [errorObject]="error()"/>
+  }
+
+  @if (container(); as container) {
+    <section class="overview">
+      <mat-card class="summary">
+        <span class="summary__label">State</span>
+        <lib-status-badge [text]="container.State || container.Status"
+                          [type]="dockerStatusToBadgeStatus(container.State || container.Status)"></lib-status-badge>
+      </mat-card>
+
+      <mat-card class="summary">
+        <span class="summary__label">Image</span>
+        <strong>{{ container.Image || '—' }}</strong>
+      </mat-card>
+
+      <mat-card class="summary">
+        <span class="summary__label">Created</span>
+        <lib-time-badge [date]="created(container)"></lib-time-badge>
+      </mat-card>
+
+      <mat-card class="summary">
+        <span class="summary__label">Ports</span>
+        <strong>{{ ports(container) }}</strong>
+      </mat-card>
+    </section>
+
+    <section class="grid">
+      <mat-card class="panel">
+        <h2>Identity</h2>
+
+        <div class="stack">
+          <lib-kv label="Container ID">{{ container.Id }}</lib-kv>
+          <lib-kv label="Name">{{ containerName() }}</lib-kv>
+          <lib-kv label="Image">{{ container.Image || '—' }}</lib-kv>
+          <lib-kv label="Command">{{ container.Command || '—' }}</lib-kv>
+          <lib-kv label="Network mode">{{ container.HostConfig?.NetworkMode || '—' }}</lib-kv>
+          <lib-kv label="Status text">{{ container.Status || '—' }}</lib-kv>
+        </div>
+      </mat-card>
+
+      <mat-card class="panel">
+        <h2>Networks</h2>
+        @if (networks().length) {
+          <div class="stack">
+            @for (network of networks(); track network[0]) {
+              <div class="kv-card">
+                <strong>{{ network[0] }}</strong>
+                <lib-kv label="IP">{{ network[1].IPAddress || '—' }}</lib-kv>
+                <lib-kv label="Gateway">{{ network[1].Gateway || '—' }}</lib-kv>
+                <lib-kv label="MAC">{{ network[1].MacAddress || '—' }}</lib-kv>
+              </div>
+            }
+          </div>
+        } @else {
+          <lib-hint-card>No explicit network attachments reported.</lib-hint-card>
+        }
+      </mat-card>
+
+      <mat-card class="panel">
+        <h2>Mounts</h2>
+        @if (mounts().length) {
+          <div class="stack">
+            @for (mount of mounts(); track mount.Destination + '-' + mount.Source) {
+              <div class="kv-card">
+                <strong>{{ mount.Destination || 'Unknown destination' }}</strong>
+                <lib-kv label="Source">{{ mount.Source || '—' }}</lib-kv>
+                <lib-kv label="Driver">{{ mount.Driver || '—' }}</lib-kv>
+                <lib-kv label="Rights">{{ mount.RW ? 'Read / write' : 'Read only' }}</lib-kv>
+              </div>
+            }
+          </div>
+        } @else {
+          <lib-hint-card>No mounts attached.</lib-hint-card>
+        }
+      </mat-card>
+
+      <mat-card class="panel">
+        <h2>Labels</h2>
+        @if (labels().length) {
+          <div class="stack">
+            @for (label of labels(); track label[0]) {
+              <lib-kv [label]="label[0]">{{ label[1] }}</lib-kv>
+            }
+          </div>
+        } @else {
+          <lib-hint-card>This container exposes no labels.</lib-hint-card>
+        }
+      </mat-card>
+
+      <mat-card class="panel panel--danger">
+        <h2>Danger zone</h2>
+        <p>
+          Kill and remove actions are intentionally shown as unavailable until the orchestration relay exposes explicit
+          mutating endpoints.
+        </p>
+        <div class="danger-actions">
+          <button mat-stroked-button type="button" disabled>
+            <mat-icon>cancel</mat-icon>
+            Kill container
+          </button>
+          <button mat-stroked-button type="button" disabled>
+            <mat-icon>delete</mat-icon>
+            Remove container
+          </button>
+        </div>
+      </mat-card>
+
+      <mat-card class="panel panel--logs">
+        <div class="panel__header">
+          <div>
+            <h2>Live logs</h2>
+            <p>Runtime output streamed directly from the relay.</p>
+          </div>
+          @if (isViewingLogs()) {
+            <div class="stream-actions">
+              @if (streaming()) {
+                <button mat-icon-button
+                        [matTooltip]="'Stop current run'"
+                        (click)="stopLogs()"
+                        class="btn--stop"
+                >
+                  <mat-icon>stop_circle</mat-icon>
+                </button>
+              }
+              <lib-sse-refresh-btn [btnText]="undefined"
+                                   [refreshing]="loading()"
+                                   [streaming]="streaming()"
+                                   (clicked)="viewLogs()"/>
+
+            </div>
+          }
+        </div>
+
+        @if (isViewingLogs()) {
+          <lib-raw-log-viewer [rawLogs]="logText()"></lib-raw-log-viewer>
+        } @else {
+          <div class="empty-state">
+            Start the live log stream to inspect runtime output for this container.
+          </div>
+
+          <button mat-flat-button color="primary" type="button" (click)="viewLogs()">
+            <mat-icon>subject</mat-icon>
+            View live logs
+          </button>
+        }
+      </mat-card>
+
+      <mat-card class="panel">
+        <h2>Raw payload</h2>
+        <markdown [clipboard]="true" class="markdown" [data]="rawJson()"/>
+      </mat-card>
+    </section>
+  }
+</section>

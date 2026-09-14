@@ -1,0 +1,46 @@
+<lib-closeable-dialog-title
+  [title]="'DIALOG.CONNECTOR_CREATE_CHOICE.TITLE' | translate"
+  [allowMaximize]="false"
+/>
+
+<mat-dialog-content class="dialog-content">
+  <p class="dialog-intro">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.INTRO' | translate }}</p>
+
+  <div class="choice-grid" role="list">
+    <button
+      type="button"
+      class="choice-card"
+      role="listitem"
+      (click)="choose('create')"
+    >
+      <div class="choice-card__icon choice-card__icon--create">
+        <mat-icon>construction</mat-icon>
+      </div>
+      <div class="choice-card__body">
+        <div class="choice-card__title">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.CREATE_TITLE' | translate }}</div>
+        <div class="choice-card__description">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.CREATE_DESCRIPTION' | translate }}</div>
+      </div>
+      <mat-icon class="choice-card__arrow">arrow_forward</mat-icon>
+    </button>
+
+    <button
+      type="button"
+      class="choice-card"
+      role="listitem"
+      (click)="choose('import')"
+    >
+      <div class="choice-card__icon choice-card__icon--import">
+        <mat-icon>upload_file</mat-icon>
+      </div>
+      <div class="choice-card__body">
+        <div class="choice-card__title">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.IMPORT_TITLE' | translate }}</div>
+        <div class="choice-card__description">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.IMPORT_DESCRIPTION' | translate }}</div>
+      </div>
+      <mat-icon class="choice-card__arrow">arrow_forward</mat-icon>
+    </button>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions" align="end">
+  <lib-btn type="CANCEL" variant="SECONDARY" (clicked)="cancel()" />
+</mat-dialog-actions>

@@ -1,0 +1,95 @@
+<div class="filter-content">
+  <div class="filter-header">
+    <h3>{{ 'GRID.FILTER' | translate }}</h3>
+
+    @if (isMobile()) {
+      <button mat-icon-button (click)="toggleMobileFilter()">
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </div>
+
+  <mat-form-field class="full-width">
+    <mat-label>{{ 'GRID.SEARCH' | translate }}</mat-label>
+    <input
+      matInput
+      [placeholder]="('GRID.SEARCH' | translate) + '...'"
+      [(ngModel)]="searchQuery"
+      (ngModelChange)="onFilterChange()"
+    />
+
+    @if (searchQuery()) {
+      <button
+        matSuffix
+        mat-icon-button
+        aria-label="Clear"
+        (click)="clearSearchQuery()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+  @if (this.needsFilterAppTypes()) {
+    <div class="filter-section">
+      <h4>{{ 'GRID.APP_TYPE' | translate }}</h4>
+      @for (appType of appTypes(); track appType) {
+        <mat-checkbox
+          [checked]="appType.checked"
+          (change)="toggleAppType(appType)"
+          [disabled]="!(storeConfig()?.allowFilterChange?.appType ?? true)"
+        >
+          {{ appType.name }}
+        </mat-checkbox>
+      }
+    </div>
+    <mat-divider/>
+  }
+
+  <div class="filter-section">
+    <h4>{{ 'GRID.PRIVACY_TECHNIQUE' | translate }}</h4>
+    @for (technique of privacyTechniques(); track technique) {
+      <mat-checkbox
+        [checked]="technique.checked"
+        (change)="togglePrivacyTechnique(technique)"
+      >
+        {{ technique.name }}
+      </mat-checkbox>
+    }
+  </div>
+
+  <mat-divider/>
+
+  <div class="filter-section">
+    <h4>{{ 'GRID.MINIMUM_RATING' | translate }}</h4>
+    <mat-radio-group
+      [ngModel]="selectedRating()"
+      (ngModelChange)="selectedRating.set($event)"
+    >
+      <mat-radio-button value="showAll">
+        {{ 'GRID.SHOW_ALL' | translate }}
+      </mat-radio-button>
+
+      @for (rating of ratings(); track rating) {
+        <div class="rating-option">
+          <mat-radio-button [value]="rating">
+            @for (item of stars(rating); let i = $index; track i) {
+              <mat-icon>star</mat-icon>
+            }
+          </mat-radio-button>
+        </div>
+      }
+    </mat-radio-group>
+  </div>
+
+  <mat-divider/>
+
+  <div class="filter-section">
+    <h4>{{ 'GRID.UNCERTIFIED_APPS' | translate }}</h4>
+    <mat-checkbox
+      [ngModel]="showUncertified()"
+      (ngModelChange)="showUncertified.set($event)"
+    >
+      {{ 'SHOW_UNCERTIFIED_APPS' | translate }}
+    </mat-checkbox>
+  </div>
+</div>

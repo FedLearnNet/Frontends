@@ -1,0 +1,29 @@
+.run-mode-title {
+  font-size: 25px;
+  margin-top: 10px;
+}
+
+.run-mode-radio {
+  display: block;
+  margin: 20px 0px;
+
+  .mdc-form-field {
+    align-items: flex-start;
+  }
+
+  &-label {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &-group {
+
+  }
+
+  .warning {
+    font-size: 12px;
+    margin-top: 5px;
+  }
+}
+
+

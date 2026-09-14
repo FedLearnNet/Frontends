@@ -1,0 +1,15 @@
+<div class="content">
+  <div class="row">
+    <strong>#
+      @if (id()) {
+        {{ id() }}
+      } @else {
+        {{ query().id }}
+      }
+    </strong>
+    <p class="ts">{{ query().createdAt | date }}</p>
+  </div>
+  <div class="meta">
+    <p>{{ queryString() }}</p>
+  </div>
+</div>

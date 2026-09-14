@@ -1,0 +1,15 @@
+.chat__list {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 0 10px;
+}
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-top: 10px;
+  max-height: calc(100% - 60px);
+  height: 100%;
+}

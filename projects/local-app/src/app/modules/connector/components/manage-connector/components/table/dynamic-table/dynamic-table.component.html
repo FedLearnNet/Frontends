@@ -1,0 +1,46 @@
+<table mat-table [dataSource]="dataSource"
+       [class.hideDeleted]="hideDeleted()"
+>
+
+  @for (column of columns(); track column; let i = $index) {
+    <ng-container [matColumnDef]="column">
+      <th mat-header-cell
+          [class.deleted]="isDeleted(i)"
+          *matHeaderCellDef (click)="headerClick(column, i)">
+        <div class="element-header-el">
+          {{ getDisplayedName(i) }}
+          @if (headerAction()) {
+            <mat-icon class="element-header-el-edit">edit</mat-icon>
+          }
+          @if (hasCalledColumns(column)) {
+            <mat-icon>transform</mat-icon>
+          }
+        </div>
+      </th>
+      <td mat-cell
+          [class.deleted]="isDeleted(i)"
+          *matCellDef="let element">
+        @if (isList(column, element)) {
+          <div class="list-view-btn">
+            <span>
+              {{ getValue(column, element) }}
+            </span>
+            <button (click)="openArrayDialog(column, element)" mat-icon-button>
+              <mat-icon>view_array</mat-icon>
+            </button>
+          </div>
+        } @else {
+          {{ getValue(column, element) }}
+        }
+      </td>
+    </ng-container>
+  }
+
+  <tr class="element-header" mat-header-row *matHeaderRowDef="getColumns()"></tr>
+  <tr class="element-row" mat-row *matRowDef="let row; columns: getColumns();"></tr>
+</table>
+@if (loading()) {
+  <lib-skeleton-loader [showHeader]="false"
+                       [tableCols]="columns().length"
+                       variant="table"></lib-skeleton-loader>
+}

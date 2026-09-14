@@ -1,0 +1,61 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="getDialogTitle()" />
+
+<mat-dialog-content class="export-dialog">
+  <div class="layout" [class.layout--single]="!isCohortExport()">
+    <section class="layout__config">
+      <lib-data-export-config
+        [(config)]="exportConfig"
+        [allowAppBased]="isCohortExport()"
+        [showPatientFilter]="isCohortExport()"
+        [patientOptions]="patientOptions()"
+        [patientOptionsTruncated]="patientOptionsTruncated()"></lib-data-export-config>
+    </section>
+
+    @if (isCohortExport()) {
+      <aside class="exports" aria-label="App exports">
+        <header class="exports__header">
+          <mat-icon class="exports__header-icon">widgets</mat-icon>
+          <h3 class="exports__title">App exports</h3>
+          <span class="spacer"></span>
+          <lib-sse-refresh-btn [streaming]="isRunning()" [refreshing]="historyLoading()" btnText=""
+                               (clicked)="loadHistory()"/>
+        </header>
+
+        @if (hasRun()) {
+          <lib-app-export-run-card
+            [runId]="runId()"
+            [status]="runStatus()"
+            [progress]="runProgress()"
+            [error]="runError()"
+            [logs]="runLogs()"
+            [outputs]="runOutputs()"
+            [startedAt]="runStartedAt()"
+            [endedAt]="runEndedAt()"
+            [running]="isRunning()"
+            [downloadReady]="downloadReady()"
+            [downloading]="downloadingRunId() !== null && downloadingRunId() === runId()"
+            (download)="downloadRun(runId())"/>
+        } @else {
+          <lib-empty-state icon="insights" title="Run an export app"
+                           subtitle="Choose Export app as export type, pick an app and press Export. Its progress shows up here."
+                           size="SMALL" [bordered]="true"/>
+        }
+
+        <section class="exports__history">
+          <h4 class="exports__subtitle">Previous exports</h4>
+          <lib-app-export-history
+            [runs]="history()"
+            [loading]="historyLoading()"
+            [error]="historyError()"
+            [downloadingRunId]="downloadingRunId()"
+            (download)="downloadRun($event)"/>
+        </section>
+      </aside>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <lib-btn type="EXPORT" [disabled]="!canExport()" [loading]="isRunning()" (clicked)="onExport()"/>
+</mat-dialog-actions>

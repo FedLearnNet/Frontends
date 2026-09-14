@@ -1,0 +1,108 @@
+@if (!hideToolbar()) {
+  <lib-header
+    [title]="'MENU.STORE_GRAPH' | translate"
+    [description]="graphSubtitle()"
+    [enableSkeleton]="isLoading()"
+    [mainGap]="false">
+    <div suffix class="toolbar-actions">
+      <button type="button" class="btn" (click)="fit()">Fit</button>
+      <button type="button" class="btn" (click)="toggleLabels()">
+        @if (showLabels()) {
+          Labels: On
+        } @else {
+          Labels: Off
+        }
+      </button>
+      <button type="button" class="btn" (click)="togglePhysics()">
+        @if (useForce()) {
+          Layout: Force
+        } @else {
+          Layout: Circle
+        }
+      </button>
+      <button type="button" class="btn" (click)="toggleEdgeDetails()">
+        @if (showEdgeDetails()) {
+          Edges: Details
+        } @else {
+          Edges: Score
+        }
+      </button>
+    </div>
+  </lib-header>
+}
+@if (graph(); as g) {
+  <lib-page-wrapper
+    [isLoading]="isLoading()"
+    [error]="error()"
+    [isEmpty]="!g.nodes.length"
+  >
+    <div echarts
+         class="chart"
+         [loading]="false"
+         [options]="option()"
+         (chartMouseOver)="onHover($event)"
+         (chartMouseOut)="clearHover()"
+         (chartInit)="onChartInit($event)">
+    </div>
+
+    @if (hoveredEdge(); as e) {
+      <div
+        class="hover-card edge-card"
+        [style.left.px]="(hoverPos()?.x ?? 0)  + 12"
+        [style.top.px]="(hoverPos()?.y ?? 0)  + 12"
+      >
+        <div class="edge-card__head">
+          <div class="edge-card__title">
+            {{ nodeName(e.fromAppId) }} <span class="edge-card__arrow">→</span> {{ nodeName(e.toAppId) }}
+          </div>
+          <div class="edge-card__meta">
+            <lib-badge [text]="'Matches: ' + e.matches?.length" color="GREEN" size="X-SMALL"></lib-badge>
+          </div>
+        </div>
+
+        @if (e.matches?.length) {
+          <div class="edge-card__list">
+            @for (m of e.matches!.slice(0, 5); track $index) {
+              <div class="match-row">
+                <div class="match-row__vars">
+                  <lib-badge [text]="m.outputVariable + ' (' + m.outputType +')'" color="GRAY"
+                             size="X-SMALL"></lib-badge>
+                  <span class="muted">→</span>
+                  <lib-badge [text]="m.inputVariable  + ' (' + m.inputType +')'" color="GRAY"
+                             size="X-SMALL"></lib-badge>
+                  @if (m.reason) {
+                    <span class="spacer"></span>
+                    <lib-badge [text]="m.reason" color="GREEN" size="X-SMALL"></lib-badge>
+                  }
+                </div>
+
+
+              </div>
+              @if (!$last) {
+                <mat-divider></mat-divider>
+              }
+            }
+
+            @if ((e.matches?.length ?? 0) > 5) {
+              <div class="edge-card__more muted">
+                +{{ (e.matches?.length ?? 0) - 5 }} more …
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+    @if (hoveredNode(); as node) {
+
+      <div
+        class="hover-card"
+        [style.left.px]="(hoverPos()?.x ?? 0)  + 12"
+        [style.top.px]="(hoverPos()?.y ?? 0)  + 12"
+      >
+        <lib-store-card [linkToShop]="false"
+                        [storeElement]="{app: node}"
+                        size="small" class="store-hint"></lib-store-card>
+      </div>
+    }
+  </lib-page-wrapper>
+}

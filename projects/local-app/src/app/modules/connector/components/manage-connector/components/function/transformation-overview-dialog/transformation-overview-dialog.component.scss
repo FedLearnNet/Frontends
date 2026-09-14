@@ -1,0 +1,299 @@
+:host {
+  display: block;
+}
+
+.overview-content {
+  padding: 4px 24px 8px;
+  max-height: 72vh;
+}
+
+.overview-intro {
+  display: block;
+  margin: 4px 0 18px;
+}
+
+/* ---------- Summary ---------- */
+.summary-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  lib-value-card {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}
+
+/* ---------- Legend ---------- */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
+  font-size: 0.8rem;
+  color: #52607a;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+/* ---------- Matrix ---------- */
+.matrix-scroll {
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.matrix {
+  --col-width: 116px;
+  --row-head-width: 220px;
+  display: grid;
+  /* grid-template-columns is set from the component to size one track per step. */
+  min-width: min-content;
+  gap: 6px;
+}
+
+.matrix-head {
+  display: contents;
+}
+
+.corner {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 12px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8391a8;
+  background: #fff;
+}
+
+.step-head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px 12px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-8px);
+  animation: step-in 0.45s ease forwards;
+
+  /* connector line between step nodes */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 26px;
+    left: -6px;
+    width: calc(100% + 6px);
+    height: 2px;
+    background: linear-gradient(90deg, #d6deec, #c2cee4);
+    z-index: 0;
+  }
+
+  &--source::before {
+    background: none;
+  }
+
+  .step-node {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #eaf0fb;
+    border: 2px solid #cad7ee;
+    color: #3a5da8;
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  &--source .step-node {
+    background: #e9ecf2;
+    border-color: #c7cedb;
+    color: #55617a;
+  }
+
+  .step-text {
+    display: flex;
+    flex-direction: column;
+    max-width: var(--col-width);
+  }
+
+  .step-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1f2f4d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .step-subtitle {
+    font-size: 0.68rem;
+    color: #7c8aa2;
+  }
+}
+
+/* display:contents rows can't animate as a whole, so children animate individually.
+   Dimming is applied per-child via the row modifier classes below. */
+.matrix-row {
+  display: contents;
+
+  &.is-dimmed .row-head,
+  &.is-dimmed .cell { filter: opacity(0.3) grayscale(0.35); }
+
+  &.is-focused .cell.cell--touched { box-shadow: 0 0 0 2px #3a5da8 inset; }
+}
+
+.row-head {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: var(--row-head-width);
+  padding: 0 12px;
+  min-height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #fbfcfe;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+
+  &:hover { background: #eef3fc; }
+
+  .row-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #263a5c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.cell {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  border-radius: 10px;
+  background: #f5f7fb;
+  color: transparent;
+  opacity: 0;
+  transform: scale(0.86);
+  animation: cell-in 0.32s ease forwards;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.cell--touched {
+  animation: cell-in 0.32s ease forwards, cell-pulse 1.8s ease 0.4s;
+}
+
+/* ---------- Treatment colors ---------- */
+.treatment--origin {
+  background: #eef1f6;
+  color: #7b8aa3;
+}
+
+.treatment--passthrough {
+  background: #f5f7fb;
+  color: #c2cbdc;
+}
+
+.treatment--read {
+  background: #e7efff;
+  color: #2f62c4;
+}
+
+.treatment--modified {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+}
+
+.treatment--created {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.treatment--absent {
+  background: repeating-linear-gradient(
+      45deg,
+      #f7f8fa,
+      #f7f8fa 5px,
+      #eef0f4 5px,
+      #eef0f4 10px
+  );
+  color: transparent;
+}
+
+/* legend dots reuse the same palette */
+.legend-dot.treatment--origin { background: #d3dae6; }
+.legend-dot.treatment--passthrough { background: #dfe5f0; }
+.legend-dot.treatment--read { background: #9dbcf0; }
+.legend-dot.treatment--modified { background: var(--warning-text); }
+.legend-dot.treatment--created { background: var(--success-text); }
+
+/* ---------- Actions ---------- */
+.overview-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 24px 20px;
+}
+
+/* ---------- Animations ---------- */
+@keyframes step-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes row-in {
+  to { opacity: 1; }
+}
+
+@keyframes cell-in {
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes cell-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(58, 93, 168, 0); }
+  30% { box-shadow: 0 0 0 4px rgba(58, 93, 168, 0.18); }
+  100% { box-shadow: 0 0 0 0 rgba(58, 93, 168, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step-head,
+  .cell,
+  .matrix-row {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,293 @@
+<lib-header
+  [title]="'FEDERATED.RUN_DETAIL_TITLE' | translate"
+  description="Review your federated test run details"
+  [enableGoBack]="true"
+  (goBack)="back()"
+>
+  @if (run(); as r) {
+    <lib-status-badge suffix [type]="runStatusToBadgeStatus(r.status!)"/>
+  }
+  <button mat-icon-button suffix (click)="toggleExpanded()">
+    @if (expanded()) {
+      <mat-icon fontSet="material-symbols-outlined">collapse_all</mat-icon>
+    } @else {
+      <mat-icon fontSet="material-symbols-outlined">expand_all</mat-icon>
+    }
+  </button>
+</lib-header>
+
+<lib-page-wrapper
+  [isEmpty]="!run()"
+  [error]="run()?.error"
+>
+  <lib-empty-state
+    empty
+    title="Run not found"
+    subtitle="Please reload and try again later"
+  />
+
+  @if (run(); as r) {
+    @if (expanded()) {
+      @if (r.config) {
+
+        <lib-info-grid title="Runtime config">
+          @if (r.config.pollInterval) {
+            <lib-info-item title="pollInterval">
+              {{ r.config.pollInterval }}
+            </lib-info-item>
+          }
+
+          @if (r.config.timeout) {
+            <lib-info-item title="timeout">
+              {{ r.config.timeout }}
+            </lib-info-item>
+          }
+
+          @if (r.config.maxPolls) {
+            <lib-info-item title="maxPolls">
+              {{ r.config.maxPolls }}
+            </lib-info-item>
+          }
+        </lib-info-grid>
+      }
+    }
+
+    <mat-tab-group>
+      <mat-tab [label]="('FEDERATED.TAB_PARTICIPANTS' | translate)">
+        <div class="fed-detail__participants">
+          @if (app(); as app) {
+            @for (p of participants(); track p.participantId) {
+              <app-app-run-federated-test-detail-participant-card
+                [participant]="p"
+                [app]="app"
+                [run]="r"
+              />
+            } @empty {
+              <p class="fed-detail__empty">
+                {{ 'FEDERATED.NO_PARTICIPANTS' | translate }}
+              </p>
+            }
+          }
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="('FEDERATED.TAB_MESSAGE_FLOW' | translate) + ' (' + roundMessages().length + ')'">
+        <div class="fed-detail__messages">
+          <div class="fed-detail__message-toolbar">
+            <mat-form-field
+              class="fed-detail__search"
+              appearance="outline"
+              subscriptSizing="dynamic"
+            >
+              <mat-icon matPrefix>search</mat-icon>
+
+              <input
+                matInput
+                type="text"
+                [value]="searchTerm()"
+                placeholder="Search messages..."
+                (input)="setSearchTerm($any($event.target).value)"
+              />
+
+              @if (searchTerm()) {
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  aria-label="Clear search"
+                  (click)="setSearchTerm('')"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+
+            <div class="fed-detail__toolbar-main">
+              <div class="fed-detail__toolbar-row">
+                <mat-form-field
+                  class="fed-detail__round-filter"
+                  appearance="outline"
+                  subscriptSizing="dynamic"
+                >
+                  <mat-label>Round</mat-label>
+
+                  <input
+                    matInput
+                    type="number"
+                    min="1"
+                    [value]="selectedRound() ?? ''"
+                    placeholder="All rounds"
+                    (input)="setRoundFilterFromInput($event)"
+                  />
+
+                  @if (selectedRound() !== null) {
+                    <button
+                      mat-icon-button
+                      matSuffix
+                      type="button"
+                      aria-label="Clear round filter"
+                      (click)="setRoundFilter(null)"
+                    >
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  }
+                </mat-form-field>
+
+                <div class="fed-detail__filter-group">
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="fed-detail__filter-button"
+                    [class.is-active]="selectedDirection() === 'ALL'"
+                    (click)="setDirectionFilter('ALL')"
+                  >
+                    All
+                  </button>
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="fed-detail__filter-button"
+                    [class.is-active]="selectedDirection() === 'SEND'"
+                    (click)="setDirectionFilter('SEND')"
+                  >
+                    <mat-icon>arrow_upward</mat-icon>
+                    Send
+                  </button>
+
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    class="fed-detail__filter-button"
+                    [class.is-active]="selectedDirection() === 'RECEIVE'"
+                    (click)="setDirectionFilter('RECEIVE')"
+                  >
+                    <mat-icon>arrow_downward</mat-icon>
+                    Recv
+                  </button>
+                </div>
+
+                <div class="fed-detail__message-count">
+                  {{ filteredMessages().length }} messages
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fed-detail__table-card">
+            <table
+              mat-table
+              matSort
+              [dataSource]="messagesDataSource"
+              class="fed-detail__table"
+            >
+              <ng-container matColumnDef="round">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ 'FEDERATED.ROUND' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  {{ m.round ?? '-' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="direction">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'FEDERATED.DIRECTION' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  @if (m.direction === 'SEND') {
+                    <lib-badge color="GREEN" [text]="m.direction" iconName="arrow_upward"/>
+                  } @else {
+                    <lib-badge color="BLUE" [text]="m.direction" iconName="arrow_downward"/>
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="from">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ 'FEDERATED.FROM' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  {{ m.fromParticipant ?? '-' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="to">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ 'FEDERATED.TO' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  {{ m.toParticipant ?? '-' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="communicationId">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ 'FEDERATED.COMM_ID' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  <code>{{ m.communicationId }}</code>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="preview">
+                <th mat-header-cell *matHeaderCellDef>
+                  {{ 'FEDERATED.PAYLOAD_PREVIEW' | translate }}
+                </th>
+                <td
+                  mat-cell
+                  *matCellDef="let m"
+                  class="fed-detail__preview"
+                  (click)="showPayloadDetail(m)"
+                >
+                  {{ m.payloadPreview }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="time">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>
+                  {{ 'GRID.START_TIME' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let m">
+                  <lib-time-badge
+                    [matTooltip]="m.createdAt | date: 'HH:mm:ss'"
+                    [dateTo]="m.createdAt"
+                    [date]="r.createdAt"
+                    [calcDuration]="true"
+                  />
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="messageColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: messageColumns"></tr>
+            </table>
+
+            @if (filteredMessages().length === 0) {
+              <lib-empty-state
+                [title]="'FEDERATED.NO_MESSAGES' | translate"
+                subtitle="No messages match the current filters"
+              />
+            }
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab [label]="('FEDERATED.TAB_RESULTS' | translate)">
+        <div class="fed-detail__results">
+          @if (run()?.outputData; as output) {
+            <lib-app-run-output
+              [appId]="r.federatedAppId!"
+              [outputData]="output"
+              [toolConfig]="toolConfig()"
+              [runId]="r.id"
+              [runType]="RunType.FEDERATED_RUN"></lib-app-run-output>
+          } @else {
+            <lib-empty-state
+              [title]="'FEDERATED.NO_RESULTS' | translate"
+              subtitle="Results will appear here once the federated run completes"
+            />
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</lib-page-wrapper>

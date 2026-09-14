@@ -1,0 +1,139 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+                            [title]="'LEARNING_REQUEST_SELECTION' | translate"/>
+<mat-dialog-content class="content">
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Overview">
+      <div class="content-wrapper">
+        <lib-info-grid title="Name/Description">
+          <div class="full-width">
+            <p>{{ project.name || 'No name provided.' }}</p>
+            <mat-divider/>
+            <p class="description-text">
+              {{ project.description || 'No description provided.' }}
+            </p>
+          </div>
+        </lib-info-grid>
+
+        <lib-info-grid title="Details">
+          <lib-info-item title="Requested cohorts">
+            <lib-status-badge [type]="'INIT'" size="SMALL"
+                              [text]="'' + cohorts.length"
+                              [animate]="true"/>
+          </lib-info-item>
+          <lib-info-item title="Requested patients">
+            <lib-status-badge [type]="'INIT'" size="SMALL"
+                              [text]="'' + data.request.requestPatients.length"
+                              [animate]="true"/>
+          </lib-info-item>
+          <lib-info-item title="Requested At">
+            <lib-time-badge [date]="project.createdAt"/>
+          </lib-info-item>
+          <lib-info-item title="Aggregator running on">
+            {{ aggregatorLocation }}
+          </lib-info-item>
+          <lib-info-item title="Public Model">
+            @if (data.request.modelCanBePublic) {
+              <lib-badge color="GREEN" [text]="'Yes'"/>
+            } @else {
+              <lib-badge color="RED" [text]="'Yes'"/>
+            }
+          </lib-info-item>
+        </lib-info-grid>
+      </div>
+      <div class="filter-wrapper">
+
+        <mat-form-field class="filter-wrapper--search">
+          <mat-label>{{ 'GRID.SEARCH' | translate }}</mat-label>
+          <input matInput (keyup)="applySearch($event)"
+                 placeholder="term">
+        </mat-form-field>
+        <div class="filter-wrapper--filter">
+          <p>Filter</p>
+          <mat-chip-listbox>
+            @for (filter of cohorts; track filter) {
+              <mat-chip-option (selectionChange)="applyFilter($event, $index)"
+              >{{ filter }} ({{ getSelectedPatientsPerCoHort(filter) }})
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+          <button mat-raised-button (click)="clearFilters()">{{ 'BUTTON.CLEAR' | translate }}</button>
+        </div>
+      </div>
+
+      <mat-table [dataSource]="dataSource" class="mat-elevation-z4">
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef [ngClass]="'mat-column-actions-' + screenSize">
+            <mat-checkbox (change)="$event ? onSelectAll() : null"
+                          color="primary"
+                          [checked]="selectedPatients.hasValue() && isAllSelected()"
+                          [indeterminate]="selectedPatients.hasValue() && !isAllSelected()"
+                          [disabled]="patients.length === 0"/>
+          </mat-header-cell>
+          <mat-cell *matCellDef="let element" [ngClass]="'mat-column-actions-' + screenSize">
+            <div>
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            color="primary"
+                            [checked]="selectedPatients.isSelected(element)"
+                            (change)="onToggleSelection(element);"/>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.COHORT_NAME' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.cohort }}</mat-cell>
+        </ng-container>
+
+        <ng-container matColumnDef="patientId">
+          <mat-header-cell *matHeaderCellDef>{{ 'GRID.PATIENT_ID' | translate }}</mat-header-cell>
+          <mat-cell *matCellDef="let element">{{ element.externalPatientId }}</mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"/>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"/>
+      </mat-table>
+    </mat-tab>
+    <mat-tab label="Selected Data">
+      <app-training-used-data [flProject]="project"/>
+    </mat-tab>
+    <mat-tab [label]="('FL_PROJECT.WORKFLOW' | translate)">
+      @if (selectedWorkflow(); as wf) {
+        <lib-workflow-readonly-view
+          class="detail"
+          [workflow]="wf!"
+          (selectNode)="showDetail($event)">
+        </lib-workflow-readonly-view>
+      }
+      @if (selectedWorkflowLoading()) {
+        <lib-skeleton-loader/>
+      }
+    </mat-tab>
+  </mat-tab-group>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.request.status === TrainingStatusPending) {
+
+
+    <button mat-raised-button color="warn" type="submit" (click)="onReject()">{{ 'BUTTON.REJECT' | translate }}</button>
+    <span class="spacer"></span>
+    @if (
+      data.request.modelCanBePublic !== false ||
+      data.request.modelNeedToBePublic !== false
+    ) {
+      <!-- !== as a safety check -->
+      <!-- if either of them isn't set we go with the public option just to be sure -->
+      <!-- e.g. if modelCanBePublic is false, but modelNeedToBePublic is not set -->
+      <!-- we wouldn't know whether maybe the model needs to be public -->
+      <!-- just to be safe we go with the public option -->
+      <button mat-raised-button color="primary" type="submit" (click)="onAccept(true)" [disabled]="!selectedPatients.hasValue()">
+        {{ 'BUTTON.ACCEPT_AND_PUBLIC' | translate }}
+      </button>
+    } @else {
+      <button mat-raised-button color="primary" type="submit" (click)="onAccept(false)" [disabled]="!selectedPatients.hasValue()">
+        {{ 'BUTTON.ACCEPT_AND_PRIVATE' | translate }}
+      </button>
+    }
+  }
+</mat-dialog-actions>

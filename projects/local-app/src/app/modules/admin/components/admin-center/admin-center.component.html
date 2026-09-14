@@ -1,0 +1,91 @@
+<lib-admin-center
+  title="Clinical Admin"
+  subtitle="Operate shared runtime infrastructure, inspect orchestrated workloads and diagnose platform execution from a single admin surface."
+  [tiles]="tiles()"
+  [actionUrl]="keycloakUrl"
+  actionLabel="Open Keycloak admin"
+  actionIcon="key"/>
+
+<section class="global-auth-section">
+  <lib-header
+    title="Global service connection"
+    description="Authenticate this local node against the global realm and monitor the federated WebSocket.">
+    <div suffix class="global-auth-badges">
+      @if (websocketStatus() !== 'UP') {
+        <lib-badge
+          [text]="credentialsBadgeText()"
+          [color]="credentialsBadgeColor()"
+          iconName="person"/>
+        <lib-badge
+          [text]="tokenBadgeText()"
+          [color]="tokenBadgeColor()"
+          iconName="vpn_key"/>
+      }
+      <lib-badge
+        [text]="websocketBadgeText()"
+        [color]="websocketBadgeColor()"
+        [pulseCircle]="websocketStatus() === 'UP'"
+        iconName="wifi"/>
+    </div>
+  </lib-header>
+
+  <lib-page-wrapper
+    [error]="globalAuthError()"
+    [isLoading]="isLoadingGlobalAuth()"
+    [skeletonOnLoading]="true"
+    [margin]="true">
+
+    <div class="global-auth-panel">
+      <div class="global-auth-panel__meta">
+        <lib-kv label="Runtime login" [value]="runtimeLoginActive() ? 'Active' : 'Not active'"/>
+      </div>
+      @if (websocketStatus() !== 'UP') {
+        <form class="global-auth-form" [formGroup]="globalAuthForm" (ngSubmit)="loginToGlobal()">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Global username</mat-label>
+            <input matInput formControlName="username" autocomplete="username">
+            @if (globalAuthForm.controls.username.touched && globalAuthForm.controls.username.invalid) {
+              <mat-hint class="error">Username is required</mat-hint>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Global password</mat-label>
+            <input matInput type="password" formControlName="password" autocomplete="current-password">
+            @if (globalAuthForm.controls.password.touched && globalAuthForm.controls.password.invalid) {
+              <mat-hint class="error">Password is required</mat-hint>
+            }
+          </mat-form-field>
+
+          <div class="global-auth-form__actions">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="globalAuthForm.invalid || isSubmittingLogin()">
+              <mat-icon>login</mat-icon>
+              Connect as user
+            </button>
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="clearGlobalLogin()"
+              [disabled]="isSubmittingLogin()">
+              <mat-icon>logout</mat-icon>
+              Clear login
+            </button>
+            <span class="spacer"></span>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="refreshGlobalAuthStatus()"
+              [disabled]="isLoadingGlobalAuth()"
+              aria-label="Refresh global service status">
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  </lib-page-wrapper>
+</section>

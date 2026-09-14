@@ -1,0 +1,53 @@
+<lib-header
+  title="Access management"
+  description="Set which schema properties can be queried by access-controlled workflows."
+  [enableAddBtn]="true"
+  [addBtnLabel]="'BUTTON.SUBMIT' | translate"
+  addBtnIcon="save"
+  (addBtnClick)="onSubmit()">
+</lib-header>
+
+<lib-page-wrapper>
+  <form [formGroup]="queryabilityFormGroup">
+    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="patient-detail-tree">
+
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
+        <div class="name-row">
+          <p>
+            {{ node.name }}
+          </p>
+          <mat-form-field>
+            <mat-label>Queryability</mat-label>
+            <mat-select [formControlName]="node.id">
+              @for (queryabilityOption of queryabilityOptions; track $index) {
+                <mat-option [value]="queryabilityOption.value">
+                  {{ queryabilityOption.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-tree-node>
+
+      <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+        <div class="mat-tree-node">
+          <button mat-icon-button matTreeNodeToggle
+                  [attr.aria-label]="'Toggle ' + node.name">
+            <mat-icon class="mat-icon-rtl-mirror">
+              {{ treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right' }}
+            </mat-icon>
+          </button>
+          <div class="name-row">
+            <p>
+              {{ node.name }}
+            </p>
+          </div>
+        </div>
+        <div [class.patient-detail-tree-invisible]="!treeControl.isExpanded(node)"
+             role="group">
+          <ng-container matTreeNodeOutlet />
+        </div>
+      </mat-nested-tree-node>
+    </mat-tree>
+  </form>
+</lib-page-wrapper>

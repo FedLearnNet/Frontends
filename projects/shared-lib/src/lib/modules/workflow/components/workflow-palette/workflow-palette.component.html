@@ -1,0 +1,51 @@
+@if (showBackBtn()) {
+  <button fExternalItem
+          (click)="routeBack()"
+          [matTooltip]="'Go back'"
+          [fDisabled]="false" [disabled]="false" matIconButton>
+    <mat-icon>arrow_back_ios</mat-icon>
+  </button>
+}
+<button fExternalItem
+        (click)="openShopDialog()"
+        [matTooltip]="'Add Tool'"
+        [fDisabled]="false" [disabled]="false" matIconButton>
+  <mat-icon>add</mat-icon>
+</button>
+
+@if (!isForFederatedLearning()) {
+  <button fExternalItem
+          (click)="addDataset()"
+          [matTooltip]="'Add input datasets'"
+          [fDisabled]="false" [disabled]="false" matIconButton>
+    <mat-icon>dataset</mat-icon>
+  </button>
+}
+
+@if (workflowId()) {
+  <button fExternalItem
+          (click)="openChat()"
+          [matTooltip]="'Ask the AI'"
+          [fDisabled]="false" [disabled]="false" matIconButton>
+    <mat-icon>chat</mat-icon>
+  </button>
+}
+
+@if (workflowId() && !isProduction) {
+  <button fExternalItem
+          (click)="saveWorkflowAsJson()"
+          [matTooltip]="'Save as Json'"
+          [fDisabled]="false" [disabled]="false" matIconButton>
+    <mat-icon fontSet="material-symbols-outlined">file_export</mat-icon>
+  </button>
+}
+
+@if (isValid()) {
+  <button fExternalItem
+          (click)="openPublishDialog()"
+          [matTooltip]="'Publish Workflow to make it accessible to other people'"
+          [fDisabled]="false" [disabled]="false" matIconButton>
+    <mat-icon>publish</mat-icon>
+  </button>
+}
+<!--unpublished-->

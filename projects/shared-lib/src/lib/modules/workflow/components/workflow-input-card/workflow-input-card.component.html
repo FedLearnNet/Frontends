@@ -1,0 +1,56 @@
+<div class="workflow-node-card"
+     [class.larger]="editMode()"
+>
+
+  <span class="ex-order">{{ index() }}</span>
+  <button class="extend-btn" (click)="toggleExtendedMode()">
+    @if (extended()) {
+      <mat-icon>keyboard_arrow_up</mat-icon>
+    } @else {
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    }
+  </button>
+  <div class="card-header">
+    <div class="header-text">
+      <h2 class="app-name">
+        {{ node().type }}
+        <button class="config-btn" (click)="toggleEditMode()">
+          <mat-icon>settings</mat-icon>
+        </button>
+        @if (!isDeleteDisabled()) {
+          <button class="config-btn" (click)="onDelete()">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+      </h2>
+    </div>
+  </div>
+  <div class="card-body">
+    @if (editMode()) {
+      <app-detail-config-element
+        [hideMode]="true"
+        [editMode]="true"
+        [hideDelete]="true"
+        [(inputConfig)]="node"
+        (inputConfigChange)="update()"
+      >
+      </app-detail-config-element>
+    } @else {
+      @if (node(); as node) {
+        @if (node.name) {
+          <p>{{ node.name }}</p>
+        } @else {
+          <lib-badge [color]="'RED'" [text]="'Not setup'"></lib-badge>
+        }
+        @if (extended()) {
+          <span>{{ node.description }}</span>
+        }
+        @if (node.required) {
+          <lib-badge [color]="'RED'" [text]="'Required'"></lib-badge>
+        }
+      }
+
+    }
+
+  </div>
+</div>

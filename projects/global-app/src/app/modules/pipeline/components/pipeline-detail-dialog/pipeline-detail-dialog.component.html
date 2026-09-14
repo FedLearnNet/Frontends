@@ -1,0 +1,6 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  title="Pipeline status" />
+
+@if (data.id) {
+  <app-pipeline-detail [id]="data.id" />
+}

@@ -1,0 +1,20 @@
+<ol class="steps" [attr.aria-label]="ariaLabel()">
+  @for (step of steps(); track step; let i = $index) {
+    <li class="steps__item"
+        [class.steps__item--done]="i < active()"
+        [class.steps__item--active]="i === active() && running() && !failed()"
+        [class.steps__item--failed]="i === active() && failed()"
+        [attr.aria-current]="i === active() ? 'step' : null">
+      <span class="steps__marker">
+        @if (i < active()) {
+          <mat-icon>check</mat-icon>
+        } @else if (i === active() && failed()) {
+          <mat-icon>close</mat-icon>
+        } @else {
+          {{ i + 1 }}
+        }
+      </span>
+      <span class="steps__label">{{ step }}</span>
+    </li>
+  }
+</ol>

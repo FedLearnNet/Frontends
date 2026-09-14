@@ -1,0 +1,110 @@
+<header [class]="className()">
+  @if (enableSkeleton()) {
+    <lib-skeleton-loader></lib-skeleton-loader>
+  } @else {
+    <div class="hero-navbar__main">
+      <div class="hero-navbar__top-row">
+        <div class="hero-navbar__identity">
+          @if (enableGoBack() || showHeading()) {
+            <div class="hero-navbar__heading-row">
+              @if (enableGoBack()) {
+                @if (showGoBackLabel()) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    (click)="onGoBackHandler()"
+                    [attr.aria-label]="goBackAriaLabel()">
+                    <mat-icon>{{ goBackIcon() }}</mat-icon>
+                    <span>{{ goBackLabel() }}</span>
+                  </button>
+                } @else {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    (click)="onGoBackHandler()"
+                    [attr.aria-label]="goBackAriaLabel()">
+                    <mat-icon>{{ goBackIcon() }}</mat-icon>
+                  </button>
+                }
+              }
+
+              <div class="hero-navbar__heading-stack">
+                <div class="hero-navbar__slot hero-navbar__slot--prefix">
+                  <ng-content select="[prefix]"></ng-content>
+                </div>
+
+                @if (showHeading()) {
+                  <div class="hero-navbar__content">
+                    <ng-content select="[title]"></ng-content>
+                    @if (title()) {
+                      <h1 class="hero-navbar__title">{{ title() }}</h1>
+                    }
+
+                    @if (description()) {
+                      <p class="hero-navbar__description">{{ description() }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="hero-navbar__utility">
+          <div class="hero-navbar__slot hero-navbar__slot--suffix">
+            @if (enableAddBtn()) {
+              <lib-btn
+                [label]="addBtnLabel()"
+                [icon]="addBtnIcon()"
+                [attr.aria-label]="addBtnAriaLabel()"
+                type="CUSTOM"
+                variant="RAISED"
+                (clicked)="addBtnClick.emit()"/>
+            }
+            <ng-content select="[suffix]"></ng-content>
+          </div>
+        </div>
+      </div>
+
+      @if (enableSearch()) {
+        <div class="hero-navbar__search-row">
+          <mat-form-field class="hero-navbar__search" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ searchLabel() }}</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              [type]="searchInputType()"
+              [value]="searchValue()"
+              [placeholder]="searchPlaceholder()"
+              [disabled]="searchDisabled()"
+              (input)="handleSearchInput($event)"
+              (keydown)="handleSearchKeydown($event)"/>
+            @if (enableSearchSuffix()) {
+              <span matSuffix class="hero-navbar__search-suffix">
+                <ng-content select="[searchSuffix]"></ng-content>
+              </span>
+            }
+            @if (searchValue()) {
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Clear search"
+                (click)="clearSearch()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+
+            @if (searchHint()) {
+              <mat-hint>{{ searchHint() }}</mat-hint>
+            }
+          </mat-form-field>
+        </div>
+      }
+
+      <div class="hero-navbar__supporting">
+        <ng-content></ng-content>
+      </div>
+    </div>
+  }
+</header>

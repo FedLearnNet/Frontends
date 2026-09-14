@@ -1,0 +1,27 @@
+<div class="dialog">
+  <h2 mat-dialog-title class="dialog--header">
+      {{ confirmButtonData.title }}
+  </h2>
+
+  <div mat-dialog-content class="dialog--content">
+      <p>{{ confirmButtonData.message }}</p>
+      @for (setting of confirmButtonData.settings; track setting) {
+        <mat-checkbox
+            color="primary"
+            [checked]="setting.value"
+            (change)="setting.value = $event.checked"
+        >
+            {{ setting.label }}
+        </mat-checkbox>
+      }
+  </div>
+
+  <div mat-dialog-actions class="dialog--footer">
+      <button mat-raised-button color="secondary" (click)="onDismiss()">
+          {{  confirmButtonData.dismissButtonText }}
+      </button>
+      <button mat-raised-button color="primary" (click)="onConfirm()">
+          {{ confirmButtonData.confirmButtonText }}
+      </button>
+  </div>
+</div>

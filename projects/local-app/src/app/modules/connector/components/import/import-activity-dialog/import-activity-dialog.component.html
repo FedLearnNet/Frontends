@@ -1,0 +1,6 @@
+<lib-closeable-dialog-title title="Import" [allowMaximize]="false"/>
+<mat-dialog-content>
+  @if (activity(); as activity) {
+    <app-import-activity class="is-plain" [activity]="activity"/>
+  }
+</mat-dialog-content>

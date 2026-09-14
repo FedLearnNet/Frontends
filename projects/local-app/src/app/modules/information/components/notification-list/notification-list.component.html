@@ -1,0 +1,135 @@
+<lib-header
+  [title]="'INFORMATION.NOTIFICATIONS' | translate"
+  [description]="'INFORMATION.NOTIFICATIONS_DESCRIPTION' | translate">
+  <div suffix class="header-actions">
+    <lib-btn
+      type="CUSTOM"
+      variant="GHOST"
+      icon="refresh"
+      [label]="'BUTTON.REFRESH' | translate"
+      (clicked)="refresh()"/>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'INFORMATION.STATUS' | translate }}</mat-label>
+      <mat-select [ngModel]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+        @for (s of statusOptions; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ 'INFORMATION.TYPE' | translate }}</mat-label>
+      <mat-select [ngModel]="typeFilter()" (selectionChange)="typeFilter.set($event.value)">
+        @for (t of typeOptions; track t) {
+          <mat-option [value]="t">{{ t }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</lib-header>
+
+
+
+<lib-page-wrapper [isLoading]="loading()"
+                  [error]="error()"
+                  [isEmpty]="!loading() && filtered().length === 0" [skeletonOnLoading]="true">
+
+  <lib-empty-state
+    empty
+    title="No messages available"
+    subtitle="You will see new messages here. Change your filter or wait until new messages arrive."
+  ></lib-empty-state>
+
+  <div class="table-container">
+    <mat-table [dataSource]="filtered()" class="mat-elevation-z0">
+      <ng-container matColumnDef="type">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.TYPE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <lib-badge [color]="typeColor(n.type)" [text]="n.type ?? 'INFO'" size="X-SMALL"/>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="title">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.TITLE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <span class="title-cell" [class.unread]="isUnread(n.status)">{{ n.title }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="message">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.MESSAGE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <span class="message-cell">{{ n.message }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="source">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.SOURCE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <span class="muted">{{ n.sourceService ?? '—' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.DATE' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <span class="muted">{{ n.createdAt | date:'short' }}</span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>{{ 'INFORMATION.STATUS' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n">
+          <lib-badge [color]="statusColor(n.status)" [text]="n.status ?? 'PENDING'" size="X-SMALL"/>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef class="actions-cell">{{ 'GRID.ACTION' | translate }}</mat-header-cell>
+        <mat-cell *matCellDef="let n" class="actions-cell" (click)="$event.stopPropagation()">
+          @if (isUnread(n.status)) {
+            <lib-btn
+              type="CUSTOM"
+              variant="GHOST"
+              [iconOnly]="true"
+              icon="mark_email_read"
+              size="SMALL"
+              [matTooltip]="'INFORMATION.MARK_AS_READ' | translate"
+              (clicked)="markAsRead(n)"/>
+          }
+          @if (n.status !== 'ARCHIVED') {
+            <lib-btn
+              type="CUSTOM"
+              variant="GHOST"
+              [iconOnly]="true"
+              icon="inventory_2"
+              size="SMALL"
+              [matTooltip]="'INFORMATION.ARCHIVE' | translate"
+              (clicked)="archive(n)"/>
+          }
+          <lib-btn
+            type="DELETE"
+            variant="DANGER"
+            [iconOnly]="true"
+            size="SMALL"
+            [matTooltip]="'BUTTON.DELETE' | translate"
+            (clicked)="delete(n)"/>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"/>
+      <mat-row
+        class="clickable-row"
+        [class.row-unread]="isUnread(row.status)"
+        *matRowDef="let row; columns: displayedColumns;"
+        (click)="openDetail(row)"/>
+    </mat-table>
+
+    @if (!loading() && filtered().length === 0) {
+      <div class="empty">{{ 'INFORMATION.NO_NOTIFICATIONS' | translate }}</div>
+    }
+  </div>
+</lib-page-wrapper>

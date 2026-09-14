@@ -1,0 +1,57 @@
+<section class="leave-review">
+  <h2>{{ 'LEAVE_YOUR_REVIEW' | translate }}</h2>
+
+  <lib-store-rating [editMode]="true"
+    [(rating)]="rating" />
+
+  <form class="review-form">
+    <mat-form-field class="full-width">
+      <mat-label>{{ 'MENU.REVIEW' | translate }}</mat-label>
+      <textarea
+        [formControl]="ratingFormControl"
+        matInput
+        [placeholder]="('ADD_YOUR_COMMENT' | translate)"></textarea>
+      @if (ratingFormControl.hasError('required')) {
+        <mat-error>
+          {{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.REVIEW' | translate)} }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </form>
+
+  <button mat-raised-button (click)="saveReview()" [disabled]="ratingFormControl.invalid">
+    {{ 'BUTTON.SAVE' | translate }}
+  </button>
+</section>
+
+<mat-divider />
+
+<section class="reviews-list">
+  <div class="reviews-header">
+    <h3 class="title">{{ currentReviews().length }}  {{ 'REVIEWS' | translate }}</h3>
+  </div>
+
+  @if (isLoading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  @if (!isLoading() && (currentReviews().length === 0)) {
+    <p class="empty">{{ 'NO_REVIEWS_YET' | translate }}</p>
+  }
+
+  @for (review of currentReviews(); track review.id) {
+    @if (!isReviewFromCurrentUser(review)) {
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <lib-store-rating [editMode]="false" [rating]="review.rating" />
+          </mat-card-title>
+          <mat-card-subtitle>{{ review.createdAt | date: 'dd/MM/yyyy' }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ review.reviewText }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</section>

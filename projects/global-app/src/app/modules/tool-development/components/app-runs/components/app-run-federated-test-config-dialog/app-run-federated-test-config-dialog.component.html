@@ -1,0 +1,100 @@
+<div class="dialog-shell">
+  <div class="dialog-header">
+    <div class="dialog-header__icon">
+      <mat-icon>hub</mat-icon>
+    </div>
+
+    <div class="dialog-header__content">
+      <h2 class="dialog-title">{{ title() }}</h2>
+      <p class="dialog-subtitle">{{ subtitle() }}</p>
+    </div>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form class="form-grid" [formGroup]="form">
+      <div class="row">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Participant ID</mat-label>
+          <input
+            matInput
+            formControlName="participantId"
+            placeholder="e.g. clinic-a"
+            autocomplete="off"
+          />
+          @if (participantIdError()) {
+            <mat-error>{{ participantIdError() }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Role</mat-label>
+          <mat-select formControlName="role">
+            <mat-option [value]="FLNetParticipantRole.CLIENT">Client</mat-option>
+            <mat-option [value]="FLNetParticipantRole.AGGREGATOR">Aggregator</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      @if (form.get('role')?.value === FLNetParticipantRole.CLIENT) {
+
+
+        <div class="hyperparams-card">
+          <div class="hyperparams-card__title">Hyperparameters</div>
+          <div class="hyperparams-card__subtitle">
+            Configure participant-specific hyperparameters for this federated node.
+          </div>
+
+          <lib-app-run-hyperparameter
+            [app]="app"
+            [hyperParams]="dynamicHyperparams"
+            (hyperParamsChange)="onHyperParamsChanged($event)"
+            (formsValid)="hyperParamsValid = $event"/>
+        </div>
+
+        @if (dataInputKeys().length > 0) {
+          <div class="hyperparams-card">
+            <div class="hyperparams-card__title">Input files</div>
+            <div class="hyperparams-card__subtitle">
+              Choose local files from the shared data directory for this participant.
+            </div>
+
+            <div class="form-grid">
+              @for (key of dataInputKeys(); track key) {
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>{{ key }}</mat-label>
+                  <input
+                    matInput
+                    [formControl]="getDataControl(key)"
+                    [matAutocomplete]="auto"
+                    placeholder="e.g. iris.csv or nested/folder/file.csv"
+                    autocomplete="off"
+                  />
+                  <mat-autocomplete #auto="matAutocomplete">
+                    @for (option of (filteredOptions[key] | async) ?? []; track option) {
+                      <mat-option [value]="option">{{ option }}</mat-option>
+                    }
+                  </mat-autocomplete>
+                </mat-form-field>
+              }
+            </div>
+          </div>
+        }
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions" align="end">
+    <button mat-stroked-button type="button" class="secondary-btn" (click)="close()">
+      Cancel
+    </button>
+
+    <button
+      mat-flat-button
+      type="button"
+      class="primary-btn"
+      [disabled]="form.invalid || !hyperParamsValid"
+      (click)="save()"
+    >
+      {{ saveLabel() }}
+    </button>
+  </mat-dialog-actions>
+</div>

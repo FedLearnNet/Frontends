@@ -1,0 +1,151 @@
+<div class="dialog">
+  <h1 mat-dialog-title class="dialog--header bold-title">
+    {{ getDialogTitle() }}
+  </h1>
+
+  <mat-divider />
+
+  <mat-dialog-content class="dialog--content">
+
+    <form [formGroup]="permissionForm">
+      <!-- Cohort Field -->
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Cohort</mat-label>
+        <mat-select formControlName="cohort">
+          @for (cohort of cohortSelectOptions; track cohort) {
+            <mat-option [value]="cohort.value">
+              {{ cohort.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ 'GRID.USER' | translate }}</mat-label>
+        <input matInput type="email" formControlName="user" [matTooltip]="('MY_PARTNERS_NAME' | translate)">
+      </mat-form-field>
+
+      <!-- Valid From / Valid Until -->
+      <div class="date-range-row">
+        <mat-form-field appearance="fill" class="half-width">
+          <mat-label>{{ 'GRID.VALID_FROM' | translate }}</mat-label>
+          <input matInput [matDatepicker]="validFromPicker" formControlName="validFrom">
+          <mat-datepicker-toggle matIconSuffix [for]="validFromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #validFromPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="half-width">
+          <mat-label>{{ 'GRID.VALID_UNTIL' | translate }}</mat-label>
+          <input matInput [matDatepicker]="validUntilPicker" formControlName="validUntil">
+          <mat-datepicker-toggle matIconSuffix [for]="validUntilPicker"></mat-datepicker-toggle>
+          <mat-datepicker #validUntilPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Settings Section -->
+      <section class="settings-section full-width" formGroupName="permissions">
+        <h3 class="settings-title">{{ 'GRID.SETTINGS' | translate }}</h3>
+
+        <!-- Is Allowed to Query -->
+
+        <mat-slide-toggle formControlName="isAllowedToQuery" color="primary" class="full-width">
+            {{ 'IS_ALLOWED_TO_QUERY' | translate }}
+        </mat-slide-toggle>
+
+        <!-- Query Retry Time -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'QUERY_RETRY_TIME' | translate }}</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="retryTimeToQuery"
+            min="3"
+            max="10"
+            placeholder="3"
+          />
+          @if (permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('min')
+          || permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('max')) {
+            <mat-error>{{ 'VALIDATION.HAS_TO_BE_BETWEEN' | translate:{ fieldName: ('GRID.QUERY_RETRY_TIME' | translate), value: '3-10' } }}</mat-error>
+          } @else if (permissionForm.controls.permissions.controls.retryTimeToQuery.hasError('required')) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.QUERY_RETRY_TIME' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- Minimum Samples for Querying -->
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'MINIMUM_SAMPLES_FOR_QUERYING' | translate }}</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="querySampleThreshold"
+            min="100"
+          />
+          @if (permissionForm.controls.permissions.controls.querySampleThreshold.hasError('min')
+          || permissionForm.controls.permissions.controls.querySampleThreshold.hasError('max')) {
+            <mat-error>{{ 'VALIDATION.MINIMUM_VALUE' | translate:{ fieldName: ('GRID.MINIMUM_SAMPLES_FOR_QUERYING' | translate), value: 100 } }}</mat-error>
+          } @else if (permissionForm.controls.permissions.controls.querySampleThreshold.hasError('required')) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.MINIMUM_SAMPLES_FOR_QUERYING' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+
+
+        <!-- Automatic Training Access For -->
+        <p>All Tools with internet access need <b>manual</b> approval </p>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'AUTOMATIC_TRAINING_ACCESS_FOR' | translate }}</mat-label>
+          <mat-select formControlName="autoTrainingAccess">
+            <mat-option [value]="AutoTrainingAccess.ALL">{{ 'ALL' | translate }}</mat-option>
+            <mat-option [value]="AutoTrainingAccess.NONE">{{ 'NONE' | translate }}</mat-option>
+            <mat-option [value]="AutoTrainingAccess.CERTIFIED_APPS">{{ 'CERTIFIED_APPS' | translate }}</mat-option>
+          </mat-select>
+          @if (permissionForm.controls.permissions.controls.autoTrainingAccess.hasError('required')) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.AUTOMATIC_TRAINING_ACCESS' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+        <!-- Automatic Statistics Access For -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'AUTOMATIC_STATISTICS_ACCESS_FOR' | translate }}</mat-label>
+          <mat-select formControlName="autoStatisticsAccess">
+            <mat-option [value]="AutoStatisticsAccess.ALL">{{ 'ALL' | translate }}</mat-option>
+            <mat-option [value]="AutoStatisticsAccess.NONE">{{ 'NONE' | translate }}</mat-option>
+          </mat-select>
+          @if (permissionForm.controls.permissions.controls.autoStatisticsAccess.hasError('required')) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.AUTOMATIC_STATISTICS_ACCESS' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+        <!-- Automatic Metrics Access For -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>{{ 'AUTOMATIC_METRICS_ACCESS_FOR' | translate }}</mat-label>
+          <mat-select formControlName="autoMetricsAccess">
+            <mat-option [value]="AutoMetricsAccess.ALL">{{ 'ALL' | translate }}</mat-option>
+            <mat-option [value]="AutoMetricsAccess.NONE">{{ 'NONE' | translate }}</mat-option>
+          </mat-select>
+          @if (permissionForm.controls.permissions.controls.autoMetricsAccess.hasError('required')) {
+            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.AUTOMATIC_METRICS_ACCESS' | translate) } }}</mat-error>
+          }
+        </mat-form-field>
+      </section>
+    </form>
+    <p class="permissive-hint">
+        {{ 'AUTOMATIC_TRAINING_ACCESS_FOR_HINT' | translate }}
+    </p>
+  </mat-dialog-content>
+
+
+  <mat-divider />
+  <mat-dialog-actions class="dialog--footer">
+
+    <button mat-raised-button color="secondary" (click)="onCancel()">
+        {{ 'BUTTON.CANCEL' | translate }}
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      (click)="onSubmit()"
+    >
+      {{ getSubmitButtonLabel() }}
+    </button>
+  </mat-dialog-actions>
+</div>

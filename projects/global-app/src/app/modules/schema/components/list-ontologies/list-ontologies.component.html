@@ -1,0 +1,95 @@
+<lib-header
+  class="header"
+  title="Ontologies"
+  description="Review and manage global ontology nodes"
+  [enableGoBack]="true"
+  [enableSearch]="true"
+  [enableSearchSuffix]="true"
+  [routerOnePathBack]="true"
+  searchLabel="Search ontologies"
+  searchPlaceholder="Name, code, CUI …"
+  [searchValue]="search()"
+  (searchInput)="onSearchChange($event)">
+
+  <button
+    matIconButton
+    searchSuffix
+    class="onto-search-mode-btn"
+    [class.active]="filterMode() === 'list'"
+    [attr.aria-pressed]="filterMode() === 'list'"
+    aria-label="Use list search"
+    (click)="setFilterMode('list')">
+    <mat-icon>list</mat-icon>
+  </button>
+  <button
+    matIconButton
+    searchSuffix
+    class="onto-search-mode-btn"
+    [class.active]="filterMode() === 'rag'"
+    [attr.aria-pressed]="filterMode() === 'rag'"
+    aria-label="Use RAG search"
+    (click)="setFilterMode('rag')">
+    <mat-icon>psychology</mat-icon>
+  </button>
+  <div suffix class="onto-toolbar">
+    @if (filterMode() === 'rag') {
+      <mat-form-field class="onto-toolbar__search-field rag-max-results" appearance="outline">
+        <mat-label>Max results</mat-label>
+        <input matInput type="number" min="1" max="20" [(ngModel)]="maxResults">
+      </mat-form-field>
+    }
+    <lib-btn
+      type="ADD"
+      variant="RAISED"
+      [label]="'BUTTON.ADD_UMLS' | translate"
+      ariaLabel="Add via UMLS"
+      menuAriaLabel="Open add ontology options"
+      [menuTriggerFor]="menuAdd"
+      [routerLink]="['umls']">
+    </lib-btn>
+  </div>
+</lib-header>
+
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="loading()"
+  [isEmpty]="items().length === 0"
+  [skeletonOnLoading]="true"
+>
+  <lib-empty-state
+    empty
+    [title]="'No results found'"
+  ></lib-empty-state>
+
+  <div class="onto-list__items">
+    @for (item of items(); track item.node.id) {
+      <a
+        [routerLink]="[item.node.id]">
+        <app-ontology-card
+          [ontologyNode]="item.node"
+        ></app-ontology-card>
+        @if (item.score) {
+          <span class="rag-score">{{ item.score }}</span>
+        }
+      </a>
+    }
+  </div>
+
+  <mat-paginator
+    class="onto-list__paginator"
+    [length]="totalCount()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [pageSizeOptions]="[5, 10, 25, 50]"
+    (page)="onPageChange($event)"
+    aria-label="Ontology pagination"
+  >
+  </mat-paginator>
+</lib-page-wrapper>
+
+
+<mat-menu #menuAdd="matMenu">
+  <button mat-menu-item (click)="addViaDialog()"
+          [matTooltip]="('BUTTON.ADD_ONTOLOGY_CUSTOM' | translate)">{{ 'BUTTON.ADD_ONTOLOGY_CUSTOM' | translate }}
+  </button>
+</mat-menu>

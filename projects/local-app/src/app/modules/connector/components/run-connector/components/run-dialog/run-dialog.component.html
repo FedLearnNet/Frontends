@@ -1,0 +1,63 @@
+<h2 mat-dialog-title class="run-mode-title">{{ 'DIALOG.RUN_CONNECTOR.TITLE' | translate:{ connectorName:
+  connector().name } }}</h2>
+<mat-divider />
+<mat-dialog-content>
+  <mat-checkbox [checked]="deleteExistingPatients()" [disabled]="dryRun()"
+    (change)="onDeleteExistingChanged($event.checked)" class="run-mode-radio">
+    <div class="run-mode-radio-label">
+      <strong>{{ 'DIALOG.RUN_CONNECTOR.DELETE_EXISTING_PATIETNS' | translate }}</strong>
+      <span>{{ 'DIALOG.RUN_CONNECTOR.DELETE_EXISTING_PATIETNS_DESC' | translate }}</span>
+    </div>
+  </mat-checkbox>
+
+  <mat-divider />
+  <mat-checkbox [checked]="dryRun()" [disabled]="deleteExistingPatients()" (change)="onDryRunChanged($event.checked)"
+    class="run-mode-radio">
+    <div class="run-mode-radio-label">
+      <strong>{{ 'DIALOG.RUN_CONNECTOR.RUN_IN_DRY_MODE' | translate }}</strong>
+      <span>{{ 'DIALOG.RUN_CONNECTOR.RUN_IN_DRY_MODE_DESC' | translate }}</span>
+    </div>
+  </mat-checkbox>
+
+  <mat-divider />
+  <app-run-new-file
+      [config]="connector()"
+      [fileSettings]="fileSettings()"
+      (uploadStateChange)="handleUploadState($event)"
+      (uploadSuccess)="handleUploadSuccess($event)"
+  />
+
+  @if (hasUnmappedRequiredFields()) {
+  <mat-card>
+    <mat-card-content>
+      <p>
+        {{ 'DIALOG.RUN_CONNECTOR.MISSING_REQUIRED_FIELDS_DESC' | translate }}
+      </p>
+
+      <ul>
+        @for (field of unmappedRequiredFields(); track field) {
+        <li>{{ field }}</li>
+        }
+      </ul>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button mat-raised-button color="warn" (click)="goToMapping()">
+        {{ 'BUTTON.GO_TO_MAPPING' | translate }}
+      </button>
+    </mat-card-actions>
+  </mat-card>
+  }
+
+</mat-dialog-content>
+<mat-divider />
+
+<mat-dialog-actions align="end">
+  <lib-btn type="CANCEL" (clicked)="onNoClick()" />
+  <lib-btn
+    type="RUN"
+    [disabled]="!valid()"
+    [loading]="runInProgress()"
+    (clicked)="onRunClick()"
+  />
+</mat-dialog-actions>

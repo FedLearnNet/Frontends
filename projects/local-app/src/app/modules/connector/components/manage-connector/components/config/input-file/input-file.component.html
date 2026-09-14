@@ -1,0 +1,86 @@
+<h2>{{ 'FILE_IMPORT_SETTINGS' | translate }}</h2>
+
+<mat-card class="file-upload">
+  <div class="file-upload-header">
+    <div>
+      <h3>Source file</h3>
+      <p class="file-upload-copy">Upload a primary file or select one that already exists for this cohort.</p>
+    </div>
+
+    @if (this.selectedFile()?.id) {
+      <lib-badge text="File ready" color="GREEN" iconName="check_circle" [border]="true" />
+    } @else {
+      <lib-badge text="Waiting for file" color="ORANGE" iconName="schedule" [border]="true" />
+    }
+  </div>
+
+  @if (!connectorExist() || hasNoFileUploaded()) {
+    <div class="input-row file-upload-actions">
+      <div class="input-row-label">
+        <span>Source file</span>
+        <mat-icon class="material-icons" [matTooltip]="('FILE_TYPE_TOOLTIP' | translate)">info_i</mat-icon>
+      </div>
+
+      <button mat-raised-button color="primary" (click)="openPrimaryFileUploadDialog()"
+        [matTooltip]="('MAIN_IMPORT_TOOLTIP' | translate)">
+        <mat-icon class="input-row-label-icon">cloud_upload</mat-icon>
+        {{ 'MAIN_IMPORT' | translate }}
+      </button>
+
+      @if (hasSelectableFiles()) {
+        <button mat-stroked-button type="button" class="existing-file-button" (click)="openFileSelectionDialog()"
+          [matTooltip]="'Open file library'">
+          <mat-icon>folder_open</mat-icon>
+          Choose from file library
+          <lib-badge [text]="availableFileCount().toString()" color="BLUE" size="X-SMALL" [border]="true" />
+        </button>
+      }
+
+      @if (settings.hasSupportFile) {
+        <button mat-raised-button color="primary" (click)="openUploadDialog()"
+          [matTooltip]="('MULTI_SUPPORTING_IMPORT_TOOLTIP' | translate)">
+          <mat-icon class="input-row-label-icon">publish</mat-icon>
+          {{ 'MULTI_SUPPORTING_IMPORT' | translate }}
+        </button>
+      }
+    </div>
+  } @else {
+    <app-run-new-file
+        [config]="config()"
+        [availableFiles]="availableFiles()"
+        (uploadSuccess)="onUploadSucceeded($event)"
+    />
+  }
+
+  <mat-card-footer class="file-upload-preview">
+    <div class="file-preview-card">
+      <div>
+        @if (selectedFile(); as selectedFile) {
+          <lib-kv label="File" [value]="selectedFile.fileName" />
+        } @else if (currentFileName(); as currentFileName) {
+          <lib-kv label="File" [value]="currentFileName" />
+        } @else if (this.selectedFile()?.id) {
+          <lib-kv label="File" value="File connected" />
+        } @else {
+          <lib-kv label="File" [value]="'WAITING_TO_RECEIVE_FILE' | translate" />
+        }
+
+        @if (settings.fileId || settings.file) {
+          <div class="file-parsing-summary">
+            <lib-badge [text]="settings.fileType" color="BLUE" size="X-SMALL" [border]="true"/>
+            @if (settings.fileType === 'CSV') {
+              <span>Delimiter <strong>{{ getDelimiterLabel() }}</strong></span>
+            }
+            @if (settings.fileType !== 'JSON') {
+              <span>{{ settings.hasHeader ? 'Header row' : 'No header row' }}</span>
+            }
+          </div>
+        }
+      </div>
+      @if (selectedFile(); as selectedFile) {
+        <a [routerLink]="['/cohort', selectedFile.cohortId, 'connector', 'files', selectedFile.id]" class="file-preview-link">Open file</a>
+      }
+    </div>
+  </mat-card-footer>
+
+</mat-card>

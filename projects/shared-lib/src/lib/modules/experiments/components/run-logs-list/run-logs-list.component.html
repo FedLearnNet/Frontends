@@ -1,0 +1,83 @@
+<section class="log-view" [class.border]="showBorder()">
+  <mat-toolbar class="toolbar">
+    <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Search logs</mat-label>
+      <input
+        matInput
+        type="search"
+        placeholder="Message, process, caller…"
+        [(ngModel)]="query"
+      />
+      <button mat-icon-button matSuffix aria-label="Clear filters" (click)="clearFilters()">
+        <mat-icon>backspace</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div class="controls">
+      <mat-button-toggle-group
+        [(ngModel)]="showOnly"
+      >
+        <mat-button-toggle value="ALL">All</mat-button-toggle>
+        <mat-button-toggle class="error" value="ERROR">Error</mat-button-toggle>
+        <mat-button-toggle class="warn" value="WARN">Warn</mat-button-toggle>
+        <mat-button-toggle class="info" value="INFO">Info</mat-button-toggle>
+        <mat-button-toggle class="debug" value="DEBUG">Debug</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-chip-set class="count-chip">
+        <mat-chip>{{ filtered().length }} / {{ logs().length }}</mat-chip>
+      </mat-chip-set>
+    </div>
+  </mat-toolbar>
+
+
+  <div #container
+       class="list"
+       role="log"
+       aria-live="polite"
+       (scroll)="onListScroll()"
+  >
+    @if (filtered().length === 0) {
+      <div class="empty">
+        <p>No log messages.</p>
+      </div>
+    } @else {
+      @for (m of filtered(); track m.id) {
+        <article class="row" [class.error]="m.severity==='ERROR'"
+                 [class.warn]="m.severity==='WARN'"
+                 [class.info]="m.severity==='INFO'"
+                 [class.debug]="m.severity==='DEBUG'">
+          <div class="row-head">
+            <lib-status-badge [type]="getType(m.severity)" [text]="m.severity" [animate]="false" [size]="'SMALL'" />
+            @if (m.process) {
+              <span class="meta chip">{{ m.process }}</span>
+            }
+
+            @if (m.caller) {
+              <span class="meta pill">{{ m.caller }}</span>
+            }
+
+            <span class="spacer"></span>
+
+            @if (m.stackTrace) {
+              <button
+                mat-icon-button
+                matTooltip="Toggle stack trace"
+                (click)="toggleExpand(m)"
+                [attr.aria-expanded]="isExpanded(m)"
+              >
+                <mat-icon>{{ isExpanded(m) ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </button>
+            }
+          </div>
+
+          <div class="msg" [title]="m.message">{{ m.message }}</div>
+
+          @if (m.stackTrace && isExpanded(m)) {
+            <pre class="stack" tabindex="0">{{ m.stackTrace }}</pre>
+          }
+        </article>
+      }
+    }
+  </div>
+</section>

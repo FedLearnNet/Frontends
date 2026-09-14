@@ -1,0 +1,137 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: data.current?.name}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
+>
+
+</lib-closeable-dialog-title>
+
+
+<mat-dialog-content class="schema-node-dialog">
+  <lib-page-wrapper [error]="error()" [isLoading]="loading()" [skeletonOnLoading]="true">
+    @if (data.current) {
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+        <input matInput [placeholder]="('GRID.NAME' | translate)" [(ngModel)]="data.current.name"
+               [disabled]="isDisabled()">
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+        <textarea matInput [placeholder]="('GRID.DESCRIPTION' | translate)" [(ngModel)]="data.current.description"
+                  [disabled]="isDisabled()"></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>{{ 'GRID.TYPE' | translate }}</mat-label>
+        <mat-select [(ngModel)]="data.current.type" [disabled]="isDisabled()">
+          @for (type of schemaTypes; track type) {
+            <mat-option [value]="type">{{ getSchemaName(type) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      @if (isSchemaAttribute(data.current.type)) {
+        <section class="schema-node-dialog__section">
+          <div class="schema-node-dialog__section-header">
+            <h3>{{ 'MENU.ONTOLOGY' | translate }}</h3>
+            @if (data.current.ontologyId) {
+              <lib-badge [text]="data.current.ontologyId" color="BLUE" [border]="true"></lib-badge>
+            }
+          </div>
+
+          <mat-form-field class="full-width">
+            <mat-label>{{ 'GRID.ONTOLOGY' | translate }}</mat-label>
+
+            <input
+              type="text"
+              matInput
+              [placeholder]="('GRID.ONTOLOGY' | translate)"
+              [formControl]="ontologyCtrl"
+              [matAutocomplete]="autoOntology"/>
+
+            @if (ontologyCtrl.value) {
+              <button matSuffix mat-icon-button aria-label="Select ontology" (click)="addOntology()">
+                <mat-icon fontSet="material-symbols-outlined">check</mat-icon>
+              </button>
+            }
+
+            <mat-autocomplete requireSelection #autoOntology="matAutocomplete">
+              @for (option of filteredOntologies(); track option.id) {
+                <mat-option [value]="option.id">
+                  {{ option.names }} ({{ option.id }})
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+
+          @if (selectedOntology()) {
+            <app-ontology-card [ontologyNode]="selectedOntology()!"/>
+          } @else {
+            <lib-empty-state
+              [compact]="true"
+              title="No ontology selected"
+              subtitle="Select an ontology to review its details."
+            ></lib-empty-state>
+          }
+        </section>
+
+        <section class="schema-node-dialog__section">
+          <div class="schema-node-dialog__section-header">
+            <h3>{{ 'MENU.DATA_TYPE' | translate }}</h3>
+            @if (data.current.dataTypeId) {
+              <lib-badge [text]="data.current.dataTypeId" color="BLUE" [border]="true"></lib-badge>
+            }
+          </div>
+
+          @if (dataTypes().length) {
+            <mat-form-field class="full-width">
+              <mat-label>{{ 'GRID.DATA_TYPE' | translate }}</mat-label>
+
+              <input
+                type="text"
+                matInput
+                [placeholder]="('GRID.DATA_TYPE' | translate)"
+                [formControl]="datatypeCtrl"
+                [matAutocomplete]="autoDatatype"/>
+
+              @if (datatypeCtrl.value) {
+                <button matSuffix mat-icon-button aria-label="Select datatype" (click)="addDatatype()">
+                  <mat-icon fontSet="material-symbols-outlined">check</mat-icon>
+                </button>
+              }
+
+              <mat-autocomplete requireSelection #autoDatatype="matAutocomplete">
+                @for (option of filteredDatatypes(); track option.id) {
+                  <mat-option [value]="option.id">
+                    {{ option.name }} ({{ option.id }})
+                  </mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+          } @else {
+            <lib-empty-state
+              [compact]="true"
+              title="'WARNING.NO_DATA_TYPES_FOUND' | translate"
+              subtitle="No DataTypes are avaible, create some, to select it here"
+            ></lib-empty-state>
+          }
+
+          @if (selectedDatatype()) {
+            <app-datatype-card [dataType]="selectedDatatype()!"/>
+          }@else {
+            <lib-empty-state
+              [compact]="true"
+              title="No DataType selected"
+              subtitle="Select an DataType to review its details."
+            ></lib-empty-state>
+          }
+        </section>
+      }
+    }
+  </lib-page-wrapper>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  @if (!isDisabled()) {
+    <lib-btn type="SAVE" (clicked)="save()"></lib-btn>
+  }
+</mat-dialog-actions>

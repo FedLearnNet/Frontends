@@ -1,0 +1,31 @@
+.item {
+  border: 1px solid #e7edf3;
+  border-radius: 14px;
+  padding: 14px 16px 14px 20px;
+  cursor: pointer;
+  transition: box-shadow .2s ease, transform .06s ease, border-color .2s ease;
+
+  /* Spacing between items */
+  & + .item {
+    margin-top: 12px;
+  }
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    border-color: #cfd8e3;
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.25);
+    outline-offset: 2px;
+  }
+}
+

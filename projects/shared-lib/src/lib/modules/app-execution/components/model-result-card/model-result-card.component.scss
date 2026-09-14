@@ -1,0 +1,40 @@
+.result {
+  border-radius: 15px;
+  margin: 30px;
+  background: white;
+
+  &--date {
+    margin-top: 20px;
+    margin-right: 10px;
+  }
+
+  &--wrapper {
+    position: relative;
+  }
+
+  &--output {
+    max-width: 100%;
+    padding: 16px;
+    width: 100%;
+  }
+
+  &--workflow-header {
+    background: #e4e4e4;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .wf-icon {
+      padding-left: 16px;
+    }
+
+  }
+}
+
+.btn--detail{
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 999;
+}

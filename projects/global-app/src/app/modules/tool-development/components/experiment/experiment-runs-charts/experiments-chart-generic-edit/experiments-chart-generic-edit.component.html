@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>
+  @if (editMode) {
+    Edit {{ config.name }}
+  } @else {
+    Create your diagram
+  }
+</h2>
+<mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Diagram name</mat-label>
+    <input matInput [(ngModel)]="config.name"/>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Diagram Type</mat-label>
+    <mat-select [(value)]="config.seriesType">
+      <mat-option value="line">Line</mat-option>
+      <mat-option value="bar">Bar</mat-option>
+      <mat-option value="scatter">Scatter</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  @if (config.seriesType) {
+    <mat-form-field>
+      <mat-label>Y Axis</mat-label>
+      <mat-select (selectionChange)="yChange()" [(value)]="config.yAxisHeader">
+        @for (group of diagramYOptions; track group) {
+          <mat-optgroup [label]="group.name"
+                        [disabled]="group.disabled">
+            @for (options of group.children; track options) {
+              <mat-option [value]="options.value">{{ options.viewValue }}</mat-option>
+            }
+          </mat-optgroup>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  @if (config.yAxisHeader) {
+    <mat-form-field>
+      <mat-label>X Axis</mat-label>
+      <mat-select [(value)]="config.xAxisHeader">
+        @for (group of diagramXOptions; track group) {
+          <mat-optgroup [label]="group.name"
+                        [disabled]="group.disabled">
+            @for (options of group.children; track options) {
+              <mat-option [value]="options.value">{{ options.viewValue }}</mat-option>
+            }
+          </mat-optgroup>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+  @if (config.yAxisHeader) {
+    <mat-form-field>
+      <mat-label>Aggreg</mat-label>
+      <mat-select [(value)]="config.dataAggregatorType">
+        @for (type of dataAggregatorTypes; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button (click)="save()">Save</button>
+</mat-dialog-actions>

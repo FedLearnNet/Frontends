@@ -1,0 +1,40 @@
+.dropzone {
+  position: relative;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &.over {
+    background: rgba(0, 150, 136, 0.1);
+    border-color: rgba(0, 150, 136, 0.6);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #555;
+  }
+}
+
+.browse {
+  cursor: pointer;
+  display: inline-block;
+  position: absolute;
+  inset: 0;
+
+  input {
+    display: none;
+  }
+}
+
+.progress-wrapper {
+  margin-top: 0.75rem;
+}

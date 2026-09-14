@@ -1,0 +1,37 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
+  [title]="fileName" />
+
+<mat-dialog-content>
+  <div class="file-header">
+    <div class="file-name-container">
+      @if (!isEditing) {
+        <div class="file-name">
+          <span>{{ fileName }}</span>
+          <button mat-icon-button (click)="startEditing()" aria-label="Edit file name">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <mat-form-field appearance="outline" class="file-name-edit">
+          <mat-label>File Name</mat-label>
+          <input matInput [(ngModel)]="fileName" placeholder="Enter file name">
+          <div matSuffix>
+            <button mat-icon-button (click)="saveFileName()" aria-label="Save file name">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button (click)="cancelEditing()" aria-label="Cancel editing">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </mat-form-field>
+      }
+    </div>
+    <div class="file-info">
+      <span>Type: {{ data.contentType }}</span>
+      <span>Size: {{ data.size | number }} bytes</span>
+    </div>
+  </div>
+
+  <mat-divider />
+  <lib-file-detail-card [file]="data" />
+</mat-dialog-content>

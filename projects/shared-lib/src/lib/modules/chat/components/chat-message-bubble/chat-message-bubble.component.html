@@ -1,0 +1,139 @@
+@if (message(); as msg) {
+  @if (msg.request) {
+    <div class="msg msg--user">
+      <div class="msg__bubble msg__bubble--user">
+        @if (msg.message) {
+          <p class="msg__text">{{ msg.message }}</p>
+        }
+        <span class="msg__meta">{{ msg.createdAt | date:'shortTime' }}</span>
+      </div>
+    </div>
+  } @else {
+    <div class="msg msg--ai">
+      <div class="msg__bubble msg__bubble--ai"
+           [class.msg__bubble--pending]="!msg.done && !msg.errorMessage"
+           [class.msg__bubble--error]="!!msg.errorMessage"
+           (mouseover)="messageHover.emit($event)"
+           (mouseleave)="messageLeave.emit()"
+           (click)="messageClicked.emit($event)">
+
+
+        @if (msg.errorMessage) {
+          <lib-badge class="msg__error"
+                     iconName="error"
+                     color="RED"
+                     [wrap]="true"
+                     [border]="true"
+                     [text]="msg.errorMessage"></lib-badge>
+        } @else {
+
+          @if (!msg.done && msg.statusMessage) {
+
+            <div class="msg__status-wrapper">
+              @if (waitingForHumanInTheLoop()) {
+                <lib-badge [text]="msg.statusMessage" color="ORANGE" [border]="true"></lib-badge>
+              } @else {
+                <lib-badge [text]="msg.statusMessage" color="BLUE" [border]="true" [pulseCircle]="true"></lib-badge>
+                <span class="spacer"></span>
+                <lib-time-badge [date]="msg.createdAt" format="SHORT" [color]="'GRAY'"
+                                [calcDuration]="true"></lib-time-badge>
+              }
+            </div>
+          }
+
+          @if (toolsCount() > 0 || reasoningsCount() > 0) {
+            <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" class="tabs">
+              @if (msg.message || reasoningsCount() > 0) {
+                <mat-tab label="Result">
+                  @if (msg.message) {
+                    <ng-template mat-tab-label>
+                      <mat-icon class="file-tab-icon">mark_chat_read</mat-icon>
+                      <span class="file-tab-label">Result</span>
+                    </ng-template>
+                    <markdown class="msg__text" [data]="msg.message"
+                              [disableSanitizer]="true"/>
+                  } @else {
+                    <ng-template mat-tab-label>
+                      <mat-icon class="file-tab-icon">psychology</mat-icon>
+                      <span class="file-tab-label">Reasoning</span>
+                      <lib-badge class="file-tab-count" [text]="''+reasoningsCount()" [size]="'X-SMALL'"
+                                 color="BLUE"></lib-badge>
+                    </ng-template>
+                    @if (humanInTheLoopCount() > 0) {
+                      @for (hitl of msg.humanInTheLoop; track $index) {
+                        <lib-chat-human-in-the-loop [humanInTheLoop]="hitl"></lib-chat-human-in-the-loop>
+                      }
+                    }
+                    <lib-chat-message-reasoning-panel [reasonings]="msg.reasonings"></lib-chat-message-reasoning-panel>
+                  }
+                </mat-tab>
+              }
+              @if (reasoningsCount() > 0 && msg.message) {
+                <mat-tab label="Tools">
+                  <ng-template mat-tab-label>
+                    <mat-icon class="file-tab-icon">psychology</mat-icon>
+                    <span class="file-tab-label">Reasoning</span>
+                    <lib-badge class="file-tab-count" [text]="''+reasoningsCount()" [size]="'X-SMALL'"
+                               color="BLUE"></lib-badge>
+                  </ng-template>
+                  <lib-chat-message-reasoning-panel [reasonings]="msg.reasonings"></lib-chat-message-reasoning-panel>
+                </mat-tab>
+              }
+              @if (humanInTheLoopCount() > 0 && msg.message) {
+                <mat-tab label="Clarification">
+                  <ng-template mat-tab-label>
+                    <mat-icon class="file-tab-icon">hearing</mat-icon>
+                    <span class="file-tab-label">Clarification</span>
+                    <lib-badge class="file-tab-count" [text]="''+humanInTheLoopCount()" [size]="'X-SMALL'"
+                               color="BLUE"></lib-badge>
+                  </ng-template>
+                  @for (hitl of msg.humanInTheLoop; track $index) {
+                    <lib-chat-human-in-the-loop [humanInTheLoop]="hitl"></lib-chat-human-in-the-loop>
+                  }
+                </mat-tab>
+              }
+              @if (toolsCount() > 0) {
+                <mat-tab label="Tools">
+                  <ng-template mat-tab-label>
+                    <mat-icon class="file-tab-icon">build</mat-icon>
+                    <span class="file-tab-label">Tools</span>
+                    <lib-badge class="file-tab-count" [text]="''+toolsCount()" [size]="'X-SMALL'"
+                               color="BLUE"></lib-badge>
+                  </ng-template>
+                  <lib-chat-message-tool-panel [tools]="msg.tools"></lib-chat-message-tool-panel>
+                </mat-tab>
+              }
+            </mat-tab-group>
+          } @else if (msg.message) {
+            <markdown class="msg__text" [data]="msg.message"
+                      [disableSanitizer]="true"/>
+          }
+
+          @if (!msg.done && !msg.errorMessage && !waitingForHumanInTheLoop()) {
+            <lib-skeleton-loader [showHeader]="false" [variant]="'list'" [showActions]="false"
+                                 [cards]="1"></lib-skeleton-loader>
+          }
+
+          @if (msg.done) {
+            <div class="done-footer">
+              <lib-time-badge [date]="msg.createdAt" format="SHORT" [color]="'GREEN'"></lib-time-badge>
+              @if (uiAction(); as action) {
+                <span class="spacer"></span>
+                <button mat-raised-button (click)="actionClicked.emit(action)">
+                  <mat-icon>call_to_action</mat-icon>
+                  {{ uiActionLabel() }}
+                </button>
+              }
+            </div>
+          }
+        }
+
+        @if (msg.errorMessage) {
+          <lib-time-badge [date]="msg.createdAt" format="SHORT" [color]="'RED'"></lib-time-badge>
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <lib-skeleton-loader></lib-skeleton-loader>
+}

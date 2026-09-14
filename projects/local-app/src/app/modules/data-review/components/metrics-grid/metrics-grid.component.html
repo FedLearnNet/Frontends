@@ -1,0 +1,81 @@
+<div class="metrics-grid">
+  <h2>{{ 'MENU.METRICS_REVIEW' | translate }}</h2>
+
+  @if (error) {
+    <lib-error-card>{{ error }}</lib-error-card>
+  }
+
+  <mat-table [dataSource]="requests" class="mat-elevation-z0" [class.is-x-small-screen]="isXSmallScreen">
+    <ng-container matColumnDef="experiment">
+      <mat-header-cell *matHeaderCellDef>Experiment</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">Experiment:</span>
+        }
+        <lib-badge color="GRAY" [text]="'#' + element.experimentId" />
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="project">
+      <mat-header-cell *matHeaderCellDef>Project</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">Project:</span>
+        }
+        <span>{{ element.projectName || ('EMPTY_VALUE' | translate) }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="metrics">
+      <mat-header-cell *matHeaderCellDef>Metrics</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">Metrics:</span>
+        }
+        <div class="metric-badges">
+          @for (name of (element.metricNames ?? []); track name) {
+            <lib-badge color="BLUE" [text]="name" />
+          } @empty {
+            <span class="muted">{{ 'EMPTY_VALUE' | translate }}</span>
+          }
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">Status:</span>
+        }
+        <lib-status-badge
+          [type]="getStatusBadgeType(element.status)"
+          [text]="element.status"
+          size="SMALL"
+          [animate]="element.status === FederatedLearningRequestStatus.PENDING" />
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.DATE' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        @if (isXSmallScreen) {
+          <span class="column-name">{{ 'GRID.DATE' | translate }}:</span>
+        }
+        <span>{{ element.createdAt | date }}</span>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns" />
+    <mat-row *matRowDef="let row; columns: displayedColumns;" (click)="openMetricsRequestDetail(row.id)" />
+  </mat-table>
+
+  <mat-paginator
+    [length]="resultsLength"
+    [pageSize]="currentPageSize"
+    aria-label="Select page of metrics review results" />
+
+  @if (isLoadingResults) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+</div>

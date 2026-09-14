@@ -1,0 +1,74 @@
+<mat-form-field class="full-width">
+  <mat-label>{{ 'GRID.FILTER' | translate }}</mat-label>
+  <input
+    matInput
+    #input
+    [(ngModel)]="filterValue"
+    [placeholder]="'FILTER_EXAMPLE' | translate"
+  />
+</mat-form-field>
+
+<div class="test-log-table">
+  <table mat-table [dataSource]="dataSource">
+
+    <ng-container matColumnDef="severity">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ 'GRID.SEVERITY' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (valueNonNull(element?.severity)) {
+          <mat-icon class="icon icon--error">error</mat-icon>
+          {{ element?.severity }}
+        } @else {
+          -
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timestamp">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ 'GRID.TIMESTAMP' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (element?.createdAt) {
+          {{ element.createdAt | date: 'medium' }}
+        } @else {
+          -
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="summary">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ 'GRID.SUMMARY' | translate }}
+      </th>
+      <td mat-cell *matCellDef="let element">
+        @if (valueNonNull(element?.process)) {
+          <mat-chip>{{ element.process }}</mat-chip>
+        }
+
+        @if (valueNonNull(element?.caller)) {
+          <mat-chip>{{ element.caller }}</mat-chip>
+        }
+
+        @if (valueNonNull(element?.group)) {
+          <mat-chip>{{ element.group }}</mat-chip>
+        }
+
+        {{ (element?.message ?? '-') }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">
+        {{ 'NO_DATA_MATCHING_THE_FILTER' | translate:{filter: input.value} }}
+      </td>
+    </tr>
+  </table>
+
+  <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"
+    aria-label="Select page of users" />
+</div>

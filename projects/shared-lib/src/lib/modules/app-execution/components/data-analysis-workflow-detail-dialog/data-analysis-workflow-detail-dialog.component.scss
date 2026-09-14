@@ -1,0 +1,16 @@
+.detail-step{
+  position: absolute;
+  z-index: 99;
+  right: 0;
+  top: 0;
+  height: 100%;
+  max-width: 50%;
+  background: white;
+  border-left: 1px solid #e8e8ef;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+  .toolbar{
+    display: flex;
+  }
+}
+
+

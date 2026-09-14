@@ -1,0 +1,79 @@
+@if (!hasDataset()) {
+  <lib-empty-state
+    title="No dataset configured yet"
+    subtitle="No dataset design is stored for this project yet. Create one to define features, export mode and preview behavior."
+    icon="dataset_linked"
+    (cta)="actionClicked.emit()"
+    [primaryButtonEnabled]="true"
+    [primaryButtonLabel]="emptyActionLabel()"
+  >
+
+  </lib-empty-state>
+} @else {
+  <mat-card class="dataset-preview-card">
+    <div class="dataset-preview-card__header">
+      <div>
+        <div class="dataset-preview-card__eyebrow">{{ title() }}</div>
+        <h3>Configured dataset</h3>
+        <p>{{ subtitle() }}</p>
+      </div>
+
+      @if (showAction()) {
+        <button mat-flat-button type="button" (click)="actionClicked.emit()">
+          <mat-icon>open_in_new</mat-icon>
+          {{ actionLabel() }}
+        </button>
+      }
+    </div>
+
+    <div class="dataset-preview-card__badges">
+      <lib-badge [text]="exportModeLabel()" color="BLUE"></lib-badge>
+      <lib-badge [text]="formatLabel()" color="GRAY"></lib-badge>
+      <lib-badge [text]="featureCount() + ' features'" color="GREEN"></lib-badge>
+      <lib-badge [text]="selectionCount() + ' data selections'" color="ORANGE"></lib-badge>
+      @if (queryName()) {
+        <lib-badge [text]="queryName()!" color="WHITE" [border]="true"></lib-badge>
+      }
+    </div>
+
+    <div class="dataset-preview-card__grid">
+      <div class="preview-meta">
+        <span class="preview-meta__label">Export mode</span>
+        <strong>{{ exportModeLabel() }}</strong>
+      </div>
+      <div class="preview-meta">
+        <span class="preview-meta__label">Dataset layout</span>
+        <strong>{{ formatLabel() }}</strong>
+      </div>
+      <div class="preview-meta">
+        <span class="preview-meta__label">Join fields</span>
+        <strong>{{ joinFieldLabel() }}</strong>
+      </div>
+      <div class="preview-meta">
+        <span class="preview-meta__label">Duplicate policy</span>
+        <strong>{{ duplicatePolicyLabel() }}</strong>
+      </div>
+    </div>
+
+    <div class="dataset-preview-card__features">
+      <div class="dataset-preview-card__section-title">Included features</div>
+      <div class="feature-preview-list">
+        @for (feature of featurePreview(); track feature.order) {
+          <div class="feature-preview-item">
+            <div class="feature-preview-item__title">
+              {{ feature.name.trim() || ('Feature ' + (feature.order + 1)) }}
+            </div>
+            <div class="feature-preview-item__meta">
+              {{ feature.allowedDataIds.length }} source{{ feature.allowedDataIds.length === 1 ? '' : 's' }}
+            </div>
+          </div>
+        }
+        @if (hiddenFeatureCount() > 0) {
+          <div class="feature-preview-item feature-preview-item--muted">
+            +{{ hiddenFeatureCount() }} more feature{{ hiddenFeatureCount() === 1 ? '' : 's' }}
+          </div>
+        }
+      </div>
+    </div>
+  </mat-card>
+}

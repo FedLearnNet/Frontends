@@ -1,0 +1,1 @@
+export const MAPPING_PREVIEW_FRAGMENT = 'mapping-preview';

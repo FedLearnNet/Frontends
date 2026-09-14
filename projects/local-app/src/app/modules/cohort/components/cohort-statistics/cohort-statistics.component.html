@@ -1,0 +1,162 @@
+<lib-header
+  title="Data Profile"
+  description="Structured quality and distribution insights across all stored properties in this cohort."
+  [mainGap]="false">
+  <div suffix class="hero__badges">
+    @for (entry of typeCounts() | keyvalue; track entry.key) {
+      <lib-badge [text]="entry.key + ': ' + entry.value" [color]="typeColor(entry.key)" [border]="true"/>
+    }
+  </div>
+  @if (statistics(); as stats) {
+    <div class="hero__badges">
+      <lib-kv label="Properties">
+        <strong>{{ properties().length }}</strong>
+      </lib-kv>
+      <lib-kv label="Patients">
+        <strong>{{ stats.patientIds.length }}</strong>
+      </lib-kv>
+      <lib-kv label="Rows scanned">
+        <strong>{{ rowsScanned() }}</strong>
+      </lib-kv>
+      <lib-kv label="Total missing">
+        <strong>{{ totalMissing() }}</strong>
+      </lib-kv>
+    </div>
+  }
+
+  <div class="tab-header-row">
+    <nav mat-tab-nav-bar [tabPanel]="panel" class="dashboard-tabs">
+      <a mat-tab-link [active]="isProfileTab()" (click)="selectProfile()">
+        Data Profile
+      </a>
+      @for (dashboard of dashboards(); track dashboard.id) {
+        <a
+          mat-tab-link
+          [active]="selectedDashboardId() === dashboard.id"
+          (click)="selectDashboard(dashboard)"
+          class="dashboard-tab">
+          <span class="dashboard-tab__name">{{ dashboard.name }}</span>
+        </a>
+      }
+      <a
+        mat-tab-link
+        class="dashboard-tab dashboard-tab--add"
+        (click)="openNewDashboardDialog()"
+        matTooltip="New custom statistics dashboard"
+        aria-label="New custom statistics dashboard">
+        <mat-icon>add</mat-icon>
+      </a>
+    </nav>
+
+    @if (!isProfileTab()) {
+      <lib-btn
+        type="ADD"
+        label="Add custom statistic"
+        [matTooltip]="('TOOLTIP.ADD_A_CONNECTOR' | translate)"
+        [menuTriggerFor]="dashboardMenu"
+        (clicked)="openCustomStatisticCreate()"/>
+      <mat-menu #dashboardMenu="matMenu">
+        <button mat-menu-item (click)="renameDashboard()">
+          <mat-icon>edit</mat-icon>
+          <span>Rename</span>
+        </button>
+        <button mat-menu-item (click)="deleteDashboard()">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    }
+  </div>
+</lib-header>
+
+<mat-tab-nav-panel #panel>
+  @if (isProfileTab()) {
+      <lib-page-wrapper
+        [isEmpty]="!statistics()"
+        [error]="error()"
+        [isLoading]="isLoading()"
+        [skeletonOnLoading]="true">
+        <lib-empty-state
+          empty
+          [title]="'No statistics available'"
+          [subtitle]="'This cohort does not expose a data profile yet.'"
+          icon="analytics"
+        ></lib-empty-state>
+
+        <div class="statistics-page">
+          <div class="quality-card">
+            <div class="chart-title">Rapid Quality Overview</div>
+            <div class="chart-subtitle">
+              Top: numeric distributions as box plots. Bottom: categorical value distribution across filtered properties.
+            </div>
+            <echarts [options]="qualityChartOption()" class="quality-chart"/>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-bar__controls">
+              <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Search properties</mat-label>
+                <input matInput [value]="searchTerm()" (input)="updateSearch($event)">
+                <mat-icon matSuffix>search</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="config-field">
+                <mat-label>Sort</mat-label>
+                <mat-select [value]="sortMode()" (selectionChange)="updateSortMode($event)">
+                  <mat-option value="missing">Missing first</mat-option>
+                  <mat-option value="completeness">Most complete</mat-option>
+                  <mat-option value="name">Name</mat-option>
+                  <mat-option value="type">Type</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="config-field">
+                <mat-label>Density</mat-label>
+                <mat-select [value]="cardDensity()" (selectionChange)="updateDensity($event)">
+                  <mat-option value="compact">Compact</mat-option>
+                  <mat-option value="comfortable">Comfortable</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="filter-bar__meta">
+              <mat-chip-listbox aria-label="Type filter">
+                @for (filter of availableTypeFilters(); track filter) {
+                  <mat-chip-option
+                    [selected]="selectedType() === filter"
+                    (click)="setTypeFilter(filter)">
+                    {{ filter === 'ALL' ? 'All types' : filter }}
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+
+              <div class="filter-summary">
+                <span class="filter-summary__count">{{ filteredProperties().length }}</span>
+                <span class="filter-summary__label">matching properties</span>
+              </div>
+            </div>
+          </div>
+
+          @if (filteredProperties().length) {
+            <div class="properties-grid" [class.properties-grid--compact]="cardDensity() === 'compact'">
+              @for (property of filteredProperties(); track property.name) {
+                <app-cohort-statistics-property-card [profile]="property" [density]="cardDensity()"/>
+              }
+            </div>
+          } @else {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <div>
+                <div class="empty-state__title">No matching properties</div>
+                <div class="empty-state__subtitle">Try a different property name or type.</div>
+              </div>
+            </div>
+          }
+        </div>
+      </lib-page-wrapper>
+  } @else if (selectedDashboard(); as dashboard) {
+    <app-cohort-custom-statistics
+      [dashboardId]="dashboard.id"
+      [properties]="properties()"/>
+  }
+</mat-tab-nav-panel>

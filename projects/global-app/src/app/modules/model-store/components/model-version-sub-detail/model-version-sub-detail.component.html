@@ -1,0 +1,100 @@
+<div class="detail-container">
+  <header class="detail-header">
+    <h2>Model variant</h2>
+    <lib-status-badge [type]="modelSubStatusToBadgeStatus(modelSub().status)" />
+  </header>
+
+  <section class="info-grid">
+    <div class="info-item">
+      <span class="info-label">Model Version ID</span>
+      <span class="info-value">{{ modelSub().modelVersionId }}</span>
+    </div>
+
+    @if (modelSub().experimentRunId; as runId) {
+      <div class="info-item">
+        <span class="info-label">Experiment Run ID</span>
+        <span class="info-value">{{ runId }}</span>
+      </div>
+    }
+
+    @if (modelSub().federatedExperimentId; as fedId) {
+      <div class="info-item">
+        <span class="info-label">Federated Experiment ID</span>
+        <span class="info-value">{{ fedId }}</span>
+      </div>
+    }
+
+    @if (modelSub().pipelineId; as pId) {
+      <div class="info-item">
+        <span class="info-label">Pipeline ID</span>
+        <span class="info-value">{{ pId }}</span>
+      </div>
+    }
+
+    @if (modelSub().pipelineStatus; as pStatus) {
+      <div class="info-item">
+        <span class="info-label">Pipeline Status</span>
+        <div class="info-value">
+          <lib-status-badge [type]="pipelineStatusToBadgeStatus(modelSub().pipelineStatus!)" />
+        </div>
+      </div>
+    }
+  </section>
+
+  @if (modelSub().imageName) {
+    <div class="info-item">
+      <span class="info-label">Docker Image</span>
+      <lib-docker-image-tag [imageName]="modelSub().imageName" size="SMALL"/>
+    </div>
+  }
+
+  @if (modelSub().federatedData; as provenance) {
+    <section class="content-section provenance-section">
+      <div class="section-heading">
+        <h3>Training provenance</h3>
+        <p>The project and query snapshots used to train this model variant.</p>
+      </div>
+
+      <div class="provenance-stack">
+        <lib-info-grid title="Project snapshot">
+          <lib-info-item title="Name">{{ provenance.project.name }}</lib-info-item>
+          <lib-info-item title="Description">{{ provenance.project.description }}</lib-info-item>
+          <lib-info-item title="Project ID">{{ provenance.project.id }}</lib-info-item>
+          <lib-info-item title="Record version">{{ provenance.project.version }}</lib-info-item>
+          @if (provenance.project.globalUniqueQueryId; as queryId) {
+            <lib-info-item title="Linked query identifier">{{ queryId }}</lib-info-item>
+          }
+          <lib-info-item title="Participating clinics">Redacted</lib-info-item>
+        </lib-info-grid>
+
+        @if (provenance.query; as query) {
+          <lib-info-grid title="Query snapshot">
+            <lib-info-item title="Name">{{ query.name }}</lib-info-item>
+            <lib-info-item title="Description">{{ query.description }}</lib-info-item>
+            <lib-info-item title="Query ID">{{ query.id }}</lib-info-item>
+            <lib-info-item title="Record version">{{ query.version }}</lib-info-item>
+            <lib-info-item title="Version identifier">{{ query.globalUniqueId }}</lib-info-item>
+            <lib-info-item title="Matching patients / query result">Redacted</lib-info-item>
+          </lib-info-grid>
+          <lib-query-detail-card [query]="query" />
+        }
+      </div>
+    </section>
+  }
+
+  <section class="content-section">
+    <h3>Files</h3>
+    @for (file of files(); track file.id) {
+      <lib-file-card
+        [file]="file.file"
+        (download)="onDownloadFile(file)"
+        (delete)="onDeleteFile(file)" />
+    }
+  </section>
+
+  <section class="content-section">
+    <h3>Pipelines</h3>
+    <app-pipeline-list [modelSubId]="modelSub().id" />
+  </section>
+
+</div>

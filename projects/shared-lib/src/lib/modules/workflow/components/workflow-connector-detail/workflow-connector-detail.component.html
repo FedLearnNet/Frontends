@@ -1,0 +1,15 @@
+<div class="detail" [class.comp]="bothSet">
+  @if (this.data.inputConfig) {
+    <app-app-detail-config-input [configs]="inputConfig"
+                                 [editMode]="false"/>
+  }
+
+  @if (bothSet) {
+    <mat-icon class="right-icon">keyboard_double_arrow_right</mat-icon>
+  }
+
+  @if (this.data.outputConfig) {
+    <app-app-detail-config-output [configs]="outputConfig"
+                                  [editMode]="false"/>
+  }
+</div>

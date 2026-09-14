@@ -1,0 +1,25 @@
+.placeholder-circle {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-text {
+  position: absolute;
+  white-space: nowrap;
+  color: #fff;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 200px;
+  max-height: 100%;
+  object-fit: cover;
+}

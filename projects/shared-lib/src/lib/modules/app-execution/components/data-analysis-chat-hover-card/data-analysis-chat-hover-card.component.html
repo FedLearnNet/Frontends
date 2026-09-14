@@ -1,0 +1,24 @@
+@if (action(); as hover) {
+  @switch (hover.kind) {
+    @case (UiActionKind.MODEL) {
+      @if (selectedModel(); as model) {
+        <lib-store-card [linkToShop]="false" [storeElement]="{model: model}"></lib-store-card>
+      } @else if (storeLoading()) {
+        <lib-skeleton-loader></lib-skeleton-loader>
+      }
+    }
+    @case (UiActionKind.APP) {
+      @if (selectedApp(); as app) {
+        <lib-store-card [linkToShop]="false" [storeElement]="{app: app}"></lib-store-card>
+      } @else if (storeLoading()) {
+        <lib-skeleton-loader></lib-skeleton-loader>
+      }
+    }
+    @default {
+      <mat-card class="hc-card">
+        <div class="hc-title">Preview</div>
+        <div class="hc-sub">No preview available.</div>
+      </mat-card>
+    }
+  }
+}

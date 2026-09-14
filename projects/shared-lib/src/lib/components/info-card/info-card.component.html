@@ -1,0 +1,34 @@
+<div [class]="className()">
+  <mat-icon class="card-icon">{{ resolvedIcon() }}</mat-icon>
+
+  @if (variant() === 'NOTICE') {
+    <span class="card-text">{{ title() ?? subtitle() }}</span>
+  } @else if (variant() === 'BANNER') {
+    <div class="card-body">
+      @if (title()) {
+        <p class="card-title">{{ title() }}</p>
+      }
+      @if (subtitle()) {
+        <p class="card-subtitle">{{ subtitle() }}</p>
+      } @else {
+        <p class="card-subtitle">
+          <ng-content select="[subtitle]"></ng-content>
+        </p>
+      }
+    </div>
+  } @else {
+    <div class="card-body">
+      @if (title()) {
+        <p class="card-title">{{ title() }}</p>
+      }
+      @if (subtitle()) {
+        <p class="card-subtitle">{{ subtitle() }}</p>
+      } @else {
+        <p class="card-subtitle">
+          <ng-content select="[subtitle]"></ng-content>
+        </p>
+      }
+    </div>
+  }
+  <ng-content select="[button]"></ng-content>
+</div>

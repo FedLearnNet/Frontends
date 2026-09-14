@@ -1,0 +1,32 @@
+<div class="app-configs">
+  <mat-tab-group>
+    <mat-tab [label]="('MENU.HYPERPARAMETER' | translate)">
+      @if (config(); as config) {
+        @for (n of config.hyperparams; track $index) {
+          <lib-tool-config-card [hyperparamConfig]="n"></lib-tool-config-card>
+        }
+      }
+    </mat-tab>
+    <mat-tab [label]="('MENU.INPUTS' | translate)">
+      @if (config(); as config) {
+
+        @for (n of config.input; track $index) {
+          <lib-tool-config-card [inputConfig]="n"></lib-tool-config-card>
+        }
+      }
+    </mat-tab>
+    <mat-tab [label]="('MENU.OUTPUTS' | translate)">
+      @if (config(); as config) {
+
+        @for (n of config.output; track $index) {
+          <lib-tool-config-card [outputConfig]="n"></lib-tool-config-card>
+        }
+      }
+    </mat-tab>
+
+  </mat-tab-group>
+</div>
+
+
+
+

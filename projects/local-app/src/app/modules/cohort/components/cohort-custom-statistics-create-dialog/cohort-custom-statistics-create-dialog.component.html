@@ -1,0 +1,350 @@
+<lib-closeable-dialog-title title="New custom statistic" [allowMaximize]="false"/>
+
+<mat-dialog-content class="dialog-content">
+  <div class="meta-row">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput [ngModel]="name()" (ngModelChange)="name.set($event)" maxlength="120" autocomplete="off">
+    </mat-form-field>
+  </div>
+
+  <mat-divider/>
+
+  @if (step() === 1) {
+    <section class="type-section">
+      <div class="section-title">Chart type</div>
+      <div class="type-grid">
+        @for (option of typeOptions; track option.value) {
+          <lib-select-btn
+            size="COMPACT"
+            [icon]="option.icon"
+            [title]="option.label"
+            [description]="option.description"
+            [selected]="selectedType() === option.value"
+            (clicked)="selectType(option.value)"/>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="config-section">
+      <div class="section-title">Configuration</div>
+
+      @switch (selectedType()) {
+        @case (CustomStatisticType.BAR) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>X (category) property</mat-label>
+              <mat-select [ngModel]="barConfig().xProperty" (ngModelChange)="patchBar('xProperty', $event)">
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Value property (optional)</mat-label>
+              <mat-select [ngModel]="barConfig().yProperty" (ngModelChange)="patchBar('yProperty', $event)">
+                <mat-option [value]="null">— count rows —</mat-option>
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Aggregation</mat-label>
+              <mat-select [ngModel]="barConfig().aggregation" (ngModelChange)="patchBar('aggregation', $event)">
+                @for (a of aggregations; track a) {
+                  <mat-option [value]="a">{{ a }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Group by (optional)</mat-label>
+              <mat-select [ngModel]="barConfig().groupByProperty" (ngModelChange)="patchBar('groupByProperty', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Orientation</mat-label>
+              <mat-select [ngModel]="barConfig().orientation" (ngModelChange)="patchBar('orientation', $event)">
+                <mat-option value="VERTICAL">Vertical</mat-option>
+                <mat-option value="HORIZONTAL">Horizontal</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Sort</mat-label>
+              <mat-select [ngModel]="barConfig().sortBy" (ngModelChange)="patchBar('sortBy', $event)">
+                <mat-option value="VALUE_DESC">Value (desc)</mat-option>
+                <mat-option value="VALUE_ASC">Value (asc)</mat-option>
+                <mat-option value="LABEL">Label</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Limit categories</mat-label>
+              <input matInput type="number" min="1" [ngModel]="barConfig().limit" (ngModelChange)="patchBar('limit', $event)">
+            </mat-form-field>
+            <mat-checkbox [checked]="barConfig().stacked" (change)="patchBar('stacked', $event.checked)">
+              Stacked groups
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.PIE) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Category property</mat-label>
+              <mat-select [ngModel]="pieConfig().property" (ngModelChange)="patchPie('property', $event)">
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Value property (optional)</mat-label>
+              <mat-select [ngModel]="pieConfig().valueProperty" (ngModelChange)="patchPie('valueProperty', $event)">
+                <mat-option [value]="null">— count rows —</mat-option>
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Aggregation</mat-label>
+              <mat-select [ngModel]="pieConfig().aggregation" (ngModelChange)="patchPie('aggregation', $event)">
+                @for (a of aggregations; track a) {
+                  <mat-option [value]="a">{{ a }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Top N slices</mat-label>
+              <input matInput type="number" min="1" [ngModel]="pieConfig().topN" (ngModelChange)="patchPie('topN', $event)">
+            </mat-form-field>
+            <mat-checkbox [checked]="pieConfig().donut" (change)="patchPie('donut', $event.checked)">
+              Donut style
+            </mat-checkbox>
+            <mat-checkbox [checked]="pieConfig().showLabels" (change)="patchPie('showLabels', $event.checked)">
+              Show labels
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.LINE) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>X axis property</mat-label>
+              <mat-select [ngModel]="lineConfig().xProperty" (ngModelChange)="patchLine('xProperty', $event)">
+                @for (p of temporalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }} (datetime)</mat-option>
+                }
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }} (numeric)</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Y axis property</mat-label>
+              <mat-select [ngModel]="lineConfig().yProperty" (ngModelChange)="patchLine('yProperty', $event)">
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Aggregation</mat-label>
+              <mat-select [ngModel]="lineConfig().aggregation" (ngModelChange)="patchLine('aggregation', $event)">
+                @for (a of aggregations; track a) {
+                  <mat-option [value]="a">{{ a }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Granularity</mat-label>
+              <mat-select [ngModel]="lineConfig().granularity" (ngModelChange)="patchLine('granularity', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (g of granularities; track g) {
+                  <mat-option [value]="g">{{ g }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Group by (optional)</mat-label>
+              <mat-select [ngModel]="lineConfig().groupByProperty" (ngModelChange)="patchLine('groupByProperty', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox [checked]="lineConfig().smooth" (change)="patchLine('smooth', $event.checked)">
+              Smooth line
+            </mat-checkbox>
+            <mat-checkbox [checked]="lineConfig().area" (change)="patchLine('area', $event.checked)">
+              Area fill
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.SCATTER) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>X property</mat-label>
+              <mat-select [ngModel]="scatterConfig().xProperty" (ngModelChange)="patchScatter('xProperty', $event)">
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Y property</mat-label>
+              <mat-select [ngModel]="scatterConfig().yProperty" (ngModelChange)="patchScatter('yProperty', $event)">
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Group by (optional)</mat-label>
+              <mat-select [ngModel]="scatterConfig().groupByProperty" (ngModelChange)="patchScatter('groupByProperty', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Size property (optional)</mat-label>
+              <mat-select [ngModel]="scatterConfig().sizeProperty" (ngModelChange)="patchScatter('sizeProperty', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox [checked]="scatterConfig().trendline" (change)="patchScatter('trendline', $event.checked)">
+              Show trendline
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.HISTOGRAM) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Property</mat-label>
+              <mat-select [ngModel]="histogramConfig().property" (ngModelChange)="patchHistogram('property', $event)">
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Bins</mat-label>
+              <input matInput type="number" min="1" [ngModel]="histogramConfig().bins" (ngModelChange)="patchHistogram('bins', $event)">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Min (optional)</mat-label>
+              <input matInput type="number" [ngModel]="histogramConfig().min" (ngModelChange)="patchHistogram('min', $event)">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Max (optional)</mat-label>
+              <input matInput type="number" [ngModel]="histogramConfig().max" (ngModelChange)="patchHistogram('max', $event)">
+            </mat-form-field>
+            <mat-checkbox [checked]="histogramConfig().cumulative" (change)="patchHistogram('cumulative', $event.checked)">
+              Cumulative
+            </mat-checkbox>
+            <mat-checkbox [checked]="histogramConfig().density" (change)="patchHistogram('density', $event.checked)">
+              Density (normalize)
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.BOXPLOT) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Numeric property</mat-label>
+              <mat-select [ngModel]="boxplotConfig().property" (ngModelChange)="patchBoxplot('property', $event)">
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Group by (optional)</mat-label>
+              <mat-select [ngModel]="boxplotConfig().groupByProperty" (ngModelChange)="patchBoxplot('groupByProperty', $event)">
+                <mat-option [value]="null">—</mat-option>
+                @for (p of categoricalProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-checkbox [checked]="boxplotConfig().showOutliers" (change)="patchBoxplot('showOutliers', $event.checked)">
+              Show outliers
+            </mat-checkbox>
+          </div>
+        }
+
+        @case (CustomStatisticType.HEATMAP) {
+          <div class="config-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>X property</mat-label>
+              <mat-select [ngModel]="heatmapConfig().xProperty" (ngModelChange)="patchHeatmap('xProperty', $event)">
+                @for (p of allProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }} ({{ p.type }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Y property</mat-label>
+              <mat-select [ngModel]="heatmapConfig().yProperty" (ngModelChange)="patchHeatmap('yProperty', $event)">
+                @for (p of allProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }} ({{ p.type }})</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Value property (optional)</mat-label>
+              <mat-select [ngModel]="heatmapConfig().valueProperty" (ngModelChange)="patchHeatmap('valueProperty', $event)">
+                <mat-option [value]="null">— count rows —</mat-option>
+                @for (p of numericProperties(); track p.name) {
+                  <mat-option [value]="p.name">{{ p.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Aggregation</mat-label>
+              <mat-select [ngModel]="heatmapConfig().aggregation" (ngModelChange)="patchHeatmap('aggregation', $event)">
+                @for (a of aggregations; track a) {
+                  <mat-option [value]="a">{{ a }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>X bins (numeric only)</mat-label>
+              <input matInput type="number" min="1" [ngModel]="heatmapConfig().xBins" (ngModelChange)="patchHeatmap('xBins', $event)">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Y bins (numeric only)</mat-label>
+              <input matInput type="number" min="1" [ngModel]="heatmapConfig().yBins" (ngModelChange)="patchHeatmap('yBins', $event)">
+            </mat-form-field>
+          </div>
+        }
+      }
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-divider/>
+
+<mat-dialog-actions class="dialog-actions">
+  @if (step() === 1) {
+    <lib-btn type="CANCEL" (clicked)="cancel()"/>
+    <span class="spacer"></span>
+    <lib-btn type="CONTINUE" [disabled]="!canContinue()" (clicked)="next()"/>
+  } @else {
+    <lib-btn type="BACK" (clicked)="back()"/>
+    <span class="spacer"></span>
+    <lib-btn type="CREATE" variant="PRIMARY" [disabled]="!canSubmit()" [loading]="saving()" (clicked)="submit()"/>
+  }
+</mat-dialog-actions>

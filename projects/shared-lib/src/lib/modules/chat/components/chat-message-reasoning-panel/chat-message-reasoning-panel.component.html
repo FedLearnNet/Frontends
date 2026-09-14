@@ -1,0 +1,25 @@
+<mat-list>
+  @for (decision of reasonings(); track $index) {
+    <mat-list-item class="list-item">
+      <mat-icon matListItemIcon>check_circle</mat-icon>
+      <div matListItemTitle>
+        <div class="step">
+          <div class="action">
+            <span class="head">Action:</span>
+            <span> {{ decision.planStep.action }} </span>
+            <span class="spacer"></span>
+            <lib-time-badge [date]="decision.timestamp" color="BLUE" format="SHORT" size="X-SMALL"></lib-time-badge>
+          </div>
+          <span class="reason">
+            <span class="head">Reason:</span>
+            {{ decision.planStep.reason }}
+          </span>
+          <span class="subtask">
+            <span class="head">Sub-task:</span>
+            {{ decision.planStep.subTaskQuestion }}
+          </span>
+        </div>
+      </div>
+    </mat-list-item>
+  }
+</mat-list>

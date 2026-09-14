@@ -1,0 +1,42 @@
+.profiles {
+  .profile {
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 10px;
+    font-weight: lighter;
+    line-height: 11px;
+  }
+}
+
+
+
+.top-categories {
+  background: #ffffff;
+  border: 1px solid #d2d6dc;
+  border-radius: 8px;
+  padding: 5px;
+
+  font-size: 10px;
+  font-weight: lighter;
+  line-height: 11px;
+
+  vertical-align: middle;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 260px;
+
+  margin-top: 5px;
+
+  &--headline{
+    font-weight: bold;
+    line-height: 15px;
+  }
+}
+
+
+.chart {
+  height: 100px;
+  width: 200px;
+}

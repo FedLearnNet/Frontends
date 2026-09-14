@@ -1,0 +1,73 @@
+<lib-closeable-dialog-title [title]="title"/>
+
+<mat-dialog-content class="rollback-dialog">
+  <section class="rollback-dialog__intro">
+    <mat-icon>settings_backup_restore</mat-icon>
+    <div>
+      <h3>{{ title }}</h3>
+      <p>
+        @if (data.mode === 'CONNECTOR_RUN') {
+          This will revert all patient data changes created by the selected connector run.
+        } @else {
+          This will restore the selected patient to the state of this audit revision.
+        }
+      </p>
+    </div>
+  </section>
+
+  <section class="rollback-dialog__details">
+    @if (data.mode === 'CONNECTOR_RUN') {
+      <lib-kv label="Connector" [value]="data.connectorName || data.connectorId"></lib-kv>
+      <lib-kv label="Connector ID" [value]="data.connectorId"></lib-kv>
+      <lib-kv label="Run ID" [value]="data.runId"></lib-kv>
+      <lib-kv label="Scope">
+        <lib-badge text="Run changes" color="ORANGE" [border]="true"></lib-badge>
+      </lib-kv>
+    } @else {
+      <lib-kv label="Patient" [value]="data.patientId"></lib-kv>
+      <lib-kv label="Internal patient ID" [value]="data.internalPatientId"></lib-kv>
+      <lib-kv label="Revision" [value]="data.revisionNumber"></lib-kv>
+      <lib-kv label="Changed at">
+        @if (data.createdAt) {
+          <lib-time-badge [date]="data.createdAt"></lib-time-badge>
+        }
+      </lib-kv>
+    }
+  </section>
+
+  <section class="rollback-dialog__setting">
+    <mat-checkbox
+      [checked]="deleteAudit()"
+      (change)="deleteAudit.set($event.checked)">
+      Delete audit entries created after the rollback target
+    </mat-checkbox>
+    <p>Keep audit entries when you need a complete trace of the rollback action. Delete them only when the audit history should match the restored state.</p>
+  </section>
+
+  @if (!canRollback) {
+    <div class="rollback-dialog__warning">
+      <mat-icon>error</mat-icon>
+      <span>Rollback cannot be started because required identifiers are missing.</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="rollback-dialog__warning">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button type="button" (click)="close()">Cancel</button>
+  <button
+    mat-raised-button
+    color="warn"
+    type="button"
+    [disabled]="!canRollback || isSubmitting()"
+    (click)="rollback()">
+    <mat-icon>settings_backup_restore</mat-icon>
+    {{ isSubmitting() ? 'Rolling back...' : confirmLabel }}
+  </button>
+</mat-dialog-actions>

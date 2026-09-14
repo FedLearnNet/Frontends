@@ -1,0 +1,13 @@
+<lib-status-title [type]="runStatusToBadgeStatus(data.run.status)">
+  #{{ data.nr }} {{ 'TEST_RUN_FOR' | translate: {name: data.app.name} }}
+</lib-status-title>
+<mat-dialog-content>
+  <lib-run-performance [meta]="data.run.meta"/>
+  <lib-experiment-workflow-node-detail
+    [config]="data.app.appConfig"
+    [experimentData]="experimentData"
+  />
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CLOSE' | translate }}</button>
+</mat-dialog-actions>

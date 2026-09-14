@@ -1,0 +1,80 @@
+@if (extended()) {
+
+  <div class="io-grid">
+    <div class="io-grid-header">
+      <div class="col input">Input</div>
+      <div class="col output">Output</div>
+    </div>
+
+    @for (con of connectorIds(); track $index) {
+      <div class="io-grid-row">
+        <div class="col input" (click)="openInputDialog($index)">
+          @if (con.inputId) {
+            <div class="input-item">
+              <span>{{ getInputName($index) }}</span>
+              <div fNodeInput
+                   [fInputMultiple]="false"
+                   [fInputCategory]="getInputType($index)"
+                   (click)="openInputDialogOrDelete($index, $event)"
+                   [fInputId]="con.inputId"
+                   fInputConnectableSide="left">
+                <mat-icon>close</mat-icon>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="col output">
+          @if (con.outputId) {
+            <div class="output-item"
+                 (click)="openOutputDialog($index)">
+              <span>{{ getOutputName($index) }}</span>
+              <div fNodeOutput
+                   [fCanBeConnectedInputs]="[getOutputType($index)]"
+                   (click)="openOutputDialogOrDelete($index, $event)"
+                   [fOutputId]="con.outputId"
+                   [fOutputMultiple]="true"
+                   fOutputConnectableSide="right"
+                   [isSelfConnectable]="false">
+                <mat-icon>close</mat-icon>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  @if (inputMode()) {
+    <div class="input-flex">
+      @for (con of connectorIds(); track $index) {
+        @if (con.inputId) {
+          <div fNodeInput
+               [fInputMultiple]="false"
+               [fInputCategory]="getInputType($index)"
+               (click)="openInputDialogOrDelete($index)"
+               [fInputId]="con.inputId"
+               fInputConnectableSide="top">
+            <mat-icon>close</mat-icon>
+          </div>
+        }
+      }
+    </div>
+  } @else {
+    <div class="output-flex">
+      @for (con of connectorIds(); track $index) {
+        @if (con.outputId) {
+          <div fNodeOutput
+               [fCanBeConnectedInputs]="[getOutputType($index)]"
+               (click)="openOutputDialogOrDelete($index)"
+               [fOutputId]="con.outputId"
+               fOutputConnectableSide="bottom"
+               [fOutputMultiple]="true"
+               [isSelfConnectable]="false">
+            <mat-icon>close</mat-icon>
+          </div>
+        }
+      }
+    </div>
+  }
+}

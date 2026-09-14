@@ -1,0 +1,33 @@
+.shop {
+  display: flex;
+
+  .main-content {
+    padding: 20px;
+    width: calc(100% - 300px);
+
+    .app-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: stretch;
+
+      app-app-card{
+        height: auto;
+      }
+    }
+
+    .item-counter {
+      text-align: center;
+      padding: 16px 0;
+      color: var(--mat-gray-600, #757575);
+      font-style: italic;
+    }
+
+    .infinite-scroll-loader {
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      width: 100%;
+    }
+  }
+}

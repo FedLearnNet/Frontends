@@ -1,0 +1,22 @@
+@if (fileContent(); as fileContent) {
+  <lib-file-content [fileContent]="fileContent" [name]="fileName()"></lib-file-content>
+} @else {
+
+  @if (retryScheduled() || loading()) {
+    <div class="loading-container">
+      <lib-skeleton-loader [variant]="'detail'" [showHeader]="false"/>
+    </div>
+  } @else if (error(); as err) {
+    <button mat-raised-button matTooltip="Reload current file" (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Reload
+    </button>
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  } @else if (loaded()) {
+    <button mat-raised-button matTooltip="Reload current file" (click)="reload()">
+      <mat-icon>refresh</mat-icon>
+      Reload
+    </button>
+    <pre class="text-content">Empty</pre>
+  }
+}

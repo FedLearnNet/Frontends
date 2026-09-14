@@ -1,0 +1,46 @@
+<lib-header
+  [title]="'MENU.YOUR_PROJECTS' | translate"
+  description="Create, review and manage your projects"
+  [enableAddBtn]="true"
+  addBtnLabel="Create Project"
+  (addBtnClick)="newProject()">
+</lib-header>
+<section>
+
+  <table mat-table [dataSource]="projects()" class="mat-elevation-z0">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
+      <td mat-cell *matCellDef="let project">
+        <a [routerLink]="['/project', project.id]">
+          {{ project.name }}
+        </a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.CREATED_AT' | translate }}</th>
+      <td mat-cell *matCellDef="let project">
+        <lib-time-badge [color]="'GRAY'"
+                        [date]="project.createdAt"/>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DESCRIPTION' | translate }}</th>
+      <td mat-cell *matCellDef="let project"> {{ project.description }}</td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</th>
+      <td mat-cell *matCellDef="let project">
+        <lib-status-badge [type]="projectStatusToBadgeStatus(project.status)" size="SMALL"
+                          [animate]="true"/>
+      </td>
+    </ng-container>
+
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</section>

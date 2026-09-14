@@ -1,0 +1,49 @@
+.global-auth-section {
+  display: block;
+  margin-top: 12px;
+}
+
+.global-auth-badges {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.global-auth-panel {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.global-auth-panel__meta {
+  display: grid;
+  gap: 10px;
+}
+
+.global-auth-form {
+  display: grid;
+  gap: 12px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.global-auth-form__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.error {
+  color: var(--mat-sys-error);
+}
+
+@media (max-width: 860px) {
+  .global-auth-panel {
+    grid-template-columns: 1fr;
+  }
+}

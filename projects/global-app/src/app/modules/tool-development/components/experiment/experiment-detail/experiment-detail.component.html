@@ -1,0 +1,71 @@
+<app-experiment-header [app]="app()" [experiment]="experiment()" [model]="modelVersion()" />
+<div class="experiment">
+  <div class="experiment--runs">
+    <table mat-table [dataSource]="runDataSource" class="experiment--table">
+
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef class="experiment--table--select">
+          <mat-checkbox (change)="$event ? toggleAllRows() : null"
+                        [checked]="runSelection.hasValue() && isAllSelected()"
+                        [indeterminate]="runSelection.hasValue() && !isAllSelected()"
+                        [aria-label]="checkboxLabel()" />
+        </th>
+        <td mat-cell *matCellDef="let row" class="experiment--table--select experiment--table--select--td">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? runSelection.toggle(row) : null"
+                        [checked]="runSelection.isSelected(row)"
+                        [aria-label]="checkboxLabel(row)" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="element">
+        <th mat-header-cell *matHeaderCellDef colspan="2">
+          <mat-form-field class="experiment--table--input">
+            <mat-label>{{ 'GRID.FILTER' | translate }}</mat-label>
+            <input matInput (keyup)="applyFilter($event)">
+          </mat-form-field>
+        </th>
+        <td mat-cell *matCellDef="let element" class="experiment--table--tdelement">
+
+          <div class="experiment--table--element">
+            <app-experiment-run-circle [color]="element.color" />
+            <div class="experiment--table--element--name">{{ element.name }}</div>
+          </div>
+          <div>
+            @for (param of hyperParamToDataSource(element.hyperParams); track param.key) {
+              <span><b>{{ param.key }}</b>: {{ param.value }}</span>
+            }
+          </div>
+
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <td mat-cell *matCellDef="let element" class="experiment--table--action">
+          <div class="experiment--table--element--status">
+            <lib-status-badge
+              size="SMALL"
+              [type]="runStatusToBadgeStatus(element.status)"></lib-status-badge>
+          </div>
+          <a mat-icon-button [routerLink]="['run', element.id]" class="experiment--table--action--icon">
+            <mat-icon>visibility</mat-icon>
+          </a>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['select', 'element']"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          (click)="runSelection.toggle(row)">
+      </tr>
+    </table>
+    <mat-paginator #paginator [pageSizeOptions]="[20, 25, 50, 100]" aria-label="Select page of runs" />
+
+
+  </div>
+  <div class="experiment--results">
+    <app-experiment-runs-charts [experimentRuns]="runSelection.selected"
+                                [diagrams]="experiment()?.diagramConfigs"
+                                (changed)="diagramsChanged($event!)" />
+  </div>
+</div>

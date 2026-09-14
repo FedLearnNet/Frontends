@@ -1,0 +1,88 @@
+<section class="preview-shell">
+    <mat-toolbar>
+        <div class="toolbar-copy">
+            <span>{{ 'FILTER_PREVIEW' | translate }}</span>
+            <small>{{ previewStats().total }} schema fields in scope</small>
+        </div>
+        <span class="spacer"></span>
+
+        <mat-button-toggle-group multiple [(ngModel)]="filterMapped">
+            <mat-button-toggle [value]="MappedFilter.Unmapped">
+                {{ 'UNMAPPED' | translate }}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="MappedFilter.Mapped">
+                {{ 'MAPPED' | translate }}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-button-toggle-group multiple [(ngModel)]="filterRequired">
+            <mat-button-toggle [value]="RequiredFilter.NotRequired">
+                {{ 'NOT_REQUIRED' | translate }}
+            </mat-button-toggle>
+            <mat-button-toggle [value]="RequiredFilter.Required">
+                {{ 'REQUIRED' | translate }}
+            </mat-button-toggle>
+        </mat-button-toggle-group>
+    </mat-toolbar>
+
+    @if (hasVisibleNodes()) {
+        <div class="tree-shell">
+            @for (node of visibleTree(); track node.node.id) {
+                <ng-container
+                        [ngTemplateOutlet]="renderNode"
+                        [ngTemplateOutletContext]="{ $implicit: node, indent: 0 }"/>
+            }
+        </div>
+    } @else {
+        <div class="empty-state">
+            <mat-icon>account_tree</mat-icon>
+            <h4>No fields match the current filters</h4>
+            <p>Adjust the preview filters to inspect mapped and required schema fields again.</p>
+        </div>
+    }
+</section>
+
+<ng-template #renderNode let-node let-indent="indent">
+    <div [style.marginLeft.px]="indent * 18" class="mapping-row" [class.group-row]="node.children.length > 0">
+        <div class="field-meta">
+            <div class="tree-dot" [class.group]="node.children.length > 0" [class.mapped]="!!getMapping(node.node)"></div>
+            <strong>
+                {{ node.node.name }}
+                @if (isRequired(node.node)) {
+                    <lib-badge text="Required" color="ORANGE" size="X-SMALL" [border]="true"/>
+                }
+            </strong>
+        </div>
+
+        @if (!node.node.childNodes?.length) {
+            @if (getMappingEntries(node.node); as mappings) {
+                @if (mappings.length) {
+                    <div class="mapping-pill mapping-pill--entries">
+                        @for (mapping of mappings; track mapping.mode + mapping.description) {
+                            <div class="mapping-entry">
+                                <lib-badge
+                                    [text]="mapping.modeLabel | translate"
+                                    [color]="mapping.modeColor"
+                                    size="X-SMALL"
+                                    [border]="true"/>
+                                <span>{{ mapping.description }}</span>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <span class="mapping-pill field-unmapped">
+                        {{ 'GRID.NO_MAPPING' | translate }}
+                    </span>
+                }
+            }
+        } @else {
+            <lib-badge text="Group" color="GRAY" size="X-SMALL" [border]="true"/>
+        }
+    </div>
+
+    @for (child of node.children; track child.node.id) {
+        <ng-container
+            [ngTemplateOutlet]="renderNode"
+            [ngTemplateOutletContext]="{ $implicit: child, indent: indent + 1 }" />
+    }
+</ng-template>

@@ -1,0 +1,47 @@
+@if (run) {
+  <app-experiment-header [app]="app" [experiment]="experiment" [run]="run"/>
+
+  <div class="detail">
+    <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+      <mat-tab label="Overview">
+        <lib-run-performance [meta]="run.meta"/>
+        <lib-run-hyper-params [hyperParams]="run.hyperParams"></lib-run-hyper-params>
+      </mat-tab>
+      <mat-tab label="Output">
+        <lib-app-run-output [appId]="app!.id"
+                            [runId]="run.id"
+                            [runType]="getRunType()"
+                            [outputData]="run.outputData"
+        />
+      </mat-tab>
+      <mat-tab label="Metric">
+        @if (getMetricsNames().length > 0) {
+
+          <div class="metric-group">
+            @for (name of getMetricsNames(); track name) {
+              <app-simple-metric-line [title]="name" [metrics]="getMetrics(name)"/>
+            }
+          </div>
+        } @else {
+          <lib-skeleton-loader [variant]="'list'"/>
+        }
+      </mat-tab>
+      <mat-tab label="Logs">
+        @if (logs$ | async; as logs) {
+          <app-app-log-table [logs]="logs"/>
+        } @else {
+          <lib-skeleton-loader [variant]="'list'"/>
+        }
+      </mat-tab>
+      <mat-tab label="Model">
+        @if (model$ | async; as model) {
+          <app-model-version-sub-detail [modelSub]="model" />
+        } @else {
+          <lib-skeleton-loader/>
+        }
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  <p> Run not found</p>
+}

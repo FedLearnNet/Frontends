@@ -1,0 +1,146 @@
+<div class="wizard-container">
+
+  @if (viewState() === 0) {
+    <div class="step-card">
+
+      <mat-toolbar class="step-card--toolbar">
+        <button mat-icon-button (click)="exitExecution()" aria-label="Go Back to selection">
+          <mat-icon>close</mat-icon>
+        </button>
+        <span>{{ name() }}</span>
+        <span class="spacer"></span>
+        @if (!workflow()) {
+          <button mat-raised-button (click)="toggleConfig()" aria-label="open Settings">
+            @if (showConfig()) {
+              <mat-icon>rule_settings</mat-icon>
+            } @else {
+              <mat-icon>settings</mat-icon>
+            }
+            @if (workflow()) {
+              <span>{{ workflow()!.nodes.length }} Nodes </span>
+            } @else {
+              <span>{{ federatedApp().appConfig.hyperparams.length }} Hyperparams </span>
+            }
+          </button>
+        }
+      </mat-toolbar>
+      @if (showConfig()) {
+        <div class="config-wrapper">
+          <lib-app-run-hyperparameter [app]="federatedApp()"
+                                      (formsValid)="hyperParamValid=$event"
+                                      (hyperParamsChange)="hyperParams.set($event)"
+          />
+        </div>
+      }
+      @if (workflow()) {
+        <lib-app-run-input [directUploadToWorkflow]="modelWorkflow()"
+                           [workflow]="workflow()"
+                           [workflowFiles]="workflowFiles()"
+                           (inputChanged)="changeInput($event)"
+        />
+      } @else {
+        <lib-app-run-input [directUploadToWorkflow]="modelWorkflow()"
+                           [app]="federatedApp()"
+                           [workflowFiles]="workflowFiles()"
+                           (formsValid)="inputValid=$event"
+                           (inputChanged)="changeInput($event)"
+        />
+      }
+      <button mat-fab extended class="start-btn" [disabled]="!isValid" (click)="startExecution()">
+        <mat-icon>play_circle</mat-icon>
+        {{ 'BUTTON.START_MODEL' | translate : {name: name()} }}
+      </button>
+    </div>
+  } @else if (viewState() === 1) {
+    <div class="status-container" [@containerAnim]>
+      @if (modelPrediction(); as pred) {
+        <div class="status-item"
+             [ngClass]="pred.status.toLowerCase()"
+             [@statusAnim]="pred.status">
+
+          <div class="status-indicator-wrapper">
+            <lib-badge
+              [text]="waitingForNextWorkflowStep() ? 'PENDING' : pred.status"
+              [color]="waitingForNextWorkflowStep() ? 'ORANGE' : 'BLUE'"
+              [border]="true"
+              [pulseCircle]="true"
+            ></lib-badge>
+            @if (currentWorkflowNode(); as currentNode) {
+              <lib-badge
+                [text]="'Node ' + currentNode.executionOrder + ': ' + (currentNode.modelDetail?.name || currentNode.appDetail?.name || currentNode.nodeId)"
+                color="GRAY"
+                [border]="true"
+              ></lib-badge>
+            } @else if (pred.currentWorkflowStep && pred.maxWorkflowSteps) {
+              <lib-badge
+                [text]="'Node ' + pred.currentWorkflowStep + '/' + pred.maxWorkflowSteps"
+                color="GRAY"
+                [border]="true"
+              ></lib-badge>
+            }
+            <div class="spacer"></div>
+            <lib-time-badge [date]="pred.createdAt" format="SHORT" [color]="'GRAY'"
+                            [calcDuration]="true"></lib-time-badge>
+            @if (canOpenWorkflowDetail()) {
+              <button mat-icon-button
+                      [matTooltip]="'View workflow in detail'"
+                      (click)="openWorkflowDetail()"
+                      class="btn--detail"
+              >
+                <mat-icon>view_timeline</mat-icon>
+              </button>
+            }
+            <button mat-icon-button
+                    [matTooltip]="'Show run details'"
+                    (click)="openDetail()"
+                    class="btn--detail"
+            >
+              <mat-icon>history</mat-icon>
+            </button>
+            <button mat-icon-button
+                    [matTooltip]="'Stop current run'"
+                    (click)="stopExecution()"
+                    class="btn--stop"
+            >
+              <mat-icon>stop_circle</mat-icon>
+            </button>
+          </div>
+          @if (pred.lastError) {
+            <lib-error-card>
+              {{ pred.lastError }}
+            </lib-error-card>
+          } @else if (waitingForNextWorkflowStep()) {
+            <lib-hint-card>
+              The previous workflow step finished. The next step is queued and will start automatically.
+            </lib-hint-card>
+          } @else {
+            @if (pred.lastLog) {
+              <lib-hint-card>
+                {{ pred.lastLog }}
+              </lib-hint-card>
+            } @else {
+              <lib-skeleton-loader [showHeader]="false" [variant]="'list'" [showActions]="false"
+                                   [cards]="1"></lib-skeleton-loader>
+            }
+          }
+        </div>
+      } @else {
+        <div class="status-item running">
+          <div class="status-indicator-wrapper">
+            <lib-badge [text]="'RUNNING'" color="BLUE" [border]="true" [pulseCircle]="true"></lib-badge>
+          </div>
+          <lib-skeleton-loader [showHeader]="false" [variant]="'list'" [showActions]="false"
+                               [cards]="1"></lib-skeleton-loader>
+        </div>
+      }
+    </div>
+  } @else if (viewState() === 2) {
+    <lib-app-run-output [appId]="modelPrediction()!.modelId!"
+                        [runId]="modelPrediction()!.id"
+                        [runType]="runType"
+                        [outputData]="modelPrediction()!.result"
+    />
+  }
+
+
+</div>

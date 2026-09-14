@@ -1,0 +1,134 @@
+:host {
+  display: block;
+}
+
+.patient-data-node {
+  --pd-node-border: rgba(148, 163, 184, 0.22);
+  --pd-node-surface: #ffffff;
+  --pd-node-header: rgba(248, 250, 252, 0.95);
+  --pd-node-text: #0f172a;
+  --pd-node-muted: rgba(71, 85, 105, 0.82);
+  --pd-node-accent: #4f46e5;
+
+  border: 1px solid var(--pd-node-border);
+  border-radius: 1rem;
+  background: var(--pd-node-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+
+  &.level-2 {
+    margin-bottom: 1.25rem;
+    border-radius: 1.125rem;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  &.level-3,
+  &.level-4,
+  &.level-5,
+  &.level-6 {
+    margin-bottom: 0.75rem;
+  }
+
+  &.is-group.level-3,
+  &.is-group.level-4 {
+    border-left: 3px solid var(--pd-node-accent);
+  }
+
+  &.is-field {
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.65) 0%, #ffffff 2.5rem);
+  }
+
+  &.is-collapsed {
+    .patient-data-node__header {
+      border-bottom: none;
+    }
+  }
+}
+
+.patient-data-node__header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  background: var(--pd-node-header);
+  border-bottom: 1px solid var(--pd-node-border);
+
+  &.is-clickable {
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      background: rgba(241, 245, 249, 0.98);
+    }
+  }
+
+  .expand-btn {
+    margin-right: 0.15rem;
+  }
+
+  .field-icon {
+    color: var(--pd-node-accent);
+    margin-right: 0.15rem;
+  }
+
+  h2, h3, h4, h5, h6, .headline {
+    margin: 0;
+    color: var(--pd-node-text);
+    line-height: 1.25;
+  }
+
+  .headline {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.patient-data-node__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.field-type {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--pd-node-muted);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.patient-data-node__body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.patient-data-node__children {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.patient-data-node__field-content {
+  min-width: 0;
+}
+
+:host-context(html.dark, .dark) .patient-data-node {
+  --pd-node-border: rgba(255, 255, 255, 0.08);
+  --pd-node-surface: #0b1020;
+  --pd-node-header: rgba(15, 23, 42, 0.92);
+  --pd-node-text: #e5e7eb;
+  --pd-node-muted: rgba(203, 213, 225, 0.75);
+  --pd-node-accent: #a5b4fc;
+
+  &.is-field {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, #0b1020 2.5rem);
+  }
+}

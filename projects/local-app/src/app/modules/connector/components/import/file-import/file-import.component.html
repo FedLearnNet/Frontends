@@ -1,0 +1,17 @@
+<div class="file-import">
+  @if (showPicker()) {
+    <lib-upload-file-area
+      [accept]="accept()"
+      [disabled]="busy()"
+      [label]="label()"
+      (toUploadFile)="selectFile($event)" />
+  }
+
+  @if (activity(); as activity) {
+    <app-import-activity
+      [activity]="activity"
+      [cancellable]="showPicker()"
+      (cancelled)="clear()"
+      (retried)="start()" />
+  }
+</div>

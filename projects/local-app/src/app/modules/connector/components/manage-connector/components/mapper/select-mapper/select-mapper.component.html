@@ -1,0 +1,460 @@
+<lib-closeable-dialog-title
+  [title]="data.directOnly
+  ? 'DIALOG.MAPPER.MAP_VALUE_TITLE'
+  : 'DIALOG.MAPPER.MAP_COLUMN_TITLE' | translate:{column: column}"
+  (maximizedChanged)="toggleMaximize($event)"/>
+
+<mat-dialog-content class="dialog-content">
+  @if (!data.directOnly) {
+    <section class="mode-section" aria-labelledby="mapping-mode-heading">
+      <div class="section-heading">
+        <div>
+          <span class="step-label">{{ 'DIALOG.MAPPER.STEP_ONE' | translate }}</span>
+          <h3 id="mapping-mode-heading">{{ 'DIALOG.MAPPER.CHOOSE_MAPPING_MODE' | translate }}</h3>
+        </div>
+        <span class="section-hint">{{ 'DIALOG.MAPPER.CHOOSE_MAPPING_MODE_HINT' | translate }}</span>
+      </div>
+
+      <div class="mode-grid">
+        <lib-select-btn
+          icon="arrow_forward"
+          [title]="'DIALOG.MAPPER.MODE_DIRECT' | translate"
+          [description]="'DIALOG.MAPPER.MODE_DIRECT_HELP' | translate"
+          [selected]="mode === ConnectorMappingMode.DIRECT"
+          (clicked)="selectMode(ConnectorMappingMode.DIRECT)"/>
+
+        <lib-select-btn
+          icon="call_split"
+          [title]="'DIALOG.MAPPER.MODE_VALUE_COLUMN' | translate"
+          [description]="'DIALOG.MAPPER.MODE_VALUE_COLUMN_HELP' | translate"
+          [selected]="mode === ConnectorMappingMode.VALUE_COLUMN"
+          (clicked)="selectMode(ConnectorMappingMode.VALUE_COLUMN)"/>
+
+        <lib-select-btn
+          icon="view_week"
+          [title]="'DIALOG.MAPPER.MODE_ONE_HOT' | translate"
+          [description]="'DIALOG.MAPPER.MODE_ONE_HOT_HELP' | translate"
+          [selected]="mode === ConnectorMappingMode.ONE_HOT"
+          (clicked)="selectMode(ConnectorMappingMode.ONE_HOT)"/>
+      </div>
+    </section>
+  }
+
+  @if (mode === ConnectorMappingMode.DIRECT) {
+    <section class="mapping-workspace" aria-labelledby="schema-target-heading">
+      @if (!data.directOnly) {
+        <div class="section-heading section-heading--compact">
+          <div>
+            <span class="step-label">{{ 'DIALOG.MAPPER.STEP_TWO' | translate }}</span>
+            <h3 id="schema-target-heading">{{ 'DIALOG.MAPPER.CHOOSE_SCHEMA_TARGET' | translate }}</h3>
+          </div>
+        </div>
+      } @else {
+        <p class="dialog-intro">{{ 'DIALOG.MAPPER.SELECT_VALUE_TARGET_INTRO' | translate }}</p>
+      }
+
+      <div class="selectors">
+        @for (level of levels; track level; let i = $index) {
+          @if (i === 0 || selectedValues[i - 1]) {
+            <div class="selector" [class.selector-nested]="i > 0">
+              @if (i > 0) {
+                @for (_ of [].constructor(i - 1); track $index) {
+                  <div class="spacer"></div>
+                }
+                <mat-icon class="subdirectory-icon">subdirectory_arrow_right</mat-icon>
+              }
+              <mat-form-field class="selector-field" appearance="outline" subscriptSizing="dynamic">
+                <mat-label>
+                  @if (i === 0) {
+                    {{ 'DIALOG.MAPPER.SELECT_GROUP' | translate }}
+                  } @else {
+                    {{ 'DIALOG.MAPPER.SELECT_FIELD_IN' | translate:{parent: selectedValues[i - 1]} }}
+                  }
+                </mat-label>
+                <input type="text"
+                       [placeholder]="'DIALOG.MAPPER.SEARCH_SCHEMA_FIELD' | translate"
+                       matInput
+                       [(ngModel)]="searchTexts[i]"
+                       (ngModelChange)="updateFilteredOptions(i)"
+                       [matAutocomplete]="auto">
+                <mat-icon matPrefix class="field-prefix-icon">{{ i === 0 ? 'folder' : 'description' }}</mat-icon>
+                <mat-autocomplete #auto="matAutocomplete"
+                                  panelClass="mapper-autocomplete-panel"
+                                  (optionSelected)="onSelection($event.option.value)">
+                  @for (option of filteredOptions[i]; track getOptionSelectionValue(option)) {
+                    <mat-option [value]="getOptionSelectionValue(option)" class="mapper-option">
+                      <div class="mapper-option__content">
+                        <div class="mapper-option__header">
+                          <mat-icon class="mapper-option__icon">{{ getNodeIcon(option.node) }}</mat-icon>
+                          <span class="mapper-option__title">{{ option.viewValue }}</span>
+                        </div>
+                        <span class="mapper-option__hint">{{ option.node.description }}</span>
+                        <div class="mapper-option__badges">
+                          @if (isChildSearchResult(i, option)) {
+                            <lib-badge [text]="getOptionPathLabel(option)" color="ORANGE" size="X-SMALL"
+                                       iconName="account_tree" [border]="true" [wrap]="true"/>
+                          }
+                          @if (isGroupNode(option.node)) {
+                            <lib-badge [text]="'DIALOG.MAPPER.GROUP' | translate" color="GRAY" size="X-SMALL"
+                                       [border]="true"/>
+                          }
+                          @if (option.node.dataType; as dataType) {
+                            <lib-badge [text]="dataType.name" color="BLUE" size="X-SMALL" [border]="true"/>
+                            <lib-badge [text]="dataType.type" color="GRAY" size="X-SMALL" [border]="true"/>
+                          }
+                          @if (option.node.ontology; as ontology) {
+                            <lib-badge [text]="ontology.name" color="GREEN" size="X-SMALL" [border]="true"
+                                       [wrap]="true"/>
+                          }
+                        </div>
+                      </div>
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+                @if (searchTexts[i]) {
+                  <button matSuffix mat-icon-button [attr.aria-label]="'BUTTON.CLEAR' | translate"
+                          (click)="clearFilteredOptions(i)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                }
+              </mat-form-field>
+            </div>
+          }
+        }
+      </div>
+
+      @if (getSelectedNode(); as selectedNode) {
+        <section class="node-detail" [attr.aria-label]="'DIALOG.MAPPER.SELECTED_FIELD_DETAILS' | translate">
+          <div class="node-detail__header">
+            <div class="node-detail__icon">
+              <mat-icon>{{ getNodeIcon(selectedNode) }}</mat-icon>
+            </div>
+            <div class="node-detail__summary">
+              <h3 class="node-detail__title">{{ selectedNode.name }}</h3>
+              <div class="node-detail__badges">
+                <lib-badge [text]="selectedNode.nodeType" color="GRAY" size="X-SMALL" [border]="true"
+                           [uppercase]="true"/>
+                @if (isGroupNode(selectedNode)) {
+                  <lib-badge [text]="'DIALOG.MAPPER.GROUP' | translate" color="ORANGE" size="X-SMALL" [border]="true"/>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="node-detail__description">
+            <span class="node-detail__label">{{ 'DIALOG.MAPPER.DESCRIPTION' | translate }}</span>
+            <p>{{ selectedNode.description || ('DIALOG.MAPPER.NO_DESCRIPTION' | translate) }}</p>
+          </div>
+
+          @if (isMappingTarget(selectedNode)) {
+            <div class="node-detail__grid">
+              <div class="node-detail__card">
+                <span class="node-detail__label">{{ 'DIALOG.MAPPER.ONTOLOGY' | translate }}</span>
+                @if (selectedNode.ontology; as ontology) {
+                  <p class="node-detail__value">{{ ontology.name }}</p>
+                  <p
+                    class="node-detail__meta">{{ ontology.description || ('DIALOG.MAPPER.NO_DESCRIPTION' | translate) }}</p>
+                } @else {
+                  <p class="node-detail__empty">{{ 'DIALOG.MAPPER.NO_ONTOLOGY' | translate }}</p>
+                }
+              </div>
+              <div class="node-detail__card">
+                <span class="node-detail__label">{{ 'DIALOG.MAPPER.DATATYPE' | translate }}</span>
+                @if (selectedNode.dataType; as dataType) {
+                  <div class="node-detail__datatype-header">
+                    <p class="node-detail__value">{{ dataType.name }}</p>
+                    <lib-badge [text]="dataType.type" color="BLUE" size="X-SMALL" [border]="true" [uppercase]="true"/>
+                  </div>
+                  <p
+                    class="node-detail__meta">{{ dataType.description || ('DIALOG.MAPPER.NO_DESCRIPTION' | translate) }}</p>
+                } @else {
+                  <p class="node-detail__empty">{{ 'DIALOG.MAPPER.NO_DATATYPE' | translate }}</p>
+                }
+              </div>
+            </div>
+          } @else {
+            <lib-info-card
+              type="INFO"
+              variant="NOTICE"
+              size="SMALL"
+              [title]="'DIALOG.MAPPER.SELECT_CHILD_FIELD' | translate"/>
+          }
+        </section>
+      }
+    </section>
+  } @else {
+    <section class="mapping-workspace value-workspace" aria-labelledby="value-mapping-heading">
+      <div class="section-heading section-heading--compact">
+        <div>
+          <span class="step-label">{{ 'DIALOG.MAPPER.STEP_TWO' | translate }}</span>
+          <h3 id="value-mapping-heading">
+            @if (mode === ConnectorMappingMode.VALUE_COLUMN) {
+              {{ 'DIALOG.MAPPER.CONFIGURE_VALUE_COLUMN' | translate }}
+            } @else {
+              {{ 'DIALOG.MAPPER.CONFIGURE_ONE_HOT' | translate }}
+            }
+          </h3>
+        </div>
+      </div>
+
+      @if (mode === ConnectorMappingMode.VALUE_COLUMN) {
+        <div class="column-route">
+          <div class="route-node route-node--source">
+            <mat-icon>input</mat-icon>
+            <span><small>{{ 'DIALOG.MAPPER.VALUE_SOURCE' | translate }}</small><strong>{{ column }}</strong></span>
+          </div>
+          <mat-icon class="route-arrow">arrow_forward</mat-icon>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="mapping-column-select">
+            <mat-label>{{ 'DIALOG.MAPPER.MAPPING_COLUMN' | translate }}</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              type="text"
+              matInput
+              autocomplete="off"
+              [(ngModel)]="mappingColumnSearch"
+              (ngModelChange)="onMappingColumnSearchChange($event)"
+              [placeholder]="'DIALOG.MAPPER.SEARCH_COLUMNS' | translate"
+              [matAutocomplete]="mappingColumnAutocomplete">
+            <mat-autocomplete
+              #mappingColumnAutocomplete="matAutocomplete"
+              [autoActiveFirstOption]="false"
+              (optionSelected)="selectMappingColumn($event.option.value)">
+              @for (availableColumn of getFilteredMappingColumns(); track availableColumn) {
+                <mat-option [value]="availableColumn">{{ availableColumn }}</mat-option>
+              }
+            </mat-autocomplete>
+            @if (mappingColumnSearch) {
+              <button
+                matSuffix
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'BUTTON.CLEAR' | translate"
+                (click)="clearMappingColumn($event)">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            <mat-hint>{{ 'DIALOG.MAPPER.MAPPING_COLUMN_HINT' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
+      } @else {
+        <lib-info-card
+          type="INFO"
+          variant="BANNER"
+          size="SMALL"
+          icon="view_week"
+          [border]="true"
+          [title]="'DIALOG.MAPPER.ONE_HOT_SOURCE' | translate:{column: column}"
+          [subtitle]="'DIALOG.MAPPER.ONE_HOT_SOURCE_HINT' | translate"/>
+      }
+
+      @if (mappingColumn) {
+        <div class="value-toolbar">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="value-search">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput [(ngModel)]="valueSearch" [placeholder]="'DIALOG.MAPPER.SEARCH_VALUES' | translate">
+            @if (valueSearch) {
+              <button matSuffix mat-icon-button (click)="valueSearch = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+          <button type="button" class="filter-chip" [class.filter-chip--active]="unmappedOnly"
+                  (click)="unmappedOnly = !unmappedOnly">
+            <mat-icon>{{ unmappedOnly ? 'check' : 'filter_alt' }}</mat-icon>
+            {{ 'DIALOG.MAPPER.UNMAPPED_ONLY' | translate }}
+          </button>
+          <div class="mapping-progress" aria-live="polite">
+            <strong>{{ getMappedValueCount() }}/{{ sourceValueOptions.length }}</strong>
+            <span>{{ 'DIALOG.MAPPER.VALUES_MAPPED' | translate }}</span>
+          </div>
+          @if (usesPreviewValidationValues(mappingColumn)) {
+            <lib-badge
+              [text]="'DIALOG.MAPPER.ALL_FILE_VALUES' | translate"
+              iconName="analytics"
+              color="BLUE"
+              size="X-SMALL"
+              [border]="true"/>
+          }
+        </div>
+
+        <div class="value-add">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="value-add__field">
+            <mat-icon matPrefix>add</mat-icon>
+            <input matInput [(ngModel)]="customValueInput"
+                   [placeholder]="'DIALOG.MAPPER.ADD_VALUE_PLACEHOLDER' | translate"
+                   (keydown.enter)="addCustomSourceValue()">
+          </mat-form-field>
+          <lib-btn
+            type="CUSTOM"
+            variant="SECONDARY"
+            size="SMALL"
+            icon="add"
+            [label]="'DIALOG.MAPPER.ADD_VALUE' | translate"
+            [disabled]="!customValueInput.trim()"
+            (clicked)="addCustomSourceValue()"/>
+        </div>
+
+        <div class="value-list">
+          @for (option of getFilteredSourceValues(); track option.value) {
+            <div class="value-row" role="button" tabindex="0" [class.value-row--mapped]="!!getValueTarget(option.value)"
+                 (click)="openValueTarget(option)" (keydown.enter)="openValueTarget(option)">
+              <span class="value-row__status"><mat-icon>{{ getValueTarget(option.value) ? 'check' : 'add' }}</mat-icon></span>
+              <span class="value-row__source">
+                <strong>{{ option.label }}</strong>
+                @if (option.custom) {
+                  <lib-badge [text]="'DIALOG.MAPPER.CUSTOM_VALUE' | translate" color="ORANGE" size="X-SMALL" [border]="true"/>
+                } @else if (option.occurrences !== undefined) {
+                  <small>{{ option.occurrences }} {{ option.occurrences === 1 ? ('DIALOG.MAPPER.OCCURRENCE' | translate) : ('DIALOG.MAPPER.OCCURRENCES' | translate) }}</small>
+                }
+              </span>
+              <mat-icon class="value-row__arrow">arrow_forward</mat-icon>
+              <span class="value-row__target">
+                @if (getValueTarget(option.value); as target) {
+                  <strong>{{ target.displayValue }}</strong>
+                  <small>{{ 'DIALOG.MAPPER.SCHEMA_TARGET' | translate }}</small>
+                } @else {
+                  <strong>{{ 'DIALOG.MAPPER.CHOOSE_TARGET' | translate }}</strong>
+                  <small>{{ 'DIALOG.MAPPER.NOT_MAPPED_YET' | translate }}</small>
+                }
+              </span>
+              @if (getValueTarget(option.value)) {
+                <button mat-icon-button type="button" class="value-row__clear"
+                        [attr.aria-label]="'BUTTON.CLEAR' | translate" (click)="clearValueTarget(option.value, $event)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              } @else if (option.custom) {
+                <button mat-icon-button type="button" class="value-row__clear"
+                        [attr.aria-label]="'BUTTON.DELETE' | translate" (click)="removeCustomSourceValue(option.value, $event)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              } @else {
+                <mat-icon class="value-row__chevron">chevron_right</mat-icon>
+              }
+            </div>
+          } @empty {
+            <div class="value-empty">
+              <mat-icon>search_off</mat-icon>
+              <strong>{{ 'DIALOG.MAPPER.NO_VALUES_FOUND' | translate }}</strong>
+              <span>{{ 'DIALOG.MAPPER.NO_VALUES_FOUND_HINT' | translate }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="value-empty value-empty--select">
+          <mat-icon>arrow_upward</mat-icon>
+          <strong>{{ 'DIALOG.MAPPER.SELECT_MAPPING_COLUMN' | translate }}</strong>
+          <span>{{ 'DIALOG.MAPPER.SELECT_MAPPING_COLUMN_HINT' | translate }}</span>
+        </div>
+      }
+    </section>
+  }
+
+  @if (!data.directOnly) {
+    <section class="validation-workspace" aria-labelledby="mapping-validation-heading">
+      <div class="section-heading section-heading--compact">
+        <div>
+          <span class="step-label">{{ 'DIALOG.MAPPER.STEP_THREE' | translate }}</span>
+          <h3 id="mapping-validation-heading">{{ 'DIALOG.MAPPER.VALIDATE_MAPPING' | translate }}</h3>
+        </div>
+        @if (hasCompleteMapping() && validationStatus !== 'CHECKING') {
+          <lib-btn
+            type="CUSTOM"
+            variant="GHOST"
+            size="SMALL"
+            icon="refresh"
+            [label]="'DIALOG.MAPPER.RUN_VALIDATION_AGAIN' | translate"
+            (clicked)="validateCurrentMapping()"/>
+        }
+      </div>
+
+      <p class="validation-intro">{{ 'DIALOG.MAPPER.VALIDATION_SAMPLE_HELP' | translate }}</p>
+
+      @if (validationStatus === 'IDLE') {
+        <lib-info-card
+          type="INFO"
+          variant="BANNER"
+          size="SMALL"
+          icon="rule"
+          [border]="true"
+          [title]="'DIALOG.MAPPER.VALIDATION_WAITING' | translate"
+          [subtitle]="'DIALOG.MAPPER.VALIDATION_WAITING_HELP' | translate"/>
+      } @else if (validationStatus === 'NO_DATA') {
+        <lib-info-card
+          type="WARNING"
+          variant="BANNER"
+          size="SMALL"
+          [border]="true"
+          [title]="'DIALOG.MAPPER.VALIDATION_NO_DATA' | translate"
+          [subtitle]="'DIALOG.MAPPER.VALIDATION_NO_DATA_HELP' | translate"/>
+      } @else if (validationStatus === 'CHECKING') {
+        <div class="validation-loading" aria-live="polite">
+          <mat-icon>sync</mat-icon>
+          <span>
+            <strong>{{ 'DIALOG.MAPPER.VALIDATION_RUNNING' | translate }}</strong>
+            <small>{{ 'DIALOG.MAPPER.VALIDATION_RUNNING_HELP' | translate }}</small>
+          </span>
+        </div>
+      } @else if (validationSummary; as summary) {
+        <lib-info-card
+          [type]="summary.valid ? 'SUCCESS' : 'ERROR'"
+          variant="BANNER"
+          size="SMALL"
+          [border]="true"
+          [title]="(summary.valid ? 'DIALOG.MAPPER.VALIDATION_SUCCESS' : 'DIALOG.MAPPER.VALIDATION_FAILED') | translate"
+          [subtitle]="'DIALOG.MAPPER.VALIDATION_CHECKED_COUNT' | translate:{count: summary.examples.length}"/>
+
+        <div class="validation-examples">
+          @for (example of summary.examples; track $index) {
+            <div class="validation-example"
+                 [class.validation-example--invalid]="!example.valid"
+                 [class.validation-example--missing]="example.missing && example.valid">
+              <div class="validation-example__route">
+                <span>
+                  <small>{{ 'DIALOG.MAPPER.SOURCE_EXAMPLE' | translate }}</small>
+                  <strong>{{ example.sourceLabel }}</strong>
+                </span>
+                <mat-icon>arrow_forward</mat-icon>
+                <span>
+                  <small>{{ 'DIALOG.MAPPER.SCHEMA_TARGET' | translate }}</small>
+                  <strong>{{ example.targetLabel }}</strong>
+                </span>
+              </div>
+              <div class="validation-example__result">
+                <code>{{ formatValidationValue(example.value) }}</code>
+                <lib-badge
+                  [text]="(example.missing && example.valid
+                    ? 'DIALOG.MAPPER.BLANK_ALLOWED_EXAMPLE'
+                    : example.valid
+                      ? 'DIALOG.MAPPER.VALID_EXAMPLE'
+                      : 'DIALOG.MAPPER.INVALID_EXAMPLE') | translate"
+                  [color]="example.missing && example.valid ? 'BLUE' : example.valid ? 'GREEN' : 'RED'"
+                  size="X-SMALL"
+                  [border]="true"/>
+              </div>
+              @if (!example.valid) {
+                <p>{{ example.message }}</p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <lib-btn
+    type="CUSTOM"
+    variant="SECONDARY"
+    icon="clear_all"
+    [label]="'BUTTON.CLEAR' | translate"
+    (clicked)="clear()"/>
+  <span class="spacer"></span>
+  <lib-btn
+    type="CUSTOM"
+    variant="PRIMARY"
+    icon="check"
+    [label]="'BUTTON.APPLY' | translate"
+    [disabled]="!isApplyEnabled()"
+    (clicked)="apply()"/>
+</mat-dialog-actions>

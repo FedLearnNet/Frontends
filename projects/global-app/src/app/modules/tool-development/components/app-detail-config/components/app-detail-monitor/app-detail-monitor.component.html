@@ -1,0 +1,12 @@
+<h2>{{ 'MENU.SYSTEM_PERFORMANCE' | translate }}</h2>
+<div class="process-wrapper">
+  @for (processName of getProcessesNames(); track processName) {
+    @if (getPerformance(processName)) {
+      <div class="process">
+        <canvas baseChart [data]="getChart(processName)" [options]="getChartOptions(processName)"
+                [type]="'line'"></canvas>
+      </div>
+    }
+  }
+</div>
+

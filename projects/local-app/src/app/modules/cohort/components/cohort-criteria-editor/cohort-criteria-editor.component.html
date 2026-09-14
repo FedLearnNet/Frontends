@@ -1,0 +1,119 @@
+<section class="criteria-editor">
+  <div class="criteria-editor__header">
+    <div>
+      <h3>Eligibility criteria</h3>
+      <p>Define adjustable inclusion and exclusion rules for this cohort.</p>
+    </div>
+    <div class="criteria-editor__actions">
+      <button mat-stroked-button type="button" (click)="addCriterion()">
+        <mat-icon>add</mat-icon>
+        Inclusion
+      </button>
+      <button mat-stroked-button type="button" (click)="addCriterion(criterionTypes[1])">
+        <mat-icon>add</mat-icon>
+        Exclusion
+      </button>
+    </div>
+  </div>
+
+  @if (!criteria().length) {
+    <div class="criteria-editor__empty">No criteria configured.</div>
+  }
+
+  <div class="criteria-list">
+    @for (group of criteria().controls; track group; let index = $index) {
+      <div class="criterion-row" [formGroup]="group">
+        <mat-form-field appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">
+            @for (type of criterionTypes; track type) {
+              <mat-option [value]="type">{{ type }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>FHIR role</mat-label>
+          <mat-select formControlName="variableRole">
+            @for (role of variableRoles; track role) {
+              <mat-option [value]="role">{{ role }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="criterion-row__field">
+          <mat-label>Ontology</mat-label>
+          <input
+            matInput
+            formControlName="ontologySearch"
+            [matAutocomplete]="ontologyAutocomplete"
+            (focus)="searchOntologies(index, group.getRawValue().ontologySearch)"
+            (input)="searchOntologies(index, group.getRawValue().ontologySearch)">
+          <mat-autocomplete #ontologyAutocomplete="matAutocomplete">
+            @for (ontology of ontologyOptionsByIndex[index]; track ontology.id) {
+              <mat-option [value]="ontologyLabel(ontology)"
+                          (onSelectionChange)="$event.isUserInput && onOntologySelected(index, group, ontology)">
+                {{ ontologyLabel(ontology) }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="criterion-row__field">
+          <mat-label>Datatype</mat-label>
+          <mat-select formControlName="dataTypeId" (selectionChange)="onDataTypeSelected(group)">
+            @for (dataType of datatypeOptionsByIndex[index]; track dataType.id) {
+              <mat-option [value]="dataType.id">{{ datatypeLabel(dataType) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Operator</mat-label>
+          <mat-select formControlName="operator">
+            @for (operator of operatorOptions(group); track operator.value) {
+              <mat-option [value]="operator.value">{{ operator.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        @if (!isValuelessOperator(group)) {
+          @if (isBoolean(group)) {
+            <mat-radio-group formControlName="value" class="criterion-row__radio">
+              <mat-radio-button [value]="'true'">true</mat-radio-button>
+              <mat-radio-button [value]="'false'">false</mat-radio-button>
+            </mat-radio-group>
+          } @else if (isCategorical(group) && valueOptions(group).length) {
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <mat-select formControlName="value">
+                @for (option of valueOptions(group); track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <mat-form-field appearance="outline">
+              <mat-label>Value</mat-label>
+              <input matInput formControlName="value">
+            </mat-form-field>
+          }
+        }
+
+        <mat-form-field appearance="outline" class="criterion-row__description">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="description">
+        </mat-form-field>
+
+        <button
+          mat-icon-button
+          color="warn"
+          type="button"
+          matTooltip="Remove criterion"
+          (click)="removeCriterion(index)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+</section>

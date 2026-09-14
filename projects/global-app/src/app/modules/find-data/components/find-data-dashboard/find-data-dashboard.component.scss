@@ -1,0 +1,39 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.container {
+  display: grid;
+  gap: 18px;
+}
+
+
+.query-builder-container {
+  width: 100%;
+}
+
+.query-execution-container {
+  height: 20px;
+}
+
+table {
+  width: 100%;
+  .action-column {
+    width: 50px;
+  }
+}
+
+.action-column--header {
+  background: transparent !important;
+  box-shadow: none;
+  padding: 0;
+}
+
+.query-link {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    color: #1e40af;
+    text-decoration: underline;
+  }
+}

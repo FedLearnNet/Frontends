@@ -1,0 +1,237 @@
+<div class="publish-info">
+
+  <mat-card class="summary-card" appearance="outlined">
+    <div class="summary-card__grid">
+
+      <div class="summary-item">
+        <div class="summary-item__label">
+          <mat-icon class="mi">folder</mat-icon>
+          Files
+        </div>
+
+        <div class="summary-item__value">
+          <lib-badge color="GRAY" text="Linked" [border]="true"> {{ (publishInfo().filePaths?.length ?? 0) }} linked
+          </lib-badge>
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-item__label">
+          <mat-icon class="mi">security</mat-icon>
+          Vulnerabilities
+        </div>
+
+        <div class="summary-item__value">
+          @if (vulnTotal() > 0) {
+            <lib-badge color="ORANGE" text="Total" [border]="true">{{ vulnTotal() }}</lib-badge>
+
+          } @else {
+            <lib-badge color="GRAY" text="Total 0" [border]="true"></lib-badge>
+          }
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-item__label">
+          <mat-icon class="mi">bug_report</mat-icon>
+          Malware
+        </div>
+
+        <div class="summary-item__value">
+          @if ((publishInfo().malwareScanResult?.infectedCount) ?? 0 > 0) {
+            <lib-badge color="ORANGE" text="Infected"
+                       [border]="true">{{ publishInfo().malwareScanResult?.infectedCount ?? 0 }}
+            </lib-badge>
+
+          } @else {
+            <lib-badge color="GRAY" text="Infected 0" [border]="true"></lib-badge>
+          }
+        </div>
+      </div>
+
+    </div>
+  </mat-card>
+
+  <div class="details-grid">
+
+
+    <mat-card class="panel" appearance="outlined">
+      <div class="panel__header">
+        <div class="panel__title">
+          <mat-icon>description</mat-icon>
+          Meta
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="panel__body">
+        <lib-kv label="Commit" [value]="publishInfo().commitHash"></lib-kv>
+        <lib-kv label="Image" [value]="publishInfo().imageName"></lib-kv>
+
+      </div>
+    </mat-card>
+
+
+    <mat-card class="panel" appearance="outlined">
+      <div class="panel__header">
+        <div class="panel__title">
+          <mat-icon>link</mat-icon>
+          Data files
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="panel__body">
+        @if ((publishInfo().filePaths?.length ?? 0) === 0) {
+          <div class="empty">No file links provided.</div>
+        } @else {
+          <div class="file-list">
+            @for (p of publishInfo().filePaths!; track trackByStr($index, p)) {
+              <div class="file-row">
+                <mat-icon class="file-row__icon">description</mat-icon>
+                <div class="file-row__text mono" matTooltip="{{ p }}">{{ p }}</div>
+                <button mat-button type="button" class="copy-btn" (click)="copy(p)">
+                  <mat-icon>content_copy</mat-icon>
+                  Copy
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="panel" appearance="outlined">
+      <div class="panel__header">
+        <div class="panel__title">
+          <mat-icon>shield</mat-icon>
+          Vulnerability scan
+        </div>
+
+        @if (publishInfo().vulnerabilityScanResult; as v) {
+          <div class="chips">
+            <lib-status-badge [size]="'SMALL'"
+                              [type]="v.success ? 'SUCCESS': 'FAILED'"/>
+            <lib-badge color="GRAY" [text]="v.tool"></lib-badge>
+          </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="panel__body">
+        @if (!publishInfo().vulnerabilityScanResult) {
+          <div class="empty">No vulnerability scan result present.</div>
+        } @else {
+          @let v = publishInfo().vulnerabilityScanResult!;
+          <lib-kv label="Target" [value]="v.target"></lib-kv>
+          <div class="chips">
+            <lib-badge color="RED" text="Critical" size="LARGE" [border]="true">{{ v.summary.critical }}
+            </lib-badge>
+            <lib-badge color="ORANGE" text="High" size="LARGE" [border]="true">{{ v.summary.high }}</lib-badge>
+          </div>
+
+          @if (v.rawReport) {
+            <mat-expansion-panel class="exp" togglePosition="after">
+              <mat-expansion-panel-header>
+                <mat-panel-title>Detail</mat-panel-title>
+                <mat-panel-description>For audit</mat-panel-description>
+              </mat-expansion-panel-header>
+              @for (r of toKeyValueList(v.rawReport); track $index) {
+                <div class="exp--1">
+                  <h3>{{ r.key }}</h3>
+                  @for (v of r.value; track $index) {
+                    <h4 class="exp--headline">
+                      {{ getValue(v, "VulnerabilityID") }}
+                      <lib-status-badge [size]="'SMALL'"
+                                        [text]="getValue(v, 'Severity')"
+                                        [type]="getValue(v, 'Severity') === 'HIGH' ? 'WARNING': 'FAILED'"/>
+                    </h4>
+                    <div class="exp--2">
+                      <lib-kv label="PkgID" [value]="getValue(v, 'PkgID')"></lib-kv>
+                      <lib-kv label="PrimaryURL" [value]="getValue(v, 'PrimaryURL')"></lib-kv>
+                      <lib-kv label="Title" [value]="getValue(v, 'Title')"></lib-kv>
+                      <lib-kv label="Description" [value]="getValue(v, 'Description')"></lib-kv>
+                    </div>
+                  }
+                </div>
+              }
+            </mat-expansion-panel>
+          }
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="panel" appearance="outlined">
+      <div class="panel__header">
+        <div class="panel__title">
+          <mat-icon>bug_report</mat-icon>
+          Malware scan
+        </div>
+
+        @if (publishInfo().malwareScanResult; as m) {
+          <div class="chips">
+            <lib-status-badge [size]="'SMALL'"
+                              [type]="m.success ? 'SUCCESS': 'FAILED'"/>
+            <lib-badge color="GRAY" [text]="m.tool"></lib-badge>
+          </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="panel__body">
+        @if (!publishInfo().malwareScanResult) {
+          <div class="empty">No malware scan result present.</div>
+        } @else {
+          @let m = publishInfo().malwareScanResult!;
+          @if ((m.findings.length) === 0) {
+            <div class="empty">No infected files reported.</div>
+          } @else {
+            <table mat-table [dataSource]="m.findings" class="findings-table">
+
+              <ng-container matColumnDef="file">
+                <th mat-header-cell *matHeaderCellDef>File</th>
+                <td mat-cell *matCellDef="let f">
+                  <div class="filecell">
+                    <mat-icon class="filecell__icon">description</mat-icon>
+                    <div class="mono" matTooltip="{{ f.filePath }}">{{ f.filePath }}</div>
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="signature">
+                <th mat-header-cell *matHeaderCellDef>Signature</th>
+                <td mat-cell *matCellDef="let f" class="mono">
+                  {{ f.signature ?? '—' }}
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="malwareDisplayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: malwareDisplayedColumns;"></tr>
+            </table>
+
+            <mat-expansion-panel class="exp" togglePosition="after">
+              <mat-expansion-panel-header>
+                <mat-panel-title>Raw lines</mat-panel-title>
+                <mat-panel-description>clamav output per finding</mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="raw-lines">
+                @for (f of m.findings; track trackByFinding($index, f)) {
+                  <div class="raw-line">
+                    <div class="raw-line__file mono">{{ f.filePath }}</div>
+                    <div class="raw-line__text mono">{{ f.rawLine ?? '—' }}</div>
+                  </div>
+                }
+              </div>
+            </mat-expansion-panel>
+          }
+        }
+      </div>
+    </mat-card>
+
+  </div>
+</div>

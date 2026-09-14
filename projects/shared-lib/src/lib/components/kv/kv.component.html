@@ -1,0 +1,18 @@
+<div
+  class="kv"
+  [class.mono]="mono()"
+  [class.multiline]="multiline()"
+  [class.no-border]="!border()"
+>
+  <div class="k">{{ label() }}</div>
+
+  <div class="v">
+    @if (value() === null || value() === undefined || value() === '') {
+      <ng-content>
+        <span class="empty">—</span>
+      </ng-content>
+    } @else {
+      {{ value() }}
+    }
+  </div>
+</div>

@@ -1,0 +1,59 @@
+.analysis-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__title {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    overflow: hidden;
+
+    .file {
+      flex: 1;
+      max-width: 100%;
+      height: auto;
+      max-height: 100%;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    overflow: scroll;
+  }
+
+  &__loading {
+    display: flex;
+  }
+
+  &__skeleton {
+    width: 100%;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__time {
+    opacity: 0.75;
+  }
+
+  &__retry {
+    border-radius: 999px;
+    height: 36px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+  }
+}

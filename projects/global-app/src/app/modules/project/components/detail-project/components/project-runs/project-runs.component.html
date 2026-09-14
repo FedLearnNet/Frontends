@@ -1,0 +1,14 @@
+<div class="project-runs">
+  <mat-tab-group>
+    <mat-tab [label]="('EXPERIMENTS' | translate)">
+      <app-list-federated-experiment [project]="project()" [workflow]="workflow()"/>
+    </mat-tab>
+    <mat-tab [label]="('LOCAL_EXPERIMENTS' | translate)">
+      <app-list-local-experiment [project]="project()" [workflow]="workflow()"/>
+    </mat-tab>
+    <mat-tab [label]="('TEST_RUNS' | translate)">
+      <app-local-test-experiment [project]="project()" [workflow]="workflow()"/>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+

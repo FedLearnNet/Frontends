@@ -1,0 +1,48 @@
+<lib-closeable-dialog-title
+    (maximizedChanged)="toggleMaximize($event)"
+    [title]="title()"
+/>
+
+@let editable = data?.editable ?? false;
+
+@if (errorMessage(); as err) {
+    <lib-error-card>
+        {{ err }}
+    </lib-error-card>
+}
+
+<mat-dialog-content>
+    <lib-json-editor
+        [jsonObject]="connector()"
+        [editable]="editable"
+        (valueChange)="onJsonChanged($event)"
+    />
+</mat-dialog-content>
+
+@if (viewMode && connector()) {
+    <mat-dialog-actions align="end" class="dialog-actions view-actions">
+        <lib-btn
+            type="CUSTOM"
+            variant="SECONDARY"
+            icon="content_copy"
+            [label]="'BUTTON.COPY_JSON' | translate"
+            (clicked)="copyJson()"
+        />
+        <lib-btn
+            type="DOWNLOAD"
+            variant="PRIMARY"
+            [label]="'BUTTON.DOWNLOAD_JSON' | translate"
+            (clicked)="downloadJson()"
+        />
+    </mat-dialog-actions>
+} @else if (editable && connector()) {
+    <mat-dialog-actions align="end" class="dialog-actions">
+
+        @if (createMode) {
+            <lib-btn type="CREATE" (clicked)="create()" />
+        } @else {
+            <lib-btn type="UPDATE" variant="PRIMARY" (clicked)="update()" />
+        }
+
+    </mat-dialog-actions>
+}

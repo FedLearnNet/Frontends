@@ -1,0 +1,45 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.fed-detail {
+  &__card {
+    border-radius: 16px;
+    transition: box-shadow 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    &-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+
+      &--stack {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+    }
+  }
+
+  &__label {
+    color: rgba(0, 0, 0, 0.55);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.4px;
+  }
+
+  &__counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+}

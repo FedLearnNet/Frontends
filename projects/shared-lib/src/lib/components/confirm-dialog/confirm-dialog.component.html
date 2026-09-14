@@ -1,0 +1,23 @@
+<div class="dialog">
+  <h2 mat-dialog-title class="dialog--header">
+    {{ confirmButtonData.title }}
+  </h2>
+
+  <div mat-dialog-content class="dialog--content">
+    <p>{{ confirmButtonData.message }}</p>
+  </div>
+
+  <div mat-dialog-actions class="dialog--footer">
+    @if (confirmButtonData.dismissButtonText) {
+      <button mat-raised-button color="secondary" (click)="onDismiss()">
+        {{ confirmButtonData.dismissButtonText }}
+      </button>
+    }
+    <span class="spacer"></span>
+    @if (confirmButtonData.confirmButtonText) {
+      <button mat-raised-button color="primary" (click)="onConfirm()">
+        {{ confirmButtonData.confirmButtonText }}
+      </button>
+    }
+  </div>
+</div>

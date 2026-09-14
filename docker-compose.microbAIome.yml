@@ -1,0 +1,15 @@
+services:
+  local-app-microbaiome:
+    build:
+      context: .
+      dockerfile: Dockerfile.microbAIome.local
+    container_name: local-frontend-microbaiome
+    ports:
+      - "4011:80"
+  global-app-microbaiome:
+    build:
+      context: .
+      dockerfile: Dockerfile.microbAIome.global
+    container_name: global-frontend-microbaiome
+    ports:
+      - "4010:80"

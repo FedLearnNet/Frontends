@@ -1,0 +1,20 @@
+@if (date()) {
+  @if (calcDuration()) {
+    @if (dateTo()) {
+      <lib-status-badge [text]="duration()"
+                        [type]="'SUCCESS'"
+                        [size]="size()"
+                        [animate]="true" />
+    } @else {
+      <lib-status-badge [text]="duration()"
+                        [type]="'RUNNING'"
+                        [size]="size()"
+                        [animate]="true" />
+    }
+  } @else {
+    <lib-badge [text]="computedDateString()" [color]="color()" [size]="size()" iconName="history_2" />
+  }
+} @else {
+  <lib-badge text="N/A" [color]="'GRAY'" [size]="size()" [uppercase]="true" />
+}
+

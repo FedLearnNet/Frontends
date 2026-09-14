@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>
+  Create your own analysis Project
+</h2>
+
+<mat-dialog-content>
+
+  <p>
+    You can create a analysis project here here.
+  </p>
+
+  <form [formGroup]="newExperimentForm">
+    <mat-form-field class="full-width">
+      <mat-label>{{ 'GRID.PROJECT_NAME' | translate }}</mat-label>
+      <input matInput [placeholder]="('PROJECT_NAME_EXAMPLE' | translate)" formControlName="name" required>
+      @if (newExperimentForm.controls.name.hasError('required')) {
+        <mat-error>
+          {{ 'VALIDATION.REQUIRED' | translate:{fieldName: ('GRID.PROJECT_NAME' | translate)} }}
+        </mat-error>
+      }
+    </mat-form-field>
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="actions">
+  <button mat-button mat-dialog-close>{{ 'BUTTON.CLOSE' | translate }}</button>
+  <button mat-button [disabled]="newExperimentForm.invalid" (click)="create()">{{ 'BUTTON.CREATE' | translate }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,84 @@
+<lib-closeable-dialog-title
+  title="Local Metrics Request"
+  (maximizedChanged)="toggleMaximize($event)"/>
+
+<mat-dialog-content class="content">
+
+  <!-- Status overview -->
+  <lib-info-grid title="Overview">
+    <lib-info-item title="Status">
+      <lib-status-badge
+        [type]="getStatusBadgeType(data.request.status)"
+        [text]="data.request.status"
+        size="SMALL"
+        [animate]="data.request.status === FederatedLearningRequestStatus.PENDING"/>
+    </lib-info-item>
+    @if (data.request.projectName) {
+      <lib-info-item title="Project">
+        {{ data.request.projectName }}
+      </lib-info-item>
+    }
+    <lib-info-item title="Requested By">
+      {{ data.request.requestKeycloakId || ('EMPTY_VALUE' | translate) }}
+    </lib-info-item>
+    <lib-info-item title="Received At">
+      <lib-time-badge [date]="data.request.createdAt"/>
+    </lib-info-item>
+    @if (data.request.verifiedOn) {
+      <lib-info-item title="Decided On">
+        <lib-time-badge [date]="data.request.verifiedOn"/>
+      </lib-info-item>
+    }
+    @if (data.request.verifiedByKeycloakId) {
+      <lib-info-item title="Decided By">
+        {{ data.request.verifiedByKeycloakId }}
+      </lib-info-item>
+    }
+  </lib-info-grid>
+
+  <mat-divider/>
+  @if (data.request.status === FederatedLearningRequestStatus.PENDING) {
+    <lib-info-card
+      subtitle=" Only aggregated metric values (e.g., loss and accuracy per epoch) will be transmitted.
+      No individual patient identifiers or raw data are included."
+      size="SMALL"
+      type="INFO">
+    </lib-info-card>
+    <lib-info-card
+      title="Accept"
+      icon="check_circle"
+      subtitle="Your metrics will be sent to the global coordinator and included in the results."
+      type="SUCCESS">
+    </lib-info-card>
+    <lib-info-card
+      title="Decline"
+      icon="cancel"
+      subtitle="No data will be shared. The global coordinator will see your clinic as declined."
+      type="ERROR">
+    </lib-info-card>
+  } @else {
+    <lib-info-card
+      [title]="data.request.status === FederatedLearningRequestStatus.REJECTED ? 'Declined' : 'Accepted'"
+      [subtitle]="'This request was ' + (data.request.status === FederatedLearningRequestStatus.REJECTED ? 'declined' : 'accepted') + (data.request.verifiedOn ? ' on ' + data.request.verifiedOn : '')"
+      [type]="data.request.status === FederatedLearningRequestStatus.REJECTED ? 'ERROR' : 'SUCCESS'"
+      [icon]="data.request.status === FederatedLearningRequestStatus.REJECTED ? 'cancel' : 'check_circle'"
+      variant="BANNER"
+      size="MEDIUM">
+    </lib-info-card>
+  }
+
+</mat-dialog-content>
+@if (data.request.status === FederatedLearningRequestStatus.PENDING) {
+  <mat-dialog-actions class="margin-top-auto" align="end">
+    <lib-btn type="CANCEL"
+             label="Decline"
+             [disabled]="isSubmitting()"
+             (clicked)="onReject()"/>
+    <span class="spacer"></span>
+    <lib-btn type="SHARE"
+             icon="check_circle"
+             label="Accept &amp; Share Metrics"
+             [disabled]="isSubmitting()"
+             (clicked)="onAccept()"/>
+  </mat-dialog-actions>
+}

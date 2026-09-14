@@ -1,0 +1,26 @@
+<lib-header
+  title="My Workflows"
+  description="Create, review and manage your workflows"
+  [enableAddBtn]="true"
+  addBtnLabel="New empty Workflow"
+  (addBtnClick)="onAddNewOne()">
+</lib-header>
+
+<section class="workflow-list">
+  @for (wf of workflows(); track wf.id) {
+    @if (route()) {
+      <a [routerLink]="['/workflow', wf.id]">
+        <lib-workflow-overview-card
+          class="workflow-list__item"
+          [workflow]="wf"
+        />
+      </a>
+    } @else {
+      <lib-workflow-overview-card
+        class="workflow-list__item"
+        [workflow]="wf"
+        (workflowSelected)="onWorkflowClicked($event)"
+      />
+    }
+  }
+</section>

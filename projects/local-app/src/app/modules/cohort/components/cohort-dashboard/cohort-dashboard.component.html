@@ -1,0 +1,81 @@
+<lib-header
+  title="Cohorts"
+  description="Create and manage patient cohorts"
+  [enableAddBtn]="true"
+  addBtnLabel="New Cohort"
+  (addBtnClick)="navigateToNew()">
+</lib-header>
+<section>
+  <mat-table [dataSource]="cohorts" class="mat-elevation-z0">
+
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element">
+        <div class="cohort-name-cell">
+          <a [routerLink]="[element.id]"> {{ element.name }}</a>
+          @if (isDeleting(element)) {
+            <lib-status-badge
+              type="RUNNING"
+              [text]="'COHORT_DELETION.DELETING' | translate"
+              size="X-SMALL"
+              [border]="true"/>
+          }
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <mat-header-cell *matHeaderCellDef>{{ 'GRID.DESCRIPTION' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element">{{ element.description }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="amountPatients">
+      <mat-header-cell *matHeaderCellDef class="amount-patient-cell">
+        Patients
+      </mat-header-cell>
+
+      <mat-cell *matCellDef="let element" class="amount-patient-cell">
+        <button mat-icon-button
+                [routerLink]="isDeleting(element) ? null : [element.id]"
+                [disabled]="isDeleting(element)"
+                fragment="Patients"
+                [matTooltip]="('TOOLTIP.SHOW_COHORT_PATIENT_LIST' | translate)">
+
+          <mat-icon
+            [matBadge]="element.amountOfPatients"
+            [matBadgeDescription]="('LABEL.PATIENT' | translate) + ': ' + element.amountOfPatients"
+            matBadgeOverlap="false"
+            aria-hidden="false"
+            class="patient-count-badge">
+            group
+          </mat-icon>
+
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef class="actions-cell">{{ 'GRID.ACTION' | translate }}</mat-header-cell>
+      <mat-cell *matCellDef="let element" class="actions-cell">
+        <lib-btn
+          type="CUSTOM"
+          variant="GHOST"
+          icon="cable"
+          [iconOnly]="true"
+          [disabled]="isDeleting(element)"
+          [matTooltip]="('TOOLTIP.MANAGE_CONNECTORS' | translate)"
+          (clicked)="navigateToConnectors(element)"/>
+        <lib-btn
+          type="DELETE"
+          variant="GHOST"
+          [iconOnly]="true"
+          [disabled]="isDeleting(element)"
+          [matTooltip]="('TOOLTIP.DELETE_COHORT' | translate)"
+          (clicked)="deleteCohort(element)"/>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns" />
+    <mat-row class="clickable-row" *matRowDef="let row; columns: displayedColumns;" />
+  </mat-table>
+</section>

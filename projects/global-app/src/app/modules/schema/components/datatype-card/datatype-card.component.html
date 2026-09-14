@@ -1,0 +1,56 @@
+@if (dataType(); as dt) {
+  <mat-card class="dt-card" appearance="outlined">
+    <div class="dt-header">
+      <div class="dt-title">
+        <div class="dt-name" [title]="dt.name">{{ dt.name }}</div>
+
+        <div class="dt-meta">
+          <lib-badge
+            [color]="'GRAY'"
+            [border]="true"
+            [text]="typeLabel(dt.type)"></lib-badge>
+          @if (hasSchemas()) {
+            <lib-badge
+              [border]="true"
+              [iconName]="'inventory_2'"
+              [text]="'In schema'"></lib-badge>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (dt.description) {
+      <div class="dt-desc">
+        {{ dt.description }}
+      </div>
+    } @else {
+      <div class="dt-desc dt-desc--muted">No description provided.</div>
+    }
+
+    <div class="dt-stats">
+      <div class="dt-stat">
+        <div class="dt-stat__label">Validations</div>
+        <div class="dt-stat__value">{{ validationsCount() }}</div>
+      </div>
+
+      <div class="dt-stat">
+        <div class="dt-stat__label">Allowed values</div>
+        <div class="dt-stat__value">{{ allowedValuesCount() }}</div>
+      </div>
+
+      <div class="dt-stat">
+        <div class="dt-stat__label">Ontologies</div>
+        <div class="dt-stat__value">{{ hasOntologies() ? (dt.ontologyIds?.length ?? 0) : 0 }}</div>
+      </div>
+    </div>
+
+    <button mat-icon-button class="dt-btn" (click)="openDetailPage()" aria-label="Open data type detail">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </mat-card>
+} @else if (showAddBtn()) {
+  <button class="dt-add" type="button" (click)="openDetailPage()" aria-label="Add data type">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    <span>Add data type</span>
+  </button>
+}

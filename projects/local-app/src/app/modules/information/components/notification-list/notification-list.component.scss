@@ -1,0 +1,84 @@
+@use "projects/shared-lib/src/lib/styles/main.scss";
+
+.header-actions {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 8px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  mat-form-field {
+    min-width: 180px;
+  }
+}
+
+.table-container {
+  overflow: auto;
+
+  mat-header-cell,
+  mat-cell {
+    white-space: nowrap;
+  }
+}
+
+.title-cell {
+  font-weight: 500;
+  color: #1f2937;
+
+  &.unread {
+    font-weight: 700;
+  }
+}
+
+.message-cell {
+  color: #475569;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: 480px;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.actions-cell {
+  justify-content: flex-end;
+  gap: 4px;
+
+  lib-btn {
+    display: inline-flex;
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &.row-unread {
+    background: #f5f8ff;
+
+    &:hover {
+      background: #eef3ff;
+    }
+  }
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}

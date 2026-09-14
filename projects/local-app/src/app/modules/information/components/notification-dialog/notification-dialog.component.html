@@ -1,0 +1,74 @@
+<div class="dialog-header">
+  <div class="dialog-title">
+    <mat-icon>notifications</mat-icon>
+    <span>{{ 'INFORMATION.NEW_NOTIFICATIONS' | translate }}</span>
+    <lib-badge color="GRAY" [text]="unread().length + ''" size="X-SMALL"/>
+  </div>
+  <lib-btn type="CLOSE" variant="GHOST" [iconOnly]="true" (clicked)="close()"/>
+</div>
+
+<mat-dialog-content class="dialog-body">
+  @if (unread().length === 0) {
+    <div class="empty">
+      <mat-icon>mark_email_read</mat-icon>
+      <p>{{ 'INFORMATION.NO_UNREAD' | translate }}</p>
+    </div>
+  } @else {
+    <ul class="notif-list">
+      @for (n of unread(); track n.id) {
+        <li class="notif" (click)="openDetail(n)">
+          <div class="notif__indicator" [attr.data-type]="n.type"></div>
+          <div class="notif__body">
+            <div class="notif__row">
+              <lib-badge [color]="typeColor(n.type)" [text]="n.type" size="X-SMALL"/>
+              <span class="notif__title">{{ n.title }}</span>
+            </div>
+            <p class="notif__message">{{ n.message }}</p>
+            <div class="notif__meta">
+              @if (n.sourceService) {
+                <span>{{ n.sourceService }}</span>
+                <span class="dot">·</span>
+              }
+              <span>{{ n.createdAt | date:'short' }}</span>
+            </div>
+          </div>
+          <div class="notif__actions" (click)="$event.stopPropagation()">
+            <lib-btn
+              type="CUSTOM"
+              variant="GHOST"
+              [iconOnly]="true"
+              icon="mark_email_read"
+              size="SMALL"
+              [matTooltip]="'INFORMATION.MARK_AS_READ' | translate"
+              (clicked)="markAsRead(n)"/>
+            <lib-btn
+              type="CUSTOM"
+              variant="GHOST"
+              [iconOnly]="true"
+              icon="inventory_2"
+              size="SMALL"
+              [matTooltip]="'INFORMATION.ARCHIVE' | translate"
+              (clicked)="archive(n)"/>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  @if (unread().length > 0) {
+    <lib-btn
+      type="CUSTOM"
+      variant="GHOST"
+      icon="done_all"
+      [label]="'INFORMATION.MARK_ALL_READ' | translate"
+      (clicked)="markAllAsRead()"/>
+  }
+  <span class="spacer"></span>
+  <lib-btn
+    type="CUSTOM"
+    variant="SECONDARY"
+    [label]="'INFORMATION.VIEW_ALL' | translate"
+    (clicked)="viewAll()"/>
+</mat-dialog-actions>

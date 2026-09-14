@@ -1,0 +1,79 @@
+<h2 mat-dialog-title>{{ 'FEDERATED.START_TITLE' | translate }}</h2>
+
+<mat-dialog-content class="fed-start">
+  <p class="fed-start__subtitle">
+    {{ 'FEDERATED.START_SUBTITLE' | translate }}
+  </p>
+
+  <div class="fed-start__grid">
+    <mat-form-field appearance="outline">
+      <mat-label>Poll interval (seconds)</mat-label>
+      <input matInput type="number" [(ngModel)]="pollInterval"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Timeout (seconds)</mat-label>
+      <input matInput type="number" [(ngModel)]="timeout"/>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Max polls</mat-label>
+      <input matInput type="number" [(ngModel)]="maxPolls"/>
+    </mat-form-field>
+  </div>
+
+  <div class="fed-start__participants-header">
+    <h3>{{ 'FEDERATED.PARTICIPANTS' | translate }} ({{ participants().length }})</h3>
+    <button mat-stroked-button color="primary" (click)="addParticipant()">
+      <mat-icon>add</mat-icon>
+      {{ 'FEDERATED.ADD_PARTICIPANT' | translate }}
+    </button>
+  </div>
+
+  <div class="fed-start__participants">
+    @for (p of participants(); track p.participantId; let i = $index) {
+      <div class="fed-start__participant" [class.is-aggregator]="p.role === FLNetParticipantRole.AGGREGATOR">
+        <div class="fed-start__participant-main">
+          <div class="fed-start__participant-id">
+            <lib-federated-client-type-badge [clientType]="p.role"
+                                             [clientName]="p.participantId"></lib-federated-client-type-badge>
+          </div>
+          <div class="fed-start__participant-paths">
+            @if (p.inputFilePaths && Object.keys(p.inputFilePaths).length > 0) {
+              <span><mat-icon inline>upload_file</mat-icon>
+                {{ Object.keys(p.inputFilePaths).length }} inputs</span>
+            }
+          </div>
+        </div>
+        <div class="fed-start__participant-actions">
+          <button mat-icon-button (click)="editParticipant(i)" [matTooltip]="'BUTTON.EDIT' | translate">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="removeParticipant(i)" [matTooltip]="'BUTTON.DELETE' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (participants().length === 0) {
+      <p class="fed-start__empty">{{ 'FEDERATED.NO_PARTICIPANTS' | translate }}</p>
+    }
+  </div>
+
+  <mat-divider/>
+
+  @if (!isValid()) {
+    <p class="fed-start__hint">
+      {{ 'FEDERATED.VALIDATION_HINT' | translate }}
+    </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancelClick()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  <button mat-flat-button color="primary" [disabled]="!isValid()" (click)="onRunClick()">
+    <mat-icon>play_arrow</mat-icon>
+    {{ 'FEDERATED.START_RUN' | translate }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,57 @@
+<lib-header
+  [enableGoBack]="hasGoBack()"
+  [locationBack]="true"
+  [description]="description()"
+  [title]="name()"
+>
+  <div suffix class="toolbar-actions">
+    @if (hasActions()) {
+      @if (canRun()) {
+        <button mat-raised-button (click)="startExperiment.emit()">
+          <mat-icon>start</mat-icon>
+          <span>Start</span>
+        </button>
+      }
+      @if (canStop()) {
+        <button mat-raised-button (click)="stop.emit()">
+          <mat-icon>cancel</mat-icon>
+          <span>Stop</span>
+        </button>
+      }
+    }
+    <lib-sse-refresh-btn [btnText]="undefined"
+                         [refreshing]="loading()"
+                         [streaming]="isSSEConnected()"
+                         (clicked)="refresh.emit()"/>
+
+    <lib-status-badge [text]="experiment().experimentStatus!"
+                      [type]="projectStatusToBadgeStatus(experiment().experimentStatus!)"
+                      size="SMALL"
+                      [animate]="true"/>
+
+    <ng-content select="[header-conent]"></ng-content>
+  </div>
+</lib-header>
+
+<div class="content-wrapper" [class.grid]="!description()">
+  @if (!description()) {
+    <lib-info-grid title="Description">
+      <ng-content/>
+    </lib-info-grid>
+  }
+
+  <lib-info-grid title="Details">
+    <lib-info-item title="Started At">
+      <lib-time-badge [date]="experiment().startedAt"/>
+    </lib-info-item>
+    <lib-info-item title="Finished At">
+      <lib-time-badge [date]="experiment().finishedAt"/>
+    </lib-info-item>
+    <lib-info-item title="Duration">
+      <lib-time-badge [date]="experiment().startedAt"
+                      [calcDuration]="true"
+                      [dateTo]="experiment().finishedAt"
+      />
+    </lib-info-item>
+  </lib-info-grid>
+</div>

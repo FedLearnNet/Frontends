@@ -1,0 +1,20 @@
+<div class="audit-card" [ngClass]="audit().decision?.toLowerCase()">
+  <div class="audit-card__header">
+    @if(audit().decision === 'ACCEPT'){
+      <lib-status-badge type="SUCCESS" text="Accepted" size="SMALL"></lib-status-badge>
+    } @else {
+      <lib-status-badge type="FAILED" text="Rejected" size="SMALL"></lib-status-badge>
+    }
+  </div>
+
+  @if (audit().reason) {
+    <div class="audit-card__divider"></div>
+
+    <div class="audit-card__reason">
+      <div class="audit-card__reason-label">Reason</div>
+      <div class="audit-card__reason-text">
+        {{ audit().reason }}
+      </div>
+    </div>
+  }
+</div>

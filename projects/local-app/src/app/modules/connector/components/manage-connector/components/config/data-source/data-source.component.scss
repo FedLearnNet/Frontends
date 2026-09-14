@@ -1,0 +1,43 @@
+.source-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+
+  padding-bottom: 50px;
+}
+
+mat-card {
+  max-width: 300px;
+  padding-bottom: 15px;
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+  }
+
+  &.selected {
+    border: 2px solid #3f51b5;
+
+    mat-icon {
+      background-color: #3f51b5;
+      color: white;
+    }
+  }
+}
+
+lib-store-card {
+  &.selected {
+    border: 2px solid #3f51b5;
+  }
+}
+
+.checkmark {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  color: green;
+}
+

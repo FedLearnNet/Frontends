@@ -1,0 +1,60 @@
+<lib-header
+  [title]="('DIALOG.CONNECTOR_FILES.TITLE' | translate)"
+  [description]="('DIALOG.CONNECTOR_FILES.MESSAGE' | translate)"
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [enableSkeleton]="loading()">
+  <lib-btn suffix type="ADD" [label]="('BUTTON.UPLOAD_FILE' | translate)" icon="upload" (click)="toggleUpload()"></lib-btn>
+  <lib-sse-refresh-btn suffix (clicked)="toggleUpload()" [refreshing]="loading()"></lib-sse-refresh-btn>
+</lib-header>
+
+@if (showUpload()) {
+    <div class="upload-panel" >
+        <app-lib-drag-and-drop-file
+                [files]="fileControl"
+                [multiple]="false"
+                [accept]="accept"
+                label="Upload a source file"
+                (filesChange)="onFilesChanged($event)"
+        />
+    </div>
+}
+
+<lib-page-wrapper
+  [error]="error()"
+  [isEmpty]="sortedFiles().length === 0"
+  [isLoading]="loading()"
+  [skeletonOnLoading]="true">
+
+  <lib-empty-state
+    empty
+    [title]="('DIALOG.CONNECTOR_FILES.NO_CONNECTOR_FILES' | translate)"
+    [subtitle]="('DIALOG.CONNECTOR_FILES.NO_COONECTOR_FILES_SUBTITLE' | translate)"
+  />
+
+  @if (uploadInProgress()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <!-- Files still being imported have no card yet; without this the page would look as though
+       nothing were happening. -->
+  @if (ongoingImports().length) {
+    <div class="import-list">
+      @for (activity of ongoingImports(); track activity.importId) {
+        <app-import-activity-chip [activity]="activity"/>
+      }
+    </div>
+  }
+
+  <div class="file-grid">
+    @for (file of sortedFiles(); track file.id) {
+      <a class="file-link" [routerLink]="[file.id]">
+        <lib-file-card
+          [file]="asFile(file)"
+          [showActions]="false"
+          [forwardClick]="true"
+        />
+      </a>
+    }
+  </div>
+</lib-page-wrapper>

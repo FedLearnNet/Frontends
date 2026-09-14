@@ -1,0 +1,77 @@
+<lib-closeable-dialog-title
+  (maximizedChanged)="toggleMaximize($event)"
+  [title]="'MENU.QUERY_DETAIL' | translate ">
+</lib-closeable-dialog-title>
+
+
+<div mat-dialog-content class="dialog--content">
+  <div class="query-detail">
+    <form [formGroup]="queryDetailForm">
+      <mat-form-field>
+        <mat-label>{{ 'GRID.NAME_OF_THE_QUERY' | translate }}</mat-label>
+        <input matInput [placeholder]="('GRID.NAME_OF_THE_QUERY' | translate)" formControlName="name" required>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
+        <input matInput [placeholder]="('DESCRIPTION_OF_THE_QUERY' | translate)" formControlName="description"
+               required>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <div class="query-builder--container">
+    <div class="query-builder--container--header">
+      {{ 'MENU.QUERY_BUILDER' | translate }}
+    </div>
+
+    @for (_ of queryList; track $index) {
+      <app-query-builder-item [(queryItem)]="queryList[$index]"
+                              [queryConfigs]="queryConfigs"
+                              [isLastItem]="$last"
+                              (removeQueryItem)="removeQueryItem($index)"
+                              (queryabilityChanged)="handleQueryChange()"
+      />
+    }
+
+    <button mat-icon-button (click)="onAddQueryItem()">
+      <mat-icon>add_circle_outline</mat-icon>
+    </button>
+  </div>
+
+  @if (data.queryData && queryList.length !== 0) {
+    <div class="query-execution--container">
+      @if (isQueryRunning()) {
+        <div class="query-progress-indicator">
+          <mat-spinner mode="indeterminate"/>
+        </div>
+      }
+      @if (data.queryData.hasResult) {
+        <div class="query-result">
+          {{ 'GRID.RESULT' | translate }}: {{ data.queryData.result }}
+        </div>
+      }
+    </div>
+  }
+  @if (this.changed) {
+    <mat-divider/>
+    <p>{{ 'YOU_CAN_NOT_CHANGE_EXECUTED_QUERIES' | translate }}</p>
+  }
+</div>
+
+<mat-divider/>
+
+<div mat-dialog-actions class="dialog--footer">
+  <lib-btn
+    [disabled]="isQueryDetailInvalid()"
+    type="CREATE"
+    [label]="getSubmitButtonLabel()"
+    (clicked)="onSubmit()"/>
+  @if (this.changed || !(data.queryData && data.queryData.hasFired)) {
+    <lib-btn
+      [disabled]="isQueryDetailInvalid()"
+      type="SEND"
+      [label]="'BUTTON.SAVE_AND_RUN_QUERY' | translate"
+      label="Send Request to All Clinics" (clicked)="onRunQuery()"/>
+  }
+
+</div>

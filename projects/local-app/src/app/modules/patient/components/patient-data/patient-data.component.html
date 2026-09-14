@@ -1,0 +1,117 @@
+@if (schemaNode(); as node) {
+  <section
+    class="patient-data-node"
+    [class.is-group]="isGroupNode(node)"
+    [class.is-field]="shouldShowDataGroup(node)"
+    [class.is-expanded]="!isGroupNode(node) || expanded()"
+    [class.is-collapsed]="isGroupNode(node) && !expanded()"
+    [class]="'level-' + schemaLevel()"
+    [attr.data-patient-field-anchor]="shouldShowDataGroup(node) ? node.id : null">
+
+    <header
+      class="patient-data-node__header"
+      [class.is-group]="isGroupNode(node)"
+      [class.is-clickable]="isGroupNode(node)"
+      (click)="isGroupNode(node) ? toggleExpanded() : null">
+      @if (isGroupNode(node)) {
+        <button
+          mat-icon-button
+          type="button"
+          class="expand-btn"
+          (click)="$event.stopPropagation(); toggleExpanded()"
+          [attr.aria-expanded]="expanded()"
+          [attr.aria-label]="expanded() ? 'Collapse section' : 'Expand section'">
+          <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      }
+
+      <div class="patient-data-node__title">
+        @switch (schemaLevel()) {
+          @case (2) {
+            <h2 class="headline">{{ node.name }}</h2>
+          }
+          @case (3) {
+            <h3>{{ node.name }}</h3>
+          }
+          @case (4) {
+            <h4>{{ node.name }}</h4>
+          }
+          @case (5) {
+            <h5>{{ node.name }}</h5>
+          }
+          @default {
+            <h6>{{ node.name }}</h6>
+          }
+        }
+        @if (shouldShowDataGroup(node) && node.dataType.type) {
+          <span class="field-type">{{ node.dataType.type }}</span>
+        }
+      </div>
+
+      <span class="spacer"></span>
+
+      @if (node.dataType) {
+        <button
+          mat-icon-button
+          type="button"
+          (click)="$event.stopPropagation(); openInfo()"
+          [attr.aria-label]="'View field details'">
+          <mat-icon>info</mat-icon>
+        </button>
+      }
+
+      @if (getEntriesForSchema(node.id).length > 1) {
+        <button
+          mat-icon-button
+          type="button"
+          (click)="$event.stopPropagation(); toggleShowChart()"
+          [attr.aria-label]="showChart() ? 'Hide chart' : 'Show chart'">
+          <mat-icon>{{ showChart() ? 'bar_chart_off' : 'bar_chart' }}</mat-icon>
+        </button>
+      }
+    </header>
+
+    @if (!isGroupNode(node) || expanded()) {
+      <div class="patient-data-node__body">
+        @if (node.childNodes.length) {
+          <div class="patient-data-node__children">
+            @for (child of sortedChildNodes(); track child.id) {
+              <app-patient-data
+                [patient]="patient()"
+                [schemaNode]="child"
+                [schemaLevel]="schemaLevel() < 6 ? schemaLevel() + 1 : 6"
+                [formMode]="formMode()"
+                [defaultExpanded]="defaultExpanded()"
+                [autoOpenAdd]="autoOpenAdd()"
+                [editable]="editable()"
+                [singleValuePerNode]="singleValuePerNode()"
+                (entryCreated)="onEntryCreated($event)"
+                (entryUpdated)="onEntryUpdated($event)"
+                (entryDeleted)="onEntryDeleted($event)"
+              />
+            }
+          </div>
+        }
+
+        @if (shouldShowDataGroup(node)) {
+          <div class="patient-data-node__field-content">
+            <app-patient-data-group
+              [items]="getEntriesForSchema(node.id)"
+              [showChart]="showChart()"
+              [schemaNode]="schemaNode()"
+              [cohortId]="patient().cohortId"
+              [patientId]="patient().id"
+              [formMode]="formMode()"
+              [autoOpenAdd]="autoOpenAdd()"
+              [editable]="editable()"
+              [singleValuePerNode]="singleValuePerNode()"
+              (entryCreated)="onEntryCreated($event)"
+              (entryUpdated)="onEntryUpdated($event)"
+              (entryDeleted)="onEntryDeleted($event)"
+            />
+          </div>
+        }
+      </div>
+    }
+  </section>
+}

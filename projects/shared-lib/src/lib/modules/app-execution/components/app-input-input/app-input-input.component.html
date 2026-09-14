@@ -1,0 +1,36 @@
+@switch (inputModel().type) {
+  @case (ToolConfigDataType.CSV) {
+    <app-lib-drag-and-drop-file [files]="formControl"
+                                [label]="parsedLabel()"
+                                [accept]="'.csv'"
+                                [multiple]="false"
+                                (filesChange)="formControl.setValue($event)"
+    />
+  }
+  @case (ToolConfigDataType.JSON) {
+    <textarea matInput [formControl]="formControl" rows="5"></textarea>
+  }
+  @case (ToolConfigDataType.IMAGE) {
+    <app-lib-drag-and-drop-file [files]="formControl"
+                                [label]="parsedLabel()"
+                                [accept]="'image/*'"
+                                [multiple]="false"
+                                (filesChange)="formControl.setValue($event)"
+    />
+  }
+  @case (ToolConfigDataType.TEXT) {
+    <textarea matInput [formControl]="formControl" rows="3"></textarea>
+  }
+  @default {
+    <mat-form-field appearance="fill">
+      <mat-label>{{ parsedLabel() }}</mat-label>
+      <input matInput [formControl]="formControl"/>
+      @if (formControl.hasError('required')) {
+        <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{fieldName: parsedLabel()} }}</mat-error>
+      }
+      @if (showTooltip()) {
+        <mat-icon matSuffix [matTooltip]="inputModel().description">mode_edit</mat-icon>
+      }
+    </mat-form-field>
+  }
+}

@@ -1,0 +1,92 @@
+<mat-card class="detail-card" appearance="outlined">
+  <div class="head">
+    @if (statusText(); as statusText) {
+      <div class="left">
+        @if (isSuccess()) {
+          <lib-status-badge [type]="'SUCCESS'" size="SMALL"
+                            [border]="true"
+                            [animate]="true"/>
+        } @else {
+          <lib-status-badge [text]="statusText"
+                            [border]="true"
+                            [type]="'WARNING'" size="SMALL"
+                            [animate]="true"/>
+        }
+      </div>
+    }
+    <span class="spacer"></span>
+    <div class="right">
+      <span class="caption">Groups are linked with</span>
+      <lib-badge text="AND" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
+    </div>
+  </div>
+
+  <div class="groups">
+    @for (group of items(); track $index) {
+      <section class="group">
+        <header class="group-header">
+          <lib-badge text="Group {{ $index + 1 }}" color="GRAY" [size]="'X-SMALL'" [border]="true"/>
+          <div class="meta">
+            <mat-icon matTooltip="All conditions in the group apply to each selected field.">info</mat-icon>
+          </div>
+        </header>
+
+        <div class="row">
+          <div class="label">Searched in</div>
+          <div class="values">
+            @if (getGroupLabels(group).length) {
+              <div class="or-row">
+                @for (label of getGroupLabels(group); track label) {
+                  <lib-badge [text]="label" color="GRAY"/>
+                  @if (!$last) {
+                    <span class="or-pill">OR</span>
+                  }
+                }
+              </div>
+            } @else {
+              <span class="muted">—</span>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="label">Condition</div>
+          <div class="values cond-list">
+            @if (group.operator && group.operator!.length) {
+              @for (op of group.operator; track $index) {
+                <div class="cond">
+                  <lib-badge [text]="prettify(op.operator)" color="ORANGE" [size]="'SMALL'" [border]="true"/>
+                  @if (op.value) {
+                    <lib-badge [text]="prettyValue(op.value)" color="GRAY" [size]="'MEDIUM'"/>
+                  }
+                </div>
+              }
+            } @else {
+              <span class="muted">—</span>
+            }
+          </div>
+        </div>
+      </section>
+
+      @if (!$last) {
+        <div class="and-connector">
+          <span class="and-pill">AND</span>
+        </div>
+      }
+    }
+  </div>
+
+  @if (statusMessage(); as statusMessage) {
+    <div class="footer">
+      <mat-icon>notes</mat-icon>
+      <span class="muted">{{ statusMessage }}</span>
+      <span class="spacer"></span>
+      <lib-time-badge [color]="'GRAY'" [date]="query().createdAt"/>
+    </div>
+  } @else if (showCreatedAtFooter()) {
+    <div class="footer">
+      <span class="spacer"></span>
+      <lib-time-badge [color]="'GRAY'" [date]="query().createdAt"/>
+    </div>
+  }
+</mat-card>

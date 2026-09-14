@@ -1,0 +1,11 @@
+.chat__list {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 0 10px;
+}
+
+.prediction-group {
+  display: grid;
+  gap: .75rem;
+}

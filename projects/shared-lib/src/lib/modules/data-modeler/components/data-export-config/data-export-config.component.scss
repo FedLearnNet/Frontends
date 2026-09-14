@@ -1,0 +1,78 @@
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 100%;
+
+  .panel {
+    width: calc(100% - 16px);
+    border: 1px solid rgba(0, 0, 0, .08);
+    border-radius: 16px;
+    padding: 8px;
+    .panel-title {
+      font-size: 13px;
+      font-weight: 650;
+      margin-bottom: 10px;
+    }
+  }
+
+
+}
+
+.hint {
+  font-size: 12px;
+  opacity: .75;
+  margin-top: 8px;
+}
+
+.row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (min-width: 720px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .row--native {
+    grid-template-columns: auto 1fr 1fr;
+  }
+}
+
+.field {
+  width: 100%;
+}
+
+.status {
+  font-weight: 650;
+}
+
+.mode {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.mode__label {
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, .6));
+}
+
+.mode__toggle mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: text-bottom;
+}

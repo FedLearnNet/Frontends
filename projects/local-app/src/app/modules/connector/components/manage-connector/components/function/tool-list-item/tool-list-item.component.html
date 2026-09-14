@@ -1,0 +1,52 @@
+<button
+  type="button"
+  class="tool-row"
+  [class.tool-row--selected]="selected()"
+  [class.tool-row--disabled]="disabled()"
+  [disabled]="disabled()"
+  [attr.aria-pressed]="selected()"
+  (click)="activated.emit()"
+>
+  <span class="tool-row__icon">
+    <mat-icon>{{ icon() }}</mat-icon>
+  </span>
+
+  <span class="tool-row__body">
+    <span class="tool-row__header">
+      <span class="tool-row__title">{{ label() }}</span>
+      @if (badgeLabelKey()) {
+        <lib-badge
+          size="X-SMALL"
+          [border]="true"
+          [color]="badgeColor()"
+          [iconName]="badgeIcon()"
+          [text]="badgeLabelKey() | translate"
+        />
+      } @else if (badgeText()) {
+        <lib-badge
+          size="X-SMALL"
+          [border]="true"
+          color="GRAY"
+          [text]="badgeText()"
+        />
+      }
+      @if (meta()) {
+        <span class="tool-row__meta">{{ meta() }}</span>
+      }
+    </span>
+    @if (disabledReason()) {
+      <span class="tool-row__description tool-row__disabled-reason">
+        <mat-icon>lock</mat-icon>
+        {{ disabledReason() }}
+      </span>
+    } @else if (description()) {
+      <span class="tool-row__description">{{ description() }}</span>
+    } @else if (descriptionFallbackKey()) {
+      <span class="tool-row__description">{{ descriptionFallbackKey() | translate }}</span>
+    }
+  </span>
+
+  <mat-icon class="tool-row__trailing">
+    {{ disabled() ? 'lock' : (selected() ? 'check_circle' : 'chevron_right') }}
+  </mat-icon>
+</button>

@@ -1,0 +1,21 @@
+<div
+  class="result"
+  [class.active]="active()"
+  [class.disabled]="!navigable()"
+  (click)="onSelect()">
+  <div class="result__icon" [attr.data-type]="item().type">
+    <mat-icon>{{ meta().icon }}</mat-icon>
+  </div>
+
+  <div class="result__body">
+    <div class="result__row">
+      <span class="result__title">{{ item().title }}</span>
+      <lib-badge [color]="meta().color" [text]="meta().labelKey | translate" size="X-SMALL"/>
+    </div>
+    @if (!navigable()) {
+      <p class="result__hint">{{ 'SEARCH.NOT_LINKABLE' | translate }}</p>
+    }
+  </div>
+
+  <mat-icon class="result__enter">subdirectory_arrow_left</mat-icon>
+</div>

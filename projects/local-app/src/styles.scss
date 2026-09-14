@@ -1,0 +1,152 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* Command-palette search overlay: let the palette fill the dialog surface. */
+.search-overlay-panel .mat-mdc-dialog-surface {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.search-overlay-panel .mat-mdc-dialog-container .mdc-dialog__content {
+  padding: 0;
+}
+
+/* Transformer selectors render in the CDK overlay, outside component style scope. */
+.module-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  mat-icon {
+    color: #627389;
+  }
+}
+
+.transformer-method-autocomplete.mat-mdc-autocomplete-panel {
+  max-height: 420px;
+  padding: 6px;
+
+  .mat-mdc-option.method-option {
+    min-height: 78px;
+    height: auto;
+    padding: 9px 12px;
+    border-radius: 10px;
+    line-height: normal;
+
+    & + .method-option {
+      margin-top: 2px;
+    }
+
+    &:hover:not(.mdc-list-item--disabled),
+    &.mat-mdc-option-active {
+      background: #f3f6fb;
+    }
+
+    .mdc-list-item__primary-text {
+      display: block;
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+  .method-option__content {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .method-option__mode {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border-radius: 10px;
+    background: #eef0ff;
+    color: #4051b5;
+
+    mat-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+    }
+
+    &[data-mode='cell'] {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    &[data-mode='row'] {
+      background: #fff7ed;
+      color: #d97706;
+    }
+
+    &[data-mode='patient'] {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+  }
+
+  .method-option__copy {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .method-option__header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+
+    strong {
+      overflow: hidden;
+      color: #1e2c43;
+      font-size: 0.92rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .method-option__badge {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: #eef0ff;
+    color: #4051b5;
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    &[data-mode='cell'] {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    &[data-mode='row'] {
+      background: #fff7ed;
+      color: #b45309;
+    }
+
+    &[data-mode='patient'] {
+      background: #f0fdf4;
+      color: #15803d;
+    }
+  }
+
+  .method-option__description {
+    display: -webkit-box;
+    overflow: hidden;
+    color: #687a91;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+}

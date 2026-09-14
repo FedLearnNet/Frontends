@@ -1,0 +1,115 @@
+<lib-header
+  title="UMLS"
+  description="Search UMLS concepts and inspect parent structures"
+  [enableGoBack]="true"
+  [routerOnePathBack]="true"
+  [enableSearch]="true"
+  [searchValue]="search()"
+  [searchLabel]="'GRID.FILTER' | translate"
+  [searchPlaceholder]="'FILTER_EXAMPLE' | translate"
+  (searchInput)="onSearchChange($event)">
+</lib-header>
+
+<lib-page-wrapper
+  [error]="error()"
+  [isLoading]="loading()"
+  [isEmpty]="data().length === 0"
+  [skeletonOnLoading]="true"
+>
+  <lib-empty-state
+    empty
+    [title]="'No results found'"
+  ></lib-empty-state>
+
+  <div class="example-table-container">
+    <table mat-table [dataSource]="data()" multiTemplateDataRows class="example-table">
+
+      <ng-container matColumnDef="ui">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.ID' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.ui }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="rootSource">
+        <th mat-header-cell *matHeaderCellDef>{{ 'GRID.SOURCE' | translate }}</th>
+        <td mat-cell *matCellDef="let row">{{ row.rootSource }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="expand">
+        <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-icon-button aria-label="expand row"
+                  (click)="openDetails(element); $event.stopPropagation()">
+            @if (expandedElement() === element) {
+              <mat-icon>keyboard_arrow_up</mat-icon>
+            } @else {
+              <mat-icon>keyboard_arrow_down</mat-icon>
+            }
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="detail">
+        <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumns.length">
+          <div class="example-element-detail"
+               [@detailExpand]="element === expandedElement() ? 'expanded' : 'collapsed'">
+            @if (expandedElement() === element) {
+              @if (expandedDetail(); as detail) {
+                @if (detail.ui === element.ui) {
+                  <mat-card>
+                    <mat-card-header>
+                      <mat-card-title><b>{{ detail.name }}</b></mat-card-title>
+                      <mat-card-subtitle>{{ detail.rootSource }}</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                      <div>
+                        <p><b>{{ 'GRID.TYPE' | translate }}:</b> {{ detail.classType }}</p>
+                        <p><b>{{ 'GRID.SUPPRESSIBLE' | translate }}:</b> {{ detail.suppressible }}</p>
+                        <p><b>{{ 'GRID.OBSOLETE' | translate }}:</b> {{ detail.obsolete }}</p>
+                        <p><b>{{ 'GRID.CV_MEMBER_COUNT' | translate }}:</b> {{ detail.cVMemberCount }}</p>
+                        <p><b>{{ 'GRID.ATOM_COUNT' | translate }}:</b> {{ detail.atomCount }}</p>
+                      </div>
+                      <div>
+                        <p><b>{{ 'GRID.HAS_PARENT' | translate }}:</b> {{ detail.parents.length > 0 ? ('YES' | translate) : ('NO' | translate) }}</p>
+                        <p><b>{{ 'GRID.HAS_ATTRIBUTES' | translate }}:</b> {{ detail.attributes.length > 0 ? ('YES' | translate) : ('NO' | translate) }}</p>
+                        <p><b>{{ 'GRID.HAS_ATOMS' | translate }}:</b> {{ detail.atomCount > 0 ? ('YES' | translate) : ('NO' | translate) }}</p>
+                        <p><b>{{ 'GRID.HAS_RELATIONS' | translate }}:</b> {{ detail.relations.length > 0 ? ('YES' | translate) : ('NO' | translate) }}</p>
+                      </div>
+                    </mat-card-content>
+                    <mat-card-actions align="end">
+                      <button mat-raised-button (click)="openDialog(element)">{{ 'BUTTON.SHOW_PARENT_STRUCTURE' | translate }}</button>
+                    </mat-card-actions>
+                  </mat-card>
+                }
+              } @else {
+                @if (detailError()) {
+                  <p>{{ detailError() }}</p>
+                } @else if (detailLoadingUi() === element.ui) {
+                  <p>{{ 'GRID.LOADING' | translate }}...</p>
+                }
+                <p>{{ 'WARNING.YOU_CAN_NOT_ACCESS_GRAPH_VIEW' | translate }}</p>
+
+                <button mat-raised-button (click)="openDialog(element)">{{ 'BUTTON.SHOW_PARENT_STRUCTURE' | translate }}</button>
+              }
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['detail']" class="detail-row"></tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="resultsLength()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize"
+    (page)="onPageChange($event)"
+    aria-label="Select page of UMLS search results" />
+</lib-page-wrapper>

@@ -1,0 +1,23 @@
+<div class="chat__list" role="log" aria-live="polite">
+  @if (wf()) {
+    @for (mw of messages(); track $index) {
+      @if (isChat(mw)) {
+        @let chat = getAsChat(mw);
+        <lib-chat-message-bubble
+          (messageClicked)="onBubbleClick($event)"
+          (messageHover)="onBubbleHover($event)"
+          (messageLeave)="onBubbleHoverLeave()"
+          (actionClicked)="onActionClick($event)"
+          [message]="chat"
+          [uiAction]="chat.action"
+        />
+      }
+
+      @if (isPrediction(mw)) {
+        <div class="prediction-group">
+          <lib-model-result-card [prediction]="getAsPrediction(mw)"/>
+        </div>
+      }
+    }
+  }
+</div>

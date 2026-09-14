@@ -1,0 +1,64 @@
+@if (flProject(); as project) {
+  <div class="wrapper">
+    <div class="head">
+      <app-experiment-header
+        [experiment]="project.experiment"
+        (refresh)="reload()"
+        [isSSEConnected]="connected()"
+        [loading]="loading()"
+        [hasActions]="false"
+        [description]="project.project.description"
+        [name]="project.project.name">
+        <div header-conent class="detail">
+          @if (project.project.isCoordinator) {
+            <lib-status-badge [type]="'SUCCESS'" size="SMALL"
+                              [text]="'Coordinator'"
+                              [animate]="true"/>
+          } @else {
+            <lib-status-badge [type]="'INIT'" size="SMALL"
+                              [text]="'Participant'"
+                              [animate]="true"/>
+          }
+        </div>
+
+      </app-experiment-header>
+    </div>
+  </div>
+  <div class="container">
+    <mat-tab-group dynamicHeight mat-stretch-tabs="false" mat-align-tabs="start"
+                   [selectedIndex]="selectedTabIndex"
+                   (selectedTabChange)="onTabChange($event)">
+      <mat-tab [label]="('FL_PROJECT.DETAILS' | translate)">
+        <div class="export-bar">
+          <button mat-raised-button (click)="exportPatientData()">
+            <mat-icon>download</mat-icon>
+            Export used Data
+          </button>
+        </div>
+        <app-training-used-data [flProject]="project.project"/>
+      </mat-tab>
+      <mat-tab [label]="('FL_PROJECT.WORKFLOW' | translate)">
+        @if (selectedWorkflow(); as wf) {
+          <lib-workflow-readonly-view
+            class="detail"
+            [workflow]="wf!"
+            [experiment]="project.experiment"
+            (selectNode)="showDetail($event)"
+          ></lib-workflow-readonly-view>
+        }
+        @if (selectedWorkflowLoading()) {
+          <lib-skeleton-loader/>
+        }
+
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+} @else {
+  @if (loading()) {
+    <lib-skeleton-loader/>
+  } @else {
+    @if (error(); as err) {
+      <lib-error-card [errorObject]="err"></lib-error-card>
+    }
+  }
+}
