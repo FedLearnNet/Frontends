@@ -41,6 +41,14 @@ export class TrainingService {
       );
   }
 
+  getTraining(id: number): Observable<FederatedLearningRequestDto> {
+    return this.apiService.get<FederatedLearningRequestDto>(`${this.getBaseUrl()}/${id}`)
+      .pipe(
+        catchError((err) => this.errorSnackbarService.showSnackBar(err,
+          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.TRAINING_STATUS').toLowerCase() + `: ${id}`})))
+      );
+  }
+
   updateTrainingStatus(
     id: number,
     status: FederatedLearningRequestStatus,
