@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "projects/**"
+      - "angular.json"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig*.json"
+      - ".eslintrc.json"
+      - ".eslintignore"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "projects/**"
+      - "angular.json"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig*.json"
+      - ".eslintrc.json"
+      - ".eslintignore"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # setup-node registers ESLint problem matchers, so lint findings appear as annotations
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: lts/*
+          cache: npm
+
+      # npm versions disagree on which optional peer dependencies belong in package-lock.json
+      - name: Pin npm
+        run: npm install -g npm@11.6.2
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+        env:
+          CYPRESS_INSTALL_BINARY: "0"
+
+      # Lints local-app, global-app and shared-lib
+      - name: Lint
+        run: npm run lint
