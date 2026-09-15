@@ -40,7 +40,7 @@ jobs:
         # javascript-typescript: application code, actions: the workflows in .github/workflows
         language: [javascript-typescript, actions]
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
