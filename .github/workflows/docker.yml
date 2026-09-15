@@ -66,7 +66,7 @@ jobs:
           else
             variants="
           build-local-fl-net-staging            local-fl-net:staging
-          build-global-fl-net-staging           global-fl-net:staging
+          build-global-fl-net-staging           global-fl-net:staging"
           fi
 
           # Minimal build context instead of the whole repository (node_modules)
