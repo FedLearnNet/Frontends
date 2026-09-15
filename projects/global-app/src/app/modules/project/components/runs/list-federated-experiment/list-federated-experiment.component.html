@@ -12,7 +12,7 @@
   </mat-toolbar>
 
 
-  <table mat-table [dataSource]="experiments()" class="mat-elevation-z0">
+  <table mat-table [dataSource]="filteredExperiments()" class="mat-elevation-z0">
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
