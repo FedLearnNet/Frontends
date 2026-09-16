@@ -1,5 +1,6 @@
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {
   FederatedLearningRequestDto,
@@ -43,6 +44,8 @@ import {
 import {TrainingReviewActions} from "@local-app/data-review/store/training-review.actions";
 import {TrainingUsedDataComponent} from "../../../training/components/training-used-data/training-used-data.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {TrainingService} from "@local-app/data-review/services/training.service";
+import {MatProgressBar} from "@angular/material/progress-bar";
 
 interface LearningRequestDataSelectorData {
   request: FederatedLearningRequestDto;
@@ -95,7 +98,8 @@ export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
     WorkflowReadonlyViewComponent,
     SkeletonLoaderComponent,
     TrainingUsedDataComponent,
-    BadgeComponent
+    BadgeComponent,
+    MatProgressBar
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
   styleUrl: './learning-request-data-selector-list.component.scss'
@@ -106,6 +110,8 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   private readonly dialog: MatDialog = inject(MatDialog);
   private readonly store: Store = inject(Store);
   private readonly schemaService: SchemaService = inject(SchemaService);
+  private readonly trainingService: TrainingService = inject(TrainingService);
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
 
   readonly data = inject<LearningRequestDataSelectorData>(MAT_DIALOG_DATA);
   readonly project: ProjectDetailDto = this.data.request.project;
@@ -122,16 +128,36 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   isLargeScreen: boolean = true;
   screenSize: string;
   patients: PatientData[] = [];
+  requestPatients: PatientLearningDto[] = [];
   cohorts: string[] = [];
   selectedPatients: SelectionModel<PatientData> = new SelectionModel<PatientData>(true);
   dataSource = new MatTableDataSource<PatientData>();
+  patientsLoading = true;
+  patientsLoadError: string | null = null;
 
   selectedFilter: boolean[] = [];
   searchValue: string;
 
   ngOnInit(): void {
-    this.data.request.requestPatients.forEach((requestCohort: PatientLearningDto) => {
+    this.trainingService.getTraining(this.data.request.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (detail) => {
+          this.requestPatients = detail.requestPatients ?? [];
+          this.buildPatientTable(this.requestPatients);
+          this.patientsLoading = false;
+        },
+        error: (err: Error) => {
+          this.patientsLoadError = err?.message ?? String(err);
+          this.patientsLoading = false;
+        }
+      });
+  }
 
+  private buildPatientTable(requestPatients: PatientLearningDto[]): void {
+    this.patients = [];
+    this.cohorts = [];
+    requestPatients.forEach((requestCohort: PatientLearningDto) => {
       const cohortDetail = this.data.cohorts.find((cohort: CohortDto) => cohort.id === requestCohort.internalCohortId);
       if (!cohortDetail) {
         return;
@@ -139,15 +165,13 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
       if (!this.cohorts.includes(cohortDetail.name)) {
         this.cohorts.push(cohortDetail.name);
       }
-      const patient: PatientData = {
+      this.patients.push({
         id: requestCohort.internalPatientId,
         cohort: cohortDetail.name,
         cohortId: requestCohort.internalCohortId,
         externalPatientId: requestCohort.externalPatientId,
         requestPatient: requestCohort,
-      };
-      this.patients.push(patient);
-
+      });
     });
     this.dataSource.data = this.patients;
     this.dataSource.filterPredicate = this.createFilter();
@@ -176,7 +200,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   getSelectedData(): PatientLearningDto[] {
     const selected = new Set(this.selectedPatients.selected.map(patient => patient.requestPatient));
 
-    return this.data.request.requestPatients.filter(requestPatient => selected.has(requestPatient));
+    return this.requestPatients.filter(requestPatient => selected.has(requestPatient));
   }
 
   onAccept(modelCanBePublic: boolean): void {

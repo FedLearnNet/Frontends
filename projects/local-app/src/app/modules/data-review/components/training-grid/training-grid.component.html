@@ -26,9 +26,9 @@
           <span class="column-name">{{ 'GRID.REQUESTED_DATA' | translate }}:</span>
         }
         <span>
-          @for (cohort of getRequestCohorts(element.requestPatients); track cohort.id) {
+          @for (cohort of getRequestCohorts(element); track cohort.id) {
             <div class="col-entry-padding">
-                {{ cohort.name + ' (' + getPatientCountForCohort(element.requestPatients, cohort.id) + ' ' + ('SAMPLES' | translate) + ')' }}
+                {{ cohort.name + ' (' + getPatientCountForCohort(element, cohort.id) + ' ' + ('SAMPLES' | translate) + ')' }}
               <br>
               </div>
           } @empty {

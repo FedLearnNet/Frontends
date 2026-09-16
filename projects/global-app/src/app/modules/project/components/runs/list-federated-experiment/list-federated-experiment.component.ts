@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input} from '@angular/core';
 
 import {MatButtonModule} from "@angular/material/button";
 import {MatTableModule} from "@angular/material/table";
@@ -44,6 +44,12 @@ export class ListFederatedExperimentComponent {
   project = input.required<ProjectDetailDto>();
   workflow = input.required<WorkflowDTO>();
   public experiments = this.store.selectSignal(selectExperiments);
+
+  public filteredExperiments = computed(() => {
+    const experiments = this.experiments();
+    const projectId = this.project().id;
+    return experiments.filter(experiment => experiment.projectId === projectId);
+  });
 
   public displayedColumns: string[] = ['name', 'description', 'status', 'createdAt'];
 
