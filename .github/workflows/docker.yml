@@ -28,10 +28,17 @@ env:
 
 jobs:
   images:
-    # main -> latest, develop -> staging*; other branches would overwrite those tags
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    name: Image (${{ matrix.app }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [local, global]
+    env:
+      SCRIPT: build-${{ matrix.app }}-fl-net${{ github.ref != 'refs/heads/main' && '-staging' || '' }}
+      IMAGE: ${{ matrix.app }}-fl-net:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -48,6 +55,17 @@ jobs:
         env:
           CYPRESS_INSTALL_BINARY: "0"
 
+      - name: Build ${{ env.SCRIPT }}
+        run: npm run "$SCRIPT"
+
+      - name: Prepare build context
+        run: |
+          ctx="$RUNNER_TEMP/docker-context"
+          mkdir -p "$ctx/dist/app"
+          cp nginx.conf "$ctx/"
+          cp -r dist/app/browser "$ctx/dist/app/"
+          echo "CONTEXT=$ctx" >> "$GITHUB_ENV"
+
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/login-action@v3
@@ -56,42 +74,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # All variants are built sequentially in one job so dependencies are installed only once.
-      # The nginx image only copies static files, so multi-arch images need no emulation.
-      - name: Build and push images
+      - name: Push ${{ env.REGISTRY }}/${{ env.IMAGE }}
         run: |
-          # <npm script> <image>:<tag>
-          # Only FL-Net is published; the other brands are not deployed from this repository.
-          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-            variants="
-          build-local-fl-net                    local-fl-net:latest
-          build-global-fl-net                   global-fl-net:latest"
-          else
-            variants="
-          build-local-fl-net-staging            local-fl-net:staging
-          build-global-fl-net-staging           global-fl-net:staging"
-          fi
-
-          # Minimal build context instead of the whole repository (node_modules)
-          ctx="$RUNNER_TEMP/docker-context"
-          while read -r -u 3 script target; do
-            [ -z "$script" ] && continue
-            echo "::group::$script -> $REGISTRY/$target"
-            npm run "$script"
-            rm -rf "$ctx" && mkdir -p "$ctx/dist/app"
-            cp nginx.conf "$ctx/"
-            cp -r dist/app/browser "$ctx/dist/app/"
-            docker buildx build \
-              --platform linux/amd64,linux/arm64 \
-              --provenance=false \
-              --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-              --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-              -t "$REGISTRY/$target" \
-              -t "$REGISTRY/$target-${GITHUB_SHA::7}" \
-              -f Dockerfile \
-              --push "$ctx"
-            echo "::endgroup::"
-          done 3<<< "$variants"
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            --provenance=false \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            -t "$REGISTRY/$IMAGE" \
+            -f Dockerfile \
+            --push "$CONTEXT"
 
   # Vulnerability scan after every build (results under Security → Code scanning)
   scan:
