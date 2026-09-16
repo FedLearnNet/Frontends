@@ -11,8 +11,8 @@ import {CommonModule} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {
-  FederatedLearningRequestStatus,
-  PatientLearningDto
+  FederatedLearningRequestDto,
+  FederatedLearningRequestStatus
 } from "@local-app/data-review/dto/federated-learning-request";
 import {MatPaginator, MatPaginatorModule} from "@angular/material/paginator";
 import {startWith} from "rxjs/operators";
@@ -109,12 +109,13 @@ export class TrainingGridComponent implements OnInit, AfterViewInit {
     });
   }
 
-  public getRequestCohorts(requestPatients: PatientLearningDto[]): CohortDto[] {
-    const requestedCohortIds = new Set(requestPatients.map(p => p.internalCohortId))
+  public getRequestCohorts(request: FederatedLearningRequestDto): CohortDto[] {
+    const counts = request.patientCountByCohort ?? {};
+    const requestedCohortIds = new Set(Object.keys(counts).map(Number));
     return this.cohorts().filter(cohort => requestedCohortIds.has(cohort.id));
   }
 
-  public getPatientCountForCohort(requestPatients: PatientLearningDto[], cohortId: number): number {
-    return requestPatients.filter(p => p.internalCohortId === cohortId).length;
+  public getPatientCountForCohort(request: FederatedLearningRequestDto, cohortId: number): number {
+    return Number(request.patientCountByCohort?.[cohortId] ?? 0);
   }
 }

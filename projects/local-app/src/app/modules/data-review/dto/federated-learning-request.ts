@@ -25,7 +25,8 @@ export interface PatientLearningDto extends BaseDto {
 
 export interface FederatedLearningRequestDto extends BaseDto {
   status: FederatedLearningRequestStatus;
-  requestPatients: PatientLearningDto[];
+  requestPatients?: PatientLearningDto[];
+  patientCountByCohort?: Record<number, number>;
   project: ProjectDetailDto;
   modelNeedToBePublic?: boolean;
   modelCanBePublic?: boolean;
