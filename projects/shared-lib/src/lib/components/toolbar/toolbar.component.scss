@@ -7,7 +7,7 @@ mat-toolbar {
 
 mat-toolbar,
 mat-drawer {
-  background-color: var.$secondary-color;
+  background-color: var(--brand-toolbar-bg, #{var.$secondary-color});
   button {
     font-size: large;
   }
@@ -21,7 +21,7 @@ mat-drawer {
   }
 
   .label{
-    background-color:  var.$primary-color;
+    background-color: var(--brand-label-bg, #{var.$primary-color});
     color: white;
     padding: 4px 10px;
     border-radius: 4px;
