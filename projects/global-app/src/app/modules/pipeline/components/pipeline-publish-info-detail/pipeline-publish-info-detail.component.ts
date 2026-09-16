@@ -37,6 +37,16 @@ export class PipelinePublishInfoDetailComponent {
     return (s.critical ?? 0) + (s.high ?? 0) + (s.medium ?? 0) + (s.low ?? 0) + (s.unknown ?? 0);
   });
 
+  readonly vulnUnknown = computed(() => {
+    const r = this.publishInfo().vulnerabilityScanResult;
+    return !r || r.success !== true;
+  });
+
+  readonly malwareUnknown = computed(() => {
+    const r = this.publishInfo().malwareScanResult;
+    return !r || r.success !== true;
+  });
+
   readonly malwareDisplayedColumns: string[] = ['file', 'signature'];
 
   trackByStr = (_: number, v: string) => v;
