@@ -22,7 +22,7 @@
           </lib-info-item>
           <lib-info-item title="Requested patients">
             <lib-status-badge [type]="'INIT'" size="SMALL"
-                              [text]="'' + data.request.requestPatients.length"
+                              [text]="patientsLoading ? '…' : ('' + requestPatients.length)"
                               [animate]="true"/>
           </lib-info-item>
           <lib-info-item title="Requested At">
@@ -45,7 +45,8 @@
         <mat-form-field class="filter-wrapper--search">
           <mat-label>{{ 'GRID.SEARCH' | translate }}</mat-label>
           <input matInput (keyup)="applySearch($event)"
-                 placeholder="term">
+                 placeholder="term"
+                 [disabled]="patientsLoading">
         </mat-form-field>
         <div class="filter-wrapper--filter">
           <p>Filter</p>
@@ -56,10 +57,16 @@
               </mat-chip-option>
             }
           </mat-chip-listbox>
-          <button mat-raised-button (click)="clearFilters()">{{ 'BUTTON.CLEAR' | translate }}</button>
+          <button mat-raised-button (click)="clearFilters()" [disabled]="patientsLoading">{{ 'BUTTON.CLEAR' | translate }}</button>
         </div>
       </div>
 
+      @if (patientsLoading) {
+        <mat-progress-bar mode="indeterminate"/>
+        <lib-skeleton-loader/>
+      } @else if (patientsLoadError) {
+        <p>{{ patientsLoadError }}</p>
+      } @else {
       <mat-table [dataSource]="dataSource" class="mat-elevation-z4">
         <ng-container matColumnDef="actions">
           <mat-header-cell *matHeaderCellDef [ngClass]="'mat-column-actions-' + screenSize">
@@ -92,6 +99,7 @@
         <mat-header-row *matHeaderRowDef="displayedColumns"/>
         <mat-row *matRowDef="let row; columns: displayedColumns;"/>
       </mat-table>
+      }
     </mat-tab>
     <mat-tab label="Selected Data">
       <app-training-used-data [flProject]="project"/>
@@ -127,11 +135,11 @@
       <!-- e.g. if modelCanBePublic is false, but modelNeedToBePublic is not set -->
       <!-- we wouldn't know whether maybe the model needs to be public -->
       <!-- just to be safe we go with the public option -->
-      <button mat-raised-button color="primary" type="submit" (click)="onAccept(true)" [disabled]="!selectedPatients.hasValue()">
+      <button mat-raised-button color="primary" type="submit" (click)="onAccept(true)" [disabled]="patientsLoading || !selectedPatients.hasValue()">
         {{ 'BUTTON.ACCEPT_AND_PUBLIC' | translate }}
       </button>
     } @else {
-      <button mat-raised-button color="primary" type="submit" (click)="onAccept(false)" [disabled]="!selectedPatients.hasValue()">
+      <button mat-raised-button color="primary" type="submit" (click)="onAccept(false)" [disabled]="patientsLoading || !selectedPatients.hasValue()">
         {{ 'BUTTON.ACCEPT_AND_PRIVATE' | translate }}
       </button>
     }
