@@ -26,4 +26,56 @@
   }
 }
 
+mat-dialog-actions {
+  gap: 10px;
+}
 
+.app-source-section {
+  display: grid;
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.app-source-heading {
+  h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+  }
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.62);
+    line-height: 1.4;
+  }
+}
+
+.app-source-editor-shell {
+  transition: opacity 160ms ease;
+
+  &.locked {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+}
+
+.app-source-status {
+  box-shadow: none;
+
+  mat-card-content {
+    display: grid;
+    gap: 6px;
+  }
+
+  span {
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  &.running {
+    border-color: var(--primary-color, #3f51b5);
+  }
+
+  &.success {
+    border-color: var(--success-text, #2e7d32);
+    background: rgba(46, 125, 50, 0.05);
+  }
+}

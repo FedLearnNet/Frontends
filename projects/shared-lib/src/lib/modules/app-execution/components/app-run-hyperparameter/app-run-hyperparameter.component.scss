@@ -1,0 +1,23 @@
+.parameter-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 700px) {
+  .parameter-grid.columns-2,
+  .parameter-grid.columns-3,
+  .parameter-grid.columns-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1000px) {
+  .parameter-grid.columns-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .parameter-grid.columns-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

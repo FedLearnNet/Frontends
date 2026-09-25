@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, linkedSignal, model, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, linkedSignal, model, output, signal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {Store} from "@ngrx/store";
 import {
@@ -16,8 +16,8 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
 import {isAppBasedUploadSettings} from "../../../../../helper/connector-config-helper";
 import {AppBasedUploadSettings} from "../../../../../models/input-config";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {TranslateService} from "@ngx-translate/core";
-import {catchError} from "rxjs";
+import {TranslatePipe, TranslateService} from "@ngx-translate/core";
+import {catchError, EMPTY, finalize} from "rxjs";
 import {ConnectorUploadService} from "../../../../../services/connector-upload.service";
 import {ConnectorDTO} from "../../../../../dto/connector";
 import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
@@ -31,7 +31,8 @@ import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
     ErrorCardComponent,
     StoreCardComponent,
     MatDivider,
-    HintCardComponent
+    HintCardComponent,
+    TranslatePipe
   ],
   templateUrl: './input-app-based.component.html',
   styleUrl: './input-app-based.component.scss',
@@ -45,6 +46,10 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   config = model.required<ConnectorDTO>();
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();
+  readonly displayMode = input<'PAGE' | 'DIALOG'>('PAGE');
+  readonly validityChange = output<boolean>();
+  readonly uploadingChange = output<boolean>();
+  readonly editorChange = output<void>();
 
   appDetail = this.store.selectSignal(selectSelectedApp);
   storeLoading = this.store.selectSignal(selectStoreLoading);
@@ -55,10 +60,21 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   name = computed(() => this.appDetail()?.name)
   inputHyperParams = computed(() => this.settings()?.hyperParams)
 
-  inputs: { [key: string]: any } = {};
+  readonly inputs = signal<{ [key: string]: any }>({});
+  readonly hyperParamValid = signal(true);
+  private readonly pendingUploads = signal(0);
+  readonly uploading = computed(() => this.pendingUploads() > 0);
+  readonly isValid = computed(() => {
+    const app = this.appDetail();
+    if (!app || this.uploading() || !this.hyperParamValid()) {
+      return false;
+    }
+    return app.appConfig.input
+      .filter(appInput => appInput.required)
+      .every(appInput => this.hasValue(this.inputs()[this.getInputName(appInput)]));
+  });
 
-  inputValid: boolean = true;
-  hyperParamValid: boolean = true;
+  private loadedVersionId?: number;
 
   constructor() {
     effect(() => {
@@ -67,15 +83,18 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
         return;
       }
       const input = cfg.inputConfig;
-      const id = cfg.inputSource?.id;
-      if (id) {
-        this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: +id}));
+      const id = Number(cfg.inputSource?.id || (input && isAppBasedUploadSettings(input) ? input.appVersionId : 0));
+      if (id && id !== this.loadedVersionId) {
+        this.loadedVersionId = id;
+        this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: id}));
       }
       if (input && isAppBasedUploadSettings(input)) {
-        this.settings.set(input);
-        if (!id && input.appVersionId) {
-          this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: input.appVersionId}));
-        }
+        this.settings.set({
+          ...input,
+          hyperParams: {...(input.hyperParams ?? {})},
+          inputData: {...(input.inputData ?? {})},
+        });
+        this.inputs.set({...input.inputData});
       }
     });
     effect(() => {
@@ -83,15 +102,24 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
       if (!appDetail) {
         return;
       }
-      this.settings.update(s => {
-        if (!s) {
-          s = {} as any;
-        }
-        s!.appImage = appDetail.imageName!;
-        s!.appVersionId = appDetail.latestVersionId!;
-        s!.appTitle = appDetail.name;
-        return s;
-      });
+      this.settings.update(s => ({
+        ...(s ?? {} as AppBasedUploadSettings),
+        appImage: appDetail.imageName!,
+        appVersionId: this.loadedVersionId ?? appDetail.latestVersionId!,
+        appTitle: appDetail.name,
+        mode: 'APP',
+        hyperParams: s?.hyperParams ?? {},
+        inputData: s?.inputData ?? {},
+      }));
+    });
+    effect(() => {
+      this.validityChange.emit(this.isValid());
+      this.uploadingChange.emit(this.uploading());
+    });
+    effect(() => {
+      this.hyperParams();
+      this.inputs();
+      this.editorChange.emit();
     });
   }
 
@@ -127,22 +155,21 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   });
 
   changeInput(data: { [key: string]: any }): void {
-    let allValid = true;
-    const input: ToolInputConfigDTO[] = this.appDetail()?.appConfig.input ?? [];
-    input.forEach((input) => {
-      const name = input.variableName ?? input.name;
-      const isRequired = input.required;
-      if (isRequired) {
-        if (!data[name] || data[name].length === 0) {
-          allValid = false;
+    const next = {...data};
+    const appInputs: ToolInputConfigDTO[] = this.appDetail()?.appConfig.input ?? [];
+    appInputs.forEach(appInput => {
+      const name = this.getInputName(appInput);
+      if (this.isFileValue(next[name])) {
+        const previousValue = this.inputs()[name];
+        if (previousValue === undefined) {
+          delete next[name];
+        } else {
+          next[name] = previousValue;
         }
-      }
-      if (this.isFileValue(data[name])) {
         this.onFileSelected(name, data[name]);
       }
     });
-    this.inputValid = allValid;
-    this.inputs = data;
+    this.inputs.set(next);
   }
 
 
@@ -161,6 +188,7 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
             null;
 
     if (!file) return;
+    this.pendingUploads.update(count => count + 1);
     this.uploadService.uploadFile(this.config().cohortId!, file).pipe(
       catchError((error) => {
         console.error(this.translate.instant('ERROR.ERROR_IMPORTING_FILE'), error);
@@ -170,47 +198,61 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
             duration: 5000,
             verticalPosition: 'top',
           });
-        throw error;
-      })
+        return EMPTY;
+      }),
+      finalize(() => this.pendingUploads.update(count => Math.max(0, count - 1)))
     ).subscribe((response: ConnectorFilesDTO): void => {
-      this.inputs[key] = response.id;
+      if (response.id) {
+        this.inputs.update(inputs => ({...inputs, [key]: response.id}));
+      }
     });
-  }
-
-  get isValid(): boolean {
-    return this.inputValid && this.hyperParamValid;
   }
 
   getHyperParamName(hyperparam: ToolHyperParamConfigDTO): string {
     return hyperparam.variableName ? hyperparam.variableName : hyperparam.name;
   }
 
+  getConfiguredConnector(): ConnectorDTO | undefined {
+    const inputConfig = this.settings();
+    if (!inputConfig || !this.isValid()) {
+      return undefined;
+    }
+    return {
+      ...this.config(),
+      inputConfig: {
+        ...inputConfig,
+        hyperParams: {...this.hyperParams()},
+        inputData: {...this.inputs()},
+        mode: 'APP',
+      }
+    };
+  }
+
   onContinueClick(): boolean {
-    if (!this.isValid) {
+    const configuredConnector = this.getConfiguredConnector();
+    if (!configuredConnector) {
       this.snackBar.open(
-        this.translate.instant('WARNING.PLEASE_IMPORT_A_FILE'),
+        this.translate.instant('WARNING.PLEASE_FILL_REQUIRED_FIELDS'),
         this.translate.instant('BUTTON.CLOSE'), {
           duration: 5000,
           verticalPosition: 'top',
         });
       return false;
     }
-    const inputConfig = this.settings();
-    if (!inputConfig) {
-      return false;
-    }
-    inputConfig.hyperParams = this.hyperParams();
-    inputConfig.inputData = this.inputs;
-    inputConfig.mode = "APP";
-    this.config.update(c => {
-      return {
-        ...c,
-        inputConfig: inputConfig
-      }
-    });
+    this.config.set(configuredConnector);
 
     this.configChange.emit(this.config());
     return true;
   }
 
+  private getInputName(appInput: ToolInputConfigDTO): string {
+    return appInput.variableName ?? appInput.name;
+  }
+
+  private hasValue(value: unknown): boolean {
+    return value !== null
+      && value !== undefined
+      && value !== ''
+      && (!Array.isArray(value) || value.length > 0);
+  }
 }

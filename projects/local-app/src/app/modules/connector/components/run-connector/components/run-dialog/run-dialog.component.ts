@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -26,6 +26,17 @@ import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-
 import {connectorFilesDetailToFileInfo, isFileUploadSettings} from "../../../../helper/connector-config-helper";
 import {ConnectorMappingConfig} from "../../../../models/connector-model";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {
+  InputAppBasedComponent
+} from '../../../manage-connector/components/config/input-app-based/input-app-based.component';
+import {isAppBasedUploadSettings} from '../../../../helper/connector-config-helper';
+import {ConnectorService} from '../../../../services/connector-crud.service';
+import {ConnectorAppBasedExtractorService} from '../../../../services/connector-app-based-extractor.service';
+import {AppBasedExtractorRequestDTO, ConnectorExtractorStreamDTO} from '../../../../dto/connector-app-based-extractor';
+import {MatProgressBar} from '@angular/material/progress-bar';
+import {ErrorCardComponent} from '@shared-lib/components/error-card/error-card.component';
+import {switchMap} from 'rxjs/operators';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-run-dialog',
@@ -43,6 +54,9 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     TranslatePipe,
     MatCardModule,
     BtnComponent,
+    InputAppBasedComponent,
+    MatProgressBar,
+    ErrorCardComponent,
   ]
 })
 export class ConnectorRunDialogComponent implements OnInit {
@@ -50,12 +64,21 @@ export class ConnectorRunDialogComponent implements OnInit {
   deleteExistingPatients = signal<boolean>(false);
   uploadInProgress = signal<boolean>(false);
   runInProgress = signal<boolean>(false);
+  appEditorValid = signal(false);
+  appSourceRunning = signal(false);
+  appSourceReady = signal(false);
+  appSourceError = signal<string | null>(null);
+  appSourceLastMessage = signal<ConnectorExtractorStreamDTO | null>(null);
   connector = signal<ConnectorDTO>({} as ConnectorDTO);
   cohort = signal<CohortDetailDto>({} as CohortDetailDto);
 
   private readonly router = inject(Router);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly connectorRunService = inject(ConnectorRunService);
+  private readonly connectorService = inject(ConnectorService);
+  private readonly appExtractorService = inject(ConnectorAppBasedExtractorService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly appEditor = viewChild(InputAppBasedComponent);
 
   public readonly dialogRef = inject(MatDialogRef<ConnectorRunDialogComponent, boolean>);
   public readonly data = inject<{ cohort: CohortDetailDto; connector: ConnectorDTO }>(MAT_DIALOG_DATA);
@@ -73,12 +96,22 @@ export class ConnectorRunDialogComponent implements OnInit {
 
   fileExist = signal<boolean>(false);
   fileSettings = signal<FileParsingSettingsDTO | undefined>(undefined);
-  readonly valid = computed(() => {
+  readonly appBasedSource = computed(() => {
+    const inputConfig = this.connector().inputConfig;
+    return !!inputConfig && isAppBasedUploadSettings(inputConfig);
+  });
+  readonly canRunConnector = computed(() => {
     if (this.hasUnmappedRequiredFields() || this.uploadInProgress()) {
       return false;
     }
-    return this.fileExist();
-  }
+    return this.fileExist() && (!this.appBasedSource() || this.appSourceReady());
+  });
+  readonly canSaveAndRunApp = computed(() =>
+    this.appBasedSource()
+    && this.appEditorValid()
+    && !this.uploadInProgress()
+    && !this.appSourceRunning()
+    && !this.runInProgress()
   );
 
   ngOnInit(): void {
@@ -108,6 +141,10 @@ export class ConnectorRunDialogComponent implements OnInit {
     } else {
       this.fileExist.set(true);
     }
+
+    if (this.appBasedSource()) {
+      this.dialogRef.updateSize('min(1100px, 94vw)');
+    }
   }
 
   onDeleteExistingChanged(checked: boolean) {
@@ -131,7 +168,7 @@ export class ConnectorRunDialogComponent implements OnInit {
   }
 
   onRunClick(): void {
-    if (!this.valid() || this.runInProgress()) {
+    if (!this.canRunConnector() || this.runInProgress()) {
       return;
     }
     this.runInProgress.set(true);
@@ -145,6 +182,56 @@ export class ConnectorRunDialogComponent implements OnInit {
           console.error(err);
         },
       });
+  }
+
+  onSaveAndRunAppClick(): void {
+    const configuredConnector = this.appEditor()?.getConfiguredConnector();
+    if (!configuredConnector || !configuredConnector.id || !isAppBasedUploadSettings(configuredConnector.inputConfig!)) {
+      this.appEditor()?.onContinueClick();
+      return;
+    }
+
+    const inputConfig = {
+      ...configuredConnector.inputConfig,
+      outputParams: undefined,
+    };
+    const connectorToSave: ConnectorDTO = {...configuredConnector, inputConfig};
+
+    this.appSourceRunning.set(true);
+    this.appSourceReady.set(false);
+    this.appSourceError.set(null);
+    this.appSourceLastMessage.set(null);
+
+    this.connectorService.save(connectorToSave).pipe(
+      switchMap(savedConnector => {
+        const saved = {...connectorToSave, ...savedConnector, inputConfig};
+        this.connector.set(saved);
+        return this.appExtractorService.runApp(this.createAppRunRequest(saved));
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: message => {
+        this.appSourceLastMessage.set(message);
+        if (message.status === 'ERROR') {
+          this.appSourceRunning.set(false);
+          this.appSourceError.set(message.lastError ?? 'The app source run failed.');
+        }
+        if (message.status === 'FINISHED' && message.uploadInfo) {
+          this.appSourceRunning.set(false);
+          this.appSourceReady.set(true);
+        }
+      },
+      error: error => {
+        this.appSourceRunning.set(false);
+        this.appSourceError.set(error?.message ?? 'The app source run failed.');
+      }
+    });
+  }
+
+  onAppEditorChange(): void {
+    if (this.appSourceReady()) {
+      this.appSourceReady.set(false);
+    }
   }
 
   goToMapping(): void {
@@ -175,7 +262,7 @@ export class ConnectorRunDialogComponent implements OnInit {
 
   handleUploadState(uploading: boolean): void {
     this.uploadInProgress.set(uploading);
-    if (uploading) {
+    if (uploading && !this.appBasedSource()) {
       // Once replacement starts, only the completed HTTP response makes the
       // selected file runnable; 100% merely means all bytes reached the server.
       this.fileExist.set(false);
@@ -226,5 +313,19 @@ export class ConnectorRunDialogComponent implements OnInit {
           }
         }
       });
+  }
+
+  private createAppRunRequest(connector: ConnectorDTO): AppBasedExtractorRequestDTO {
+    const inputConfig = connector.inputConfig;
+    if (!inputConfig || !isAppBasedUploadSettings(inputConfig)) {
+      throw new Error('The connector does not have an app based source configuration.');
+    }
+    return {
+      appImage: inputConfig.appImage,
+      appVersionId: inputConfig.appVersionId,
+      cohortId: connector.cohortId!,
+      hyperParams: inputConfig.hyperParams,
+      inputData: inputConfig.inputData,
+    };
   }
 }
