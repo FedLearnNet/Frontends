@@ -35,10 +35,28 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [local, global]
+        include:
+          - app: local
+            flavor: fl-net
+            image: local-fl-net
+          - app: global
+            flavor: fl-net
+            image: global-fl-net
+          - app: local
+            flavor: microbAIome
+            image: local-microbaiome
+          - app: global
+            flavor: microbAIome
+            image: global-microbaiome
+          - app: local
+            flavor: dAIbetes
+            image: local-daibetes
+          - app: global
+            flavor: dAIbetes
+            image: global-daibetes
     env:
-      SCRIPT: build-${{ matrix.app }}-fl-net${{ github.ref != 'refs/heads/main' && '-staging' || '' }}
-      IMAGE: ${{ matrix.app }}-fl-net:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
+      SCRIPT: build-${{ matrix.app }}-${{ matrix.flavor }}${{ github.ref != 'refs/heads/main' && '-staging' || '' }}
+      IMAGE: ${{ matrix.image }}:${{ github.ref == 'refs/heads/main' && 'latest' || 'staging' }}
     steps:
       - uses: actions/checkout@v5
 
