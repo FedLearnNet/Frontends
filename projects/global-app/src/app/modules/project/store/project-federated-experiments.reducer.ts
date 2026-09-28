@@ -86,7 +86,6 @@ export const projectFederatedExperimentReducer = createReducer(
 
   on(ProjectFederatedExperimentsActions.loadExperiment, (state): ProjectFederatedExperimentState => ({
     ...state,
-    selectedExperiment: null,
     loading: true,
     error: null,
   })),
