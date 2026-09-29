@@ -37,7 +37,6 @@
           displayMode="DIALOG"
           (validityChange)="appEditorValid.set($event)"
           (uploadingChange)="handleUploadState($event)"
-          (editorChange)="onAppEditorChange()"
         />
       </div>
 
@@ -49,7 +48,7 @@
             <mat-progress-bar mode="indeterminate"/>
           </mat-card-content>
         </mat-card>
-      } @else if (appSourceReady()) {
+      } @else if (appSourceReady() && !hasPendingSourceChanges()) {
         <mat-card appearance="outlined" class="app-source-status success">
           <mat-card-content>
             <strong>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.READY_TITLE' | translate }}</strong>

@@ -100,11 +100,13 @@ export class ConnectorRunDialogComponent implements OnInit {
     const inputConfig = this.connector().inputConfig;
     return !!inputConfig && isAppBasedUploadSettings(inputConfig);
   });
+
+  readonly hasPendingSourceChanges = computed(() => !!this.appEditor()?.hasUserChanges());
   readonly canRunConnector = computed(() => {
-    if (this.hasUnmappedRequiredFields() || this.uploadInProgress()) {
+    if (this.hasUnmappedRequiredFields() || this.uploadInProgress() || !this.fileExist()) {
       return false;
     }
-    return this.fileExist() && (!this.appBasedSource() || this.appSourceReady());
+    return !this.appBasedSource() || !this.hasPendingSourceChanges() || this.appSourceReady();
   });
   readonly canSaveAndRunApp = computed(() =>
     this.appBasedSource()
@@ -219,6 +221,7 @@ export class ConnectorRunDialogComponent implements OnInit {
         if (message.status === 'FINISHED' && message.uploadInfo) {
           this.appSourceRunning.set(false);
           this.appSourceReady.set(true);
+          this.appEditor()?.markPristine();
         }
       },
       error: error => {
@@ -226,12 +229,6 @@ export class ConnectorRunDialogComponent implements OnInit {
         this.appSourceError.set(error?.message ?? 'The app source run failed.');
       }
     });
-  }
-
-  onAppEditorChange(): void {
-    if (this.appSourceReady()) {
-      this.appSourceReady.set(false);
-    }
   }
 
   goToMapping(): void {

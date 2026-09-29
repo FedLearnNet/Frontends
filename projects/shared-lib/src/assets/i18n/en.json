@@ -916,7 +916,7 @@
       "MISSING_REQUIRED_FIELDS_DESC": "The following required fields are not mapped. Please complete the mapping before continuing.",
       "APP_SOURCE": {
         "TITLE": "Configure the app data source",
-        "DESCRIPTION": "Review or edit the app settings and inputs for this run. Save and run the app first; when its output is ready, you can run the connector.",
+        "DESCRIPTION": "The connector runs with the current app settings. Change a hyperparameter or input only when this run needs different data, then save and run the app before running the connector.",
         "OVERVIEW": "App overview",
         "SETTINGS": "Hyperparameters",
         "INPUTS": "Inputs",

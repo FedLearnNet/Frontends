@@ -49,7 +49,6 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   readonly displayMode = input<'PAGE' | 'DIALOG'>('PAGE');
   readonly validityChange = output<boolean>();
   readonly uploadingChange = output<boolean>();
-  readonly editorChange = output<void>();
 
   appDetail = this.store.selectSignal(selectSelectedApp);
   storeLoading = this.store.selectSignal(selectStoreLoading);
@@ -75,6 +74,12 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   });
 
   private loadedVersionId?: number;
+
+  private readonly baseline = signal<string | undefined>(undefined);
+  readonly hasUserChanges = computed(() => {
+    const baseline = this.baseline();
+    return baseline !== undefined && baseline !== this.configurationSnapshot();
+  });
 
   constructor() {
     effect(() => {
@@ -116,10 +121,17 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
       this.validityChange.emit(this.isValid());
       this.uploadingChange.emit(this.uploading());
     });
-    effect(() => {
-      this.hyperParams();
-      this.inputs();
-      this.editorChange.emit();
+    effect(onCleanup => {
+      if (this.baseline() !== undefined || !this.appDetail() || this.storeLoading()) {
+        return;
+      }
+      const snapshot = this.configurationSnapshot();
+      const handle = setTimeout(() => {
+        if (this.baseline() === undefined) {
+          this.baseline.set(snapshot);
+        }
+      });
+      onCleanup(() => clearTimeout(handle));
     });
   }
 
@@ -212,6 +224,10 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
     return hyperparam.variableName ? hyperparam.variableName : hyperparam.name;
   }
 
+  markPristine(): void {
+    this.baseline.set(this.configurationSnapshot());
+  }
+
   getConfiguredConnector(): ConnectorDTO | undefined {
     const inputConfig = this.settings();
     if (!inputConfig || !this.isValid()) {
@@ -243,6 +259,13 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
 
     this.configChange.emit(this.config());
     return true;
+  }
+
+  private configurationSnapshot(): string {
+    return JSON.stringify({
+      hyperParams: this.hyperParams(),
+      inputs: this.inputs(),
+    });
   }
 
   private getInputName(appInput: ToolInputConfigDTO): string {
