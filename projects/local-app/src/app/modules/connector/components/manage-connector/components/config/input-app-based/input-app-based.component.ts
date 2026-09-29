@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, linkedSignal, output, signal, ChangeDetectionStrategy, input as input_1} from '@angular/core';
+import {Component, computed, effect, inject, linkedSignal, output, signal, ChangeDetectionStrategy, input} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {Store} from "@ngrx/store";
 import {
@@ -43,6 +43,7 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   private readonly translate: TranslateService = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
 
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   configInput = input.required<ConnectorDTO>({alias: 'config'});
   config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();
@@ -68,15 +69,15 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
       if (!cfg) {
         return;
       }
-      const input = cfg.inputConfig;
+      const inputConfig = cfg.inputConfig;
       const id = cfg.inputSource?.id;
       if (id) {
         this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: +id}));
       }
-      if (input && isAppBasedUploadSettings(input)) {
-        this.settings.set(input);
-        if (!id && input.appVersionId) {
-          this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: input.appVersionId}));
+      if (inputConfig && isAppBasedUploadSettings(inputConfig)) {
+        this.settings.set(inputConfig);
+        if (!id && inputConfig.appVersionId) {
+          this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: inputConfig.appVersionId}));
         }
       }
     });

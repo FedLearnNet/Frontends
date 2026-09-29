@@ -1,5 +1,5 @@
 import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
-import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 import {SseClient} from 'ngx-sse-client';
 import {Observable, of, Subject, throwError} from 'rxjs';
 import {ImportEventDTO} from '../dto/import-progress';
@@ -27,6 +27,8 @@ describe('ConnectorImportService', () => {
     });
     service = TestBed.inject(ConnectorImportService);
   });
+
+  afterEach(() => jasmine.clock().uninstall());
 
   it('follows live SSE reading events as soon as the upload finishes', () => {
     const sseEvents = new Subject<Event>();
@@ -64,7 +66,8 @@ describe('ConnectorImportService', () => {
     subscription.unsubscribe();
   });
 
-  it('retries the SSE connection while the backend creates the import tracker', fakeAsync(() => {
+  it('retries the SSE connection while the backend creates the import tracker', () => {
+    jasmine.clock().install();
     const reading: ImportEventDTO = {
       importId: 'import-2',
       phase: 'PARSING',
@@ -86,12 +89,12 @@ describe('ConnectorImportService', () => {
     httpEvents.next({type: HttpEventType.UploadProgress, loaded: 7, total: 7});
     expect(sseClient.stream).toHaveBeenCalledTimes(1);
 
-    tick(500);
+    jasmine.clock().tick(500);
 
     expect(sseClient.stream).toHaveBeenCalledTimes(2);
     expect(messages.at(-1)).toEqual({kind: 'event', event: reading});
     subscription.unsubscribe();
-  }));
+  });
 
   it('cancels the live SSE follower when the import subscription is cancelled', () => {
     const sseTeardown = jasmine.createSpy('sseTeardown');

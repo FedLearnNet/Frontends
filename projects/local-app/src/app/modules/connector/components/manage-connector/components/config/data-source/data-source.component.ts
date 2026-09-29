@@ -38,6 +38,7 @@ function withoutTag(image: string): string {
 export class ConnectorStepDataSourceConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
   private readonly store: Store = inject(Store);
 
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   configInput = input.required<ConnectorDTO>({alias: 'config'});
   config = linkedSignal(this.configInput);
 

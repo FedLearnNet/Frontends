@@ -1,4 +1,4 @@
-import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, isDevMode} from '@angular/core';
 import {provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {caseConversionInterceptor} from '@shared-lib/interceptors/case-conversion.interceptor';
 import {loadingInterceptor} from '@shared-lib/interceptors/loading.interceptor';
@@ -68,7 +68,6 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({
         paramsInheritanceStrategy: 'always',
       })),
-    provideZoneChangeDetection({eventCoalescing: true}),
     provideTranslateService({
       fallbackLang: localStorage.getItem('language') || 'en',
       loader: provideTranslateHttpLoader({

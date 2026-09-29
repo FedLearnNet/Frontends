@@ -43,6 +43,7 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   private translate = inject(TranslateService);
 
   readonly cohortId = input<number>();
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
   readonly config = linkedSignal(this.configInput);
   connectorExist = computed(() => {

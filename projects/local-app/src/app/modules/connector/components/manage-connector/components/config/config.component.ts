@@ -46,6 +46,7 @@ const componentMapper: { [key: string]: any } = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectorStepConfigComponent implements OnInit, OnChanges, ConnectorStepConfig<ConnectorDTO> {
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
   readonly config = linkedSignal(this.configInput);
   readonly componentType = input<string | number>();

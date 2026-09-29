@@ -83,13 +83,10 @@ export class MarkDownEditorComponent implements AfterViewInit, ControlValueAcces
       placeholder: 'Type here...',
       unorderedListStyle: '-',
       previewRender: (plainText, preview) => {
-        const parsed = this.markdownService.parse(plainText);
-        if (parsed instanceof Promise) {
-          parsed.then((html) => (preview.innerHTML = html));
-          return 'Loading...';
-        }
-        preview.innerHTML = parsed;
-        return parsed;
+        (async () => {
+          preview.innerHTML = await this.markdownService.parse(plainText);
+        })();
+        return 'Loading...';
       },
     });
 

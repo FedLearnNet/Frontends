@@ -71,6 +71,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   private connectorPreviewService = inject(ConnectorPreviewService);
 
   readonly cohortId = input<number | undefined>(undefined);
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   readonly configInput = input.required<ConnectorDTO>({alias: 'config'});
   readonly config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();

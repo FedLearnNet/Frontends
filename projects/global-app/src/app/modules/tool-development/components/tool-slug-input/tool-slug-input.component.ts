@@ -33,6 +33,7 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
   ],
 })
 export class ToolSlugInputComponent implements ControlValueAccessor {
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   valueInput = input<string>('', {alias: 'value'});
   value = linkedSignal(this.valueInput);
   toolName = input<string>('');
