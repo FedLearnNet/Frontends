@@ -13,7 +13,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {MatButton} from "@angular/material/button";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
-import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
+import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {environment} from "@global-app/env/environment";
 import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorDTO} from "../../../../../../../dto/connector";
@@ -33,6 +33,8 @@ import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
     StatusBadgeComponent,
     MatTooltip
   ],
+  // One instance per extractor view, so a failed or running stream never shows up on another connector.
+  providers: [ConnectorAppBasedExtractorService],
   templateUrl: './app-based-extractor.component.html',
   styleUrl: './app-based-extractor.component.scss',
 })
@@ -60,6 +62,14 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
 
   hasStoredOutputs = computed(() =>
     Object.keys(this.appBasedConfig()?.outputParams ?? {}).length > 0);
+
+  status = computed<StatusBadeType>(() => {
+    const service = this.connectorAppBasedExtractorService;
+    if (service.running()) return 'RUNNING';
+    if (service.error()) return 'FAILED';
+    if (this.last()?.uploadInfo || this.hasStoredOutputs()) return 'SUCCESS';
+    return 'PENDING';
+  });
 
   ngOnInit() {
     const config = this.config();
@@ -95,16 +105,17 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
    };*/
     this.runStarted.emit(true);
     this.cleanup();
-    this.subscriptions.push(this.connectorAppBasedExtractorService.runApp(data).subscribe(msg => {
-      this.last.set(msg);
-      this.messages.update(m => {
-        m.push(msg);
-        return m;
-      })
-      if (msg.uploadInfo) {
-        this.runFinished.emit(msg.uploadInfo);
-      }
-    }));
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions = [this.connectorAppBasedExtractorService.runApp(data).subscribe({
+      next: msg => {
+        this.last.set(msg);
+        this.messages.update(m => [...m, msg]);
+        if (msg.uploadInfo) {
+          this.runFinished.emit(msg.uploadInfo);
+        }
+      },
+      error: () => undefined
+    })];
   }
 
   getFileName(path?: string) {

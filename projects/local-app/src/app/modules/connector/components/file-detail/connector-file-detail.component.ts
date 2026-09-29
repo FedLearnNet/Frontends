@@ -1,7 +1,6 @@
-import {Component, DestroyRef, OnInit, computed, inject, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {DecimalPipe} from '@angular/common';
-import {Location} from '@angular/common';
+import {DecimalPipe, Location} from '@angular/common';
 import {Actions, ofType} from '@ngrx/effects';
 import {Store} from '@ngrx/store';
 import {ActivatedRoute, RouterLink} from '@angular/router';
@@ -29,9 +28,7 @@ import {ImportStatusEnum} from "../../dto/connector.enum";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {ImportActions} from '../../store/import/import.actions';
 import {selectCohortImports} from '../../store/import/import.selectors';
-import {
-  ImportActivityChipComponent
-} from '../import/import-activity-chip/import-activity-chip.component';
+import {ImportActivityChipComponent} from '../import/import-activity-chip/import-activity-chip.component';
 
 @Component({
   selector: 'app-connector-file-detail',
@@ -169,7 +166,7 @@ export class ConnectorFileDetailComponent implements OnInit {
       this.loading.set(true);
       this.uploadService.deleteFile(this.cohortId, file.id).pipe(
         finalize(() => this.loading.set(false)),
-      ).subscribe(() => this.location.back());
+      ).subscribe({next: () => this.location.back(), error: () => undefined});
     });
   }
 

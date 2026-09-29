@@ -1,14 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  computed,
-  inject,
-  input,
-  model,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, model, OnInit, output, signal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {FileUploadSettings} from "../../../../../models/input-config";
 import {ConnectorUploadService} from "../../../../../services/connector-upload.service";
@@ -24,6 +14,7 @@ import {RunNewFileComponent} from '../../../../run-connector/components/run-new-
 import {ConnectorFilesDTO, UploadInfoDTO} from '../../../../../dto/upload-info';
 import {
   connectorFilesDetailToFileInfo,
+  fileTypeLabel,
   isFileUploadSettings
 } from "../../../../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../../../../dto/connector";
@@ -122,6 +113,8 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   hasSelectableFiles(): boolean {
     return this.availableFiles().length > 0;
   }
+
+  readonly fileTypeLabel = fileTypeLabel;
 
   getDelimiterLabel(): string {
     if (this.settings.delimiter === 'CUSTOM') {

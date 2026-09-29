@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, signal} from '@angular/core';
+import {Component, inject, input, OnInit, signal, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {
@@ -26,8 +26,8 @@ import {
   EditConnectorJsonEditorData
 } from "../manage-connector/components/connector-json-editor-dialog/connector-json-editor-dialog.component";
 import {
-  ConnectorCreateChoiceDialogComponent,
-  ConnectorCreateChoice
+  ConnectorCreateChoice,
+  ConnectorCreateChoiceDialogComponent
 } from "../manage-connector/components/connector-create-choice-dialog/connector-create-choice-dialog.component";
 import {
   ConnectorImportDialogComponent,
@@ -41,7 +41,7 @@ import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/statu
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
-import { getCleanConnectorConfig } from '../../helper/connector-config-helper';
+import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 
 
 @Component({
@@ -58,6 +58,11 @@ export class ListConnectorComponent implements OnInit {
   displayedColumns: string[] = ['name', 'source', 'last', 'actions'];
   connectors: ConnectorDTO[] = [];
   dataSource = new MatTableDataSource<ConnectorDTO>([]);
+
+  @ViewChild(MatPaginator)
+  set paginator(paginator: MatPaginator | undefined) {
+    this.dataSource.paginator = paginator ?? null;
+  }
 
   private router = inject(Router);
   private dialog = inject(MatDialog);

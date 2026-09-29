@@ -1,12 +1,19 @@
-import {Component, computed, effect, ElementRef, inject, input, output, signal, viewChild, ViewChild} from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  input,
+  output,
+  signal,
+  viewChild,
+  ViewChild
+} from '@angular/core';
 import {ConnectorDTO} from "../../../../dto/connector";
 import {ConnectorStepConfigChangeEmitter} from "../../../../models/connector-step-config";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {
-  ConnectorFileImportResultDTO,
-  ConnectorFilesDTO,
-  FileParsingSettingsDTO
-} from "../../../../dto/upload-info";
+import {ConnectorFileImportResultDTO, ConnectorFilesDTO, FileParsingSettingsDTO} from "../../../../dto/upload-info";
 import {
   ConnectorStepDataSourceMultiFileUploadComponent
 } from "../../../manage-connector/components/config/input-file/components/multi-file/multi-file.component";
@@ -19,17 +26,11 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {MatIcon} from '@angular/material/icon';
 import {ConfirmDialogComponent} from '@shared-lib/components/confirm-dialog/confirm-dialog.component';
 import {isFileUploadSettings} from "../../../../helper/connector-config-helper";
-import {
-  InputAppBasedComponent
-} from "../../../manage-connector/components/config/input-app-based/input-app-based.component";
 import {ALLOWED_FILE_EXTENSIONS} from '../../../../constansts/allowed-file-extenstion.constants';
 import {
   InputFileSelectDialogComponent
 } from "../../../manage-connector/components/config/input-file/components/input-file-select-dialog/input-file-select-dialog.component";
-import {
-  FileImportComponent,
-  FileImportResult
-} from "../../../import/file-import/file-import.component";
+import {FileImportComponent, FileImportResult} from "../../../import/file-import/file-import.component";
 import {ImportUploadSettings} from "../../../../dto/connector-import";
 import {FileUploadSettings} from "../../../../models/input-config";
 
@@ -37,7 +38,7 @@ import {FileUploadSettings} from "../../../../models/input-config";
   selector: 'app-run-new-file',
   templateUrl: './run-new-file.component.html',
   styleUrl: './run-new-file.component.scss',
-  imports: [MatCheckbox, FormsModule, MatButton, MatTooltip, MatIcon, TranslatePipe, InputAppBasedComponent, FileImportComponent]
+  imports: [MatCheckbox, FormsModule, MatButton, MatTooltip, MatIcon, TranslatePipe, FileImportComponent]
 })
 export class RunNewFileComponent {
   private readonly snackBar = inject(MatSnackBar);
@@ -249,7 +250,7 @@ export class RunNewFileComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: this.translate.instant('DIALOG.REUPLOAD_MODAL.TITLE'),
-        message: this.translate.instant('DIALOG.REUPLOAD_MODAL.MESSAGE', { fileName: fileName }),
+        message: this.translate.instant('DIALOG.REUPLOAD_MODAL.MESSAGE', {fileName: fileName}),
         dismissButtonText: this.translate.instant('BUTTON.CANCEL'),
         confirmButtonText: this.translate.instant('BUTTON.UPLOAD'),
       },

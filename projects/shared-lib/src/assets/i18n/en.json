@@ -1,4 +1,9 @@
 {
+  "DRY_RUN": "Dry run",
+  "DRY_RUN_RESULTS_HINT": "Dry run: nothing was written to the cohort. The counts above show what a real run would change.",
+  "CHECKING_PATIENT_CHANGES": "Checking patient changes (dry run)",
+  "APP_OUTPUT_TO_IMPORT": "Outputs to import",
+  "APP_OUTPUT_TO_IMPORT_HINT": "Pick one output, or several and merge them. Transforms, mapping and runs use this.",
   "SEARCH": {
     "PLACEHOLDER": "Search cohorts, patients, schemas…",
     "START_TYPING": "Start typing to search across your workspace",
@@ -40,18 +45,18 @@
   "CONFIGURED": "Configured",
   "TRANSFORMER": "Transformer",
   "SELECT_A_DATA_SOURCE": "Select a Data Source",
-  "SELECT_A_DATA_SOURCE_DESC": "Extract data from a pre-built API integration using a Native Source or from one of our Generic Sources to add content to the platform.",
+  "SELECT_A_DATA_SOURCE_DESC": "Read the data from a file, or with an extractor app installed for this cohort.",
   "GENERIC_SOURCE": "Generic Source",
-  "GENERIC_SOURCE_DESC": "Extract data from a generic source, such as a local file or any API.",
+  "GENERIC_SOURCE_DESC": "Upload a CSV, Excel or JSON file, or a ZIP with several CSV files.",
   "SPECIFIC_SOURCE": "Specific Source",
-  "SPECIFIC_SOURCE_DESC": "Extract data from a generic source, such as a local file or any API.",
+  "SPECIFIC_SOURCE_DESC": "Extract data with an extractor app installed for this cohort, such as a database query or a dataset import.",
   "FILE_IMPORT_SETTINGS": "File Import Settings",
   "FILE_TYPE": "File Type",
-  "FILE_TYPE_TOOLTIP": "Info about the action",
+  "FILE_TYPE_TOOLTIP": "The file with one row per patient, including the patient ID.",
   "MAIN_IMPORT": "Main Import",
-  "MAIN_IMPORT_TOOLTIP": "File containing Patient ID",
+  "MAIN_IMPORT_TOOLTIP": "The file with one row per patient, including the patient ID.",
   "MULTI_SUPPORTING_IMPORT": "Multi Supporting Import",
-  "MULTI_SUPPORTING_IMPORT_TOOLTIP": "File containing different Data, regarding to PatientID",
+  "MULTI_SUPPORTING_IMPORT_TOOLTIP": "More files with data for the same patient IDs.",
   "FILE": "File",
   "WAITING_TO_RECEIVE_FILE": "Waiting to Receive a File",
   "FILE_SETTINGS": "File Settings",
@@ -98,7 +103,7 @@
   "ADD_DEFAULT_SELECTORS": "Add Default Selectors",
   "SHEETS_MERGED_BY": "Sheets merged by",
   "CSV_FILES_MERGED_BY": "CSV files merged by",
-  "ADD_DEFAULT_SELECTORS_MESSAGE": "Default header extract paths that are found within the first page of the response, with at least one non-null value.",
+  "ADD_DEFAULT_SELECTORS_MESSAGE": "Loads the columns of the source file.",
   "PARAMETERS": "Parameters",
   "HYPERPARAMETERS": "Hyper-Parameters",
   "INPUTS": "Inputs",
@@ -125,7 +130,7 @@
   "IF_YOU_WANT_TO_IMPORT_A_NEW_FILE": "If you want to import a new file",
   "FILE_CONTAINING_PATIENT_ID": "File containing Patient ID",
   "NEW_FILE": "New File",
-  "FILE_CONTAINING_DIFFERENT_DATA": "File containing different Data, regarding to PatientID",
+  "FILE_CONTAINING_DIFFERENT_DATA": "More files with data for the same patient IDs.",
   "FILE_IMPORTED_SUCCESSFULLY": "File Imported Successfully",
   "FILE_IS_BEING_ANALYZED": "The file is being analyzed. This may take a moment.",
   "EXISTING_FILES": "Existing Files",
@@ -617,6 +622,7 @@
     "RUN_ERRORS": "Run Errors",
     "RUN_LOGS": "Run Logs",
     "RUN_DATE": "Run Date",
+    "DURATION": "Duration",
     "NEW_PATIENTS": "New Patients",
     "UPDATED_PATIENTS": "Updated Patients",
     "DELETED_PATIENTS": "Deleted Patients",
@@ -900,7 +906,7 @@
     },
     "SAVE_CONNECTOR": {
       "TITLE": "Save Connector",
-      "MESSAGE": "What's your Name and your Description for your Connector",
+      "MESSAGE": "Give the connector a name and a description.",
       "THIS_CONNECTOR_IS_USED_FOR": "This connector is used for ..."
     },
     "RUN_CONNECTOR": {
@@ -909,7 +915,7 @@
       "RUN_IN_DELETION_MODE": "Run in Deletion Mode",
       "RUN_IN_DELETION_MODE_DESC": "Every entity supplied in the run will be deleted.",
       "RUN_IN_DRY_MODE": "Make this a Dry Run",
-      "RUN_IN_DRY_MODE_DESC": "A Dry Run will run the connector without applying the updates to the cohort. You can then review the results and optionally choose to apply the changes to cohort or abandon the results.",
+      "RUN_IN_DRY_MODE_DESC": "A Dry Run will run the connector without applying the updates to the cohort. The run then shows how many patients would be created, updated, deleted or fail.",
       "DELETE_EXISTING_PATIETNS": "Delete all patients before import",
       "DELETE_EXISTING_PATIETNS_DESC": "If enabled, all existing patients will be permanently deleted before the import begins. This action cannot be undone and will replace all current patient data with the imported dataset.",
       "MISSING_REQUIRED_FIELDS_TITLE": "Missing required mappings",
@@ -981,7 +987,7 @@
       "TITLE": "Add connector",
       "INTRO": "Choose how you want to add a connector to this cohort.",
       "CREATE_TITLE": "Create manually",
-      "CREATE_DESCRIPTION": "Build a new connector step by step — configure the data source, transforms, and schema mapping.",
+      "CREATE_DESCRIPTION": "Set up the data source, transformations and schema mapping step by step.",
       "IMPORT_TITLE": "Import connector",
       "IMPORT_DESCRIPTION": "Import an existing connector definition from a local JSON file or a remote URL."
     },
@@ -990,7 +996,7 @@
       "METHOD_LABEL": "Import method",
       "METHOD_URL": "From URL",
       "METHOD_JSON": "From JSON",
-      "URL_HINT": "Import a connector definition from an HTTP(S) URL, file URL, or local path that returns valid JSON matching the ConnectorDTO schema. Extra fields are ignored. The import fails if the resource is unreachable or the JSON is invalid.",
+      "URL_HINT": "Import a connector definition (JSON) from an http(s) URL, a file:/// URL or a local path. Unknown fields are ignored.",
       "URL_LABEL": "Source URL or path",
       "URL_HINT_FIELD": "Must start with https://, http://, file:///, or /",
       "JSON_HINT": "Paste connector JSON below or upload a .json file. Valid JSON is formatted and applied automatically, then you can create the connector.",
@@ -1049,7 +1055,7 @@
       "MAPPING_COLUMN_HINT": "Its distinct values decide where the source value is written.",
       "SEARCH_COLUMNS": "Search available columns",
       "ONE_HOT_SOURCE": "Distinct values from {{ column }}",
-      "ONE_HOT_SOURCE_HINT": "Each mapped value represents its own schema field, making this mode a good fit for one-hot encoding.",
+      "ONE_HOT_SOURCE_HINT": "Each mapped value gets its own schema field (one-hot encoding).",
       "SEARCH_VALUES": "Search source values",
       "UNMAPPED_ONLY": "Unmapped only",
       "VALUES_MAPPED": "values mapped",
@@ -1089,7 +1095,7 @@
       "VALIDATION_RUNNING_HELP": "Each example is evaluated against the selected schema field and its datatype rules.",
       "VALIDATION_SUCCESS": "The tested values match the schema",
       "VALIDATION_FAILED": "Some tested values do not match the schema",
-      "VALIDATION_CHECKED_COUNT": "{{count}} examples checked. Open this dialog again at any time to review the details.",
+      "VALIDATION_CHECKED_COUNT": "{{count}} examples checked.",
       "SOURCE_EXAMPLE": "Source rule",
       "VALID_EXAMPLE": "Valid",
       "BLANK_ALLOWED_EXAMPLE": "Blank allowed",
@@ -1144,7 +1150,9 @@
     "FAILED_TO_DELETE": "Failed to delete {{ name }}",
     "TRANSFORMATION_FAILED_GENERIC": "Transformation failed. Please check your configuration and try again.",
     "SAVE_CONNECTOR_GENERIC": "Failed to save connector. Please try again.",
-    "FAILED_TO_DELETE_COHORT": "Failed to delete cohort"
+    "FAILED_TO_DELETE_COHORT": "Failed to delete cohort",
+    "FAILED_TO_ROLLBACK": "Failed to roll back {{ name }}",
+    "FAILED_TO_UPLOAD": "Failed to upload {{ name }}"
   },
   "WARNING": {
     "PIVOT_VALUE_COLUMN_REQUIRED": "Select a value column for every table with pivoting enabled.",
@@ -1167,7 +1175,9 @@
     "NO_CONFIG_RECEIVED": "No config received",
     "COHORT_NOT_FOUND": "Cohort not found",
     "EMPTY": "Empty",
-    "RUN_EXTRACTOR_BEFORE_PREVIEW": "Run the extractor before previewing it — it has not produced any output yet."
+    "RUN_EXTRACTOR_BEFORE_PREVIEW": "Run the extractor first. It has not produced any output yet.",
+    "SELECT_APP_OUTPUT": "The extractor produced several outputs. Choose the ones to import.",
+    "MERGE_APP_OUTPUTS": "Several outputs are selected. Merge them before continuing."
   },
   "VALIDATION": {
     "REQUIRED": "{{ fieldName }} is required",
@@ -1370,8 +1380,8 @@
     "TITLE": "Preview data source",
     "FROM_CACHE": "From cache",
     "COMPUTED_NOW": "Computed now",
-    "EXPLAIN_CACHED": "This step was read back from an earlier preview instead of being recomputed. Cached data is reused only while the source and every earlier step are unchanged — editing any of them recomputes this step automatically.",
-    "EXPLAIN_FRESH": "This step was computed for this preview and stored, so opening it again will not recompute it.",
+    "EXPLAIN_CACHED": "Taken from an earlier preview. It is recomputed when the source or an earlier step changes.",
+    "EXPLAIN_FRESH": "Computed for this preview and stored for the next time.",
     "STEP": "Step",
     "STEP_INDEX": "Position in chain",
     "TRANSFORMER": "Transformation",
@@ -1381,7 +1391,7 @@
     "INVALIDATE": "Drop and recompute",
     "ALSO_DROPS": "This also drops the {{count}} step(s) after it, because each one is computed from the previous step's output.",
     "NOT_RUN": "Not run yet",
-    "EXPLAIN_NOT_RUN": "This step is carried out by an app, and a preview never starts a container. Until you run it, the table shows the rows going into the step rather than what it returns."
+    "EXPLAIN_NOT_RUN": "This step runs in an app, which the preview does not start. Until you run it, the table shows the rows going into the step."
   },
   "APP_TRANSFORMER": {
     "TITLE": "App transformation",
@@ -1391,13 +1401,17 @@
     "LAST_MESSAGE": "Last message",
     "ROWS": "Rows returned",
     "FAILED": "The app transformation failed",
-    "NOT_RUN_HINT": "This step runs in an app, so the preview cannot compute it on its own. Run it to see what it returns — the result is kept, and the steps after it are previewed on top of it.",
+    "NOT_RUN_HINT": "This step runs in an app. Run it to see its result. The result is stored and the next steps use it.",
     "STEP": "Step {{index}}",
     "INPUT_ROWS": "Rows going in",
     "RUNNING_HINT": "Step {{index}} is running in its app. Its result appears here as soon as the app answers.",
     "APP": "App",
     "STEP_LABEL": "Step",
-    "BLOCKED_HINT": "This step is previewed on rows that step {{index}} has not produced yet, because that step runs in an app. Run step {{index}} first — this one is then computed on its real input.",
+    "BLOCKED_HINT": "Step {{index}} runs in an app and has not been run yet, so this step uses its input rows. Run step {{index}} first.",
     "OPEN_BLOCKING_STEP": "Go to step {{index}}"
+  },
+  "LABEL": {
+    "FILE": "File",
+    "FILES": "Files"
   }
 }

@@ -38,7 +38,7 @@
               <button (click)="save('name')" matSuffix mat-icon-button>
                 <mat-icon>save</mat-icon>
               </button>
-              <button (click)="toggleEditMode('name')" matSuffix mat-icon-button>
+              <button (click)="cancelEdit('name')" matSuffix mat-icon-button>
                 <mat-icon>close</mat-icon>
               </button>
             </mat-form-field>
@@ -60,7 +60,7 @@
               <button (click)="save('description')" matSuffix mat-icon-button>
                 <mat-icon>save</mat-icon>
               </button>
-              <button (click)="toggleEditMode('description')" matSuffix mat-icon-button>
+              <button (click)="cancelEdit('description')" matSuffix mat-icon-button>
                 <mat-icon>close</mat-icon>
               </button>
             </mat-form-field>
@@ -100,8 +100,7 @@
         <div class="automation-disclosure">
           <div>
             <h3>Automation settings</h3>
-            <p>Schedules and connector chains are advanced run controls. Keep them hidden until you need recurring or
-              dependent imports.</p>
+            <p>Run this connector on a schedule or after another connector.</p>
           </div>
 
           <div class="automation-actions">
@@ -125,15 +124,15 @@
               <div class="automation-card__header">
                 <div>
                   <h4>Schedule</h4>
-                  <p>Use a predictable run cadence for imports that arrive regularly.</p>
+                  <p>Run the connector at fixed times.</p>
                 </div>
                 <div class="automation-card__actions">
                   <button
                     mat-icon-button
                     type="button"
                     (click)="toggleCronHelp()"
-                    [matTooltip]="showCronHelp ? 'Hide cron help' : 'How to write a Quarkus cron expression'"
-                    aria-label="How to write a Quarkus cron expression">
+                    [matTooltip]="showCronHelp ? 'Hide cron help' : 'Cron format help'"
+                    aria-label="Cron format help">
                     <mat-icon>{{ showCronHelp ? 'info' : 'info_outline' }}</mat-icon>
                   </button>
                   <mat-slide-toggle
@@ -147,9 +146,8 @@
 
               @if (showCronHelp) {
                 <div class="cron-help">
-                  <div class="cron-help__title">Quarkus cron format</div>
-                  <p>Quarkus uses Quartz cron syntax by default: seconds, minutes, hours, day of month, month, day of
-                    week.</p>
+                  <div class="cron-help__title">Cron format</div>
+                  <p>Six fields: seconds, minutes, hours, day of month, month, day of week.</p>
                   <div class="cron-help__example">
                     <code>0 15 10 * * ?</code>
                     <span>Runs every day at 10:15.</span>
@@ -158,7 +156,7 @@
                     <code>0 0 2 ? * MON-FRI</code>
                     <span>Runs at 02:00 on weekdays.</span>
                   </div>
-                  <p>Use <code>?</code> in either day field when you do not want to specify that field.</p>
+                  <p>Use <code>?</code> in one of the two day fields.</p>
                 </div>
               }
 
@@ -167,7 +165,7 @@
                 <input
                   matInput
                   [disabled]="!isScheduleEnabled()"
-                  [ngModel]="connector.scheduleSettings?.cronExpression || '0 2 * * *'"
+                  [ngModel]="connector.scheduleSettings?.cronExpression || '0 0 2 * * ?'"
                   (ngModelChange)="onCronExpressionChange($event)">
                 <mat-icon matSuffix>schedule</mat-icon>
               </mat-form-field>
@@ -176,7 +174,7 @@
                 <mat-icon>{{ isScheduleEnabled() ? 'event_available' : 'event_busy' }}</mat-icon>
                 <span>
                 @if (isScheduleEnabled()) {
-                  Runs from cron: {{ connector.scheduleSettings?.cronExpression || '0 2 * * *' }}
+                  Runs from cron: {{ connector.scheduleSettings?.cronExpression || '0 0 2 * * ?' }}
                 } @else {
                   Schedule is off. Users can still start the connector manually.
                 }
@@ -188,7 +186,7 @@
               <div class="automation-card__header">
                 <div>
                   <h4>Trigger</h4>
-                  <p>Chain connectors so dependent data loads start after upstream imports complete.</p>
+                  <p>Run this connector after another connector has finished.</p>
                 </div>
                 <mat-slide-toggle
                   color="primary"
@@ -254,17 +252,21 @@
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>{{ 'GRID.RUN_DATE' | translate }}</th>
           <td mat-cell *matCellDef="let element">
-            @if (convertStatus(element.status) === 'RUNNING') {
-              <lib-time-badge
-                [date]="element.createdAt"
-                [calcDuration]="true"></lib-time-badge>
+            @if (convertStatus(element.status) === 'FAILED') {
+              <lib-time-badge [date]="element.createdAt" [color]="'RED'"></lib-time-badge>
             } @else {
-              @if (convertStatus(element.status) === 'FAILED') {
-                <lib-time-badge [date]="element.createdAt" [color]="'RED'"></lib-time-badge>
-              } @else {
-                <lib-time-badge [date]="element.createdAt"></lib-time-badge>
-              }
+              <lib-time-badge [date]="element.createdAt"></lib-time-badge>
             }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="duration">
+          <th mat-header-cell *matHeaderCellDef>{{ 'GRID.DURATION' | translate }}</th>
+          <td mat-cell *matCellDef="let element">
+            <lib-time-badge
+              [date]="element.createdAt"
+              [dateTo]="isActive(element.status) ? null : element.updatedAt"
+              [calcDuration]="true"></lib-time-badge>
           </td>
         </ng-container>
 
@@ -300,7 +302,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedRunColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedRunColumns;"></tr>
       </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"/>
+      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of runs"/>
 
 
     }

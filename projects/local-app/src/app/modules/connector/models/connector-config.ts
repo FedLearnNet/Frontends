@@ -12,7 +12,7 @@ import {
   ConnectorTransformerDTO,
   PivotConfigDTO
 } from "../dto/connector";
-import {hydrateFileInfoData, isAppBasedUploadSettings} from "../helper/connector-config-helper";
+import {fileTypeLabel, hydrateFileInfoData, isAppBasedUploadSettings} from "../helper/connector-config-helper";
 
 function getPrimaryUploadInfo(
   fileInfo?: Record<string, UploadInfoDTO> | UploadInfoDTO
@@ -283,14 +283,14 @@ export function configToCards(config: ConnectorDTO): ConnectorCard[] {
     const name: string = config.inputSource.title;
     const card: ConnectorCard = {
       index: 1,
-      title: name + " settings",
+      title: name + " Settings",
       configured: false,
       step: config.inputSource.configName,
       type: 'CONFIG'
     };
     if (config.inputSource.configName === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG) {
       const name: string | undefined = config.inputConfig && 'fileType' in config.inputConfig
-        ? config.inputConfig.fileType
+        ? fileTypeLabel(config.inputConfig as FileUploadSettings)
         : undefined;
       card.content = "FileType: " + (name ?? 'Not specified');
       card.configured = true;
@@ -305,7 +305,7 @@ export function configToCards(config: ConnectorDTO): ConnectorCard[] {
 
   if (config.inputConfig) {
     cards.push({
-      index: 2, title: " Specify headers",
+      index: 2, title: " Specify Headers",
       configured: true,
       step: ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG,
       type: 'CONFIG'

@@ -35,7 +35,7 @@ export class BadgeComponent {
   );
 
   formattedText = computed(() => {
-    const text = this.text() ?? '';
+    const text = String(this.text() ?? '');
     return this.uppercase()
       ? text
       : text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
