@@ -66,7 +66,9 @@
             "allowedCommonJsDependencies": [
               "easymde",
               "lodash",
-              "papaparse"
+              "papaparse",
+              "prismjs",
+              "prismjs/components/prism-json"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -933,7 +935,9 @@
             "allowedCommonJsDependencies": [
               "easymde",
               "lodash",
-              "papaparse"
+              "papaparse",
+              "prismjs",
+              "prismjs/components/prism-json"
             ]
           },
           "configurations": {
