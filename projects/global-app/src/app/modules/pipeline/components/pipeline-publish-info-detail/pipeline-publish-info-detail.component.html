@@ -22,7 +22,9 @@
         </div>
 
         <div class="summary-item__value">
-          @if (vulnTotal() > 0) {
+          @if (vulnUnknown()) {
+            <lib-badge color="ORANGE" text="Unknown" [border]="true"></lib-badge>
+          } @else if (vulnTotal() > 0) {
             <lib-badge color="ORANGE" text="Total" [border]="true">{{ vulnTotal() }}</lib-badge>
 
           } @else {
@@ -38,7 +40,9 @@
         </div>
 
         <div class="summary-item__value">
-          @if ((publishInfo().malwareScanResult?.infectedCount) ?? 0 > 0) {
+          @if (malwareUnknown()) {
+            <lib-badge color="ORANGE" text="Unknown" [border]="true"></lib-badge>
+          } @else if ((publishInfo().malwareScanResult?.infectedCount ?? 0) > 0) {
             <lib-badge color="ORANGE" text="Infected"
                        [border]="true">{{ publishInfo().malwareScanResult?.infectedCount ?? 0 }}
             </lib-badge>
