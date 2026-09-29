@@ -6,7 +6,25 @@ import {
   ProblemSolutionComponent,
   ProblemSolutionStep
 } from "@shared-lib/components/problem-solution/problem-solution.component";
-import {Router} from "@angular/router";
+import {Router, RouterLink} from "@angular/router";
+import {MatIcon} from "@angular/material/icon";
+import {BottleneckExplorerComponent} from "@global-app/utils/components/bottleneck-explorer/bottleneck-explorer.component";
+import {StartHeroComponent} from "@global-app/utils/components/start-hero/start-hero.component";
+import {FederatedFlowComponent} from "@global-app/utils/components/federated-flow/federated-flow.component";
+
+interface StartAction {
+  icon: string;
+  title: string;
+  description: string;
+  route: string;
+  /** Only offered where the global data standard is maintained. */
+  dataModeling?: boolean;
+}
+
+interface StartStep {
+  title: string;
+  description: string;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -15,7 +33,12 @@ import {Router} from "@angular/router";
   imports: [
     HeroComponent,
     CapabilitiesComponent,
-    ProblemSolutionComponent
+    ProblemSolutionComponent,
+    RouterLink,
+    MatIcon,
+    BottleneckExplorerComponent,
+    FederatedFlowComponent,
+    StartHeroComponent
   ]
 })
 export class DashboardComponent {
@@ -23,6 +46,32 @@ export class DashboardComponent {
 
   project = environment.project;
   appTitle = environment.appTitle;
+
+  private readonly allActions: StartAction[] = [
+    {icon: 'search', title: 'Find data', route: '/find-data', dataModeling: true,
+      description: 'See which sites have patients that match your criteria.'},
+    {icon: 'workspaces', title: 'Start a training', route: '/project',
+      description: 'Train a model across sites. The data stays at each site.'},
+    {icon: 'science', title: 'Analyse data', route: '/experiment',
+      description: 'Run a tool on the data you have access to.'},
+    {icon: 'rebase_edit', title: 'Build a workflow', route: '/workflow',
+      description: 'Chain tools into a pipeline you can run again.'},
+    {icon: 'inventory_2', title: 'Find a tool', route: '/store',
+      description: 'Browse the tools and models in the store.'},
+    {icon: 'developer_mode', title: 'Publish a tool', route: '/app',
+      description: 'Turn your code into a tool others can run.'},
+    {icon: 'schema', title: 'Edit the data standard', route: '/data-modelling', dataModeling: true,
+      description: 'Define the fields every site maps its data to.'},
+  ];
+
+  readonly actions = this.allActions.filter(action => !action.dataModeling || environment.allowGlobalDataModeling);
+
+  readonly steps: StartStep[] = [
+    {title: 'Agree on a data standard', description: 'All sites map their data to the same fields.'},
+    {title: 'Import data at each site', description: 'Each site loads its patients in its own local app.'},
+    {title: 'Find matching data', description: 'Search across sites without seeing individual patients.'},
+    {title: 'Train and analyse', description: 'Models travel to the data. Only results come back.'},
+  ];
 
   get isPoSyMed(){
     return this.project.toLowerCase() === 'posymed';
@@ -38,19 +87,6 @@ export class DashboardComponent {
     {label: 'Tool execution', value: 'Registry-only + governed'},
     {label: 'Assistance', value: 'LLM copilots'},
   ]);
-
-  flnetHeroBadges = signal([
-    {label: 'Privacy-preserving federation', icon: 'shield'},
-    {label: 'Cross-site orchestration', icon: 'hub'},
-    {label: 'Reproducible federated runs', icon: 'repeat'}
-  ]);
-
-  flnetHeroKpis = signal([
-    {label: 'Training mode', value: 'Federated + Local'},
-    {label: 'Governance', value: 'Policy controlled'},
-    {label: 'Deployment', value: 'Cloud / On-prem sites'}
-  ]);
-
 
   items = signal<CapabilityItem[]>([
     {
@@ -137,92 +173,6 @@ export class DashboardComponent {
       title: 'LLM-supported configuration and interpretation',
       description: 'Conversational assistance helps users select tools, set parameters, and understand results.',
       helper: 'This lowers the barrier for non-technical users while keeping guardrails and traceability in place.',
-    },
-  ]);
-
-  flnetCapabilities = signal<CapabilityItem[]>([
-    {
-      tag: 'Federation',
-      icon: 'hub',
-      title: 'Cross-site learning orchestration',
-      description: 'Coordinate distributed training and analytics across multiple institutions without moving raw data.',
-      bullets: ['Federated aggregation', 'Site coordination', 'Distributed execution'],
-    },
-    {
-      tag: 'Privacy',
-      icon: 'shield',
-      title: 'Privacy-preserving execution',
-      description: 'Data stays at the site while only controlled updates or results are exchanged.',
-      bullets: ['Data locality', 'Minimal transfer', 'Controlled exposure'],
-    },
-    {
-      tag: 'Governance',
-      icon: 'policy',
-      title: 'Policy-aware federation',
-      description: 'Execution follows site-level rules and organizational constraints.',
-      bullets: ['Site permissions', 'Execution policies', 'Traceable decisions'],
-    },
-    {
-      tag: 'Workflows',
-      icon: 'device_hub',
-      title: 'Composable federated workflows',
-      description: 'Chain analysis and training steps into reproducible cross-site pipelines.',
-      bullets: ['Reusable pipelines', 'Typed interfaces', 'No-code orchestration'],
-    },
-    {
-      tag: 'Clinical',
-      icon: 'local_hospital',
-      title: 'Clinical-ready collaboration',
-      description: 'Built for distributed clinical environments with strong governance and auditability.',
-      bullets: ['Institution isolation', 'Federated training', 'Controlled collaboration'],
-    },
-    {
-      tag: 'Traceability',
-      icon: 'history',
-      title: 'End-to-end experiment tracking',
-      description: 'All federated runs produce structured metadata for reproducibility and compliance.',
-      bullets: ['Run metadata', 'Execution history', 'Audit-ready exports'],
-    },
-  ]);
-
-  flnetProblems = signal<ProblemSolutionStep[]>([
-    {
-      icon: 'storage',
-      title: 'Data silos across institutions',
-      description: 'Clinical data cannot be centrally aggregated due to governance and privacy constraints.',
-      helper: 'This limits large-scale learning and collaboration across sites.',
-    },
-    {
-      icon: 'sync_problem',
-      title: 'Inconsistent execution environments',
-      description: 'Different infrastructure and local setups lead to non-reproducible experiments.',
-      helper: 'Results become difficult to compare or validate across institutions.',
-    },
-    {
-      icon: 'gpp_bad',
-      title: 'Missing federation governance',
-      description: 'Cross-site execution often lacks clear policy control and observability.',
-      helper: 'Without centralized orchestration, tracking responsibility and compliance becomes difficult.',
-    },
-  ]);
-  flnetSolutions = signal<ProblemSolutionStep[]>([
-    {
-      icon: 'hub',
-      title: 'Federated orchestration layer',
-      description: 'FLNet coordinates distributed execution without moving raw data.',
-      helper: 'Sites participate in shared workflows while maintaining local control.',
-    },
-    {
-      icon: 'shield',
-      title: 'Privacy-preserving computation',
-      description: 'Only model updates or approved outputs leave institutional boundaries.',
-      helper: 'This enables collaboration while respecting governance and compliance constraints.',
-    },
-    {
-      icon: 'policy',
-      title: 'Governed and traceable federation',
-      description: 'All executions follow policies with complete run-level traceability.',
-      helper: 'Federated experiments become reproducible, auditable, and suitable for clinical contexts.',
     },
   ]);
 
