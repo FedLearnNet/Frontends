@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -42,6 +42,7 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
   selector: 'app-cohort-overview',
   templateUrl: './cohort-overview.component.html',
   styleUrl: './cohort-overview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabsModule,
     TranslatePipe,

@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -39,6 +39,7 @@ interface InputFileSelectDialogData {
         TranslatePipe,
     ],
   templateUrl: './input-file-select-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './input-file-select-dialog.component.scss',
 })
 export class InputFileSelectDialogComponent {

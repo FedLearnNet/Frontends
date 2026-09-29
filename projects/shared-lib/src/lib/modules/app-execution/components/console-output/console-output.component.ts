@@ -1,10 +1,11 @@
-import {Component, computed, effect, ElementRef, input, model, viewChild} from '@angular/core';
+import {Component, computed, effect, ElementRef, input, model, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ConsoleStdOutDTO} from "../../../../../../../global-app/src/app/modules/tool-development/dto/performance";
 
 @Component({
   selector: 'lib-console-output',
   imports: [],
   templateUrl: './console-output.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './console-output.component.scss',
 })
 export class ConsoleOutputComponent {

@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatButton} from "@angular/material/button";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -31,6 +31,7 @@ interface LocalExperimentData {
     CloseableDialogTitleComponent
   ],
   templateUrl: './create-local-experiment-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-local-experiment-dialog.component.scss'
 })
 export class CreateLocalExperimentDialogComponent {

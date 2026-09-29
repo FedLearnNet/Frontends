@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
@@ -36,6 +36,7 @@ import {
     BadgeComponent,
   ],
   templateUrl: './metrics-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './metrics-grid.component.scss',
 })
 export class MetricsGridComponent implements OnInit, AfterViewInit {

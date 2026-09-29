@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
 import {SMALL} from '@shared-lib/constants';
@@ -22,6 +22,7 @@ import {Subscription} from 'rxjs';
   selector: 'app-cohort-dashboard',
   templateUrl: './cohort-dashboard.component.html',
   styleUrl: './cohort-dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatButtonModule,

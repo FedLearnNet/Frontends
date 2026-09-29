@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
 
@@ -9,6 +9,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     SkeletonLoaderComponent
   ],
   templateUrl: './page-wrapper.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './page-wrapper.component.scss',
 })
 export class PageWrapperComponent {

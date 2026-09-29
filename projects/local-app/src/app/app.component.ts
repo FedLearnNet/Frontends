@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, HostListener, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, HostListener, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {environment} from '@local-app/env/environment';
 import {TranslateService} from "@ngx-translate/core";
 import {RouterLink, RouterOutlet} from "@angular/router";
@@ -39,6 +39,7 @@ import {MatDialogRef} from "@angular/material/dialog";
     MatButtonModule,
   ],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {

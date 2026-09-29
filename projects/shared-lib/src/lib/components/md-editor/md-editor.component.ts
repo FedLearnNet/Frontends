@@ -10,6 +10,7 @@ import {
   output,
   signal,
   viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {MarkdownComponent, MarkdownService, provideMarkdown} from 'ngx-markdown';
@@ -21,6 +22,7 @@ import EasyMDE from 'easymde';
   templateUrl: './md-editor.component.html',
   styleUrls: ['./md-editor.component.scss'],
   imports: [MarkdownComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     provideMarkdown(),
     {

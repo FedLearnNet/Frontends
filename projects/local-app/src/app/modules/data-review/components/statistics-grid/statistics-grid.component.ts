@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {ActivatedRoute} from '@angular/router';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -33,6 +33,7 @@ import {
     ErrorCardComponent,
   ],
   templateUrl: './statistics-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './statistics-grid.component.scss'
 })
 export class StatisticsGridComponent implements OnInit, AfterViewInit {

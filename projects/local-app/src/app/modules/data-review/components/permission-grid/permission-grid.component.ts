@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {PermissionDTO} from '@local-app/data-review/models';
 import {MatDialog} from '@angular/material/dialog';
 import {
@@ -35,6 +35,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
     PageWrapperComponent,
   ],
   templateUrl: './permission-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./permission-grid.component.scss'],
 })
 export class PermissionGridComponent implements OnInit {

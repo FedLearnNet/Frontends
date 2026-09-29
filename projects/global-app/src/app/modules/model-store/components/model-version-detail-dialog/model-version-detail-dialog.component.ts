@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -20,6 +20,7 @@ interface ModelDetail {
     ModelVersionDetailComponent
   ],
   templateUrl: './model-version-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-version-detail-dialog.component.scss'
 })
 export class ModelVersionDetailDialogComponent {

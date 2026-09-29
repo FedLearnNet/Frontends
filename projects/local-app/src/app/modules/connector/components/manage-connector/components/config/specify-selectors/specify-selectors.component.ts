@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, computed, inject, input, model, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, OnInit, output, signal, ChangeDetectionStrategy, linkedSignal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {
   appOutputsToFileInfo,
@@ -43,6 +43,7 @@ import {MatOption, MatSelect} from "@angular/material/select";
   selector: 'app-specify-selectors',
   templateUrl: './specify-selectors.component.html',
   styleUrl: './specify-selectors.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ConnectorDynamicTableComponent,
     MatButton,
@@ -70,7 +71,8 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   private connectorPreviewService = inject(ConnectorPreviewService);
 
   readonly cohortId = input<number | undefined>(undefined);
-  readonly config = model.required<ConnectorDTO>();
+  readonly configInput = input.required<ConnectorDTO>({alias: 'config'});
+  readonly config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();
   sheets: { name: string; info: UploadInfoView }[] = [];

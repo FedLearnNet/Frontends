@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
 import {NestedTreeControl} from '@angular/cdk/tree';
@@ -32,6 +32,7 @@ const BLACK_LISTED_ELEMENTS = ['Unique Patient ID'];
   selector: 'app-patient-detail-queryability-form',
   templateUrl: './patient-detail-queryability-form.component.html',
   styleUrl: './patient-detail-queryability-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatTreeModule,

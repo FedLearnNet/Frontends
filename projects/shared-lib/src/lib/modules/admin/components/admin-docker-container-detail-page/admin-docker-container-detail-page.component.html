@@ -11,7 +11,7 @@
       Back
     </button>
 
-    <button suffix mat-stroked-button type="button" (click)="copyToClipboard(container()?.Id, 'Container ID')">
+    <button suffix mat-stroked-button type="button" (click)="copyToClipboard($safeNavigationMigration(container()?.Id), 'Container ID')">
       <mat-icon>content_copy</mat-icon>
       Copy ID
     </button>

@@ -1,4 +1,4 @@
-import {Component, effect, forwardRef, inject, input, QueryList, ViewChildren} from '@angular/core';
+import {Component, effect, forwardRef, inject, input, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
 import { FormBuilder, FormGroup, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
 import {MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
 import {DynamicFormService} from '@local-app/cohort/services/dynamic-form.service';
@@ -17,6 +17,7 @@ import {toLocalFormDateTimeString} from "../../../patient/helper/patient-data-pa
     ReactiveFormsModule,
     PatientDataFormFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

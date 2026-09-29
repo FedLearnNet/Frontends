@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -31,6 +31,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
   selector: 'app-run-dialog',
   templateUrl: './run-dialog.component.html',
   styleUrl: './run-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogTitle,
     MatDivider,

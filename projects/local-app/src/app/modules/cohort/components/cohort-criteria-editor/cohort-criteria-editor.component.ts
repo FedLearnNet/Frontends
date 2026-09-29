@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, effect, inject, input} from '@angular/core';
+import {Component, effect, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatButtonModule} from '@angular/material/button';
@@ -100,6 +100,7 @@ const OPERATOR_OPTIONS: Partial<Record<DataTypeTypeEnum, SelectOption<QueryOpera
     MatTooltipModule,
   ],
   templateUrl: './cohort-criteria-editor.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-criteria-editor.component.scss',
 })
 export class CohortCriteriaEditorComponent {

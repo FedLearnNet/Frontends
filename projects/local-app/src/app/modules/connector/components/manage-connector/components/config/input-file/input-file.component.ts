@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, computed, inject, input, model, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, OnInit, output, signal, ChangeDetectionStrategy, linkedSignal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {FileUploadSettings} from "../../../../../models/input-config";
 import {ConnectorUploadService} from "../../../../../services/connector-upload.service";
@@ -32,6 +32,7 @@ import {
   selector: 'app-input-file',
   templateUrl: './input-file.component.html',
   styleUrl: './input-file.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatIcon, MatTooltip, MatButton, RunNewFileComponent, MatCardFooter, TranslatePipe, BadgeComponent, KvComponent, RouterLink]
 })
 export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
@@ -42,7 +43,8 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   private translate = inject(TranslateService);
 
   readonly cohortId = input<number>();
-  readonly config = model<ConnectorDTO>({} as ConnectorDTO);
+  readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
+  readonly config = linkedSignal(this.configInput);
   connectorExist = computed(() => {
     const config = this.config();
     return !!(config &&

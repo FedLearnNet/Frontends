@@ -1,4 +1,4 @@
-import {Component, computed, input, model, OnInit, signal} from '@angular/core';
+import {Component, computed, input, model, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   AppCardCertBadgeComponent
 } from "@shared-lib/modules/store/components/app-card-cert-badge/app-card-cert-badge.component";
@@ -31,6 +31,7 @@ import {RunStatusTypes} from "../../../../../../../global-app/src/app/modules/to
     StatusBadgeComponent
   ],
   templateUrl: './experiment-workflow-node-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-workflow-node-card.component.scss'
 })
 export class ExperimentWorkflowNodeCardComponent implements OnInit {

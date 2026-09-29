@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, linkedSignal, model, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, linkedSignal, output, signal, ChangeDetectionStrategy, input as input_1} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {Store} from "@ngrx/store";
 import {
@@ -34,6 +34,7 @@ import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
     HintCardComponent
   ],
   templateUrl: './input-app-based.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './input-app-based.component.scss',
 })
 export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO> {
@@ -42,7 +43,8 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   private readonly translate: TranslateService = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
 
-  config = model.required<ConnectorDTO>();
+  configInput = input.required<ConnectorDTO>({alias: 'config'});
+  config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();
 

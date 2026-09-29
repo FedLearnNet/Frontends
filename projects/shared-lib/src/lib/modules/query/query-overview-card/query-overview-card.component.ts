@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {DatePipe} from "@angular/common";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
 import {
@@ -19,6 +19,7 @@ type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemD
     DatePipe
   ],
   templateUrl: './query-overview-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './query-overview-card.component.scss',
 })
 export class QueryOverviewCardComponent {

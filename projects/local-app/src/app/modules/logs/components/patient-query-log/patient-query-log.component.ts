@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LoadLogData, LoadLogDataResponse} from "../../model/log-wrapper";
 import {LogService} from "../../services/log-service";
@@ -16,6 +16,7 @@ import {
     GeneralLogTableComponent
   ],
   templateUrl: './patient-query-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-query-log.component.scss'
 })
 export class PatientQueryLogComponent implements OnInit, LoadLogDataResponse {

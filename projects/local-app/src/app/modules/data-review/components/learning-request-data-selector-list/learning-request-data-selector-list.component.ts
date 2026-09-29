@@ -1,5 +1,5 @@
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {
@@ -102,6 +102,7 @@ export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
     MatProgressBar
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './learning-request-data-selector-list.component.scss'
 })
 export class LearningRequestDataSelectorListComponent implements OnInit {

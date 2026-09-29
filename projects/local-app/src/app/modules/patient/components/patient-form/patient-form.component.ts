@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -15,6 +15,7 @@ const COHORT_PATIENTS_TAB_FRAGMENT = 'Patients';
   selector: 'app-patient-form',
   templateUrl: './patient-form.component.html',
   styleUrl: './patient-form.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     PageWrapperComponent,
     PatientEditorComponent,

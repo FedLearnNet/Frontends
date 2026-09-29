@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild, input } from '@angular/core';
+import { Component, inject, signal, ViewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import { MatPaginator } from "@angular/material/paginator";
 import { LoadLogData } from '../../../../../logs/model/log-wrapper';
 import { LogPage } from '../../../../../logs/dto/page';
@@ -15,6 +15,7 @@ import { GeneralLogTableComponent } from '../../../../../logs/components/general
     selector: 'app-run-change-log',
     templateUrl: './run-change-log.component.html',
     styleUrl: './run-change-log.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [GeneralLogTableComponent]
 })
 export class RunConnectorChangeLogComponent {

@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
@@ -25,6 +25,7 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
   selector: 'app-detail-datatype',
   templateUrl: './detail-datatype.component.html',
   styleUrl: './detail-datatype.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatInputModule,

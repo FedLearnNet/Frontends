@@ -49,7 +49,7 @@
           {{ parameterGroup.get('key')?.value }}
           @if (parameterGroup.get('doc')?.value) {
             <mat-icon class="material-icons header-info"
-                      [matTooltip]="parameterGroup.get('doc')?.value">info_i</mat-icon>
+                      [matTooltip]="$safeNavigationMigration(parameterGroup.get('doc')?.value)">info_i</mat-icon>
           }
         </td>
       </ng-container>
@@ -128,8 +128,8 @@
         <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
         <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
           {{ paramGroup.get('key')?.value }}
-          @if (hasDescription(paramGroup.get('doc')?.value)) {
-            <mat-icon class="material-icons" [matTooltip]="paramGroup.get('doc')?.value">info_i
+          @if (hasDescription($safeNavigationMigration(paramGroup.get('doc')?.value))) {
+            <mat-icon class="material-icons" [matTooltip]="$safeNavigationMigration(paramGroup.get('doc')?.value)">info_i
             </mat-icon>
           }
         </td>
@@ -170,7 +170,7 @@
         <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
           @if (paramGroup.get('type')?.value === 'MAP') {
             <div class="map-editor">
-              @for (entry of getMapEntries(paramGroup.get('key')?.value); track $index) {
+              @for (entry of getMapEntries($safeNavigationMigration(paramGroup.get('key')?.value)); track $index) {
                 <div class="map-entry">
                   <mat-form-field class="map-key">
                     <mat-label>Key</mat-label>
@@ -232,8 +232,8 @@
           <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
           <td mat-cell *matCellDef="let paramGroup" [formGroup]="paramGroup">
             {{ paramGroup.get('key')?.value }}
-            @if (hasDescription(paramGroup.get('doc')?.value)) {
-              <mat-icon class="material-icons" [matTooltip]="paramGroup.get('doc')?.value">info_i
+            @if (hasDescription($safeNavigationMigration(paramGroup.get('doc')?.value))) {
+              <mat-icon class="material-icons" [matTooltip]="$safeNavigationMigration(paramGroup.get('doc')?.value)">info_i
               </mat-icon>
             }
           </td>

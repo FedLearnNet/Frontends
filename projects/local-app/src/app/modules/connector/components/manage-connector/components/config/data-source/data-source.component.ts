@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, model, OnInit, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, output, signal, ChangeDetectionStrategy, input, linkedSignal} from '@angular/core';
 import {ConnectorSourceCard, globalGenericSource, storeItemToCard} from "../../../../../models/connector-card";
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {ConnectorStepConfigs} from "../../../../../enum/connector-step-config";
@@ -25,6 +25,7 @@ function withoutTag(image: string): string {
   selector: 'app-data-source',
   templateUrl: './data-source.component.html',
   styleUrl: './data-source.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDivider,
     MatCard,
     MatCardHeader,
@@ -37,7 +38,8 @@ function withoutTag(image: string): string {
 export class ConnectorStepDataSourceConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
   private readonly store: Store = inject(Store);
 
-  config = model.required<ConnectorDTO>();
+  configInput = input.required<ConnectorDTO>({alias: 'config'});
+  config = linkedSignal(this.configInput);
 
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();

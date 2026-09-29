@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from "@ngrx/store";
 import {
   selectAllFiles,
@@ -25,6 +25,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
     HeaderComponent
   ],
   templateUrl: './file-list-component.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-list-component.component.scss',
 })
 export class FileListComponentComponent {

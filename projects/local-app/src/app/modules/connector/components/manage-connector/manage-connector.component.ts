@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ConnectorCard} from "../../models/connector-card";
 import {ConnectorStepConfigs} from "../../enum/connector-step-config";
 import {ConnectorStepConfigChangeEmitter} from "../../models/connector-step-config";
@@ -96,6 +96,7 @@ type RouteData = Data & {
   selector: 'app-manage-connector',
   templateUrl: './manage-connector.component.html',
   styleUrl: './manage-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent]
 })
 export class ManageConnectorComponent implements OnInit {

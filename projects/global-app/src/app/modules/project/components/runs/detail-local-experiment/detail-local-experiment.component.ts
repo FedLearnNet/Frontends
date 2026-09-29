@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject} from '@angular/core';
+import {Component, computed, effect, inject, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from "@ngrx/store";
 import {selectSelectedProject} from "@global-app/project/store/project.selectors";
 import {
@@ -30,6 +30,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     SkeletonLoaderComponent
   ],
   templateUrl: './detail-local-experiment.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './detail-local-experiment.component.scss'
 })
 export class DetailLocalExperimentComponent {

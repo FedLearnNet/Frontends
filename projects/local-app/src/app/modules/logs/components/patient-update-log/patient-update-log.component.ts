@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LogPage} from "../../dto/page";
 import {LogService} from "../../services/log-service";
@@ -14,6 +14,7 @@ import {AuditFieldEnum} from "../../services/log-service-filter-dto";
     GeneralLogTableComponent
   ],
   templateUrl: './patient-update-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-update-log.component.scss'
 })
 export class PatientUpdateLogComponent implements LoadLogDataResponse {

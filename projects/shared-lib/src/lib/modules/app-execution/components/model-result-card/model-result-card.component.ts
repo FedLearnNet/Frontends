@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, input, linkedSignal, signal, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, input, linkedSignal, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {
   AppRunOutputComponent
 } from "@shared-lib/modules/app-execution/components/app-run-output/app-run-output.component";
@@ -52,6 +52,7 @@ import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-
     BadgeComponent
   ],
   templateUrl: './model-result-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-result-card.component.scss'
 })
 export class ModelResultCardComponent {
