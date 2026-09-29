@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatTabsModule} from "@angular/material/tabs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AppDetailConfigComponent} from "../app-detail-config/app-detail-config.component";
@@ -57,6 +57,7 @@ import {getConfigWSUrl} from "@global-app/utils/ws-url-helper";
     HeaderComponent,
   ],
   templateUrl: './app-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail.component.scss'
 })
 export class AppDetailComponent implements OnInit {

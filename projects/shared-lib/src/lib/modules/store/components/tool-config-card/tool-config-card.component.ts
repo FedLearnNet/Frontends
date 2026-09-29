@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {
@@ -31,6 +31,7 @@ import {Store} from "@ngrx/store";
     ToolHyperparamValidationComponent
   ],
   templateUrl: './tool-config-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tool-config-card.component.scss',
 })
 export class ToolConfigCardComponent {

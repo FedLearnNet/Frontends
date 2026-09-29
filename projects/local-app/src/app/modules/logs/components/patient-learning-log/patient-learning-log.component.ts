@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LoadLogData, LoadLogDataResponse} from "../../model/log-wrapper";
 import {LogService} from "../../services/log-service";
@@ -12,6 +12,7 @@ import {Router} from "@angular/router";
     GeneralLogTableComponent
   ],
   templateUrl: './patient-learning-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-learning-log.component.scss'
 })
 export class PatientLearningLogComponent implements LoadLogDataResponse {

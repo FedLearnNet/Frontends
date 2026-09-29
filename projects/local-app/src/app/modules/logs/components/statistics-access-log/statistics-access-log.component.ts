@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {CohortDto} from '@local-app/cohort/models';
 import {CohortService} from '@local-app/cohort/services/cohort.service';
@@ -14,6 +14,7 @@ import {GeneralLogTableComponent} from '../general-log-table/general-log-table.c
   selector: 'app-statistics-access-log',
   imports: [GeneralLogTableComponent],
   templateUrl: './statistics-access-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './statistics-access-log.component.scss',
 })
 export class StatisticsAccessLogComponent implements LoadLogDataResponse, OnInit {

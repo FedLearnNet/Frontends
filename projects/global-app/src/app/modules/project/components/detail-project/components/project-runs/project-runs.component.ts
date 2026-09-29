@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatTabsModule} from "@angular/material/tabs";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {
@@ -24,6 +24,7 @@ import {
     LocalTestExperimentComponent,
   ],
   templateUrl: './project-runs.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './project-runs.component.scss'
 })
 export class ProjectRunsComponent {

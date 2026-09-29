@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatIconModule} from "@angular/material/icon";
 import {MatDialog} from "@angular/material/dialog";
 import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
@@ -49,6 +49,7 @@ echarts.use([
   ],
   templateUrl: './cohort-custom-statistics.component.html',
   styleUrl: './cohort-custom-statistics.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})],
 })
 export class CohortCustomStatisticsComponent {

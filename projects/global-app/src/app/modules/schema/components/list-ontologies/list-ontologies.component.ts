@@ -1,4 +1,4 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyService} from "@global-app/schema/services/ontology.service";
 import {OntologyNodeDTO, OntologySearchResponseDTO} from "../../dto/ontology";
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -27,6 +27,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
   selector: 'app-list-ontologies',
   templateUrl: './list-ontologies.component.html',
   styleUrl: './list-ontologies.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatButtonModule,

@@ -1,4 +1,4 @@
-import {Component, computed, inject, model, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, model, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -38,6 +38,7 @@ import {CohortService} from '@local-app/cohort/services/cohort.service';
     TranslatePipe,
   ],
   templateUrl: './cohort-members.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-members.component.scss',
 })
 export class CohortMembersComponent implements OnInit {

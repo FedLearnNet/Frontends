@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, inject, input, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyDTO, OntologyEdgeDTO, OntologyNodeDTO} from "../../dto/ontology";
 import {map, Observable} from "rxjs";
 import {FormControl, FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -19,6 +19,7 @@ import {OntologyEdgeCardComponent} from "@global-app/schema/components/ontology-
   selector: 'app-detail-ontology-relation-lists',
   templateUrl: './detail-ontology-relation-lists.component.html',
   styleUrl: './detail-ontology-relation-lists.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatList, MatListSubheaderCssMatStyler, MatIconButton, MatIcon, ReactiveFormsModule, FormsModule, MatFormField, MatLabel, MatInput, MatAutocompleteTrigger, MatSuffix, MatAutocomplete, MatOption, AsyncPipe, TranslatePipe, OntologyEdgeCardComponent]
 })
 export class DetailOntologyRelationListsComponent implements OnInit {

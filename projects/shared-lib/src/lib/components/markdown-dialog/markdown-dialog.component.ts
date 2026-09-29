@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -19,6 +19,7 @@ export interface MarkdownDialogData {
   ],
   templateUrl: './markdown-dialog.component.html',
   styleUrl: './markdown-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     provideMarkdown(),
   ],

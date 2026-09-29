@@ -30,7 +30,6 @@
             "index": "projects/local-app/src/index.html",
             "browser": "projects/local-app/src/main.ts",
             "polyfills": [
-              "zone.js",
               "@angular/localize/init"
             ],
             "tsConfig": "projects/local-app/tsconfig.app.json",
@@ -67,10 +66,13 @@
             "allowedCommonJsDependencies": [
               "easymde",
               "lodash",
-              "papaparse"
+              "papaparse",
+              "prismjs",
+              "prismjs/components/prism-json"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
+                ".",
                 "projects/shared-lib/src/lib/styles"
               ]
             }
@@ -150,6 +152,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -228,6 +231,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -285,6 +289,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -364,6 +369,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -443,6 +449,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -495,6 +502,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -573,6 +581,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -651,6 +660,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -729,6 +739,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -785,6 +796,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/local-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -830,8 +842,6 @@
           "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
-              "zone.js",
-              "zone.js/testing",
               "@angular/localize/init"
             ],
             "tsConfig": "projects/local-app/tsconfig.spec.json",
@@ -890,7 +900,6 @@
             "index": "projects/global-app/src/index.html",
             "browser": "projects/global-app/src/main.ts",
             "polyfills": [
-              "zone.js",
               "@angular/localize/init"
             ],
             "tsConfig": "projects/global-app/tsconfig.app.json",
@@ -926,7 +935,9 @@
             "allowedCommonJsDependencies": [
               "easymde",
               "lodash",
-              "papaparse"
+              "papaparse",
+              "prismjs",
+              "prismjs/components/prism-json"
             ]
           },
           "configurations": {
@@ -1005,6 +1016,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -1085,6 +1097,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/posymed"
                 ]
@@ -1141,6 +1154,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/posymed"
                 ]
@@ -1219,6 +1233,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -1298,6 +1313,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -1355,6 +1371,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/microb-AI-ome"
                 ]
@@ -1434,6 +1451,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -1513,6 +1531,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -1564,6 +1583,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/dAIbetes"
                 ]
@@ -1642,6 +1662,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -1720,6 +1741,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -1798,6 +1820,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -1854,6 +1877,7 @@
               ],
               "stylePreprocessorOptions": {
                 "includePaths": [
+                  ".",
                   "projects/global-app/src/assets/styles",
                   "projects/shared-lib/src/lib/styles/FLNet"
                 ]
@@ -1902,8 +1926,6 @@
           "builder": "@angular/build:karma",
           "options": {
             "polyfills": [
-              "zone.js",
-              "zone.js/testing",
               "@angular/localize/init"
             ],
             "tsConfig": "projects/global-app/tsconfig.spec.json",
@@ -1970,8 +1992,6 @@
           "options": {
             "tsConfig": "projects/shared-lib/tsconfig.spec.json",
             "polyfills": [
-              "zone.js",
-              "zone.js/testing",
               "@angular/localize/init"
             ]
           }

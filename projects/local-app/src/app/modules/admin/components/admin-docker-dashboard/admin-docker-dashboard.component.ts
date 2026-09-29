@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {
   AdminDockerDashboardComponent as SharedAdminDockerDashboardComponent
 } from '@shared-lib/modules/admin/components/admin-docker-dashboard/admin-docker-dashboard.component';
@@ -10,6 +10,7 @@ import {
 
   ],
   templateUrl: './admin-docker-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './admin-docker-dashboard.component.scss'
 })
 export class AdminDockerDashboardComponent {

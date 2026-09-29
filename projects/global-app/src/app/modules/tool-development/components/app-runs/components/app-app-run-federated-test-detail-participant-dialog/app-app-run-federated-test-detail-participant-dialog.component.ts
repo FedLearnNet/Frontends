@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {
   ExperimentWorkflowNodeDetailComponent
 } from "@shared-lib/modules/experiments/components/experiment-workflow-node-detail/experiment-workflow-node-detail.component";
@@ -33,6 +33,7 @@ interface TestDetail {
     InfoCardComponent
   ],
   templateUrl: './app-app-run-federated-test-detail-participant-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-app-run-federated-test-detail-participant-dialog.component.scss'
 })
 export class AppAppRunFederatedTestDetailParticipantDialogComponent implements OnInit {

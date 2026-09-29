@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyNodeDTO} from "@global-app/schema/dto/ontology";
 import {MatCard} from '@angular/material/card';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
@@ -7,6 +7,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
   selector: 'app-ontology-card',
   templateUrl: './ontology-card.component.html',
   styleUrl: './ontology-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, BadgeComponent]
 })
 export class OntologyCardComponent {

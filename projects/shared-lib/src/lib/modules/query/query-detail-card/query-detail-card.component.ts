@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {MatCard} from "@angular/material/card";
 import {MatIcon} from "@angular/material/icon";
@@ -23,6 +23,7 @@ type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemD
     TimeBadgeComponent
   ],
   templateUrl: './query-detail-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './query-detail-card.component.scss',
 })
 export class QueryDetailCardComponent {

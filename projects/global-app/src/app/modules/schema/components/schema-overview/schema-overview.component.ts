@@ -1,4 +1,4 @@
-import {Component, signal} from '@angular/core';
+import {Component, signal, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {TranslatePipe} from '@ngx-translate/core';
 import {ActionCardButtonComponent} from "@shared-lib/components/action-card-button/action-card-button.component";
@@ -16,6 +16,7 @@ interface OverviewCard {
   selector: 'app-schema-overview',
   templateUrl: './schema-overview.component.html',
   styleUrl: './schema-overview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterLink, TranslatePipe, ActionCardButtonComponent, PageWrapperComponent, HeaderComponent]
 })
 export class SchemaOverviewComponent {

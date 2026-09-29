@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   AppDetailConfigInputComponent
 } from "../../../../../../../global-app/src/app/modules/tool-development/components/app-detail-config/components/app-detail-config-input/app-detail-config-input.component";
@@ -22,6 +22,7 @@ interface WorkflowConnectorDetailData{
     MatIcon
   ],
   templateUrl: './workflow-connector-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-connector-detail.component.scss'
 })
 export class WorkflowConnectorDetailComponent {

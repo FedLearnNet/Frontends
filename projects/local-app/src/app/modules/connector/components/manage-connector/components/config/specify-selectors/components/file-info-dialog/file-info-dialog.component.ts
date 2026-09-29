@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {
   CloseableDialogTitleComponent
@@ -12,6 +12,7 @@ import {MatButton} from "@angular/material/button";
   selector: 'app-connector-file-info-dialog',
   templateUrl: './file-info-dialog.component.html',
   styleUrl: './file-info-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CloseableDialogTitleComponent, KvComponent, DatePipe, MatButton]
 })
 export class ConnectorFileInfoDialogComponent {
