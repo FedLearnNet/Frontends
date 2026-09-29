@@ -1,15 +1,14 @@
-@if (!isLoading()) {
-  <div [class.page-wrapper]="margin()">
-    @if (error(); as err) {
-      <lib-error-card [errorObject]="err"></lib-error-card>
-    }
-    @if (isLoading()) {
+<div [class.page-wrapper]="margin()">
+  @if (error(); as err) {
+    <lib-error-card [errorObject]="err"></lib-error-card>
+  }
+  @if (isLoading()) {
+    @if (skeletonOnLoading()) {
       <lib-skeleton-loader></lib-skeleton-loader>
     }
-    @if (isEmpty()) {
-      <ng-content select="[empty]"></ng-content>
-    } @else {
-      <ng-content></ng-content>
-    }
-  </div>
-}
+  } @else if (isEmpty()) {
+    <ng-content select="[empty]"></ng-content>
+  } @else {
+    <ng-content></ng-content>
+  }
+</div>
