@@ -86,11 +86,11 @@
     "rxjs": "^7.4.0"
   },
   "devDependencies": {
-    "@angular-eslint/builder": "21.2.0",
-    "@angular-eslint/eslint-plugin": "21.3.1",
-    "@angular-eslint/eslint-plugin-template": "21.3.1",
-    "@angular-eslint/schematics": "21.3.1",
-    "@angular-eslint/template-parser": "21.3.1",
+    "@angular-eslint/builder": "22.5.0",
+    "@angular-eslint/eslint-plugin": "22.5.0",
+    "@angular-eslint/eslint-plugin-template": "22.5.0",
+    "@angular-eslint/schematics": "22.5.0",
+    "@angular-eslint/template-parser": "22.5.0",
     "@angular/build": "^22.2.0",
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
