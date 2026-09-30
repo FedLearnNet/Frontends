@@ -1,7 +1,9 @@
-@if (loadingErrorLogs) {
+@if (loadError) {
   <h3>{{ 'ERROR.ERROR_TRY_AGAIN' | translate }}</h3>
+} @else if (loading) {
+  <mat-progress-bar mode="indeterminate"/>
 }
-<div class="log-table" [hidden]="loadingErrorLogs">
+<div class="log-table" [hidden]="loading || loadError">
   <mat-paginator [pageSize]="pageSize()"
                  [pageSizeOptions]="pageSizeOptions"
                  (page)="onPageChange($event)"

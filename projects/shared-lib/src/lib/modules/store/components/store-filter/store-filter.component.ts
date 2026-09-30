@@ -100,7 +100,7 @@ export class StoreFilterComponent {
         'SECURE_MULTI_PARTY_COMPUTATION',
         'DATA_TRANSFORMATION',
         'SELF_LEARNED',
-        'DATABASE_ADOPTER',
+        'EXTRACTOR',
         'INFERENCE',
         'WORKFLOW'
       ])

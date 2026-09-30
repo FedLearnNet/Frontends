@@ -1,6 +1,11 @@
 import {ConnectorDTO} from "../dto/connector";
 import {CohortDetailDto} from "@local-app/cohort/models";
-import {SchemaNodeNestedDto, SchemaNodeTypeEnum, SchemaRootNodeDto} from "@local-app/cohort/dto/schema";
+import {
+  isAttributeNode,
+  SchemaNodeNestedDto,
+  SchemaNodeTypeEnum,
+  SchemaRootNodeDto
+} from "@local-app/cohort/dto/schema";
 import {ConnectorMappingConfig} from "../models/connector-model";
 
 
@@ -11,8 +16,8 @@ export function rematchMappingSchemaId(config: ConnectorDTO, cohort: CohortDetai
   }
   const root: SchemaRootNodeDto = cohort.schemaRoot;
   const nodes: SchemaNodeNestedDto[] = root.childNodes;
-  for(const schemaMapping of schemaMappings) {
-    if(schemaMapping.mapping !== undefined) {
+  for (const schemaMapping of schemaMappings) {
+    if (schemaMapping.mapping !== undefined) {
       schemaMapping.schemaId = findSchemaId(schemaMapping.mapping, nodes)
     }
   }
@@ -36,7 +41,7 @@ export function findSchemaId(mapping: string, nodes: SchemaNodeNestedDto[]): num
     }
   }
   for (const node of nodes) {
-    if (node.name === mapping && node.nodeType === SchemaNodeTypeEnum.ATTRIBUTE) {
+    if (node.name === mapping && isAttributeNode(node)) {
       return node.id;
     }
   }

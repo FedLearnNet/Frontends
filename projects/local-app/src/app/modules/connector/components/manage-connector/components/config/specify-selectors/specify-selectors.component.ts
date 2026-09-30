@@ -1,7 +1,9 @@
-import {ChangeDetectorRef, Component, inject, input, model, OnInit, output, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, model, OnInit, output, signal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {
+  appOutputsToFileInfo,
   connectorFilesDetailToFileInfo,
+  filterSelectedOutputs,
   isAppBasedUploadSettings,
   isFileUploadSettings,
   mergeFileInfo
@@ -31,12 +33,11 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorFileInfoDialogComponent} from "./components/file-info-dialog/file-info-dialog.component";
 import {ConnectorPreviewService} from "../../../../../services/connector-preview.service";
 import {configToConnectorConfigDTO} from "../../../../../models/connector-config";
-import {
-  PivotTableDialogComponent,
-  PivotTableDialogResult
-} from "../pivot-table-dialog/pivot-table-dialog.component";
+import {PivotTableDialogComponent, PivotTableDialogResult} from "../pivot-table-dialog/pivot-table-dialog.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.component";
+import {MatFormField, MatHint, MatLabel} from "@angular/material/form-field";
+import {MatOption, MatSelect} from "@angular/material/select";
 
 @Component({
   selector: 'app-specify-selectors',
@@ -52,7 +53,12 @@ import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.comp
     MatIcon,
     MatTooltip,
     BtnComponent,
-    InfoCardComponent
+    InfoCardComponent,
+    MatFormField,
+    MatLabel,
+    MatHint,
+    MatSelect,
+    MatOption
   ]
 })
 export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConfig<ConnectorDTO>, OnInit {
@@ -76,6 +82,18 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   isToolBased = signal<boolean>(false);
   fileDetails = signal<ConnectorFilesDetailDTO | null>(null);
 
+  /** The outputs the extractor stored on its last run. */
+  readonly outputNames = computed(() => {
+    const inputConfig = this.config().inputConfig;
+    return inputConfig && isAppBasedUploadSettings(inputConfig) ? Object.keys(inputConfig.outputParams ?? {}) : [];
+  });
+
+  /** The outputs the connector imports; several of them are merged. */
+  readonly selectedOutputs = computed(() => {
+    const inputConfig = this.config().inputConfig;
+    return inputConfig && isAppBasedUploadSettings(inputConfig) ? inputConfig.selectedOutputs ?? [] : [];
+  });
+
   ngOnInit(): void {
     const config = this.config();
 
@@ -98,7 +116,11 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
         && !!config.inputConfig
         && isFileUploadSettings(config.inputConfig);
 
-      if (hasNoData || needsOriginalPivotColumns || (wantsAllSheets && cachedSheetCount <= 1)) {
+      // An app connector arrives with the tables of its stored outputs already loaded; loading them
+      // again would drop the column edits it was saved with.
+      const hasAppOutputs = this.isToolBased() && !!config.fileInfo && Object.keys(config.fileInfo).length > 0;
+
+      if (!hasAppOutputs && (hasNoData || needsOriginalPivotColumns || (wantsAllSheets && cachedSheetCount <= 1))) {
         this.loadColumns();
       }
     }
@@ -179,18 +201,9 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
         catchError(() => of(null))
       )
     )).subscribe(results => {
-      const fileInfo: Record<string, UploadInfoDTO> = {};
-      let lastDetail: ConnectorFilesDetailDTO | null = null;
-
-      results.filter(r => r !== null).forEach(({name, detail}) => {
-        lastDetail = detail;
-        const sheets = connectorFilesDetailToFileInfo(detail);
-        const sheetNames = Object.keys(sheets);
-        sheetNames.forEach(sheet => {
-          const key = sheetNames.length <= 1 ? name : `${name}/${sheet}`;
-          fileInfo[key] = {...sheets[sheet], sheet: key};
-        });
-      });
+      const loaded = results.flatMap(result => result ? [result] : []);
+      const fileInfo = appOutputsToFileInfo(loaded);
+      const lastDetail = loaded.length > 0 ? loaded[loaded.length - 1].detail : null;
 
       if (Object.keys(fileInfo).length === 0) {
         this.snackBar.open(
@@ -256,7 +269,38 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     this.openRenameDialog(event.columnName, name, event.index, sheetName);
   }
 
+  selectOutputs(outputNames: string[]): void {
+    this.mergeConfig = undefined;
+    this.config.update(config => ({
+      ...config,
+      mergeConfig: undefined,
+      inputConfig: {...config.inputConfig, selectedOutputs: outputNames} as AppBasedUploadSettings,
+    }));
+    this.activeSheetIndex = 0;
+    this.loadColumns();
+  }
+
+  protected outputSelectionWarning(): string | undefined {
+    if (!this.isToolBased() || this.outputNames().length < 2) {
+      return undefined;
+    }
+    if (this.selectedOutputs().length === 0) {
+      return 'WARNING.SELECT_APP_OUTPUT';
+    }
+    return this.selectedOutputs().length > 1 && !this.mergeConfig ? 'WARNING.MERGE_APP_OUTPUTS' : undefined;
+  }
+
   onContinueClick(): boolean {
+    const outputWarning = this.outputSelectionWarning();
+    if (outputWarning) {
+      this.snackBar.open(
+        this.translate.instant(outputWarning),
+        this.translate.instant('BUTTON.CLOSE'), {
+          duration: 5000,
+          verticalPosition: 'top',
+        });
+      return false;
+    }
     const fileInfo = this.config().fileInfo;
     if (!fileInfo || Object.keys(fileInfo).length === 0) {
       this.snackBar.open(
@@ -380,6 +424,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     this.updateConfigFileInfo();
     this.emitConfigChange();
     this.cdr.detectChanges();
+    this.refreshMergedPreview();
 
     if (showMessage) {
       this.snackBar.open(
@@ -469,6 +514,9 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     fileInfo: Record<string, UploadInfoDTO>,
     emitChange = true,
   ): void {
+    if (this.isToolBased()) {
+      fileInfo = filterSelectedOutputs(fileInfo, this.selectedOutputs());
+    }
     this.sourceTables = this.mapFileInfoToSheets(fileInfo);
     this.pivotTables = this.mapFileInfoToSheets(fileInfo);
     this.reconcileSingleTablePivotKey();
@@ -488,7 +536,40 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
 
     if (emitChange && this.config().pivotConfig) {
       this.refreshPivotPreview();
+    } else {
+      this.refreshMergedPreview();
     }
+  }
+
+  private refreshMergedPreview(): void {
+    if (!this.mergeConfig || this.config().pivotConfig || this.sheets.length !== 1) {
+      return;
+    }
+    const config = {...this.config(), fileInfo: undefined, uploadInfo: undefined};
+    this.connectorPreviewService.previewPivot(configToConnectorConfigDTO(config)).subscribe({
+      next: ([rows]) => {
+        if (!rows?.length || this.sheets.length !== 1) {
+          return;
+        }
+        const sheet = this.sheets[0];
+        const previous = sheet.info;
+        const columns = [...new Set(rows.flatMap(row => Object.keys(row)))];
+        const indexOf = (column: string) => previous.columns.indexOf(column);
+        sheet.info = {
+          ...previous,
+          json: rows,
+          columns,
+          renamedColumns: columns.map(c => indexOf(c) >= 0 ? previous.renamedColumns[indexOf(c)] : c),
+          deletedColumns: columns.map(c => indexOf(c) >= 0 ? previous.deletedColumns[indexOf(c)] : false),
+        };
+        this.updateConfigFileInfo();
+        this.emitConfigChange();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // The service already reports preview errors.
+      }
+    });
   }
 
   private emitConfigChange(): void {
