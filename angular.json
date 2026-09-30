@@ -70,6 +70,9 @@
               "prismjs",
               "prismjs/components/prism-json"
             ],
+            "externalDependencies": [
+              "marked-katex-extension"
+            ],
             "stylePreprocessorOptions": {
               "includePaths": [
                 ".",
@@ -938,6 +941,9 @@
               "papaparse",
               "prismjs",
               "prismjs/components/prism-json"
+            ],
+            "externalDependencies": [
+              "marked-katex-extension"
             ]
           },
           "configurations": {
