@@ -11,7 +11,6 @@
     "lint-shared-lib": "ng lint --project=shared-lib",
     "build-global-fl-net": "ng build --project=global-app --configuration=FLNet-production",
     "build-global-fl-net-staging": "ng build --project=global-app --configuration=FLNet-staging",
-    "build-global-fl-net-staging-relative": "ng build --project=global-app --configuration=FLNet-staging-relative",
     "build-local-fl-net": "ng build --project=local-app --configuration=FLNet-production",
     "build-local-fl-net-staging": "ng build --project=local-app --configuration=FLNet-staging",
     "build-local-fl-net-staging-localhost": "ng build --project=local-app --configuration=FLNet-staging-localhost",

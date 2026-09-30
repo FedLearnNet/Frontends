@@ -1725,84 +1725,6 @@
                 ]
               }
             },
-            "FLNet-staging-relative": {
-              "optimization": {
-                "scripts": true,
-                "styles": {
-                  "minify": true,
-                  "inlineCritical": false
-                },
-                "fonts": true
-              },
-              "sourceMap": false,
-              "aot": true,
-              "extractLicenses": true,
-              "outputHashing": "all",
-              "outputPath": "dist/app",
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "3.5mb",
-                  "maximumError": "4mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "200kb",
-                  "maximumError": "400kb"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "projects/global-app/src/environments/environment.ts",
-                  "with": "projects/global-app/src/environments/FLNet/environment.relative-staging.ts"
-                },
-                {
-                  "replace": "projects/shared-lib/src/environments/environment.ts",
-                  "with": "projects/global-app/src/environments/FLNet/environment.relative-staging.ts"
-                }
-              ],
-              "assets": [
-                "projects/global-app/src/assets",
-                {
-                  "glob": "**/*",
-                  "input": "projects/shared-lib/src/assets/images/FLNet",
-                  "output": "projects/global-app/src/assets/images/"
-                },
-                {
-                  "glob": "**/*.html",
-                  "input": "./projects/shared-lib/src/assets",
-                  "output": "/assets/"
-                },
-                {
-                  "glob": "**/*.scss",
-                  "input": "projects/shared-lib/src/lib/styles/FLNet",
-                  "output": "projects/shared-lib/src/lib/styles"
-                },
-                {
-                  "glob": "**/*",
-                  "input": "projects/shared-lib/src/assets/images/FLNet",
-                  "output": "projects/shared-lib/src/assets/images/"
-                },
-                {
-                  "glob": "**/*",
-                  "input": "projects/shared-lib/src/assets/i18n",
-                  "output": "assets/i18n"
-                }
-              ],
-              "styles": [
-                "projects/global-app/src/styles.scss",
-                "projects/shared-lib/src/lib/styles/FLNet/styles.scss",
-                "node_modules/easymde/dist/easymde.min.css",
-                "node_modules/prismjs/themes/prism-okaidia.css",
-                "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.css"
-              ],
-              "stylePreprocessorOptions": {
-                "includePaths": [
-                  "projects/global-app/src/assets/styles",
-                  "projects/shared-lib/src/lib/styles/FLNet"
-                ]
-              }
-            },
             "FLNet-development": {
               "optimization": false,
               "extractLicenses": false,
@@ -1870,9 +1792,6 @@
             },
             "staging": {
               "buildTarget": "global-app:build:FLNet-staging"
-            },
-            "staging-relative": {
-              "buildTarget": "global-app:build:FLNet-staging-relative"
             },
             "development": {
               "buildTarget": "global-app:build:FLNet-development"
