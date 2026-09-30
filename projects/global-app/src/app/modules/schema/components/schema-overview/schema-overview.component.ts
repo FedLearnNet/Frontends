@@ -4,6 +4,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {ActionCardButtonComponent} from "@shared-lib/components/action-card-button/action-card-button.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
+import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 
 interface OverviewCard {
   titleKey: string;
@@ -16,7 +17,7 @@ interface OverviewCard {
   selector: 'app-schema-overview',
   templateUrl: './schema-overview.component.html',
   styleUrl: './schema-overview.component.scss',
-  imports: [RouterLink, TranslatePipe, ActionCardButtonComponent, PageWrapperComponent, HeaderComponent]
+  imports: [RouterLink, TranslatePipe, ActionCardButtonComponent, PageWrapperComponent, HeaderComponent, HintCardComponent]
 })
 export class SchemaOverviewComponent {
   readonly cards = signal<OverviewCard[]>([

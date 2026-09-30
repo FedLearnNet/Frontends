@@ -409,6 +409,7 @@
   },
   "DATA_MODELER": {
     "MANAGEMENT_OVERVIEW": "Manage ontologies, schemas and data pipelines",
+    "UMLS_DISCLAIMER": "Some material in the UMLS Metathesaurus is from copyrighted sources of the respective copyright holders. Users of the UMLS Metathesaurus are solely responsible for compliance with any copyright, patent or trademark restrictions and are referred to the copyright, patent or trademark notices appearing in the original sources, all of which are hereby incorporated by reference.",
     "ONTOLOGY_MANAGEMENT": "Create and maintain biomedical ontologies",
     "SCHEMA_MANAGEMENT": "Design and validate data schemas",
     "DATA_GENERATION": "Generate and simulate datasets",
