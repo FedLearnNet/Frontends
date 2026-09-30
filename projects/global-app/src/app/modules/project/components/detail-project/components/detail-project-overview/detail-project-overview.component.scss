@@ -103,6 +103,31 @@
   color: #6b7280;
 }
 
+.aggregator-location {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.aggregator-location-label {
+  margin: 0;
+  font-size: 1rem;
+  color: #6b7280;
+}
+
+.aggregator-location-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
 
 @media (min-width: 960px) {
   .project-detail {

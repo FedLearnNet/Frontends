@@ -17,6 +17,7 @@ export interface ProjectCreateDto {
   name: string;
   description: string;
   queryId?: number;
+  platformIsCoordinator?: boolean;
 }
 
 export enum ProjectRole {

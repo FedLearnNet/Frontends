@@ -1,3 +1,16 @@
 mat-form-field{
   width: 100%;
 }
+
+.aggregator-location {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+
+  mat-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}

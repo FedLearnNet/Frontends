@@ -85,6 +85,42 @@
         }
       </mat-form-field>
 
+      @if (platformAggregatorSupported() || platformIsCoordinator.value) {
+        <div class="aggregator-location">
+          <p class="aggregator-location-label">{{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
+          <div class="aggregator-location-row">
+            <mat-radio-group [formControl]="platformIsCoordinator">
+              <mat-radio-button [value]="false">
+                {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
+              </mat-radio-button>
+              <mat-radio-button [value]="true" [disabled]="platformIsCoordinator.disabled || !platformAggregatorSupported()">
+                {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM' | translate }}
+              </mat-radio-button>
+            </mat-radio-group>
+
+            @if (platformAggregatorSupported()) {
+              @if (!editModePlatformIsCoordinator()) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Edit aggregator location"
+                  (click)="onEditPlatformIsCoordinator($event)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              } @else {
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Save aggregator location"
+                  (click)="onSavePlatformIsCoordinator($event)">
+                  <mat-icon>save</mat-icon>
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+
       <p class="edit-hint">
         {{ 'Click the pencil icon to edit' }}
       </p>

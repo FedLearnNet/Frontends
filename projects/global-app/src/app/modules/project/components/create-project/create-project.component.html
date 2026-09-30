@@ -21,6 +21,20 @@
                 required rows="5"></textarea>
     </mat-form-field>
     <mat-checkbox formControlName="acceptProcess">{{ 'BUTTON.I_ACCEPT_THE_PROCESS' | translate }}</mat-checkbox>
+
+    @if (platformAggregatorSupported()) {
+      <div class="aggregator-location">
+        <p>{{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
+        <mat-radio-group formControlName="platformIsCoordinator">
+          <mat-radio-button [value]="false">
+            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
+          </mat-radio-button>
+          <mat-radio-button [value]="true">
+            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM' | translate }}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+    }
   </form>
 
   <mat-divider/>
