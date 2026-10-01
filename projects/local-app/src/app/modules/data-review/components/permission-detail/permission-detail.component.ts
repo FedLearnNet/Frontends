@@ -83,9 +83,9 @@ export class PermissionDetailComponent implements OnInit {
         [Validators.required, Validators.min(3), Validators.max(10)],
       ],
       querySampleThreshold: [100, [Validators.required, Validators.min(100)]],
-      autoTrainingAccess: [AutoTrainingAccess.ALL, Validators.required],
-      autoStatisticsAccess: [AutoStatisticsAccess.ALL, Validators.required],
-      autoMetricsAccess: [AutoMetricsAccess.ALL, Validators.required],
+      autoTrainingAccess: [AutoTrainingAccess.NONE, Validators.required],
+      autoStatisticsAccess: [AutoStatisticsAccess.NONE, Validators.required],
+      autoMetricsAccess: [AutoMetricsAccess.NONE, Validators.required],
     }),
   });
 
