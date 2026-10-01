@@ -1,3 +1,4 @@
+<div class="app-source-editor" [class.dialog-layout]="displayMode() === 'DIALOG'">
 @if (storeLoading()) {
   <lib-skeleton-loader></lib-skeleton-loader>
 } @else {
@@ -5,32 +6,38 @@
     <lib-error-card [errorObject]="err"></lib-error-card>
   }
   @if (appDetail(); as app) {
-    <h3>Overview</h3>
-    <lib-store-card [linkToShop]="false" [storeElement]="{app: app}" size="x-large"></lib-store-card>
+    <h3>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.OVERVIEW' | translate }}</h3>
+    <lib-store-card
+      [linkToShop]="false"
+      [enableHover]="false"
+      [storeElement]="{app: app}"
+      [size]="displayMode() === 'DIALOG' ? 'x-small' : 'x-large'"/>
     <mat-divider></mat-divider>
 
-    <h3>Settings</h3>
+    <h3>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.SETTINGS' | translate }}</h3>
     @if (hasHyperParams()) {
       <lib-app-run-hyperparameter [app]="app"
-                                  (formsValid)="hyperParamValid=$event"
-                                  (hyperParamsChange)="hyperParams.set($event)"
+                                  [layoutColumns]="displayMode() === 'DIALOG' ? 4 : 1"
+                                  [(hyperParams)]="hyperParams"
+                                  (formsValid)="hyperParamValid.set($event)"
       />
     } @else {
-      <lib-hint-card>There are no HyperParams</lib-hint-card>
+      <lib-hint-card>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.NO_HYPERPARAMETERS' | translate }}</lib-hint-card>
     }
     <mat-divider></mat-divider>
-    <h3>Inputs</h3>
+    <h3>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.INPUTS' | translate }}</h3>
     @if (hasInputs()) {
-
       <lib-app-run-input [app]="app"
+                         [dynamicInputs]="inputs()"
                          [directUploadToWorkflow]="undefined"
                          (inputChanged)="changeInput($event)"
       />
     } @else {
-      <lib-hint-card>There are no inputs</lib-hint-card>
+      <lib-hint-card>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.NO_INPUTS' | translate }}</lib-hint-card>
     }
   } @else {
-    <lib-error-card>No App found</lib-error-card>
+    <lib-error-card>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.NOT_FOUND' | translate }}</lib-error-card>
   }
 }
+</div>
 

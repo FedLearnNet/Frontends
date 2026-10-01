@@ -920,7 +920,22 @@
       "DELETE_EXISTING_PATIETNS": "Delete all patients before import",
       "DELETE_EXISTING_PATIETNS_DESC": "If enabled, all existing patients will be permanently deleted before the import begins. This action cannot be undone and will replace all current patient data with the imported dataset.",
       "MISSING_REQUIRED_FIELDS_TITLE": "Missing required mappings",
-      "MISSING_REQUIRED_FIELDS_DESC": "The following required fields are not mapped. Please complete the mapping before continuing."
+      "MISSING_REQUIRED_FIELDS_DESC": "The following required fields are not mapped. Please complete the mapping before continuing.",
+      "APP_SOURCE": {
+        "TITLE": "Configure the app data source",
+        "DESCRIPTION": "The connector runs with the current app settings. Change a hyperparameter or input only when this run needs different data, then save and run the app before running the connector.",
+        "OVERVIEW": "App overview",
+        "SETTINGS": "Hyperparameters",
+        "INPUTS": "Inputs",
+        "NO_HYPERPARAMETERS": "This app has no hyperparameters.",
+        "NO_INPUTS": "This app does not require any inputs.",
+        "NOT_FOUND": "The configured app could not be loaded.",
+        "SAVE_AND_RUN": "Save & run app",
+        "RUNNING_TITLE": "Preparing source data",
+        "RUNNING_DESC": "The app is running. This can take a few moments.",
+        "READY_TITLE": "Source data is ready",
+        "READY_DESC": "The app completed successfully. You can now run the connector."
+      }
     },
     "DELETE_PERMISSION": {
       "TITLE": "Delete Permission",

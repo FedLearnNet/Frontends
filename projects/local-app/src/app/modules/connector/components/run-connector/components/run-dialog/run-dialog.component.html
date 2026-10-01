@@ -20,12 +20,53 @@
   </mat-checkbox>
 
   <mat-divider />
-  <app-run-new-file
-      [config]="connector()"
-      [fileSettings]="fileSettings()"
-      (uploadStateChange)="handleUploadState($event)"
-      (uploadSuccess)="handleUploadSuccess($event)"
-  />
+  @if (appBasedSource()) {
+    <section class="app-source-section">
+      <div class="app-source-heading">
+        <div>
+          <h3>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.TITLE' | translate }}</h3>
+          <p>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.DESCRIPTION' | translate }}</p>
+        </div>
+      </div>
+
+      <div class="app-source-editor-shell"
+           [class.locked]="appSourceRunning()"
+           [attr.inert]="appSourceRunning() ? '' : null">
+        <app-input-app-based
+          [config]="connector()"
+          displayMode="DIALOG"
+          (validityChange)="appEditorValid.set($event)"
+          (uploadingChange)="handleUploadState($event)"
+        />
+      </div>
+
+      @if (appSourceRunning()) {
+        <mat-card appearance="outlined" class="app-source-status running">
+          <mat-card-content>
+            <strong>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.RUNNING_TITLE' | translate }}</strong>
+            <span>{{ appSourceLastMessage()?.lastLog || ('DIALOG.RUN_CONNECTOR.APP_SOURCE.RUNNING_DESC' | translate) }}</span>
+            <mat-progress-bar mode="indeterminate"/>
+          </mat-card-content>
+        </mat-card>
+      } @else if (appSourceReady() && !hasPendingSourceChanges()) {
+        <mat-card appearance="outlined" class="app-source-status success">
+          <mat-card-content>
+            <strong>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.READY_TITLE' | translate }}</strong>
+            <span>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.READY_DESC' | translate }}</span>
+          </mat-card-content>
+        </mat-card>
+      } @else if (appSourceError(); as error) {
+        <lib-error-card [errorObject]="error"/>
+      }
+    </section>
+  } @else {
+    <app-run-new-file
+        [config]="connector()"
+        [fileSettings]="fileSettings()"
+        (uploadStateChange)="handleUploadState($event)"
+        (uploadSuccess)="handleUploadSuccess($event)"
+    />
+  }
 
   @if (hasUnmappedRequiredFields()) {
   <mat-card>
@@ -54,9 +95,19 @@
 
 <mat-dialog-actions align="end">
   <lib-btn type="CANCEL" (clicked)="onNoClick()" />
+  @if (appBasedSource()) {
+    <lib-btn
+      type="CUSTOM"
+      icon="data_saver_on"
+      [label]="'DIALOG.RUN_CONNECTOR.APP_SOURCE.SAVE_AND_RUN' | translate"
+      [disabled]="!canSaveAndRunApp()"
+      [loading]="appSourceRunning()"
+      (clicked)="onSaveAndRunAppClick()"
+    />
+  }
   <lib-btn
     type="RUN"
-    [disabled]="!valid()"
+    [disabled]="!canRunConnector()"
     [loading]="runInProgress()"
     (clicked)="onRunClick()"
   />
