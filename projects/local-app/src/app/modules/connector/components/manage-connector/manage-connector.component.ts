@@ -1,4 +1,14 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {ConnectorCard} from "../../models/connector-card";
 import {ConnectorStepConfigs} from "../../enum/connector-step-config";
 import {ConnectorStepConfigChangeEmitter} from "../../models/connector-step-config";
@@ -109,6 +119,7 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -493,17 +504,24 @@ export class ManageConnectorComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: FunctionsDetailDTO | { delete: boolean }) => {
       if (!result) {
+        this.removeUnsavedTransformerCard(card);
         return;
       }
 
       if ('delete' in result) {
+        const hadTransformer = !!card.id && this.transformer.has(card.id);
         this.cards = this.cards.filter(c => c.id !== card.id);
-        this.disableAddTransformer = false;
-        if (this.transformer.has(card.id!)) {
+        if (hadTransformer) {
           this.transformer.delete(card.id!);
           this.transformedData.delete(card.id!);
-          this.reAssignIndex();
+        }
+        this.reAssignIndex();
+        if (this.currentStep?.id === card.id) {
           this.currentStep = this.getFallbackStepAfterDelete(card.index);
+        }
+        this.syncCardState();
+        this.changeDetectorRef.markForCheck();
+        if (hadTransformer) {
           this.applyTransform();
         }
         return;
@@ -516,6 +534,20 @@ export class ManageConnectorComponent implements OnInit {
 
       this.applyTransform();
     });
+  }
+
+  private removeUnsavedTransformerCard(card: ConnectorCard): void {
+    if (!card.id || this.transformer.has(card.id)) {
+      return;
+    }
+
+    this.cards = this.cards.filter(existing => existing.id !== card.id);
+    this.reAssignIndex();
+    if (this.currentStep?.id === card.id) {
+      this.currentStep = this.getFallbackStepAfterDelete(card.index);
+    }
+    this.syncCardState();
+    this.changeDetectorRef.markForCheck();
   }
 
   public addTransform() {
@@ -542,6 +574,7 @@ export class ManageConnectorComponent implements OnInit {
     transFormerCards.forEach(c => {
       c.previewRunning = true;
     });
+    this.changeDetectorRef.markForCheck();
     this.connectorPreviewService.preview(transFormerCards, config, this.transformer, this.cohortId()).subscribe({
       next: (data) => {
         transFormerCards.forEach(c => {
@@ -549,11 +582,13 @@ export class ManageConnectorComponent implements OnInit {
         });
         this.transformedData = data.rows;
         this.previewStages = data.stages;
+        this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
         transFormerCards.forEach(c => {
           c.previewRunning = false;
         });
+        this.changeDetectorRef.markForCheck();
         const inputConfig = this.config.inputConfig;
         if (inputConfig && isFileUploadSettings(inputConfig) && !inputConfig.fileExists) {
           return;
