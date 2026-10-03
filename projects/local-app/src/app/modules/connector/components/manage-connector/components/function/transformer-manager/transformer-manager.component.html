@@ -23,10 +23,18 @@
             [description]="'DIALOG.TRANSFORMER_MANAGER.APP_TOOLS_DESCRIPTION' | translate"
             [selected]="source() === 'tools'"
             (clicked)="onSourceChange('tools')"/>
+
+          <lib-select-btn
+            size="COMPACT"
+            icon="code"
+            [title]="'DIALOG.TRANSFORMER_MANAGER.CUSTOM_CODE' | translate"
+            [description]="'DIALOG.TRANSFORMER_MANAGER.CUSTOM_CODE_DESCRIPTION' | translate"
+            [selected]="source() === 'code'"
+            (clicked)="onSourceChange('code')"/>
         </div>
       </div>
 
-      @if (!isToolsTransformer()) {
+      @if (source() === 'builtin') {
         <mat-chip-listbox
           class="scope-filter"
           [attr.aria-label]="'DIALOG.TRANSFORMER_MANAGER.FILTER_BY_SCOPE' | translate"
@@ -87,7 +95,7 @@
             </div>
           }
         </div>
-      } @else {
+      } @else if (isToolsTransformer()) {
         <div class="picker-section">
           <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.INSTALLED_APPS' | translate }}</span>
 
@@ -118,6 +126,8 @@
             <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
           </button>
         </div>
+      } @else {
+        <app-code-transformer [columns]="columns()" [rows]="rows" [schema]="schema"/>
       }
 
       @if (!hasSelection() && hasError()) {

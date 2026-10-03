@@ -1,5 +1,5 @@
 import {Component, computed, effect, ElementRef, input, model, viewChild} from '@angular/core';
-import {ConsoleStdOutDTO} from "../../../../../../../global-app/src/app/modules/tool-development/dto/performance";
+import {ConsoleStdOutDTO} from '../../dto/console';
 
 @Component({
   selector: 'lib-console-output',

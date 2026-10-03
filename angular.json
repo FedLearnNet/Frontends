@@ -65,6 +65,7 @@
               "node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js"
             ],
             "allowedCommonJsDependencies": [
+              "codemirror",
               "easymde",
               "lodash",
               "papaparse"

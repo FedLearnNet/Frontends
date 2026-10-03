@@ -1,0 +1,232 @@
+<div class="code-transformer">
+  <aside class="code-transformer__rail">
+    <section class="code-transformer__section">
+      <span class="code-transformer__label">{{ 'CODE_TRANSFORMER.INPUT' | translate }}</span>
+      <mat-chip-listbox
+        [value]="mode()"
+        [hideSingleSelectionIndicator]="true"
+        (change)="$event.value && setMode($event.value)">
+        @for (m of modes; track m) {
+          <mat-chip-option [value]="m" [attr.data-mode]="m.toLowerCase()">
+            <mat-icon matChipAvatar>{{ modeIcon(m) }}</mat-icon>
+            {{ modeLabelKey(m) | translate }}
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+      @if (isCell()) {
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>{{ 'CODE_TRANSFORMER.COLUMNS' | translate }}</mat-label>
+          <mat-select multiple [value]="selectedColumns()" (valueChange)="selectedColumns.set($event)">
+            @for (c of columns(); track c) {
+              <mat-option [value]="c">{{ c }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+      <mat-button-toggle-group [value]="generated()" (change)="generated.set($event.value)">
+        <mat-button-toggle [value]="false" [disabled]="!rows().length">
+          {{ 'CODE_TRANSFORMER.DATA_PREVIEW' | translate: {count: rows().length} }}
+        </mat-button-toggle>
+        <mat-button-toggle [value]="true">{{ 'CODE_TRANSFORMER.DATA_GENERATED' | translate }}</mat-button-toggle>
+      </mat-button-toggle-group>
+      @if (generated()) {
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>{{ 'CODE_TRANSFORMER.INPUT_TYPE' | translate }}</mat-label>
+          <mat-select [value]="inputType()" (valueChange)="inputType.set($event)">
+            @for (t of types; track t) {
+              <mat-option [value]="t">{{ t }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+    </section>
+
+    <section class="code-transformer__section">
+      <span class="code-transformer__label">{{ 'CODE_TRANSFORMER.GOAL' | translate }}</span>
+      <mat-button-toggle-group [value]="fromSchema()" (change)="fromSchema.set($event.value)">
+        <mat-button-toggle [value]="true" [disabled]="!schemaGoals().length">
+          {{ 'CODE_TRANSFORMER.GOAL_FROM_SCHEMA' | translate }}
+        </mat-button-toggle>
+        <mat-button-toggle [value]="false">{{ 'CODE_TRANSFORMER.GOAL_CUSTOM' | translate }}</mat-button-toggle>
+      </mat-button-toggle-group>
+
+      @if (fromSchema()) {
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            [placeholder]="'CODE_TRANSFORMER.GOAL_SEARCH' | translate"
+            [matAutocomplete]="goalAutocomplete"
+            [value]="goalSearch()"
+            (input)="goalSearch.set($any($event.target).value)">
+          <mat-autocomplete #goalAutocomplete="matAutocomplete" [displayWith]="goalLabel"
+                            (optionSelected)="selectGoal($event.option.value)">
+            @for (g of filteredGoals(); track g.label) {
+              <mat-option [value]="g">{{ g.label }} <small class="code-transformer__hint">{{ g.dataType.type }}</small></mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        @if (goal(); as g) {
+          <div class="code-transformer__badges">
+            <lib-badge color="BLUE" [text]="g.type"/>
+            @if (g.isRequired) {
+              <lib-badge color="ORANGE" [text]="'CODE_TRANSFORMER.REQUIRED' | translate"/>
+            }
+            @for (rule of g.validations; track $index) {
+              <lib-badge color="GRAY" [text]="rule.name + ' ' + rule.validator"/>
+            }
+            @if (g.options?.length) {
+              <lib-badge
+                color="GRAY"
+                [matTooltip]="g.options!.join(', ')"
+                [text]="'CODE_TRANSFORMER.OPTIONS_COUNT' | translate: {count: g.options!.length}"/>
+            }
+          </div>
+        }
+      } @else {
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>{{ 'CODE_TRANSFORMER.GOAL_TYPE' | translate }}</mat-label>
+          <mat-select [value]="goalType()" (valueChange)="setGoalType($event)">
+            @for (t of types; track t) {
+              <mat-option [value]="t">{{ t }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-slide-toggle [checked]="required()" (change)="required.set($event.checked)">
+          {{ 'CODE_TRANSFORMER.REQUIRED' | translate }}
+        </mat-slide-toggle>
+        @for (rule of rules(); track $index) {
+          <div class="code-transformer__rule">
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>{{ 'CODE_TRANSFORMER.RULE' | translate }}</mat-label>
+              <mat-select [value]="rule.name" (valueChange)="updateRule($index, {name: $event})">
+                @for (name of ruleNames(); track name) {
+                  <mat-option [value]="name">{{ name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic">
+              <mat-label>{{ 'CODE_TRANSFORMER.RULE_VALUE' | translate }}</mat-label>
+              <input matInput [value]="rule.validator ?? ''" (input)="updateRule($index, {validator: $any($event.target).value})">
+            </mat-form-field>
+            <button mat-icon-button type="button" (click)="removeRule($index)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
+        @if (ruleNames().length) {
+          <lib-btn
+            type="CUSTOM"
+            variant="SECONDARY"
+            size="SMALL"
+            icon="add"
+            [label]="'CODE_TRANSFORMER.ADD_RULE' | translate"
+            (clicked)="addRule()"/>
+        }
+      }
+    </section>
+  </aside>
+
+  <section class="code-transformer__main">
+    <div #editor class="code-transformer__editor"></div>
+
+    <div class="code-transformer__actions">
+      <lib-badge
+        iconName="memory"
+        [color]="runnerColor()"
+        [animate]="runnerBusy() ? 'PULSE' : undefined"
+        [matTooltip]="runner().image ?? ''"
+        [text]="('CODE_TRANSFORMER.RUNNER_' + runner().status) | translate"/>
+      @if (runnerReady()) {
+        <lib-btn
+          type="CUSTOM"
+          variant="SECONDARY"
+          size="SMALL"
+          icon="stop"
+          [label]="'CODE_TRANSFORMER.RUNNER_STOP' | translate"
+          (clicked)="stopRunner()"/>
+      } @else {
+        <lib-btn
+          type="CUSTOM"
+          variant="SECONDARY"
+          size="SMALL"
+          icon="play_circle"
+          [label]="'CODE_TRANSFORMER.RUNNER_START' | translate"
+          [disabled]="runnerBusy()"
+          (clicked)="startRunner()"/>
+      }
+      <span class="code-transformer__spacer"></span>
+      <lib-btn
+        type="CUSTOM"
+        icon="play_arrow"
+        [matTooltip]="'CODE_TRANSFORMER.CHECK_SHORTCUT' | translate"
+        [label]="'CODE_TRANSFORMER.CHECK' | translate"
+        [disabled]="!canCheck()"
+        [loading]="running()"
+        (clicked)="check()"/>
+    </div>
+
+    @if (runner().error; as err) {
+      <lib-error-card [errorObject]="err"/>
+    }
+
+    @if (result(); as r) {
+      <div #result></div>
+      @if (r.isSuccess) {
+        <div class="code-transformer__badges">
+          <lib-badge iconName="check_circle" [text]="r.message"/>
+          @for (key of r.inputKeys; track key) {
+            <lib-badge color="GRAY" iconName="input" [text]="key"/>
+          }
+          @for (key of r.returnKeys; track key) {
+            <lib-badge color="BLUE" iconName="output" [text]="key"/>
+          }
+        </div>
+      } @else {
+        <lib-error-card>
+          <div>
+            <strong>{{ r.message }}</strong>
+            <ul class="code-transformer__errors">
+              @for (group of errorGroups(); track group[0]) {
+                <li>{{ group[0] }} <strong>({{ group[1] }}×)</strong></li>
+              }
+            </ul>
+          </div>
+        </lib-error-card>
+      }
+      @if (r.samples?.length) {
+        <table class="code-transformer__samples">
+          <thead>
+            <tr>
+              <th>{{ 'CODE_TRANSFORMER.SAMPLE_INPUT' | translate }}</th>
+              <th>{{ 'CODE_TRANSFORMER.SAMPLE_OUTPUT' | translate }}</th>
+              <th>{{ 'CODE_TRANSFORMER.SAMPLE_CHECK' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sample of r.samples; track $index) {
+              <tr [class.code-transformer__failed]="sample.error">
+                <td [matTooltip]="format(sample.input)">{{ format(sample.input) }}</td>
+                <td [matTooltip]="format(sample.output)">{{ format(sample.output) }}</td>
+                <td [matTooltip]="sample.error ?? ''">
+                  @if (sample.error) {
+                    <mat-icon>error</mat-icon>{{ sample.error }}
+                  } @else {
+                    <mat-icon>check_circle</mat-icon>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+
+    <lib-console-log
+      [(outputs)]="logs"
+      [title]="'CODE_TRANSFORMER.RUNNER_LOG' | translate"
+      [clientConnected]="logsConnected()"
+      [appConnected]="runnerReady()"
+      [docked]="false"/>
+  </section>
+</div>

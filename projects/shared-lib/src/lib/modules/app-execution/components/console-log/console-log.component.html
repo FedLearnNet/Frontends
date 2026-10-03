@@ -1,5 +1,5 @@
-<div class="dynamic-container" [style.height.px]="dynamicHeight()">
-  @if (isVisible()) {
+<div class="dynamic-container" [class.dynamic-container--docked]="docked()" [style.height.px]="dynamicHeight()">
+  @if (isVisible() && docked()) {
     <div
       class="resize-handle"
       (mousedown)="onResizeStart($event)"
@@ -20,7 +20,11 @@
       <mat-icon class="connected-warn" [matTooltip]="'APP_DISCONNECTED' | translate">sync</mat-icon>
     }
 
-    @if (appConnected()) {
+    @if (title()) {
+      <span class="console-title">{{ title() }}</span>
+    }
+
+    @if (appConnected() || !docked()) {
       <button mat-icon-button (click)="toggleConsole()">
         @if (!isVisible()) {
           <mat-icon>keyboard_arrow_up</mat-icon>
@@ -49,7 +53,7 @@
 
   @if (isVisible()) {
     <lib-console-output
-      [consoleStdOut]="consoleOutputs()"
+      [consoleStdOut]="outputs()"
       [followConsole]="followConsole()"
     ></lib-console-output>
   }

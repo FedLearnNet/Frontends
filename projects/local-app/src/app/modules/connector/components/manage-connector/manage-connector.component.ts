@@ -484,6 +484,8 @@ export class ManageConnectorComponent implements OnInit {
       data: {
         functions: this.functions,
         columns: this.getLatestColumns(),
+        rows: this.getLatestData(),
+        schema: this.resolvedCohort()?.schemaRoot?.childNodes ?? [],
         patientIdColumn: getPatientIdMappedColumn(this.config.schemaMapping),
         data: currentConfig,
         errorMessage: errorMessage,

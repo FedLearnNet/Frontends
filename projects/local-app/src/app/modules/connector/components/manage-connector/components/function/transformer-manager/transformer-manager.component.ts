@@ -46,16 +46,20 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {SelectBtnComponent} from '@shared-lib/components/select-btn/select-btn.component';
 import {KvComponent} from '@shared-lib/components/kv/kv.component';
+import {CodeTransformerComponent} from '../code-transformer/code-transformer.component';
+import {SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
 
 export interface TransformerDialogData {
   functions: FunctionsDetailDTO[];
   columns: string[];
+  rows?: Record<string, unknown>[];
+  schema?: SchemaNodeNestedDto[];
   patientIdColumn?: string;
   data?: FunctionsDetailDTO;
   errorMessage?: string;
 }
 
-type TransformerSource = 'builtin' | 'tools';
+type TransformerSource = 'builtin' | 'tools' | 'code';
 
 function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
   return transformer.moduleName === TOOLS_TRANSFORMER_MODULE.moduleName
@@ -86,6 +90,7 @@ function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
     BtnComponent,
     SelectBtnComponent,
     KvComponent,
+    CodeTransformerComponent,
   ],
   providers: [provideMarkdown()],
 })
@@ -99,6 +104,8 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
   private readonly mapper = viewChild<AppRunTransformerRowMappingComponent>('mapper');
 
   readonly columns = signal<string[]>(this.cfg.columns ?? []);
+  readonly rows = (this.cfg.rows ?? []).filter(row => !!row);
+  readonly schema = this.cfg.schema ?? [];
   readonly functions = signal<FunctionsDetailDTO[]>(this.cfg.functions ?? []);
 
   readonly source = signal<TransformerSource>('builtin');
