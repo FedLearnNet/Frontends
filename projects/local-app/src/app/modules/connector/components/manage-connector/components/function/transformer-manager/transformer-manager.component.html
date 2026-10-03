@@ -120,14 +120,60 @@
             </div>
           }
 
+          @if (readyCustomFunctions().length) {
+            <span class="section-label section-label--spaced">{{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}</span>
+            <div class="tool-list">
+              @for (fn of readyCustomFunctions(); track fn.appImage) {
+                <app-transformer-tool-list-item
+                  [function]="fn"
+                  [disabled]="isPatientModeUnavailable(fn.mode)"
+                  (activated)="selectCustomTool(fn)"
+                />
+              }
+            </div>
+          }
+
           <button type="button" class="marketplace-banner" (click)="showTools()">
             <mat-icon>storefront</mat-icon>
             <span>{{ 'DIALOG.TRANSFORMER_MANAGER.BROWSE_MARKETPLACE' | translate }}</span>
             <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
           </button>
         </div>
+      } @else if (editing()) {
+        @if (customs().length) {
+          <button type="button" class="back-link" (click)="editing.set(false)">
+            <mat-icon>arrow_back</mat-icon>
+            {{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}
+          </button>
+        }
+        <app-code-transformer
+          [columns]="columns()"
+          [rows]="rows"
+          [schema]="schema"
+          [transformer]="editingTransformer()"
+          (saved)="onCustomSaved($event)"/>
       } @else {
-        <app-code-transformer [columns]="columns()" [rows]="rows" [schema]="schema"/>
+        <div class="picker-section">
+          <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}</span>
+          <div class="tool-list">
+            @for (fn of customFunctions(); track fn.methodName + $index) {
+              <app-transformer-tool-list-item
+                [function]="fn"
+                [selected]="isFunctionSelected(fn)"
+                [disabled]="!fn.appImage || isPatientModeUnavailable(fn.mode)"
+                [disabledReason]="!fn.appImage
+                  ? ('DIALOG.TRANSFORMER_MANAGER.CUSTOM_NOT_BUILT' | translate)
+                  : isPatientModeUnavailable(fn.mode) ? ('DIALOG.TRANSFORMER_MANAGER.PATIENT_ID_REQUIRED' | translate) : ''"
+                (activated)="selectFunction(fn)"
+              />
+            }
+          </div>
+          <button type="button" class="marketplace-banner" (click)="newCustom()">
+            <mat-icon>add</mat-icon>
+            <span>{{ 'DIALOG.TRANSFORMER_MANAGER.NEW_CUSTOM' | translate }}</span>
+            <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
+          </button>
+        </div>
       }
 
       @if (!hasSelection() && hasError()) {
@@ -147,6 +193,16 @@
             <p class="rail-head__description">
               {{ fn.description || ('DIALOG.TRANSFORMER_MANAGER.NO_DESCRIPTION' | translate) }}
             </p>
+            @if (selectedCustom(); as custom) {
+              <div class="rail-head__actions">
+                <lib-btn type="CUSTOM" variant="SECONDARY" size="SMALL" icon="code"
+                         [label]="'DIALOG.TRANSFORMER_MANAGER.EDIT_CODE' | translate"
+                         (clicked)="editCustom(custom)"/>
+                <lib-btn type="CUSTOM" variant="GHOST" size="SMALL" icon="open_in_new"
+                         [label]="'DIALOG.TRANSFORMER_MANAGER.OPEN_DETAILS' | translate"
+                         (clicked)="openDetails(custom)"/>
+              </div>
+            }
           </div>
 
           <div class="rail-section scope-card">

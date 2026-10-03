@@ -231,7 +231,12 @@
       "APP_NOT_IN_STORE": "Die App dieses Schritts ist hier nicht installiert. Das Mapping kann angesehen, aber nicht geändert werden. Installiere die App oder wähle eine andere aus der Liste.",
       "INPUT_FIELD": "Eingabe",
       "OUTPUT_FIELD": "Ausgabe",
-      "APP_NOT_IN_STORE_SHORT": "App hier nicht installiert"
+      "APP_NOT_IN_STORE_SHORT": "App hier nicht installiert",
+      "CUSTOM_TRANSFORMERS": "Eigene Transformer",
+      "CUSTOM_NOT_BUILT": "Noch nicht gebaut",
+      "NEW_CUSTOM": "Neuen eigenen Transformer schreiben",
+      "EDIT_CODE": "Code bearbeiten",
+      "OPEN_DETAILS": "Details"
     },
     "MAPPER": {
       "MAP_COLUMN_TITLE": "Mapping für {{ column }} konfigurieren",
@@ -437,6 +442,39 @@
     "GOAL_TYPE": "Ziel-Datentyp",
     "INPUT_TYPE": "Generierter Eingabetyp",
     "CHECK": "Code prüfen",
-    "FAILED": "Die Code-Prüfung ist fehlgeschlagen"
+    "FAILED": "Die Code-Prüfung ist fehlgeschlagen",
+    "NAME": "Name",
+    "DESCRIPTION": "Beschreibung",
+    "SAVE": "Speichern & bauen",
+    "SAVE_HINT": "Speichert den Code und baut ihn zu einem lokalen, geprüften Image",
+    "SAVE_DISABLED": "Vergib einen Namen und prüfe den aktuellen Code zuerst erfolgreich",
+    "SAVE_FAILED": "Der eigene Transformer konnte nicht gespeichert werden",
+    "BUILD": "Lokaler Image-Build"
+  },
+  "CUSTOM_TRANSFORMERS": {
+    "TITLE": "Eigene Transformer",
+    "DESCRIPTION": "Im Connector in Python geschriebene Transformer, gebaut als lokale Images, die diesen Client nie verlassen.",
+    "DETAIL_DESCRIPTION": "Generiertes Projekt, lokaler Image-Build und die Connectoren, die ihn nutzen.",
+    "EMPTY": "Noch keine eigenen Transformer",
+    "EMPTY_SUBTITLE": "Schreibe einen im Connector: Transformation hinzufügen → Eigener Code.",
+    "STATUS": "Status",
+    "NAME": "Name",
+    "MODE": "Modus",
+    "USED_BY": "Genutzt von",
+    "UPDATED": "Aktualisiert",
+    "STATUS_BUILDING": "Wird gebaut",
+    "STATUS_READY": "Bereit",
+    "STATUS_FAILED": "Build fehlgeschlagen",
+    "RELOAD": "Neu laden",
+    "REBUILD": "Neu bauen",
+    "DELETE_TITLE": "Eigenen Transformer löschen",
+    "DELETE_MESSAGE": "Möchtest du \"{{name}}\" und sein lokales Image löschen?",
+    "DELETE_USED": "Entferne ihn zuerst aus allen Connectoren",
+    "NOT_FOUND": "Eigener Transformer nicht gefunden",
+    "IMAGE": "Image",
+    "GOAL": "Ziel",
+    "INPUT_KEYS": "Eingabe-Schlüssel",
+    "RETURN_KEYS": "Rückgabe-Schlüssel",
+    "NOT_USED": "Kein Connector nutzt ihn"
   }
 }

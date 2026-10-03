@@ -3,7 +3,7 @@ import {ModelPublishStatus, ModelSubStatus} from "@global-app/model-store/dto/mo
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {ModelAccessDto} from "@global-app/model-store/dto/model-access";
 import {FileDTO} from "@shared-lib/modules/files/dto/file";
-import {PipelineStatus} from "../../../../../../global-app/src/app/modules/pipeline/dto/pipeline";
+import {PipelineStatus} from "@shared-lib/modules/pipeline/dto/pipeline";
 import {ProjectDto} from "@global-app/project/dto/project";
 import {QueryDTO} from "@global-app/find-data/dto/query";
 

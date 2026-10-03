@@ -26,7 +26,7 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
 import {dockerStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
 import {SseRefreshBtnComponent} from "@shared-lib/components/sse-refresh-btn/sse-refresh-btn.component";
-import {PipelineStatus} from "../../../../../../../global-app/src/app/modules/pipeline/dto/pipeline";
+import {PipelineStatus} from "@shared-lib/modules/pipeline/dto/pipeline";
 import {MatTooltip} from "@angular/material/tooltip";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 

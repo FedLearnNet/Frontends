@@ -1,0 +1,85 @@
+:host {
+  display: block;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.summary-card,
+.code-card,
+.build-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.build-card {
+  margin-top: 16px;
+}
+
+.summary-card {
+  &__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__usages {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  &__muted {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.code-card {
+  min-width: 0;
+
+  &__editor {
+    border: 1px solid rgba(16, 24, 40, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+
+    ::ng-deep {
+      .CodeMirror {
+        height: auto;
+        font-size: 13px;
+      }
+
+      .CodeMirror-scroll {
+        max-height: 560px;
+      }
+
+      pre.CodeMirror-line {
+        padding: 0 8px;
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+:host {
+  display: block;
+}
+
+section {
+  margin-bottom: 1rem;
+}
+
+h3 {
+  margin: 0 0 1rem;
+  font-weight: 500;
+  color: #212121;
+}
+
+.pipeline-steps-empty {
+  opacity: .75;
+  padding: 1rem;
+}
+
+.pipeline-steps-table {
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+
+  .mat-mdc-header-row {
+    background-color: #fafafa;
+  }
+
+  .mat-mdc-row {
+    transition: background-color 0.2s ease-in-out;
+
+    &:hover {
+      cursor: pointer;
+      background-color: #f7f8fc;
+    }
+  }
+
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    color: #757575;
+    padding: 0.75rem 1rem;
+  }
+
+  .mat-mdc-header-cell {
+    font-weight: 500;
+    color: #212121;
+  }
+}
+
+.status-td {
+  width: 250px;
+}

@@ -31,7 +31,7 @@ import {MatCheckbox} from "@angular/material/checkbox";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {
   PipelinePublishInfoDetailComponent
-} from "../../../pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {ToolIoGraphComponent} from "@shared-lib/modules/store/components/tool-io-graph/tool-io-graph.component";
 
 @Component({

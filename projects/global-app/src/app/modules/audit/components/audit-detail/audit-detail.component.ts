@@ -21,7 +21,7 @@ import {AuditActions} from "../../service/audit.actions";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {
   PipelinePublishInfoDetailComponent
-} from "../../../pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 

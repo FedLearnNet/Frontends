@@ -10,11 +10,12 @@ import {
   input,
   linkedSignal,
   OnInit,
+  output,
   signal,
   viewChild
 } from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {finalize} from 'rxjs';
+import {finalize, Subscription} from 'rxjs';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatIconModule} from '@angular/material/icon';
@@ -34,13 +35,21 @@ import {ErrorCardComponent} from '@shared-lib/components/error-card/error-card.c
 import {BadgeColor} from '@shared-lib/components/badge/badge.component';
 import {ConsoleLogComponent} from '@shared-lib/modules/app-execution/components/console-log/console-log.component';
 import {ConsoleStdOutDTO} from '@shared-lib/modules/app-execution/dto/console';
+import {StatusBadgeComponent} from '@shared-lib/components/status-badge/status-badge.component';
+import {pipelineStatusToBadgeStatus} from '@shared-lib/utils/badge-status.helper';
+import {PipelineStepsComponent} from '@shared-lib/modules/pipeline/components/pipeline-steps/pipeline-steps.component';
+import {PipelineStatus} from '@shared-lib/modules/pipeline/dto/pipeline';
 import {isAttributeNode, SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
 import {FunctionExecutionMode} from '../../../../../dto/function';
 import {
+  CodeTransformerCheckDTO,
   CodeTransformerCheckResultDTO,
+  CodeTransformerDTO,
   CodeTransformerGoalDTO,
+  CodeTransformerPipelineDTO,
   CodeTransformerRunnerDTO,
-  CodeTransformerRunnerStatus
+  CodeTransformerRunnerStatus,
+  CodeTransformerStatus
 } from '../../../../../dto/code-transformer';
 import {
   DataTypeDto,
@@ -52,8 +61,8 @@ import {ConnectorCodeTransformerService} from '../../../../../services/connector
 import {modeIcon, modeLabelKey} from '../tool-list-item/transformer-mode';
 
 const HEADER = [
-  'from pyfedappwrap.transformation.base_transformer import BaseTransformerAPP',
-  'class CodeTransformer(BaseTransformerAPP):',
+  'from pyfedappwrap.transformation.base_transformer import BaseTransformerAPP, BaseTransformerConfig',
+  'class CodeTransformer(BaseTransformerAPP[BaseTransformerConfig]):',
 ];
 const SIGNATURES: Record<FunctionExecutionMode, string> = {
   [FunctionExecutionMode.CELL]: '    def transform(self, value):',
@@ -114,6 +123,8 @@ function schemaGoals(nodes: SchemaNodeNestedDto[], path: string[] = []): SchemaG
     BtnComponent,
     BadgeComponent,
     ErrorCardComponent,
+    StatusBadgeComponent,
+    PipelineStepsComponent,
   ],
   templateUrl: './code-transformer.component.html',
   styleUrl: './code-transformer.component.scss',
@@ -126,15 +137,19 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
   private readonly editorHost = viewChild.required<ElementRef<HTMLElement>>('editor');
   private readonly resultHost = viewChild<ElementRef<HTMLElement>>('result');
   private editor?: CodeMirror.Editor;
+  private buildSubscription?: Subscription;
 
   columns = input<string[]>([]);
   rows = input<Record<string, unknown>[]>([]);
   schema = input<SchemaNodeNestedDto[]>([]);
+  transformer = input<CodeTransformerDTO | null>(null);
+  saved = output<CodeTransformerDTO>();
 
   readonly modes = Object.values(FunctionExecutionMode);
   readonly types = Object.values(DataTypeTypeEnum);
   readonly modeIcon = modeIcon;
   readonly modeLabelKey = modeLabelKey;
+  readonly pipelineStatusToBadgeStatus = pipelineStatusToBadgeStatus;
 
   readonly mode = signal(FunctionExecutionMode.CELL);
   readonly selectedColumns = linkedSignal(() => this.columns().slice(0, 1));
@@ -166,13 +181,22 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
   readonly goalType = signal(DataTypeTypeEnum.STRING);
   readonly rules = signal<DataTypeValidationDto[]>([]);
   readonly required = signal(false);
+  readonly goalOptions = signal<string[]>([]);
   readonly ruleNames = computed(() => RULES[this.goalType()] ?? []);
+  readonly name = linkedSignal(() => this.transformer()?.name ?? '');
+  readonly description = linkedSignal(() => this.transformer()?.description ?? '');
+  readonly savedTransformer = linkedSignal(() => this.transformer());
+  readonly build = linkedSignal<CodeTransformerPipelineDTO | null | undefined>(() => this.transformer()?.pipeline);
+  readonly saving = signal(false);
+  readonly saveError = signal<string | null>(null);
+  readonly checkedRequest = signal<string | null>(null);
 
   readonly goal = computed<CodeTransformerGoalDTO | null>(() => {
     if (!this.fromSchema()) {
       return {
         type: this.goalType(),
         validations: this.rules().filter(rule => rule.validator?.trim()),
+        options: this.goalOptions(),
         isRequired: this.required(),
         allowNullValues: !this.required(),
       };
@@ -192,10 +216,28 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
     .reduce<Record<string, number>>((groups, sample) => ({...groups, [sample.error!]: (groups[sample.error!] ?? 0) + 1}), {})));
   readonly isCell = computed(() => this.mode() === FunctionExecutionMode.CELL);
   readonly inputColumns = computed(() => this.isCell() ? this.selectedColumns() : this.columns());
+  readonly request = computed<CodeTransformerCheckDTO | null>(() => {
+    const columns = this.inputColumns();
+    const goal = this.goal();
+    return goal ? {
+      body: this.body(),
+      mode: this.mode(),
+      goal,
+      sourceGoals: this.generated() ? Object.fromEntries(columns.map(c => [c, {type: this.inputType()}])) : null,
+      data: this.generated() ? null : Object.fromEntries(columns.map(c => [c, this.rows().map(row => row[c] ?? null)])),
+    } : null;
+  });
   readonly canCheck = computed(() =>
     !this.running() && this.runnerReady() && !!this.goal() && !!this.inputColumns().length && !!this.body().trim());
+  readonly canSave = computed(() => !this.saving() && !!this.name().trim() && !!this.result()?.isSuccess
+    && this.checkedRequest() === JSON.stringify(this.request()));
+  readonly building = computed(() => this.savedTransformer()?.status === CodeTransformerStatus.BUILDING);
 
   ngOnInit(): void {
+    const transformer = this.transformer();
+    if (transformer) {
+      this.edit(transformer);
+    }
     this.startRunner();
     this.service.runnerLogs().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: log => {
@@ -261,6 +303,7 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
   setGoalType(type: DataTypeTypeEnum): void {
     this.goalType.set(type);
     this.rules.set([]);
+    this.goalOptions.set([]);
   }
 
   addRule(): void {
@@ -276,18 +319,13 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
   }
 
   check(): void {
-    const columns = this.inputColumns();
+    const request = this.request()!;
     this.running.set(true);
     this.result.set(null);
-    this.service.check({
-      body: this.body(),
-      mode: this.mode(),
-      goal: this.goal()!,
-      sourceGoals: this.generated() ? Object.fromEntries(columns.map(c => [c, {type: this.inputType()}])) : null,
-      data: this.generated() ? null : Object.fromEntries(columns.map(c => [c, this.rows().map(row => row[c] ?? null)])),
-    }).pipe(finalize(() => this.running.set(false))).subscribe({
+    this.service.check(request).pipe(finalize(() => this.running.set(false))).subscribe({
       next: result => {
         this.result.set(result);
+        this.checkedRequest.set(result.isSuccess ? JSON.stringify(request) : null);
         afterNextRender(() => this.resultHost()?.nativeElement.scrollIntoView({behavior: 'smooth', block: 'nearest'}),
           {injector: this.injector});
       },
@@ -298,6 +336,57 @@ export class CodeTransformerComponent implements OnInit, AfterViewInit {
         returnKeys: [],
       }),
     });
+  }
+
+  save(): void {
+    this.saving.set(true);
+    this.saveError.set(null);
+    this.service.save({
+      ...this.request()!,
+      id: this.savedTransformer()?.id,
+      name: this.name().trim(),
+      description: this.description().trim(),
+    }).pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: transformer => this.track(transformer),
+      error: err => this.saveError.set(err?.error?.detail ?? err?.message ?? this.translate.instant('CODE_TRANSFORMER.SAVE_FAILED')),
+    });
+  }
+
+  private track(transformer: CodeTransformerDTO): void {
+    this.savedTransformer.set(transformer);
+    this.build.set(transformer.pipeline);
+    this.buildSubscription?.unsubscribe();
+    if (transformer.status !== CodeTransformerStatus.BUILDING) {
+      this.saved.emit(transformer);
+      return;
+    }
+    this.buildSubscription = this.service.buildUpdates(transformer.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(build => {
+      this.build.set(build);
+      if (build.pipelineStatus === PipelineStatus.SUCCESS || build.pipelineStatus === PipelineStatus.FAILED) {
+        this.buildSubscription?.unsubscribe();
+        this.service.get(transformer.id).subscribe(updated => {
+          this.savedTransformer.set(updated);
+          this.saved.emit(updated);
+        });
+      }
+    });
+  }
+
+  private edit(transformer: CodeTransformerDTO): void {
+    const columns = Object.keys(transformer.data ?? transformer.sourceGoals ?? {});
+    this.mode.set(transformer.mode);
+    this.body.set(transformer.body);
+    this.fromSchema.set(false);
+    this.goalType.set(transformer.goal.type);
+    this.rules.set(transformer.goal.validations ?? []);
+    this.required.set(!!transformer.goal.isRequired);
+    this.goalOptions.set(transformer.goal.options ?? []);
+    this.generated.set(!transformer.data || !this.rows().length);
+    this.inputType.set(Object.values(transformer.sourceGoals ?? {})[0]?.type ?? this.inputType());
+    this.selectedColumns.set(columns.filter(c => this.columns().includes(c)));
+    if (transformer.status === CodeTransformerStatus.BUILDING) {
+      this.track(transformer);
+    }
   }
 
   private showSource(body = this.body()): void {

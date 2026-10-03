@@ -25,7 +25,7 @@
           @if (vulnUnknown()) {
             <lib-badge color="ORANGE" text="Unknown" [border]="true"></lib-badge>
           } @else if (vulnTotal() > 0) {
-            <lib-badge color="ORANGE" text="Total" [border]="true">{{ vulnTotal() }}</lib-badge>
+            <lib-badge color="ORANGE" [text]="'Total ' + vulnTotal()" [border]="true"/>
 
           } @else {
             <lib-badge color="GRAY" text="Total 0" [border]="true"></lib-badge>

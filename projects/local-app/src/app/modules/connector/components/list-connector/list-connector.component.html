@@ -7,6 +7,8 @@
            (clicked)="onAddClick()"/>
   <lib-btn suffix variant="SECONDARY" label="Files" icon="folder"
            [routerLink]="getFilesRoute()"/>
+  <lib-btn suffix variant="SECONDARY" [label]="'CUSTOM_TRANSFORMERS.TITLE' | translate" icon="code"
+           routerLink="custom"/>
 </lib-header>
 
 <lib-page-wrapper [isEmpty]="connectors.length === 0">

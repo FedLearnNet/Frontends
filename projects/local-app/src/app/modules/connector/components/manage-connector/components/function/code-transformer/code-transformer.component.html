@@ -222,6 +222,42 @@
       }
     }
 
+    <div class="code-transformer__save">
+      <mat-form-field subscriptSizing="dynamic">
+        <mat-label>{{ 'CODE_TRANSFORMER.NAME' | translate }}</mat-label>
+        <input matInput required [value]="name()" (input)="name.set($any($event.target).value)">
+      </mat-form-field>
+      <mat-form-field subscriptSizing="dynamic" class="code-transformer__grow">
+        <mat-label>{{ 'CODE_TRANSFORMER.DESCRIPTION' | translate }}</mat-label>
+        <input matInput [value]="description()" (input)="description.set($any($event.target).value)">
+      </mat-form-field>
+      <lib-btn
+        type="CUSTOM"
+        icon="inventory_2"
+        [matTooltip]="(canSave() ? 'CODE_TRANSFORMER.SAVE_HINT' : 'CODE_TRANSFORMER.SAVE_DISABLED') | translate"
+        [label]="'CODE_TRANSFORMER.SAVE' | translate"
+        [disabled]="!canSave() || building()"
+        [loading]="saving() || building()"
+        (clicked)="save()"/>
+    </div>
+
+    @if (saveError(); as err) {
+      <lib-error-card [errorObject]="err"/>
+    }
+
+    @if (build(); as b) {
+      <div class="code-transformer__build">
+        <div class="code-transformer__badges">
+          <lib-status-badge size="SMALL" [type]="pipelineStatusToBadgeStatus(b.pipelineStatus)"/>
+          <span>{{ 'CODE_TRANSFORMER.BUILD' | translate }}</span>
+          @if (savedTransformer()?.imageName; as image) {
+            <lib-badge color="GRAY" iconName="deployed_code" [text]="image"/>
+          }
+        </div>
+        <lib-pipeline-steps [pipeline]="b"/>
+      </div>
+    }
+
     <lib-console-log
       [(outputs)]="logs"
       [title]="'CODE_TRANSFORMER.RUNNER_LOG' | translate"

@@ -900,7 +900,12 @@
       "APP_NOT_IN_STORE": "This step is configured with an app that is not installed here, so its mapping can be viewed but not changed. Install the app, or pick another one from the list.",
       "INPUT_FIELD": "Input",
       "OUTPUT_FIELD": "Output",
-      "APP_NOT_IN_STORE_SHORT": "App not installed here"
+      "APP_NOT_IN_STORE_SHORT": "App not installed here",
+      "CUSTOM_TRANSFORMERS": "Custom transformers",
+      "CUSTOM_NOT_BUILT": "Not built yet",
+      "NEW_CUSTOM": "Write a new custom transformer",
+      "EDIT_CODE": "Edit code",
+      "OPEN_DETAILS": "Details"
     },
     "SKIP_TRANSFORM": {
       "TITLE": "Add a transformation?",
@@ -1441,10 +1446,43 @@
     "GOAL_TYPE": "Goal data type",
     "INPUT_TYPE": "Generated input type",
     "CHECK": "Check code",
-    "FAILED": "The code check failed"
+    "FAILED": "The code check failed",
+    "NAME": "Name",
+    "DESCRIPTION": "Description",
+    "SAVE": "Save & build",
+    "SAVE_HINT": "Saves the code and builds it into a local, scanned image",
+    "SAVE_DISABLED": "Give it a name and run a successful check of the current code first",
+    "SAVE_FAILED": "The custom transformer could not be saved",
+    "BUILD": "Local image build"
   },
   "LABEL": {
     "FILE": "File",
     "FILES": "Files"
+  },
+  "CUSTOM_TRANSFORMERS": {
+    "TITLE": "Custom transformers",
+    "DESCRIPTION": "Transformers written in Python in the connector, built into local images that never leave this client.",
+    "DETAIL_DESCRIPTION": "Generated project, local image build and the connectors using it.",
+    "EMPTY": "No custom transformers yet",
+    "EMPTY_SUBTITLE": "Write one in a connector: Add Transform → Custom code.",
+    "STATUS": "Status",
+    "NAME": "Name",
+    "MODE": "Mode",
+    "USED_BY": "Used by",
+    "UPDATED": "Updated",
+    "STATUS_BUILDING": "Building",
+    "STATUS_READY": "Ready",
+    "STATUS_FAILED": "Build failed",
+    "RELOAD": "Reload",
+    "REBUILD": "Rebuild",
+    "DELETE_TITLE": "Delete custom transformer",
+    "DELETE_MESSAGE": "Do you want to delete \"{{name}}\" and its local image?",
+    "DELETE_USED": "Remove it from every connector first",
+    "NOT_FOUND": "Custom transformer not found",
+    "IMAGE": "Image",
+    "GOAL": "Goal",
+    "INPUT_KEYS": "Input keys",
+    "RETURN_KEYS": "Return keys",
+    "NOT_USED": "No connector uses it"
   }
 }

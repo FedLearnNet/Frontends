@@ -5,7 +5,7 @@ import {
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {
   PipelinePublishInfoDetailComponent
-} from "../pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
 
 @Component({

@@ -13,7 +13,7 @@ import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 
 @Component({
-  selector: 'app-pipeline-publish-info-detail',
+  selector: 'lib-pipeline-publish-info-detail',
   imports: [MatCardModule,
     MatIconModule,
     MatTableModule,
@@ -38,8 +38,7 @@ export class PipelinePublishInfoDetailComponent {
   });
 
   readonly vulnUnknown = computed(() => {
-    const r = this.publishInfo().vulnerabilityScanResult;
-    return !r || r.success !== true;
+    return !this.publishInfo().vulnerabilityScanResult?.summary;
   });
 
   readonly malwareUnknown = computed(() => {

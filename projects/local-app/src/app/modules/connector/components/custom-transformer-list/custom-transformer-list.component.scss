@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.custom-transformers {
+  width: 100%;
+  margin-top: 24px;
+
+  .mat-mdc-row {
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f7f8fc;
+    }
+  }
+
+  &__description {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.82rem;
+  }
+}
