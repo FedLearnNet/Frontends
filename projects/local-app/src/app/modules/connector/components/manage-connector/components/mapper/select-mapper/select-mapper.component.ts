@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnInit, Signal} from '@angular/core';
+import {Component, effect, inject, OnInit, Signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatButtonModule} from '@angular/material/button';
@@ -102,6 +102,7 @@ export interface ConnectorSelectMapperResult {
     CloseableDialogTitleComponent,
   ],
   templateUrl: './select-mapper.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './select-mapper.component.scss'
 })
 export class ConnectorSelectMapperComponent implements OnInit {

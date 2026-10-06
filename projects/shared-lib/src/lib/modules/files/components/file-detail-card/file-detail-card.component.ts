@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FileDTO} from "@shared-lib/modules/files/dto/file";
 import {Store} from "@ngrx/store";
 import {DomSanitizer} from "@angular/platform-browser";
@@ -28,6 +28,7 @@ import {FileContentComponent} from "@shared-lib/modules/files/components/file-co
     FileContentComponent
   ],
   templateUrl: './file-detail-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-detail-card.component.scss'
 })
 export class FileDetailCardComponent {

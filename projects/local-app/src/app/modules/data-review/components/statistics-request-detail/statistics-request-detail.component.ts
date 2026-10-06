@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {MatButtonModule} from "@angular/material/button";
@@ -47,6 +47,7 @@ interface StatisticsRequestDetailData {
     QueryDetailCardComponent
   ],
   templateUrl: './statistics-request-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './statistics-request-detail.component.scss'
 })
 export class StatisticsRequestDetailComponent implements OnInit {

@@ -1,6 +1,6 @@
 <lib-closeable-dialog-title
   (maximizedChanged)="toggleMaximize($event)"
-  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: data.current?.name}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
+  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: $safeNavigationMigration(data.current?.name)}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
 >
 
 </lib-closeable-dialog-title>

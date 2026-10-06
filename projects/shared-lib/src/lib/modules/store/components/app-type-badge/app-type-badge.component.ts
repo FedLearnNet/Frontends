@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {FederatedAppType} from "@shared-lib/modules/store/dto/enum";
 import {MatIcon} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -10,6 +10,7 @@ import {MatTooltip} from "@angular/material/tooltip";
     MatTooltip
   ],
   templateUrl: './app-type-badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-type-badge.component.scss'
 })
 export class AppTypeBadgeComponent {

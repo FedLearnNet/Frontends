@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialog} from '../../models';
 import {MatButtonModule} from "@angular/material/button";
@@ -10,6 +10,7 @@ import {MatButtonModule} from "@angular/material/button";
     '../../styles/main.scss',
     './confirm-dialog.component.scss',
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatButtonModule

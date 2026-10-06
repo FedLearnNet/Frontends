@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {SchemaService} from "@global-app/schema/services/schema.service";
 import {SchemaNodeDTO, SchemaNodeType, SchemaStructureDTO} from "@global-app/schema/dto/schema";
 import {MatDialog} from "@angular/material/dialog";
@@ -34,6 +34,7 @@ interface SchemaOutlineRow {
   selector: 'app-detail-schema',
   templateUrl: './detail-schema.component.html',
   styleUrl: './detail-schema.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgStyle,
     HeaderComponent,

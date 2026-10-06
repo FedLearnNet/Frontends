@@ -1,4 +1,4 @@
-import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, isDevMode} from '@angular/core';
 import {routes} from './app.routes';
 import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import {CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, customBearerTokenInterceptor} from 'keycloak-angular';
@@ -69,7 +69,6 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({
         paramsInheritanceStrategy: 'always',
       })),
-    provideZoneChangeDetection({eventCoalescing: true}),
     provideTranslateService({
       fallbackLang: 'en',
       loader: provideTranslateHttpLoader({

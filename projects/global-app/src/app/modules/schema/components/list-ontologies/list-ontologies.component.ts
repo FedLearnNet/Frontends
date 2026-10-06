@@ -1,4 +1,4 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyService} from "@global-app/schema/services/ontology.service";
 import {OntologyNodeDTO, OntologySearchResponseDTO} from "../../dto/ontology";
 import {FeatureAvailableDTO} from "../../dto/feature-available";
@@ -29,6 +29,7 @@ import {FeatureAvailableService} from "@global-app/schema/services/feature-avail
   selector: 'app-list-ontologies',
   templateUrl: './list-ontologies.component.html',
   styleUrl: './list-ontologies.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatButtonModule,

@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {DataAnalysisResultAnalyzerDialogData} from "@shared-lib/modules/app-execution/model/data-analyzer";
 import {Store} from "@ngrx/store";
@@ -31,6 +31,7 @@ import {
   ],
   templateUrl: './data-analysis-result-analyzer-dialog.component.html',
   styleUrl: './data-analysis-result-analyzer-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     provideMarkdown(),
   ],

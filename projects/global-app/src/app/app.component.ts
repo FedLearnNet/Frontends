@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {environment} from '@global-app/env/environment';
 import {TranslationService} from '@shared-lib/services/translation.service';
 import {RouterOutlet} from "@angular/router";
@@ -24,6 +24,7 @@ import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
     SidenavComponent,
     FooterComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class AppComponent implements OnInit {

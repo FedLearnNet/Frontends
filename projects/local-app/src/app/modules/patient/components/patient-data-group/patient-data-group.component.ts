@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, model, signal, output} from '@angular/core';
+import {Component, computed, effect, inject, input, model, signal, output, ChangeDetectionStrategy} from '@angular/core';
 import {PatientDataEntryCreateDto, PatientDataEntryDto} from "../../dto/patient";
 import {PatientDataElementComponent} from "../patient-data-element/patient-data-element.component";
 import {PatientDataSparklineComponent} from "../patient-data-sparkline/patient-data-sparkline.component";
@@ -30,6 +30,7 @@ import { BtnComponent } from '@shared-lib/components/btn/btn.component';
     BtnComponent,
   ],
   templateUrl: './patient-data-group.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-data-group.component.scss'
 })
 export class PatientDataGroupComponent {

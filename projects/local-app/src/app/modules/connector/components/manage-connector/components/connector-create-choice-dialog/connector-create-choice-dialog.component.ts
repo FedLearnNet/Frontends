@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from '@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component';
@@ -20,6 +20,7 @@ export type ConnectorCreateChoice = 'create' | 'import';
     BtnComponent,
   ],
   templateUrl: './connector-create-choice-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './connector-create-choice-dialog.component.scss',
 })
 export class ConnectorCreateChoiceDialogComponent {

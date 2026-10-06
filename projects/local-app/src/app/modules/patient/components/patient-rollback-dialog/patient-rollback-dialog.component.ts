@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {PatientService} from "../../service/patient.service";
 import {ConnectorService} from "../../../connector/services/connector-crud.service";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
@@ -38,6 +38,7 @@ export interface PatientRollbackDialogData {
     TimeBadgeComponent,
   ],
   templateUrl: './patient-rollback-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-rollback-dialog.component.scss',
 })
 export class PatientRollbackDialogComponent {

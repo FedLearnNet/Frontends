@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, model} from '@angular/core';
+import {Component, computed, inject, input, model, ChangeDetectionStrategy} from '@angular/core';
 import {DataTypeNodeDTO, DataTypes} from "../../dto/datatype";
 import {MatCard} from '@angular/material/card';
 import {MatIconButton} from '@angular/material/button';
@@ -10,6 +10,7 @@ import {Router} from "@angular/router";
   selector: 'app-datatype-card',
   templateUrl: './datatype-card.component.html',
   styleUrl: './datatype-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatIcon, BadgeComponent, MatIconButton]
 })
 export class DatatypeCardComponent {

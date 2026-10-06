@@ -8,7 +8,8 @@ import {
   output,
   signal,
   viewChild,
-  ViewChild
+  ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {ConnectorDTO} from "../../../../dto/connector";
 import {ConnectorStepConfigChangeEmitter} from "../../../../models/connector-step-config";
@@ -38,6 +39,7 @@ import {FileUploadSettings} from "../../../../models/input-config";
   selector: 'app-run-new-file',
   templateUrl: './run-new-file.component.html',
   styleUrl: './run-new-file.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCheckbox, FormsModule, MatButton, MatTooltip, MatIcon, TranslatePipe, FileImportComponent]
 })
 export class RunNewFileComponent {
