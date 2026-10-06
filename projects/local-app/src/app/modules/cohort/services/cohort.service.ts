@@ -1,5 +1,5 @@
 import {inject, Injectable, signal} from '@angular/core';
-import {catchError, map, Observable, of, Subject, switchMap, takeWhile, throwError, timer} from 'rxjs';
+import {catchError, map, Observable, of, Subject, switchMap, takeWhile, tap, throwError, timer} from 'rxjs';
 import {HttpErrorResponse, HttpParams} from '@angular/common/http';
 import {ApiService} from '@shared-lib/services/api.service';
 import {environment} from '@local-app/env/environment';
@@ -57,6 +57,7 @@ export class CohortService {
 
   public createCohort(create: CreateCohortDto): Observable<CohortDto> {
     return this.apiService.post<CohortDto>(this.getBaseUrl(), create).pipe(
+      tap(() => this.notifyCohortsChanged()),
       catchError((err) => this.errorSnackbarService.showSnackBar(
         err,
         this.translate.instant('ERROR.ERROR_AT', {name: this.translate.instant('GRID.COHORT_CREATION')})
@@ -66,6 +67,7 @@ export class CohortService {
 
   updateCohort(cohort: CohortDetailDto): Observable<CohortDetailDto> {
     return this.apiService.put<CohortDetailDto>(`${this.getBaseUrl()}/${cohort.id}`, cohort).pipe(
+      tap(() => this.notifyCohortsChanged()),
       catchError((err: HttpErrorResponse) => {
         const fallback = err.status === 409
           ? this.translate.instant('VALIDATION.COHORT_NAME_EXISTS')
