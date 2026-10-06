@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {PermissionDTO} from '@local-app/data-review/models';
 import {MatDialog} from '@angular/material/dialog';
 import {
@@ -15,6 +15,7 @@ import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {MatPaginatorModule} from "@angular/material/paginator";
+import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from "rxjs";
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
@@ -48,9 +49,23 @@ export class PermissionGridComponent implements OnInit {
   filterCohort = input<CohortDetailDto | undefined>();
   @ViewChild(MatTable) table: MatTable<PermissionDTO>;
 
-  isXSmallScreen: boolean = false;
-  permissions: PermissionDTO[];
-  cohorts: CohortDto[];
+  private readonly routeData = toSignal(this.activatedRoute.data, {
+    initialValue: this.activatedRoute.snapshot.data as {
+      permissions?: PermissionDTO[];
+      cohorts?: CohortDto[];
+    },
+  });
+  private readonly screenSize = toSignal(this.responsiveService.getScreenSize(), {initialValue: ''});
+
+  readonly isXSmallScreen = computed(() => this.screenSize() === XSMALL);
+  readonly permissions = signal<PermissionDTO[]>(this.routeData().permissions ?? []);
+  readonly cohorts = computed<CohortDto[]>(() => {
+    const filter = this.filterCohort();
+    if (filter) {
+      return [filter];
+    }
+    return this.routeData().cohorts ?? [];
+  });
 
   displayedColumns: string[] = [
     'actions',
@@ -70,23 +85,7 @@ export class PermissionGridComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.activatedRoute.data.subscribe(({permissions, cohorts}) => {
-      this.permissions = permissions;
-      if (this.filterCohort()) {
-        this.cohorts = [this.filterCohort()!];
-      } else {
-        this.cohorts = cohorts;
-      }
-      this.refreshPermissions();
-    });
-
-    this.checkAndAdjustResponsiveLayout();
-  }
-
-  checkAndAdjustResponsiveLayout(): void {
-    this.responsiveService.getScreenSize().subscribe(
-      (screenSize) => (this.isXSmallScreen = screenSize === XSMALL)
-    );
+    setTimeout(() => this.refreshPermissions());
   }
 
   addPermission(): void {
@@ -117,8 +116,8 @@ export class PermissionGridComponent implements OnInit {
       if (!result) return;
 
       this.permissionService.deletePermission(permission.id!).subscribe(() => {
-        this.permissions = this.permissions.filter((p) => p.id !== permission.id);
-        this.table.renderRows();
+        this.permissions.update(rows => rows.filter((p) => p.id !== permission.id));
+        this.table?.renderRows();
       });
     });
   }
@@ -150,12 +149,12 @@ export class PermissionGridComponent implements OnInit {
         })
       ),
     ).subscribe((permissions) => {
-      this.permissions = permissions;
-      this.table.renderRows();
+      this.permissions.set(permissions);
+      this.table?.renderRows();
     });
   }
 
   getCohortName(cohortId: number): string {
-    return this.cohorts.find((cohort: CohortDto) => cohort.id === cohortId)?.name ?? '';
+    return this.cohorts().find((cohort: CohortDto) => cohort.id === cohortId)?.name ?? '';
   }
 }

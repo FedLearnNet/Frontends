@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, inject, input, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {CohortDto} from '@local-app/cohort/models';
 import {CohortService} from '@local-app/cohort/services/cohort.service';
@@ -27,7 +27,7 @@ export class StatisticsAccessLogComponent implements LoadLogDataResponse, OnInit
   displayedColumns = ['actions', 'createdAt', 'queryId', 'status', 'requestKeycloakId'];
   filters = ['Pending', 'Approved', 'Rejected', 'Running', 'Completed'];
 
-  data: LogPage<RequestDataStatisticsDto>;
+  readonly data = signal<LogPage<RequestDataStatisticsDto> | undefined>(undefined);
   cohorts: CohortDto[] = [];
 
   ngOnInit(): void {
@@ -43,12 +43,12 @@ export class StatisticsAccessLogComponent implements LoadLogDataResponse, OnInit
       info.pageSize ?? this.pageSize(),
       selectedStatus,
     ).subscribe({
-      next: (data) => this.data = data,
+      next: (data) => this.data.set(data),
     });
   }
 
   openDetail(id: number | string): void {
-    const request = this.data.results.find(item => item.id === id);
+    const request = this.data()?.results.find(item => item.id === id);
     if (!request) {
       return;
     }

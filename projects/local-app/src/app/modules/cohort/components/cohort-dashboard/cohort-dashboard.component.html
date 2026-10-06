@@ -6,7 +6,7 @@
   (addBtnClick)="navigateToNew()">
 </lib-header>
 <section>
-  <mat-table [dataSource]="cohorts" class="mat-elevation-z0">
+  <mat-table [dataSource]="cohorts()" class="mat-elevation-z0">
 
     <ng-container matColumnDef="name">
       <mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</mat-header-cell>

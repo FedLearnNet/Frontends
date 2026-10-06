@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {catchError, map, Observable, of, Subject, switchMap, takeWhile, throwError, timer} from 'rxjs';
 import {HttpErrorResponse, HttpParams} from '@angular/common/http';
 import {ApiService} from '@shared-lib/services/api.service';
@@ -12,6 +12,7 @@ import {
   CohortMemberDto,
   CohortNameHealthDto,
   CreateCohortDto,
+  isCohortDeleting,
 } from '@local-app/cohort/models';
 import {TranslateService} from "@ngx-translate/core";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
@@ -29,8 +30,12 @@ export class CohortService {
   private readonly apiUrl = environment.localLearningAPIURL;
   private readonly path = 'cohort'
   private readonly cohortsChangedSubject = new Subject<void>();
+  private readonly pendingDeletionIdsState = signal<ReadonlySet<number>>(new Set());
+  private readonly removedCohortIdsState = signal<ReadonlySet<number>>(new Set());
 
   readonly cohortsChanged = this.cohortsChangedSubject.asObservable();
+  readonly pendingDeletionIds = this.pendingDeletionIdsState.asReadonly();
+  readonly removedCohortIds = this.removedCohortIdsState.asReadonly();
 
   getCohorts(): Observable<CohortDto[]> {
     return this.apiService.get<CohortDto[]>(`${this.getBaseUrl()}`);
@@ -157,7 +162,83 @@ export class CohortService {
     this.cohortsChangedSubject.next();
   }
 
+  beginCohortDeletion(cohortId: number): void {
+    this.pendingDeletionIdsState.update(ids => withId(ids, cohortId));
+  }
+
+  completeCohortDeletion(cohortId: number): void {
+    const pending = withoutId(this.pendingDeletionIdsState(), cohortId);
+    const removed = withId(this.removedCohortIdsState(), cohortId);
+    const pendingChanged = pending !== this.pendingDeletionIdsState();
+    const removedChanged = removed !== this.removedCohortIdsState();
+    if (!pendingChanged && !removedChanged) {
+      return;
+    }
+    if (pendingChanged) {
+      this.pendingDeletionIdsState.set(pending);
+    }
+    if (removedChanged) {
+      this.removedCohortIdsState.set(removed);
+    }
+    this.notifyCohortsChanged();
+  }
+
+  /**
+   * Keeps a local pending flag while the server still returns the cohort, and
+   * forgets tombstones once the server list no longer contains them.
+   */
+  adoptCohortList(cohorts: readonly {id: number; deletionInProgress?: boolean}[]): void {
+    const present = new Set(cohorts.map(cohort => cohort.id));
+    this.removedCohortIdsState.update(ids => {
+      const next = new Set([...ids].filter(id => present.has(id)));
+      return sameIds(next, ids) ? ids : next;
+    });
+    const removed = this.removedCohortIdsState();
+    this.pendingDeletionIdsState.update(ids => {
+      const next = new Set<number>();
+      for (const cohort of cohorts) {
+        if (removed.has(cohort.id)) {
+          continue;
+        }
+        if (ids.has(cohort.id) || isCohortDeleting(cohort)) {
+          next.add(cohort.id);
+        }
+      }
+      return sameIds(next, ids) ? ids : next;
+    });
+  }
+
   private getBaseUrl(): string {
     return `${this.apiUrl}/${this.path}`;
   }
+}
+
+function withId(ids: ReadonlySet<number>, id: number): ReadonlySet<number> {
+  if (ids.has(id)) {
+    return ids;
+  }
+  const next = new Set(ids);
+  next.add(id);
+  return next;
+}
+
+function withoutId(ids: ReadonlySet<number>, id: number): ReadonlySet<number> {
+  if (!ids.has(id)) {
+    return ids;
+  }
+  const next = new Set(ids);
+  next.delete(id);
+  return next;
+}
+
+function sameIds(a: ReadonlySet<number>, b: ReadonlySet<number>): boolean {
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const id of a) {
+    if (!b.has(id)) {
+      return false;
+    }
+  }
+  return true;
 }

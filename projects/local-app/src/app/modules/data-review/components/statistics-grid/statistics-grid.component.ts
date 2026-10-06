@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {ActivatedRoute} from '@angular/router';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {MatDialog} from '@angular/material/dialog';
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
-import {MatPaginator, MatPaginatorModule, PageEvent} from "@angular/material/paginator";
+import {MatPaginatorModule, PageEvent} from "@angular/material/paginator";
 import {MatProgressBar} from "@angular/material/progress-bar";
 import {MatTableModule} from '@angular/material/table';
 import {TranslatePipe} from '@ngx-translate/core';
@@ -36,7 +36,7 @@ import {
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './statistics-grid.component.scss'
 })
-export class StatisticsGridComponent implements OnInit, AfterViewInit {
+export class StatisticsGridComponent implements OnInit {
   private readonly dialog: MatDialog = inject(MatDialog);
   private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private readonly responsiveService: ResponsiveService = inject(ResponsiveService);
@@ -45,51 +45,33 @@ export class StatisticsGridComponent implements OnInit, AfterViewInit {
 
   readonly INIT_PAGE_SIZE = 20;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  private readonly routeData = toSignal(this.activatedRoute.data, {
+    initialValue: this.activatedRoute.snapshot.data as {cohorts?: CohortDto[]},
+  });
+  private readonly screenSize = toSignal(this.responsiveService.getScreenSize(), {initialValue: ''});
 
-  isXSmallScreen = false;
-  isLoadingResults = false;
-  error: string | null = null;
-
-  requests: RequestDataStatisticsDto[] = [];
-  cohorts: CohortDto[] = [];
-  resultsLength = 0;
+  readonly isXSmallScreen = computed(() => this.screenSize() === XSMALL);
+  readonly isLoadingResults = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly requests = signal<RequestDataStatisticsDto[]>([]);
+  readonly cohorts = computed<CohortDto[]>(() => this.routeData().cohorts ?? []);
+  readonly resultsLength = signal(0);
+  readonly paginatorReady = signal(false);
+  readonly currentPage = signal(0);
+  readonly currentPageSize = signal(this.INIT_PAGE_SIZE);
 
   displayedColumns: string[] = ['query', 'requestedData', 'date'];
 
-  currentPage = 0;
-  currentPageSize = this.INIT_PAGE_SIZE;
-
   ngOnInit(): void {
-    this.activatedRoute.data
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({cohorts}) => {
-        this.cohorts = cohorts ?? [];
-      });
-
-    this.responsiveService.getScreenSize()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(screenSize => {
-        this.isXSmallScreen = screenSize === XSMALL;
-      });
-
-    this.loadRequests();
+    setTimeout(() => this.loadRequests());
   }
 
-  ngAfterViewInit(): void {
-    if (!this.paginator) {
-      return;
-    }
-
-    this.paginator.page
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event: PageEvent) => {
-        this.loadRequests(event.pageIndex, event.pageSize);
-      });
+  onPage(event: PageEvent): void {
+    this.loadRequests(event.pageIndex, event.pageSize);
   }
 
   openStatisticsRequestModal(id: number): void {
-    const request = this.requests.find(item => item.id === id);
+    const request = this.requests().find(item => item.id === id);
     if (!request) {
       return;
     }
@@ -101,43 +83,54 @@ export class StatisticsGridComponent implements OnInit, AfterViewInit {
       autoFocus: false,
       data: {
         request,
-        cohorts: this.cohorts,
+        cohorts: this.cohorts(),
       },
     }).afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((updated: RequestDataStatisticsDto | undefined) => {
         if (updated) {
-          this.loadRequests(this.currentPage, this.currentPageSize);
+          this.loadRequests(this.currentPage(), this.currentPageSize());
         }
       });
   }
 
   getRequestCohorts(request: RequestDataStatisticsDto): CohortDto[] {
     const requestedCohortIds = new Set(request.cohortIds ?? []);
-    return this.cohorts.filter(cohort => requestedCohortIds.has(cohort.id));
+    return this.cohorts().filter(cohort => requestedCohortIds.has(cohort.id));
   }
 
-  private loadRequests(page = this.currentPage, pageSize = this.currentPageSize): void {
-    this.isLoadingResults = true;
-    this.error = null;
-    this.currentPage = page;
-    this.currentPageSize = pageSize;
+  private loadRequests(page = this.currentPage(), pageSize = this.currentPageSize()): void {
+    const nextPage = Math.max(page, 0);
+    this.isLoadingResults.set(true);
+    this.error.set(null);
+    this.currentPage.set(nextPage);
+    this.currentPageSize.set(pageSize);
 
     this.statisticsRequestService.getAllRequests(
-      page,
+      nextPage,
       pageSize,
       FederatedLearningRequestStatus.PENDING
     ).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          this.requests = response.results ?? [];
-          this.resultsLength = response.totalCount ?? this.requests.length;
-          this.isLoadingResults = false;
-        },
+        next: (response) => this.applyPage(response.results ?? [], response.totalCount),
         error: (error: Error) => {
-          this.error = error.message ?? String(error);
-          this.isLoadingResults = false;
+          this.error.set(error.message ?? String(error));
+          this.isLoadingResults.set(false);
         }
       });
+  }
+
+  private applyPage(results: RequestDataStatisticsDto[], totalCount?: number): void {
+    const total = totalCount ?? results.length;
+    this.requests.set(results);
+    this.isLoadingResults.set(false);
+    if (this.paginatorReady()) {
+      this.resultsLength.set(total);
+      return;
+    }
+    setTimeout(() => {
+      this.resultsLength.set(total);
+      this.paginatorReady.set(true);
+    });
   }
 }

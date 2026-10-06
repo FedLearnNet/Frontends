@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, inject, input, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LoadLogData, LoadLogDataResponse} from "../../model/log-wrapper";
 import {LogService} from "../../services/log-service";
@@ -26,7 +26,7 @@ export class PatientQueryLogComponent implements OnInit, LoadLogDataResponse {
 
   displayedColumns: string[] = ['actions', 'createdAt', 'cohortId', 'patientId', 'queryId'];
 
-  public data: LogPage<PatientQueryLogDto>;
+  readonly data = signal<LogPage<PatientQueryLogDto> | undefined>(undefined);
 
   private queries: LocalQueryDto[] = [];
 
@@ -43,12 +43,12 @@ export class PatientQueryLogComponent implements OnInit, LoadLogDataResponse {
       info.page!,
       info.pageSize ?? this.pageSize(),
       info.search).subscribe(data => {
-      this.data = data;
+      this.data.set(data);
     })
   }
 
   openDetail(id: number | string) {
-    const queryPatient = this.data.results.find(d => d.id === id);
+    const queryPatient = this.data()?.results.find(d => d.id === id);
     if (!queryPatient) {
       return;
     }
