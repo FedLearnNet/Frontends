@@ -1,3 +1,21 @@
-lib-store-card{
+lib-store-card {
   margin-bottom: 20px;
+}
+
+.app-source-editor {
+  display: block;
+}
+
+.dialog-layout {
+  display: grid;
+  gap: 14px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  lib-store-card {
+    margin-bottom: 0;
+  }
 }

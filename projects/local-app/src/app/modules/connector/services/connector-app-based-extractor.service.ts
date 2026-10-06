@@ -64,12 +64,17 @@ export class ConnectorAppBasedExtractorService {
 
           if (msg.status === RunStatusTypes.ERROR) {
             this._error.set(msg.lastError ?? 'Run failed');
+            this._running.set(false);
           }
           if (msg.status === RunStatusTypes.FINISHED && msg.uploadInfo) {
             this._running.set(false);
           }
         }),
-        takeWhile(msg => !(msg.status === RunStatusTypes.FINISHED && msg.uploadInfo), true), // include terminal event
+        takeWhile(
+          msg => msg.status !== RunStatusTypes.ERROR
+            && !(msg.status === RunStatusTypes.FINISHED && msg.uploadInfo),
+          true
+        ), // include the terminal event
         finalize(() => {
           this._connected.set(false);
           this._running.set(false);
