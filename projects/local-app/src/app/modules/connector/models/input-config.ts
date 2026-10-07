@@ -25,6 +25,7 @@ export interface AppBasedUploadSettings extends ConnectorInputConfig {
   appVersionId: number;
   appTitle: string;
   outputParams?: { [outputName: string]: number };
+  selectedOutputs?: string[];
 }
 
 export interface FTPUploadSettings extends ConnectorInputConfig {

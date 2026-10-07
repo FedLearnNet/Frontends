@@ -2,11 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {ApiService} from '@shared-lib/services/api.service';
 import {catchError, filter, map, Observable, throwError} from 'rxjs';
 import {environment} from '@local-app/env/environment';
-import {
-  ConnectorFilesDetailDTO,
-  ConnectorFilesDTO,
-  ConnectorFileUploadSettingsDTO,
-} from "../dto/upload-info";
+import {ConnectorFilesDetailDTO, ConnectorFilesDTO, ConnectorFileUploadSettingsDTO,} from "../dto/upload-info";
 import {FileUploadSettings} from "../models/input-config";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from '@ngx-translate/core';
@@ -43,11 +39,11 @@ export class ConnectorUploadService {
       .importStream(cohortId, file, this.toUploadSettings(file, supportFile, settings), undefined,
         crypto.randomUUID())
       .pipe(
-        filter((message): message is ImportStreamMessage & {kind: 'event'} =>
+        filter((message): message is ImportStreamMessage & { kind: 'event' } =>
           message.kind === 'event' && !!message.event.last),
         map(message => message.event.result?.files?.[0] as ConnectorFilesDetailDTO),
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECTS').toLowerCase()}))),
+          this.translate.instant('ERROR.FAILED_TO_UPLOAD', {name: this.translate.instant('LABEL.FILE').toLowerCase()}))),
       );
   }
 
@@ -60,10 +56,7 @@ export class ConnectorUploadService {
   }
 
   removeSupportFile(cohortId: number, fileId: number): Observable<any> {
-    return this.deleteFile(cohortId, fileId).pipe(
-      catchError((err) => this.errorSnackbarService.showSnackBar(err,
-        this.translate.instant('ERROR.FAILED_TO_REMOVE', {name: this.translate.instant('GRID.ADDITIONAL_FILES').toLowerCase()}))),
-    );
+    return this.deleteFile(cohortId, fileId);
   }
 
   /** The same upload, reporting the transfer for a caller that shows a bar rather than a panel. */
@@ -106,7 +99,6 @@ export class ConnectorUploadService {
   }
 
 
-
   private toUploadSettings(
     file: File,
     supportFile: boolean,
@@ -139,7 +131,7 @@ export class ConnectorUploadService {
       `${this.getBaseUrl()}/cohorts/${cohortId}/files`,
     ).pipe(
       catchError((err) => this.errorSnackbarService.showSnackBar(err,
-        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECTS').toLowerCase()}))),
+        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('LABEL.FILES').toLowerCase()}))),
     );
   }
 
@@ -149,18 +141,21 @@ export class ConnectorUploadService {
       `${this.getBaseUrl()}/cohorts/${cohortId}/files/${fileId}`
     ).pipe(
       catchError((err) => this.errorSnackbarService.showSnackBar(err,
-        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECTS').toLowerCase()}))),
+        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('LABEL.FILE').toLowerCase()}))),
     );
   }
 
   deleteFile(cohortId: number, fileId: number): Observable<any> {
-    return this.apiService.delete(`${this.getBaseUrl()}/cohorts/${cohortId}/files/${fileId}`);
+    return this.apiService.delete(`${this.getBaseUrl()}/cohorts/${cohortId}/files/${fileId}`).pipe(
+      catchError((err) => this.errorSnackbarService.showSnackBar(err,
+        this.translate.instant('ERROR.FAILED_TO_DELETE', {name: this.translate.instant('LABEL.FILE').toLowerCase()}))),
+    );
   }
 
   downloadFile(cohortId: number, fileId: number): Observable<HTMLAnchorElement> {
     return this.apiService.download(`${this.getBaseUrl()}/cohorts/${cohortId}/files/${fileId}/download`).pipe(
       catchError((err) => this.errorSnackbarService.showSnackBar(err,
-        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECTS').toLowerCase()}))),
+        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('LABEL.FILE').toLowerCase()}))),
     );
   }
 
@@ -169,7 +164,7 @@ export class ConnectorUploadService {
       `${this.getBaseUrl()}/cohorts/${cohortId}/file`
     ).pipe(
       catchError((err) => this.errorSnackbarService.showSnackBar(err,
-        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECTS').toLowerCase()}))),
+        this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('LABEL.FILE').toLowerCase()}))),
     );
   }
 

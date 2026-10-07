@@ -1,4 +1,9 @@
 {
+  "DRY_RUN": "Testlauf",
+  "DRY_RUN_RESULTS_HINT": "Testlauf: Es wurde nichts in die Kohorte geschrieben. Die Zahlen oben zeigen, was ein echter Lauf ändern würde.",
+  "CHECKING_PATIENT_CHANGES": "Patientenänderungen werden geprüft (Testlauf)",
+  "APP_OUTPUT_TO_IMPORT": "Zu importierende Ausgaben",
+  "APP_OUTPUT_TO_IMPORT_HINT": "Wähle eine Ausgabe oder mehrere und führe sie zusammen. Transformationen, Mapping und Läufe verwenden diese.",
   "FILE_IS_BEING_ANALYZED": "Die Datei wird analysiert. Dies kann einen Moment dauern.",
   "SEARCH": {
     "PLACEHOLDER": "Kohorten, Patienten, Schemata durchsuchen…",
@@ -67,7 +72,7 @@
     "CANCEL": "Abbrechen",
     "ACCEPT": "Akzeptieren",
     "REJECT": "Ablehnen",
-    "CLOSE": "Schliessen",
+    "CLOSE": "Schließen",
     "DELETE": "Löschen",
     "PATIENTS": "Patienten",
     "SAVE": "Speichern",
@@ -136,6 +141,8 @@
     "NO_MESSAGES": "Noch keine Rundennachrichten."
   },
   "GRID": {
+    "DURATION": "Dauer",
+    "MODE": "Modus",
     "OVERVIEW": "Uebersicht",
     "SEARCH": "Suche",
     "STATUS": "Status",
@@ -188,7 +195,7 @@
     "SKIP_TRANSFORM": {
       "TITLE": "Transformation hinzufügen?",
       "LEAD": "Transformationen sind optional und können später hinzugefügt werden.",
-      "DESCRIPTION": "Sie können eine benutzerdefinierte Transformation auf Ihre Daten anwenden, bevor Sie diese mappen, oder diesen Schritt überspringen und direkt zum Mapper gehen."
+      "DESCRIPTION": "Du kannst deine Daten vor dem Mapping transformieren oder diesen Schritt überspringen und direkt zum Mapper gehen."
     },
     "TRANSFORMER_MANAGER": {
       "TRANSFORMATION_SOURCE": "Transformationsquelle",
@@ -219,7 +226,7 @@
       "COLUMN_TO_OVERRIDE_TOOLTIP": "Die Auswahl einer vorhandenen Spalte hier überschreibt sie – die ursprünglichen Daten gehen verloren.",
       "INPUT_COLUMN_TOOLTIP": "Wähle eine vorhandene Spalte aus den Daten als Eingabe aus.",
       "INPUT_VALUE_TOOLTIP": "Gib einen festen Wert als Eingabe an, anstatt eine Spalte zu verwenden.",
-      "APP_NOT_IN_STORE": "Dieser Schritt ist mit einer App konfiguriert, die hier nicht installiert ist. Das Mapping kann daher angesehen, aber nicht geändert werden. Installieren Sie die App oder wählen Sie eine andere aus der Liste.",
+      "APP_NOT_IN_STORE": "Die App dieses Schritts ist hier nicht installiert. Das Mapping kann angesehen, aber nicht geändert werden. Installiere die App oder wähle eine andere aus der Liste.",
       "INPUT_FIELD": "Eingabe",
       "OUTPUT_FIELD": "Ausgabe",
       "APP_NOT_IN_STORE_SHORT": "App hier nicht installiert"
@@ -247,7 +254,7 @@
       "MAPPING_COLUMN_HINT": "Ihre eindeutigen Werte bestimmen das Ziel für den Quellwert.",
       "SEARCH_COLUMNS": "Verfügbare Spalten durchsuchen",
       "ONE_HOT_SOURCE": "Eindeutige Werte aus {{ column }}",
-      "ONE_HOT_SOURCE_HINT": "Jeder zugeordnete Wert repräsentiert ein eigenes Schemafeld und eignet sich damit gut für One-Hot-Encoding.",
+      "ONE_HOT_SOURCE_HINT": "Jeder zugeordnete Wert bekommt ein eigenes Schemafeld (One-Hot-Encoding).",
       "SEARCH_VALUES": "Quellwerte durchsuchen",
       "UNMAPPED_ONLY": "Nur nicht zugeordnete",
       "VALUES_MAPPED": "Werte zugeordnet",
@@ -284,7 +291,7 @@
       "VALIDATION_RUNNING_HELP": "Jedes Beispiel wird anhand des gewählten Schemafelds und seiner Datentypregeln bewertet.",
       "VALIDATION_SUCCESS": "Die geprüften Werte entsprechen dem Schema",
       "VALIDATION_FAILED": "Einige geprüfte Werte entsprechen nicht dem Schema",
-      "VALIDATION_CHECKED_COUNT": "{{count}} Beispiele geprüft. Öffne diesen Dialog erneut, um die Details anzusehen.",
+      "VALIDATION_CHECKED_COUNT": "{{count}} Beispiele geprüft.",
       "SOURCE_EXAMPLE": "Quellregel",
       "VALID_EXAMPLE": "Gültig",
       "BLANK_ALLOWED_EXAMPLE": "Leerer Wert erlaubt",
@@ -303,7 +310,9 @@
   },
   "WARNING": {
     "PIVOT_VALUE_COLUMN_REQUIRED": "Wähle für jede Tabelle mit aktivierter Pivotierung eine Wertespalte aus.",
-    "RUN_EXTRACTOR_BEFORE_PREVIEW": "Führen Sie den Extraktor aus, bevor Sie eine Vorschau anzeigen — er hat noch keine Ausgabe erzeugt."
+    "RUN_EXTRACTOR_BEFORE_PREVIEW": "Führe zuerst den Extraktor aus. Er hat noch keine Ausgabe erzeugt.",
+    "SELECT_APP_OUTPUT": "Der Extraktor hat mehrere Ausgaben erzeugt. Wähle die zu importierenden aus.",
+    "MERGE_APP_OUTPUTS": "Mehrere Ausgaben sind ausgewählt. Führe sie zusammen, bevor du fortfährst."
   },
   "VALIDATION": {
     "REQUIRED": "{{ fieldName }} ist erforderlich"
@@ -343,7 +352,7 @@
       "MISSING_HINT": "Fehlend: diese Spalten liest der Konnektor bisher, die neue Datei hat sie nicht.",
       "ADDED_TITLE": "Nur in der neuen Datei ({{count}})",
       "ADDED_HINT": "Neu: auf diese Spalten ist noch nichts gemappt, sie blieben unberücksichtigt.",
-      "REFUSED_NEXT": "Laden Sie eine Datei mit denselben Spalten hoch, oder stellen Sie die Quelldatei des Konnektors auf dieses Format um.",
+      "REFUSED_NEXT": "Lade eine Datei mit denselben Spalten hoch oder stelle die Quelldatei des Konnektors auf dieses Format um.",
       "TABLE_MATCHED": "unverändert",
       "TABLE_CHANGED": "Spalten weichen ab",
       "TABLE_MISSING": "fehlt in der neuen Datei",
@@ -368,8 +377,8 @@
     "TITLE": "Datenquelle der Vorschau",
     "FROM_CACHE": "Aus dem Cache",
     "COMPUTED_NOW": "Jetzt berechnet",
-    "EXPLAIN_CACHED": "Dieser Schritt wurde aus einer früheren Vorschau übernommen statt neu berechnet. Zwischengespeicherte Daten werden nur verwendet, solange die Quelle und alle vorherigen Schritte unverändert sind — eine Änderung berechnet diesen Schritt automatisch neu.",
-    "EXPLAIN_FRESH": "Dieser Schritt wurde für diese Vorschau berechnet und gespeichert; beim erneuten Öffnen wird er nicht neu berechnet.",
+    "EXPLAIN_CACHED": "Aus einer früheren Vorschau übernommen. Wird neu berechnet, wenn sich die Quelle oder ein vorheriger Schritt ändert.",
+    "EXPLAIN_FRESH": "Für diese Vorschau berechnet und für das nächste Mal gespeichert.",
     "STEP": "Schritt",
     "STEP_INDEX": "Position in der Kette",
     "TRANSFORMER": "Transformation",
@@ -379,7 +388,7 @@
     "INVALIDATE": "Verwerfen und neu berechnen",
     "ALSO_DROPS": "Damit werden auch die {{count}} nachfolgenden Schritte verworfen, da jeder auf der Ausgabe des vorherigen Schritts beruht.",
     "NOT_RUN": "Noch nicht ausgeführt",
-    "EXPLAIN_NOT_RUN": "Dieser Schritt wird von einer App ausgeführt, und eine Vorschau startet nie einen Container. Bis Sie ihn ausführen, zeigt die Tabelle die Zeilen, die in den Schritt hineingehen, und nicht sein Ergebnis."
+    "EXPLAIN_NOT_RUN": "Dieser Schritt läuft in einer App, die die Vorschau nicht startet. Bis du ihn ausführst, zeigt die Tabelle die Eingangszeilen des Schritts."
   },
   "APP_TRANSFORMER": {
     "TITLE": "App-Transformation",
@@ -389,13 +398,13 @@
     "LAST_MESSAGE": "Letzte Meldung",
     "ROWS": "Zurückgegebene Zeilen",
     "FAILED": "Die App-Transformation ist fehlgeschlagen",
-    "NOT_RUN_HINT": "Dieser Schritt läuft in einer App, die Vorschau kann ihn daher nicht selbst berechnen. Führen Sie ihn aus, um sein Ergebnis zu sehen — es wird gespeichert, und die folgenden Schritte bauen darauf auf.",
+    "NOT_RUN_HINT": "Dieser Schritt läuft in einer App. Führe ihn aus, um sein Ergebnis zu sehen. Das Ergebnis wird gespeichert und von den nächsten Schritten verwendet.",
     "STEP": "Schritt {{index}}",
     "INPUT_ROWS": "Eingehende Zeilen",
     "RUNNING_HINT": "Schritt {{index}} läuft in seiner App. Das Ergebnis erscheint hier, sobald die App antwortet.",
     "APP": "App",
     "STEP_LABEL": "Schritt",
-    "BLOCKED_HINT": "Dieser Schritt wird auf Zeilen vorschaut, die Schritt {{index}} noch nicht erzeugt hat, weil jener Schritt in einer App läuft. Führen Sie zuerst Schritt {{index}} aus — danach wird dieser auf seiner echten Eingabe berechnet.",
+    "BLOCKED_HINT": "Schritt {{index}} läuft in einer App und wurde noch nicht ausgeführt, daher verwendet dieser Schritt dessen Eingangszeilen. Führe zuerst Schritt {{index}} aus.",
     "OPEN_BLOCKING_STEP": "Zu Schritt {{index}}"
   }
 }

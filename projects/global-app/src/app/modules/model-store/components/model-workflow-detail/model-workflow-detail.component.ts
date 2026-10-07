@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {
   ModelWorkflowDetailComponent as LibModelWorkflowDetailComponent
 } from "@shared-lib/modules/app-execution/components/model-workflow-detail/model-workflow-detail.component";
@@ -9,6 +9,7 @@ import {
     LibModelWorkflowDetailComponent,
   ],
   templateUrl: './model-workflow-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-workflow-detail.component.scss'
 })
 export class ModelWorkflowDetailComponent {

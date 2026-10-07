@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {DataTypeNodeDTO} from "@global-app/schema/dto/datatype";
@@ -33,6 +33,7 @@ import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/
   selector: 'app-detail-schema-card',
   templateUrl: './detail-schema-card.component.html',
   styleUrl: './detail-schema-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatFormFieldModule,

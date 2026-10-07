@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {MatIconButton} from "@angular/material/button";
 import {MatCheckbox} from "@angular/material/checkbox";
@@ -36,6 +36,7 @@ import {StoreConfig} from '@shared-lib/models';
     MatIcon
   ],
   templateUrl: './store-filter.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-filter.component.scss'
 })
 export class StoreFilterComponent {
@@ -100,7 +101,7 @@ export class StoreFilterComponent {
         'SECURE_MULTI_PARTY_COMPUTATION',
         'DATA_TRANSFORMATION',
         'SELF_LEARNED',
-        'DATABASE_ADOPTER',
+        'EXTRACTOR',
         'INFERENCE',
         'WORKFLOW'
       ])

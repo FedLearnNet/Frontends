@@ -1,4 +1,4 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import Keycloak from "keycloak-js";
 import {MatButton} from "@angular/material/button";
@@ -13,6 +13,7 @@ import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
   selector: 'app-lib-user-menu',
   templateUrl: './user-menu.component.html',
   styleUrl: './user-menu.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     BadgeComponent,
     MatIcon,

@@ -1,6 +1,7 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyService} from "@global-app/schema/services/ontology.service";
 import {OntologyNodeDTO, OntologySearchResponseDTO} from "../../dto/ontology";
+import {FeatureAvailableDTO} from "../../dto/feature-available";
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatButtonModule} from '@angular/material/button';
 import {RouterLink} from '@angular/router';
@@ -22,11 +23,13 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {FeatureAvailableService} from "@global-app/schema/services/feature-available.service";
 
 @Component({
   selector: 'app-list-ontologies',
   templateUrl: './list-ontologies.component.html',
   styleUrl: './list-ontologies.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatFormFieldModule,
     MatButtonModule,
@@ -49,6 +52,9 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 export class ListOntologiesComponent {
   readonly ontologyService: OntologyService = inject(OntologyService);
   private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly featureAvailableService: FeatureAvailableService = inject(FeatureAvailableService);
+
+  readonly features = signal<FeatureAvailableDTO>({umlsSearchEnabled: false, embeddingEnabled: false});
 
   filterMode = signal<'rag' | 'list' | 'graph'>('list');
   maxResults = signal<number>(3);
@@ -144,6 +150,10 @@ export class ListOntologiesComponent {
       sub?.unsubscribe();
     });
   });
+
+  constructor() {
+    this.featureAvailableService.get().subscribe(features => this.features.set(features));
+  }
 
   onSearchChange(filterValue: string) {
     this.search.set(filterValue);

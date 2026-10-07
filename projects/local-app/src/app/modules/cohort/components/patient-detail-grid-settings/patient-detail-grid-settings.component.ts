@@ -1,4 +1,4 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {isEmpty} from 'lodash';
 import {MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
@@ -26,6 +26,7 @@ export interface PatientDetailGridSettingsData {
   selector: 'app-patient-detail-grid-settings',
   templateUrl: './patient-detail-grid-settings.component.html',
   styleUrl: './patient-detail-grid-settings.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDivider,
     MatTreeModule,

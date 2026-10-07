@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, HostListener, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, HostListener, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {environment} from '@local-app/env/environment';
 import {TranslateService} from "@ngx-translate/core";
 import {RouterLink, RouterOutlet} from "@angular/router";
@@ -12,7 +12,7 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {CohortStarService} from "@local-app/utils/services/cohort-star.service";
 import {CohortService} from "@local-app/cohort/services/cohort.service";
-import {CohortDto} from "@local-app/cohort/models";
+import {CohortDto, isCohortDeleting} from "@local-app/cohort/models";
 import {Store} from "@ngrx/store";
 import {MatDialog} from "@angular/material/dialog";
 import {NotificationActions} from "@local-app/information/store/notification.actions";
@@ -39,6 +39,7 @@ import {MatDialogRef} from "@angular/material/dialog";
     MatButtonModule,
   ],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
@@ -76,7 +77,10 @@ export class AppComponent implements OnInit {
   readonly starredIds = this.cohortStars.starredIds;
 
   readonly sections = computed<NavSection[]>(() => {
-    const starred = this.cohorts().filter(c => this.starredIds().includes(String(c.id)));
+    const removed = this.cohortService.removedCohortIds();
+    const pending = this.cohortService.pendingDeletionIds();
+    const visible = this.cohorts().filter(cohort => !removed.has(cohort.id));
+    const starred = visible.filter(c => this.starredIds().includes(String(c.id)));
     const reviews = this.reviewCounts();
     const unread = this.unreadCount();
 
@@ -85,7 +89,7 @@ export class AppComponent implements OnInit {
     if (starred.length > 0) {
       baseSections.push({
         title: 'MENU.STARRED',
-        items: starred.map(c => this.cohortToNavItem(c)),
+        items: starred.map(c => this.cohortToNavItem(c, pending)),
       });
     }
 
@@ -95,8 +99,8 @@ export class AppComponent implements OnInit {
         {
           id: 'cohorts',
           label: 'MENU.COHORT', icon: 'layers', route: ['/cohort'],
-          badge: this.cohorts().length || undefined,
-          children: this.cohorts().map(c => this.cohortToNavItem(c)),
+          badge: visible.length || undefined,
+          children: visible.map(c => this.cohortToNavItem(c, pending)),
         },
       ],
     });
@@ -203,18 +207,25 @@ export class AppComponent implements OnInit {
 
   private loadCohorts() {
     this.cohortService.getCohorts().subscribe({
-      next: cohorts => this.cohorts.set(cohorts ?? []),
+      next: cohorts => {
+        const list = cohorts ?? [];
+        this.cohortService.adoptCohortList(list);
+        this.cohorts.set(list);
+      },
       error: () => this.cohorts.set([]),
     });
   }
 
-  private cohortToNavItem(c: CohortDto): NavItem {
+  private cohortToNavItem(c: CohortDto, pending: ReadonlySet<number>): NavItem {
+    const deleting = pending.has(c.id) || isCohortDeleting(c);
     return {
       id: String(c.id),
       label: c.name,
-      icon: 'circle',
-      route: ['/cohort', c.id],
-      starrable: true,
+      icon: deleting ? 'hourglass_top' : 'circle',
+      route: deleting ? undefined : ['/cohort', c.id],
+      disabled: deleting,
+      starrable: !deleting,
+      badge: deleting ? this.translate.instant('COHORT_DELETION.DELETING') : undefined,
     };
   }
 

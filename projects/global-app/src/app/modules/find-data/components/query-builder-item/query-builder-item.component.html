@@ -35,7 +35,7 @@
         </mat-select>
       </mat-form-field>
       @if (!isValuelessOperator) {
-        @switch (selectedQueryConfig?.queryOperatorOption?.type) {
+        @switch ($safeNavigationMigration(selectedQueryConfig?.queryOperatorOption?.type)) {
           @case (dataType.CATEGORICAL) {
             <mat-form-field>
               <mat-select formControlName="value">

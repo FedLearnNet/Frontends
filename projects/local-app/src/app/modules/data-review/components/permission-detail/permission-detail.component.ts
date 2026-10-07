@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {SelectOption} from '@shared-lib/models';
 import {PermissionService} from '@local-app/data-review/services/permission.service';
@@ -42,6 +42,7 @@ interface PermissionDetailComponentData {
   selector: 'app-permission-detail',
   templateUrl: './permission-detail.component.html',
   styleUrls: ['./permission-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatButtonModule,
@@ -83,9 +84,9 @@ export class PermissionDetailComponent implements OnInit {
         [Validators.required, Validators.min(3), Validators.max(10)],
       ],
       querySampleThreshold: [100, [Validators.required, Validators.min(100)]],
-      autoTrainingAccess: [AutoTrainingAccess.ALL, Validators.required],
-      autoStatisticsAccess: [AutoStatisticsAccess.ALL, Validators.required],
-      autoMetricsAccess: [AutoMetricsAccess.ALL, Validators.required],
+      autoTrainingAccess: [AutoTrainingAccess.NONE, Validators.required],
+      autoStatisticsAccess: [AutoStatisticsAccess.NONE, Validators.required],
+      autoMetricsAccess: [AutoMetricsAccess.NONE, Validators.required],
     }),
   });
 

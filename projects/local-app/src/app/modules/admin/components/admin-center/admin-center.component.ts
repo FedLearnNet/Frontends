@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {environment} from "@local-app/env/environment";
@@ -35,6 +35,7 @@ import {UpDownUnknown} from '../../dto/health';
     SharedAdminCenterComponent
   ],
   templateUrl: './admin-center.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './admin-center.component.scss'
 })
 export class AdminCenterComponent implements OnInit {

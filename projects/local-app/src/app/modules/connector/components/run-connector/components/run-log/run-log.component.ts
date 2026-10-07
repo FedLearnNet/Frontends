@@ -8,7 +8,8 @@ import {
   OnInit,
   signal,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   MatCell,
@@ -39,13 +40,15 @@ import {TitleCasePipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {PaginatorStateService} from '@shared-lib/services/paginator-state.service';
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
+import {MatProgressBar} from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-run-error-log',
   templateUrl: './run-log.component.html',
   styleUrl: './run-log.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [MatPaginator, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TitleCasePipe, TranslatePipe, TimeBadgeComponent]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [MatPaginator, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TitleCasePipe, TranslatePipe, TimeBadgeComponent, MatProgressBar]
 })
 export class RunConnectorLogComponent implements OnInit, AfterViewInit {
   readonly levelVariants = [...LEVEL_VARIANTS];
@@ -57,7 +60,8 @@ export class RunConnectorLogComponent implements OnInit, AfterViewInit {
   selectedFilterKey = signal<string>('');
   pageSize = signal<number>(this.pageSizeOptions[1]);
 
-  loadingErrorLogs: boolean = false;
+  loading = false;
+  loadError = false;
 
   @Input() type: RunLogsType | number = RunLogsType.ERROR;
 
@@ -122,7 +126,7 @@ export class RunConnectorLogComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     if (!this.runId()) {
-      this.loadingErrorLogs = true;
+      this.loadError = true;
       return;
     }
 
@@ -204,7 +208,8 @@ export class RunConnectorLogComponent implements OnInit, AfterViewInit {
   }
 
   private loadLogs(): void {
-    this.loadingErrorLogs = true;
+    this.loading = true;
+    this.loadError = false;
 
     const logs$: Observable<(ConnectorRunPatientLogDTO | ConnectorRunLogRowDTO)[]> =
       this.type === RunLogsType.ERROR
@@ -226,11 +231,12 @@ export class RunConnectorLogComponent implements OnInit, AfterViewInit {
           }
         }),
         finalize(() => {
-          this.loadingErrorLogs = false;
+          this.loading = false;
           this.dataSource.data = this.data();
           this.applyClientFilters();
         }),
         catchError(() => {
+          this.loadError = true;
           this.data.set([]);
           return of([]);
         })

@@ -20,7 +20,7 @@ import {RedirectGuard} from "@shared-lib/services/redirect-guard";
 import {AuditPendingComponent} from "../audit/components/audit-pending/audit-pending.component";
 import {toolAuditResolver, toolPendingAuditResolver} from "../audit/service/audit.resolver.service";
 import {AuditDetailComponent} from "../audit/components/audit-detail/audit-detail.component";
-import {ADMIN_REALM_ROLE, AUDITOR_REALM_ROLE, AuthGuard} from "@shared-lib/services/keycloak";
+import {AUDITOR_REALM_ROLE, AuthGuard} from "@shared-lib/services/keycloak";
 
 const globalAllStoreUrl = environment.globalLearningApiUrl + "/store/all";
 const routes: Routes = [

@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LoadLogData, LoadLogDataResponse} from "../../model/log-wrapper";
 import {LogService} from "../../services/log-service";
@@ -12,6 +12,7 @@ import {Router} from "@angular/router";
     GeneralLogTableComponent
   ],
   templateUrl: './patient-learning-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-learning-log.component.scss'
 })
 export class PatientLearningLogComponent implements LoadLogDataResponse {
@@ -24,11 +25,11 @@ export class PatientLearningLogComponent implements LoadLogDataResponse {
   //TODO: Add filters
   filters: string[] = [];
 
-  public data: LogPage<PatientLearningDto>;
+  readonly data = signal<LogPage<PatientLearningDto> | undefined>(undefined);
 
   public loadData(info: LoadLogData) {
     this.logService.getPatientDataLearningLog(info).subscribe(data => {
-      this.data = data;
+      this.data.set(data);
     })
   }
 

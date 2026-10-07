@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {MatTabsModule} from "@angular/material/tabs";
 import {WorkflowViewComponent} from "@shared-lib/modules/workflow/components/workflow-view/workflow-view.component";
@@ -28,6 +28,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
   selector: 'app-detail-project',
   templateUrl: './detail-project.component.html',
   styleUrl: './detail-project.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabsModule,
     WorkflowViewComponent,

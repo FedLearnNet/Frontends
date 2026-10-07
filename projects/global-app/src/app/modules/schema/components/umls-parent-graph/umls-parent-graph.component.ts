@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, inject, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {
@@ -31,6 +31,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     TranslatePipe
   ],
   templateUrl: './umls-parent-graph.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './umls-parent-graph.component.scss'
 })
 export class UmlsParentGraphComponent implements AfterViewInit {

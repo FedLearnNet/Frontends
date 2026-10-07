@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyService} from "@global-app/schema/services/ontology.service";
 import {OntologyNodeDTO} from "../../dto/ontology";
 import {MatDivider} from '@angular/material/divider';
@@ -22,6 +22,7 @@ import {finalize} from "rxjs";
   selector: 'app-detail-ontology',
   templateUrl: './detail-ontology.component.html',
   styleUrl: './detail-ontology.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDivider,
     MatButton,

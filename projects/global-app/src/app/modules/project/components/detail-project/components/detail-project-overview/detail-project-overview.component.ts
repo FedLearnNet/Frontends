@@ -1,4 +1,4 @@
-import {Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
 import {ProjectDto} from '../../../../dto/project';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -37,6 +37,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     MatCardContent,
     MatCardAvatar,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class DetailProjectOverviewComponent {

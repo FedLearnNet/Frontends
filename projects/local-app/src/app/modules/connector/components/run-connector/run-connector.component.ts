@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Data} from "@angular/router";
 import {ConnectorRunDTO} from "../../dto/run";
 import {ConnectorDTO} from "../../dto/connector";
@@ -10,7 +10,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {RunConnectorChangeLogComponent} from './components/run-change-log/run-change-log.component';
 import {RunConnectorLogComponent} from './components/run-log/run-log.component';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
@@ -23,6 +23,7 @@ import {
   PatientRollbackDialogData
 } from '../../../patient/components/patient-rollback-dialog/patient-rollback-dialog.component';
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {interval, Subscription} from 'rxjs';
 import {ConnectorRunService} from '../../services/run.service';
 
@@ -32,7 +33,8 @@ type RouteData = Data & { breadcrumb: string | any, run: ConnectorRunDTO, connec
   selector: 'app-run-connector',
   templateUrl: './run-connector.component.html',
   styleUrl: './run-connector.component.scss',
-  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatTabLabel, MatTooltip, MatTabContent, RunConnectorChangeLogComponent, RunConnectorLogComponent, TranslatePipe, KvComponent, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent, MatProgressBar]
+  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatTabLabel, MatTooltip, MatTabContent, RunConnectorChangeLogComponent, RunConnectorLogComponent, TranslatePipe, KvComponent, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent, MatProgressBar, BadgeComponent]
 })
 export class RunConnectorViewComponent implements OnInit, OnDestroy {
   private static readonly REFRESH_PERIOD = 5000;
@@ -49,6 +51,7 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly connectorRunService = inject(ConnectorRunService);
+  private readonly translate = inject(TranslateService);
   private refreshSub?: Subscription;
 
   ngOnInit(): void {
@@ -81,7 +84,7 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   }
 
   checkRunningAndStartRefresh(): void {
-    const isRunning = this.run?.status === ImportStatusEnum.RUNNING;
+    const isRunning = this.isActive();
 
     if (isRunning && !this.refreshSub) {
       this.refreshSub = interval(RunConnectorViewComponent.REFRESH_PERIOD).subscribe(() => this.loadRun());
@@ -125,7 +128,9 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
       case ConnectorRunStep.MAPPING:
         return 'Mapping patient data';
       case ConnectorRunStep.LOADING:
-        return 'Loading patient changes';
+        return this.run?.dryRun
+          ? this.translate.instant('CHECKING_PATIENT_CHANGES')
+          : 'Loading patient changes';
       case ConnectorRunStep.FINISHED:
         return 'Finished';
       default:
@@ -177,6 +182,12 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
         runId: this.run.id,
       } as PatientRollbackDialogData
     });
+  }
+
+  isActive(): boolean {
+    return !!this.run
+      && this.run.status !== ImportStatusEnum.FINISHED
+      && this.run.status !== ImportStatusEnum.ERROR;
   }
 
   public convertStatus(status?: ImportStatusEnum): StatusBadeType {

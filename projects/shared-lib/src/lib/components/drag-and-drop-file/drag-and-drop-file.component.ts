@@ -1,4 +1,4 @@
-import {Component, input, OnInit, output} from '@angular/core';
+import {Component, input, OnInit, output, ChangeDetectionStrategy} from '@angular/core';
 import {AbstractControl, FormControl, Validators} from '@angular/forms';
 import {DragAndDropDirective} from "@shared-lib/directives/drag-and-drop.directive";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -15,6 +15,7 @@ import {MatIcon} from "@angular/material/icon";
     TranslatePipe,
     NgClass,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class DragAndDropFileComponent implements OnInit {

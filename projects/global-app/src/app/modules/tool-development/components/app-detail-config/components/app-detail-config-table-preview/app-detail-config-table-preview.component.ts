@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {ColumnRuleDTO, TabularSchemaDTO} from "@shared-lib/modules/app-execution/dto/config";
 
@@ -8,6 +8,7 @@ import {ColumnRuleDTO, TabularSchemaDTO} from "@shared-lib/modules/app-execution
     BadgeComponent
   ],
   templateUrl: './app-detail-config-table-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-table-preview.component.scss',
 })
 export class AppDetailConfigTablePreviewComponent {

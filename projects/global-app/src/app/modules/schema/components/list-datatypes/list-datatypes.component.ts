@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, signal} from '@angular/core';
+import {Component, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {DataTypeService} from "@global-app/schema/services/datatype.service";
 import {DataTypeNodeDTO} from "../../dto/datatype";
 import {DatatypeCardComponent} from '../datatype-card/datatype-card.component';
@@ -15,6 +15,7 @@ import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.comp
   selector: 'app-list-datatypes',
   templateUrl: './list-datatypes.component.html',
   styleUrl: './list-datatypes.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [DatatypeCardComponent, MatPaginator, ReactiveFormsModule, HeaderComponent, PageWrapperComponent, EmptyStateComponent, InfoCardComponent]
 })
 export class ListDatatypesComponent {

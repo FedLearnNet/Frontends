@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        image: [local-fl-net, global-fl-net]
+        image: [local-fl-net, global-fl-net, local-microbaiome, global-microbaiome, local-daibetes, global-daibetes]
         # Scheduled runs have no inputs and scan both published tags
         tag: ${{ fromJSON(inputs.tag && format('["{0}"]', inputs.tag) || '["latest", "staging"]') }}
     steps:

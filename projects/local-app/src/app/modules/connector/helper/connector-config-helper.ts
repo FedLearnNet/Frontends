@@ -1,8 +1,4 @@
-import {
-  AppBasedUploadSettings,
-  ConnectorInputConfig,
-  FileUploadSettings
-} from "../models/input-config";
+import {AppBasedUploadSettings, ConnectorInputConfig, FileUploadSettings} from "../models/input-config";
 import {ConnectorFilesDetailDTO, UploadInfoDTO} from "../dto/upload-info";
 import {ConnectorDTO, ConnectorTransformerDTO, SheetMergeResultDTO} from '../dto/connector';
 import {ConnectorMappingConfig} from "../models/connector-model";
@@ -35,8 +31,8 @@ const parseRows = (dto: UploadInfoDTO): Record<string, UploadInfoDTO>[] => {
   if (!dto.json) return [];
 
   return typeof dto.json === 'string'
-      ? JSON.parse(dto.json)
-      : dto.json;
+    ? JSON.parse(dto.json)
+    : dto.json;
 };
 
 const renameKeys = (row: Record<string, UploadInfoDTO>, renameMap: Map<string, string>): Record<string, UploadInfoDTO> => {
@@ -47,8 +43,8 @@ const renameKeys = (row: Record<string, UploadInfoDTO>, renameMap: Map<string, s
 };
 
 function renameDuplicateColumns(
-    entries: [sheetName: string, dto: UploadInfoDTO][],
-    sheetUidMapping: Record<string, string>
+  entries: [sheetName: string, dto: UploadInfoDTO][],
+  sheetUidMapping: Record<string, string>
 ): void {
   const columnCount = new Map<string, number>();
 
@@ -79,9 +75,9 @@ function renameDuplicateColumns(
     dto.renamedColumns = dto.renamedColumns.map(col => renameMap.get(col) ?? col);
 
     dto.columnProfiles = dto.columnProfiles?.map(profile =>
-        renameMap.has(profile.name)
-            ? { ...profile, name: renameMap.get(profile.name)! }
-            : profile
+      renameMap.has(profile.name)
+        ? {...profile, name: renameMap.get(profile.name)!}
+        : profile
     );
 
     dto.data = dto.data.map(row => renameKeys(row, renameMap));
@@ -90,13 +86,13 @@ function renameDuplicateColumns(
 }
 
 export function mergeFileInfo(
-    fileInfoMap: Record<string, UploadInfoDTO>,
-    mergeConfig: SheetMergeResultDTO
+  fileInfoMap: Record<string, UploadInfoDTO>,
+  mergeConfig: SheetMergeResultDTO
 ): Record<string, UploadInfoDTO> {
   const entries = Object.entries(fileInfoMap);
   if (entries.length < 2) return fileInfoMap;
 
-  const { commonUidColumnName, sheetUidMapping } = mergeConfig;
+  const {commonUidColumnName, sheetUidMapping} = mergeConfig;
 
   renameDuplicateColumns(entries, sheetUidMapping);
 
@@ -125,9 +121,9 @@ export function mergeFileInfo(
     if (!normalized) continue;
 
     const uidKey =
-        dto.columns.find(
-            col => col === normalized || col === `${sheetName}::${normalized}`
-        ) ?? normalized;
+      dto.columns.find(
+        col => col === normalized || col === `${sheetName}::${normalized}`
+      ) ?? normalized;
 
     const rows = parseRows(dto);
 
@@ -143,7 +139,7 @@ export function mergeFileInfo(
       const uid = row[uidKey] ?? row[normalized];
       if (uid == null) continue;
 
-      const newRow: Record<string, UploadInfoDTO> = { [commonUidColumnName]: uid };
+      const newRow: Record<string, UploadInfoDTO> = {[commonUidColumnName]: uid};
 
       for (const [key, value] of Object.entries(row)) {
         if (key !== uidKey && key !== normalized) {
@@ -156,11 +152,11 @@ export function mergeFileInfo(
   }
 
   allRows.sort((a, b) =>
-      String(a[commonUidColumnName]).localeCompare(
-          String(b[commonUidColumnName]),
-          undefined,
-          { numeric: true, sensitivity: 'base' }
-      )
+    String(a[commonUidColumnName]).localeCompare(
+      String(b[commonUidColumnName]),
+      undefined,
+      {numeric: true, sensitivity: 'base'}
+    )
   );
 
   const limitedData = allRows.slice(0, 10);
@@ -204,6 +200,39 @@ export function connectorFilesDetailToFileInfo(
   return fileInfo;
 }
 
+
+export function appOutputsToFileInfo(
+  outputs: { name: string, detail: ConnectorFilesDetailDTO }[]
+): Record<string, UploadInfoDTO> {
+  const fileInfo: Record<string, UploadInfoDTO> = {};
+  outputs.forEach(({name, detail}) => {
+    const sheets = connectorFilesDetailToFileInfo(detail);
+    const sheetNames = Object.keys(sheets);
+    sheetNames.forEach(sheet => {
+      const key = sheetNames.length <= 1 ? name : `${name}/${sheet}`;
+      fileInfo[key] = {...sheets[sheet], sheet: key};
+    });
+  });
+  return fileInfo;
+}
+
+function isSelectedOutputTable(tableName: string, selectedOutput: string): boolean {
+  return tableName === selectedOutput || tableName.startsWith(`${selectedOutput}/`);
+}
+
+
+export function filterSelectedOutputs(
+  fileInfo: Record<string, UploadInfoDTO>,
+  selectedOutputs?: string[]
+): Record<string, UploadInfoDTO> {
+  if (!selectedOutputs?.length) {
+    return fileInfo;
+  }
+  const kept = Object.entries(fileInfo)
+    .filter(([name]) => selectedOutputs.some(output => isSelectedOutputTable(name, output)));
+  return kept.length > 0 ? Object.fromEntries(kept) : fileInfo;
+}
+
 export function hydrateFileInfoData(fileInfo: Record<string, UploadInfoDTO>): void {
   for (const dto of Object.values(fileInfo)) {
     if (!dto.data?.length && dto.json) {
@@ -229,6 +258,10 @@ export function isFileUploadSettings(
   cfg: ConnectorInputConfig
 ): cfg is FileUploadSettings {
   return cfg?.mode === 'FILE';
+}
+
+export function fileTypeLabel(settings: Partial<FileUploadSettings>): string | undefined {
+  return settings.fileType === 'CSV' && settings.firstSheetOnly === false ? 'ZIP' : settings.fileType;
 }
 
 export function isAppBasedUploadSettings(
@@ -295,11 +328,11 @@ export function getPatientIdTransformerConflict(
 
 export function getCleanConnectorConfig(connector: ConnectorDTO): ConnectorDTO {
   const transformerConfig = connector.transformer?.length
-      ? connector.transformer.map(item => ({
-        ...item,
-        connectorId: undefined
-      }))
-      : undefined;
+    ? connector.transformer.map(item => ({
+      ...item,
+      connectorId: undefined
+    }))
+    : undefined;
 
   return {
     ...connector,

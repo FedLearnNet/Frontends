@@ -1,4 +1,4 @@
-import {Component, effect, inject, signal, viewChild} from '@angular/core';
+import {Component, effect, inject, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {UMLSService} from "@global-app/schema/services/umls";
 import {UMLSDetailResultDTO, UMLSSearchResultDTO, UMLSSearchResultDtoPage} from "../../dto/umls";
 import {MatPaginator, MatPaginatorModule, PageEvent} from "@angular/material/paginator";
@@ -26,6 +26,7 @@ import {finalize} from "rxjs";
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatIconButton,

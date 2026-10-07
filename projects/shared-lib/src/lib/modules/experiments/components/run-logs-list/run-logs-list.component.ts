@@ -1,4 +1,4 @@
-import {Component, computed, effect, ElementRef, input, signal, viewChild} from '@angular/core';
+import {Component, computed, effect, ElementRef, input, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {RunMessageLogDTO} from "../../dto/log";
 import {FormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -26,6 +26,7 @@ import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/statu
     StatusBadgeComponent
   ],
   templateUrl: './run-logs-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './run-logs-list.component.scss'
 })
 export class RunLogsListComponent {

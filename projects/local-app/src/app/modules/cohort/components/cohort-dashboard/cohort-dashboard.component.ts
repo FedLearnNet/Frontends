@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
 import {SMALL} from '@shared-lib/constants';
@@ -22,6 +22,7 @@ import {Subscription} from 'rxjs';
   selector: 'app-cohort-dashboard',
   templateUrl: './cohort-dashboard.component.html',
   styleUrl: './cohort-dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatButtonModule,
@@ -44,7 +45,7 @@ export class CohortDashboardComponent implements OnInit, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly translate = inject(TranslateService);
 
-  cohorts: CohortDto[] = [];
+  readonly cohorts = signal<CohortDto[]>([]);
   displayedColumns: string[] = ['name', 'description', 'amountPatients', 'actions'];
   isLargeScreen: boolean = true;
   screenSize: string;
@@ -54,7 +55,9 @@ export class CohortDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({cohorts}) => {
-      this.cohorts = cohorts;
+      const list = (cohorts ?? []) as CohortDto[];
+      this.cohortService.adoptCohortList(list);
+      this.cohorts.set(this.displayCohorts(list));
       this.syncListPolling();
     });
     this.cohortsChangedSub = this.cohortService.cohortsChanged.subscribe(() => this.refreshCohorts(false));
@@ -68,7 +71,7 @@ export class CohortDashboardComponent implements OnInit, OnDestroy {
   }
 
   isDeleting(cohort: CohortDto): boolean {
-    return isCohortDeleting(cohort);
+    return this.cohortService.pendingDeletionIds().has(cohort.id) || isCohortDeleting(cohort);
   }
 
   navigateToConnectors(cohort: CohortDto): void {
@@ -122,27 +125,40 @@ export class CohortDashboardComponent implements OnInit, OnDestroy {
 
   private refreshCohorts(showCompletionToast = false): void {
     const deletingBefore = new Set(
-      this.cohorts.filter(cohort => isCohortDeleting(cohort)).map(cohort => cohort.id),
+      this.cohorts().filter(cohort => this.isDeleting(cohort)).map(cohort => cohort.id),
     );
 
     this.cohortService.getCohorts().subscribe(cohorts => {
-      const completedIds = [...deletingBefore].filter(id => !cohorts.some(cohort => cohort.id === id));
+      const incoming = cohorts ?? [];
+      const completedIds = [...deletingBefore].filter(id => !incoming.some(cohort => cohort.id === id));
+      this.cohortService.adoptCohortList(incoming);
+      for (const id of completedIds) {
+        this.cohortService.completeCohortDeletion(id);
+      }
+      this.cohorts.set(this.displayCohorts(incoming));
+      this.syncListPolling();
       if (showCompletionToast && completedIds.length) {
         this.showDeletionSuccessToast();
       }
-      this.cohorts = cohorts;
-      this.syncListPolling();
     });
   }
 
+  private displayCohorts(cohorts: CohortDto[]): CohortDto[] {
+    const removed = this.cohortService.removedCohortIds();
+    return cohorts
+      .filter(cohort => !removed.has(cohort.id))
+      .map(cohort => this.isDeleting(cohort) ? {...cohort, deletionInProgress: true} : cohort);
+  }
+
   private markCohortDeleting(cohortId: number): void {
-    this.cohorts = this.cohorts.map(cohort =>
+    this.cohortService.beginCohortDeletion(cohortId);
+    this.cohorts.update(rows => rows.map(cohort =>
       cohort.id === cohortId ? {...cohort, deletionInProgress: true} : cohort,
-    );
+    ));
   }
 
   private syncListPolling(): void {
-    if (this.cohorts.some(cohort => isCohortDeleting(cohort))) {
+    if (this.cohorts().some(cohort => this.isDeleting(cohort))) {
       this.startListPolling();
       return;
     }

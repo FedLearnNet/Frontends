@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {ConnectorStepDataSourceInputFileConfigComponent} from "../../input-file.component";
 import {FormBuilder, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -38,6 +38,7 @@ import {
     UploadFileAreaComponent,
   ],
   templateUrl: './multi-file.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './multi-file.component.scss'
 })
 export class ConnectorStepDataSourceMultiFileUploadComponent implements OnInit {

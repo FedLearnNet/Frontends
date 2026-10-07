@@ -114,6 +114,7 @@ export class SidenavComponent {
   }
 
   itemKey(item: NavItem): string {
-    return item.id ?? item.label;
+    const id = item.id ?? item.label;
+    return item.disabled ? `${id}:disabled` : id;
   }
 }

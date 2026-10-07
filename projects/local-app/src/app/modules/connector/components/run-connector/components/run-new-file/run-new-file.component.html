@@ -1,14 +1,12 @@
-<div class="new-file-upload-container">
-  <mat-checkbox [(ngModel)]="newFile" class="run-mode-radio">
-    <div class="run-mode-radio-label">
-      <strong>{{ 'IMPORT_A_NEW_FILE' | translate }}</strong>
-      <span>{{ 'IF_YOU_WANT_TO_IMPORT_A_NEW_FILE' | translate }}</span>
-    </div>
-  </mat-checkbox>
-  @if (newFile()) {
-    @if (isToolBased()) {
-      <app-input-app-based [config]="config()"></app-input-app-based>
-    } @else {
+@if (!isToolBased()) {
+  <div class="new-file-upload-container">
+    <mat-checkbox [(ngModel)]="newFile" class="run-mode-radio">
+      <div class="run-mode-radio-label">
+        <strong>{{ 'IMPORT_A_NEW_FILE' | translate }}</strong>
+        <span>{{ 'IF_YOU_WANT_TO_IMPORT_A_NEW_FILE' | translate }}</span>
+      </div>
+    </mat-checkbox>
+    @if (newFile()) {
       <input class="file-upload-input" type="file" (change)="onFileSelected($event)" #fileInput>
       <button mat-raised-button color="primary" (click)="fileInput.click()"
               [disabled]="isUploading()"
@@ -37,8 +35,8 @@
         </button>
       }
     }
-  }
-</div>
+  </div>
+}
 <app-file-import
   [cohortId]="config().cohortId!"
   [connectorId]="config().id"

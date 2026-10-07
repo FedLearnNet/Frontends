@@ -1,9 +1,9 @@
 <lib-header
   [title]="run ? 'Run ' + run.id : ('BUTTON.LOADING' | translate)"
-  [description]="connector?.name ? 'Connector: ' + connector?.name : 'Review run results, errors and execution logs.'"
+  [description]="connector?.name ? 'Connector: ' + $safeNavigationMigration(connector?.name) : 'Review run results, errors and execution logs.'"
   [enableGoBack]="true"
   [locationBack]="true">
-  @if (run && connector) {
+  @if (run && connector && !run.dryRun && !isActive()) {
     <div suffix class="run-header-actions">
       <lib-btn
         type="REMOVE"
@@ -31,26 +31,25 @@
                   [size]="'SMALL'"
                   [text]="run.status"
                   [type]="convertStatus(run.status)"></lib-status-badge>
-              </lib-kv><!--
-            <lib-kv [label]="'GRID.TRIGGER' | translate ">
-              <lib-badge [border]=true color="GRAY" size="SMALL" [text]="run.trigger || 'System'"></lib-badge>
-            </lib-kv>-->
+              </lib-kv>
               <lib-kv [label]="'GRID.START_TIME' | translate ">
-                @if (convertStatus(run.status) === 'RUNNING') {
-                  <lib-time-badge
-                    [date]="run.createdAt"
-                    [calcDuration]="true"></lib-time-badge>
+                @if (convertStatus(run.status) === 'FAILED') {
+                  <lib-time-badge [date]="run.createdAt" [color]="'RED'"></lib-time-badge>
                 } @else {
-                  @if (convertStatus(run.status) === 'FAILED') {
-                    <lib-time-badge [date]="run.createdAt" [color]="'RED'"></lib-time-badge>
-                  } @else {
-                    <lib-time-badge [date]="run.createdAt"></lib-time-badge>
-                  }
+                  <lib-time-badge [date]="run.createdAt"></lib-time-badge>
                 }
               </lib-kv>
-              <!--   <lib-kv [label]="'GRID.RUN_STEP' | translate ">
-                   <lib-badge [border]=true color="GRAY" size="SMALL" [text]="run.currentStep || ''"></lib-badge>
-                 </lib-kv> -->
+              @if (run.dryRun) {
+                <lib-kv [label]="'GRID.MODE' | translate ">
+                  <lib-badge [text]="'DRY_RUN' | translate" color="GRAY" size="SMALL" [border]="true"/>
+                </lib-kv>
+              }
+              <lib-kv [label]="'GRID.DURATION' | translate ">
+                <lib-time-badge
+                  [date]="run.createdAt"
+                  [dateTo]="isActive() ? null : run.updatedAt"
+                  [calcDuration]="true"></lib-time-badge>
+              </lib-kv>
             </div>
           </mat-card-content>
         </mat-card>
@@ -83,7 +82,8 @@
                 }
               } @else if (hasPatientProgress()) {
                 <span class="run-progress-subtitle">
-                     Patient {{ run.currentElementNr }} of {{ run.expectedElements }}@if (run.currentRowNr !== null && run.currentRowNr !== undefined) {
+                     Patient {{ run.currentElementNr }}
+                  of {{ run.expectedElements }}@if (run.currentRowNr !== null && run.currentRowNr !== undefined) {
                   · {{ run.currentRowNr }} rows processed
                 }
                    </span>
@@ -115,6 +115,9 @@
           </ng-template>
 
           <ng-template matTabContent>
+            @if (run.dryRun) {
+              <p class="run-dry-run-hint">{{ 'DRY_RUN_RESULTS_HINT' | translate }}</p>
+            }
             <app-run-change-log [runId]="run.id" [cohortId]="connectorCohortId"/>
           </ng-template>
         </mat-tab>

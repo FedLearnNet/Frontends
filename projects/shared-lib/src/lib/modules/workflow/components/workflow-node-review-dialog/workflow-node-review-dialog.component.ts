@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatButton} from "@angular/material/button";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -22,6 +22,7 @@ import {MatIcon} from "@angular/material/icon";
     MatIcon
   ],
   templateUrl: './workflow-node-review-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-node-review-dialog.component.scss'
 })
 export class WorkflowNodeReviewDialogComponent {

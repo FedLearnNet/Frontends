@@ -1,6 +1,7 @@
 import {createReducer, on} from '@ngrx/store';
 import {NotificationActions} from './notification.actions';
 import {NotificationDTO} from '@shared-lib/base/notifications';
+import {TrainingReviewActions} from '@local-app/data-review/store/training-review.actions';
 
 export interface ReviewCounts {
   training: number;
@@ -60,6 +61,13 @@ export const notificationReducer = createReducer(
   })),
   on(NotificationActions.loadUserInfoFailure, (state, {error}): NotificationState => ({
     ...state, loading: false, error,
+  })),
+  on(TrainingReviewActions.updateStatusSuccess, (state): NotificationState => ({
+    ...state,
+    reviewCounts: {
+      ...state.reviewCounts,
+      training: Math.max(0, state.reviewCounts.training - 1),
+    },
   })),
 
   on(NotificationActions.markAsReadSuccess, (state, {updated}): NotificationState => ({

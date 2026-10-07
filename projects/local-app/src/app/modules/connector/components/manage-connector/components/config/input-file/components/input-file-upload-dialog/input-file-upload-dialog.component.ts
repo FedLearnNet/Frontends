@@ -1,6 +1,6 @@
 import {DecimalPipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
-import {Component, computed, inject, signal, viewChild} from '@angular/core';
+import {Component, computed, inject, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -83,6 +83,7 @@ export interface InputFileUploadDialogResult {
     TranslatePipe,
   ],
   templateUrl: './input-file-upload-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './input-file-upload-dialog.component.scss',
 })
 export class InputFileUploadDialogComponent {

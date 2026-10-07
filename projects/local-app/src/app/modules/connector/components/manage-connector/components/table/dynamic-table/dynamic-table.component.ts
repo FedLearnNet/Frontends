@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, model, output, untracked} from '@angular/core';
+import {Component, effect, inject, input, model, output, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {DataSource} from "@angular/cdk/collections";
 import {Observable, ReplaySubject} from "rxjs";
 import {MatDialog} from "@angular/material/dialog";
@@ -13,6 +13,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
   selector: 'app-dynamic-table',
   templateUrl: './dynamic-table.component.html',
   styleUrl: './dynamic-table.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTableModule,
     MatIcon,
