@@ -7,7 +7,7 @@ import {MatIcon} from '@angular/material/icon';
 import {TranslatePipe} from '@ngx-translate/core';
 import {BtnComponent} from '@shared-lib/components/btn/btn.component';
 
-export type ConnectorCreateChoice = 'create' | 'import';
+export type ConnectorCreateChoice = 'assistant' | 'create' | 'import';
 
 @Component({
   selector: 'app-connector-create-choice-dialog',

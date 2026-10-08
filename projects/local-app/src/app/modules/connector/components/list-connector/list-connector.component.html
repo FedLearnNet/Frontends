@@ -4,6 +4,7 @@
 
   <lib-btn suffix type="ADD" [label]="'BUTTON.ADD_A_CONNECTOR' | translate"
            [matTooltip]="('TOOLTIP.ADD_A_CONNECTOR' | translate)"
+           [loading]="openingWizard()" [disabled]="openingWizard()"
            (clicked)="onAddClick()"/>
   <lib-btn suffix variant="SECONDARY" label="Files" icon="folder"
            [routerLink]="getFilesRoute()"/>

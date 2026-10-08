@@ -1,0 +1,58 @@
+<section class="question" role="group" [attr.aria-label]="'DIALOG.TRANSFORMER_ASSISTANT.QUESTION' | translate">
+  <header class="question__header">
+    <span class="question__icon"><mat-icon>contact_support</mat-icon></span>
+    <div>
+      <div class="question__eyebrow">{{ 'DIALOG.TRANSFORMER_ASSISTANT.QUESTION' | translate }}</div>
+      <markdown class="question__text" [data]="question().question"/>
+    </div>
+  </header>
+
+  <div class="question__toolbar">
+    <span class="question__hint">
+      {{ (multiple() ? 'DIALOG.TRANSFORMER_ASSISTANT.SELECT_COLUMNS' : 'DIALOG.TRANSFORMER_ASSISTANT.SELECT_COLUMN') | translate }}
+    </span>
+    @if ((question().options ?? []).length > 8) {
+      <label class="question__filter">
+        <mat-icon>search</mat-icon>
+        <input type="search" [value]="filter()" (input)="filter.set($any($event.target).value)"
+               [placeholder]="'DIALOG.TRANSFORMER_ASSISTANT.FILTER_COLUMNS' | translate"
+               [attr.aria-label]="'DIALOG.TRANSFORMER_ASSISTANT.FILTER_COLUMNS' | translate"/>
+      </label>
+    }
+  </div>
+
+  <div class="question__columns" [attr.role]="multiple() ? 'group' : 'radiogroup'">
+    @for (column of columns(); track column) {
+      <button type="button" class="column" [class.column--selected]="isSelected(column)"
+              [attr.role]="multiple() ? 'checkbox' : 'radio'" [attr.aria-checked]="isSelected(column)"
+              (click)="toggle(column)">
+        <mat-icon class="column__check">
+          @if (multiple()) {
+            {{ isSelected(column) ? 'check_box' : 'check_box_outline_blank' }}
+          } @else {
+            {{ isSelected(column) ? 'radio_button_checked' : 'radio_button_unchecked' }}
+          }
+        </mat-icon>
+        <span class="column__text">
+          <span class="column__name">{{ column }}</span>
+          @if (samples(column); as values) {
+            <span class="column__samples">{{ values }}</span>
+          }
+        </span>
+        @if (column === suggestion()) {
+          <span class="column__suggested">{{ 'DIALOG.TRANSFORMER_ASSISTANT.SUGGESTED' | translate }}</span>
+        }
+      </button>
+    } @empty {
+      <span class="question__empty">{{ 'DIALOG.TRANSFORMER_ASSISTANT.NO_COLUMN_MATCHES' | translate }}</span>
+    }
+  </div>
+
+  <footer class="question__footer">
+    @if (multiple() && selected().length) {
+      <span class="question__count">{{ 'DIALOG.TRANSFORMER_ASSISTANT.SELECTED' | translate: {count: selected().length} }}</span>
+    }
+    <lib-btn type="CUSTOM" variant="PRIMARY" icon="check" [disabled]="selected().length === 0"
+             [label]="'DIALOG.TRANSFORMER_ASSISTANT.CONFIRM_SELECTION' | translate" (clicked)="confirm()"/>
+  </footer>
+</section>

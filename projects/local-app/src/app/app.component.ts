@@ -1,7 +1,8 @@
 import {Component, computed, DestroyRef, HostListener, inject, OnInit, signal} from '@angular/core';
 import {environment} from '@local-app/env/environment';
-import {TranslateService} from "@ngx-translate/core";
-import {RouterLink, RouterOutlet} from "@angular/router";
+import {TranslatePipe, TranslateService} from "@ngx-translate/core";
+import {NavigationEnd, Router, RouterLink, RouterOutlet} from "@angular/router";
+import {filter} from "rxjs";
 import {BreadcrumbComponent} from '@shared-lib/components/breadcrumb/breadcrumb.component';
 import {SidenavComponent} from "@shared-lib/components/sidenav/sidenav.component";
 import {UserMenuComponent} from "@shared-lib/components/user-menu/user-menu.component";
@@ -26,6 +27,12 @@ import {
 } from "./modules/search/components/search-overlay/search-overlay.component";
 import {MatDialogRef} from "@angular/material/dialog";
 
+const NARROW_SCREEN = '(max-width: 768px)';
+
+function isNarrowScreen(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia(NARROW_SCREEN).matches;
+}
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -37,6 +44,7 @@ import {MatDialogRef} from "@angular/material/dialog";
     FooterComponent,
     MatIconModule,
     MatButtonModule,
+    TranslatePipe,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -49,6 +57,7 @@ export class AppComponent implements OnInit {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
 
   readonly unreadCount = this.store.selectSignal(selectUnreadCount);
   readonly reviewCounts = this.store.selectSignal(selectReviewCounts);
@@ -67,7 +76,8 @@ export class AppComponent implements OnInit {
     },
   ];
 
-  menuCollapsed = signal<boolean>(false);
+  /** On a narrow screen the menu covers the page, so it starts closed there. */
+  menuCollapsed = signal<boolean>(isNarrowScreen());
 
   private searchDialogRef?: MatDialogRef<SearchOverlayComponent>;
 
@@ -156,6 +166,14 @@ export class AppComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.loadCohorts());
     this.store.dispatch(NotificationActions.loadUserInfo());
+    // On a narrow screen the open menu covers the page it just navigated to
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (isNarrowScreen()) {
+          this.menuCollapsed.set(true);
+        }
+      });
   }
 
   onToggle() {

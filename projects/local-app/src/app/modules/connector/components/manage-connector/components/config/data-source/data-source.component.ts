@@ -8,7 +8,8 @@ import {MatCard, MatCardAvatar, MatCardHeader, MatCardSubtitle, MatCardTitle} fr
 import {MatIcon} from '@angular/material/icon';
 import {TranslatePipe} from '@ngx-translate/core';
 import {Store} from "@ngrx/store";
-import {selectStoreList} from "@shared-lib/modules/store/store/store.selectors";
+import {selectStoreError, selectStoreList} from "@shared-lib/modules/store/store/store.selectors";
+import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {StoreActions} from "@shared-lib/modules/store/store/store.actions";
 import {FederatedAppType} from "@shared-lib/modules/store/dto/enum";
 import {StoreCardComponent} from "@shared-lib/modules/store/components/store-card/store-card.component";
@@ -32,7 +33,7 @@ function withoutTag(image: string): string {
     MatCardAvatar,
     MatCardTitle,
     MatCardSubtitle,
-    TranslatePipe, StoreCardComponent]
+    TranslatePipe, StoreCardComponent, BadgeComponent]
 })
 export class ConnectorStepDataSourceConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
   private readonly store: Store = inject(Store);
@@ -44,6 +45,8 @@ export class ConnectorStepDataSourceConfigComponent implements OnInit, Connector
 
   public selected = signal<ConnectorSourceCard | undefined>(undefined);
   private readonly storeList = this.store.selectSignal(selectStoreList);
+  private readonly storeError = this.store.selectSignal(selectStoreError);
+  readonly storeUnavailable = computed(() => !!this.storeError());
 
   public storeItems = computed(() => {
     const items = (this.storeList() ?? []).filter(item => item.app && !item.model && !item.workflow);

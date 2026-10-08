@@ -1,6 +1,8 @@
 import {Component, computed, inject, input, output} from '@angular/core';
 import {ConnectorCard} from "../../../../models/connector-card";
 import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
+import {MatTooltip} from '@angular/material/tooltip';
+import {TranslatePipe} from '@ngx-translate/core';
 
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -17,7 +19,7 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
   selector: 'app-connector-cards',
   templateUrl: './cards.component.html',
   styleUrl: './cards.component.scss',
-  imports: [MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatIconButton, MatIcon, MatCardContent, ErrorCardComponent, KvComponent, KeyValuePipe, BadgeComponent, StatusBadgeComponent]
+  imports: [MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatIconButton, MatIcon, MatCardContent, ErrorCardComponent, KvComponent, KeyValuePipe, BadgeComponent, StatusBadgeComponent, MatTooltip, TranslatePipe]
 })
 export class ConnectorStepCardsComponent {
   private readonly store: Store = inject(Store);
@@ -26,6 +28,9 @@ export class ConnectorStepCardsComponent {
   readonly function = input<FunctionsDetailDTO | undefined>(undefined);
 
   readonly isAppBased = computed(() => !!this.function()?.appImage);
+
+  /** The columns of a CELL function, which runs on several when the assistant combined them. */
+  readonly columns = computed(() => (this.function()?.column ?? '').split(',').map(column => column.trim()).filter(Boolean));
 
   readonly isCellMode = computed(() =>
     !this.isAppBased() && this.function()?.mode === FunctionExecutionMode.CELL);

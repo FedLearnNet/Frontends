@@ -13,6 +13,10 @@ export interface ConnectorCard {
   previewRunning?: boolean;
   configured?: boolean;
   optional?: boolean;
+  /** Added by the AI assistant, shown with a badge. */
+  aiSuggested?: boolean;
+  /** A step that comes later, shown greyed out so the whole flow is visible from the start. */
+  upcoming?: boolean;
 }
 
 

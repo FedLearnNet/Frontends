@@ -27,6 +27,7 @@ import {StoreDTO} from '@shared-lib/modules/store/dto/store';
 import {StoreActions} from '@shared-lib/modules/store/store/store.actions';
 import {
   selectSelectedApp,
+  selectStoreError,
   selectStoreList,
   selectStoreLoading
 } from '@shared-lib/modules/store/store/store.selectors';
@@ -141,6 +142,7 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
   private readonly storeItem = toSignal(this.store.select(selectSelectedApp));
   private readonly storeList = toSignal(this.store.select(selectStoreList), {initialValue: [] as StoreDTO[]});
   readonly storeLoading = toSignal(this.store.select(selectStoreLoading), {initialValue: false});
+  readonly storeUnavailable = toSignal(this.store.select(selectStoreError), {initialValue: null});
 
   readonly selectedTool = signal<AppDetailDto | null>(null);
 

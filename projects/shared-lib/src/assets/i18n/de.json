@@ -1,4 +1,5 @@
 {
+  "STORE_UNAVAILABLE": "Der globale Store ist nicht erreichbar, daher können seine Apps gerade nicht angezeigt werden.",
   "DRY_RUN": "Testlauf",
   "DRY_RUN_RESULTS_HINT": "Testlauf: Es wurde nichts in die Kohorte geschrieben. Die Zahlen oben zeigen, was ein echter Lauf ändern würde.",
   "CHECKING_PATIENT_CHANGES": "Patientenänderungen werden geprüft (Testlauf)",
@@ -84,10 +85,12 @@
     "EXPORT": "Exportieren",
     "SKIP_TO_MAPPER": "Weiter zum Mapper",
     "ADD_TRANSFORMATION": "Transformation hinzufügen",
+    "LET_AI_SUGGEST": "Mit KI zuordnen",
     "DO_NOT_PIVOT": "Nicht pivotieren",
     "RETRY": "Erneut versuchen",
     "STOP_IMPORT": "Import abbrechen",
-    "CLOSE_KEEP_RUNNING": "Schließen, Import läuft weiter"
+    "CLOSE_KEEP_RUNNING": "Schließen, Import läuft weiter",
+    "CONTINUE_WITH_AI": "Mit KI fortfahren"
   },
   "PIVOT_TABLE": "Tabelle pivotieren",
   "PIVOT_VALUE_COLUMN": "Spalte mit Feldnamen",
@@ -191,6 +194,44 @@
     "DELETE_COHORT_MEMBER": {
       "TITLE": "Kohortenmitglied löschen",
       "MESSAGE": "Möchtest du {{ name }} wirklich aus dieser Kohorte entfernen?"
+    },
+    "TRANSFORMER_ASSISTANT": {
+      "TITLE": "KI-Transformationsassistent",
+      "WAITING": "Schema-Knoten werden vorbereitet...",
+      "RUNNING": "Läuft",
+      "NO_MATCH": "ohne Lösung",
+      "DIRECT_MAPPING": "Direktes Mapping",
+      "STOP": "Stoppen",
+      "APPLY": "{{count}} Mappings übernehmen",
+      "ERROR": "Der Assistent ist fehlgeschlagen: {{error}}",
+      "PROGRESS": "{{done}} von {{total}} Schema-Knoten",
+      "PENDING": "Wartet",
+      "CURRENT": "Wird analysiert",
+      "FINISHED": "Alle Schema-Knoten analysiert",
+      "STOPPED": "Gestoppt",
+      "DIRECT": "direkt",
+      "TRANSFORMED": "transformiert",
+      "SUBTITLE": "Findet für jeden nicht gemappten Schema-Knoten ein Mapping und validiert es auf Ihren Daten",
+      "DONE": "Fertig",
+      "FAILED": "Fehlgeschlagen",
+      "PATIENT_ID": "Patienten-ID",
+      "QUESTION": "Der Assistent benötigt Ihre Eingabe",
+      "SELECT_COLUMN": "Wählen Sie eine Spalte",
+      "SELECT_COLUMNS": "Wählen Sie eine oder mehrere Spalten",
+      "FILTER_COLUMNS": "Spalten filtern",
+      "NO_COLUMN_MATCHES": "Keine Spalte passt zum Filter",
+      "CONFIRM_SELECTION": "Bestätigen",
+      "SELECTED": "{{count}} ausgewählt",
+      "WAITING_FOR_INPUT": "Wartet auf Ihre Antwort",
+      "WAITING_STATUS": "Braucht Ihre Eingabe",
+      "ANSWER_BELOW": "Beantworten Sie die Frage unten, um fortzufahren",
+      "INCLUDE": "{{node}} übernehmen",
+      "KIND_DIRECT": "Direkt",
+      "KIND_NATIVE": "Nativ",
+      "KIND_ETL_TOOL": "ETL-Tool",
+      "KIND_CUSTOM_CODE": "Eigener Code",
+      "SELECTION": "{{selected}} von {{found}} ausgewählt",
+      "SUGGESTED": "Vorgeschlagen"
     },
     "SKIP_TRANSFORM": {
       "TITLE": "Transformation hinzufügen?",
@@ -306,7 +347,23 @@
       "OVERVIEW_VALIDATION_TOOLTIP": "{{count}} Vorschaubeispiele waren gültig. Öffne den Mapping-Dialog erneut für Details.",
       "OVERVIEW_SINGLE_VALIDATION_TOOLTIP": "Validierter Vorschauwert: {{value}}",
       "OVERVIEW_INVALIDATION_TOOLTIP": "Mindestens eines von {{count}} Vorschaubeispielen war ungültig. Öffne den Mapping-Dialog erneut für Details.",
-      "VIEW_VALIDATION_DETAILS": "Validierungsdetails anzeigen"
+      "VIEW_VALIDATION_DETAILS": "Validierungsdetails anzeigen",
+      "SUMMARY": "{{unmapped}} nicht zugeordnet, {{valid}} gültig, {{invalid}} ungültig, {{pending}} ausstehend",
+      "NOT_MAPPED": "Keinem Schemafeld zugeordnet",
+      "VISIT_HELP": "Hat ein Patient mehrere Zeilen, z. B. eine pro Aufenthalt, unterscheidet die Besuchsspalte sie und die Zeitstempelspalte gibt an, wann ein Wert erfasst wurde.",
+      "MATCH_BY_NAME": "Nach Namen zuordnen",
+      "MATCH_BY_NAME_HELP": "Ordnet nicht zugeordnete Spalten zu, deren Name einem Schemafeld entspricht"
+    },
+    "CONNECTOR_CREATE_CHOICE": {
+      "TITLE": "Connector hinzufügen",
+      "INTRO": "Wählen Sie, wie Sie dieser Kohorte einen Connector hinzufügen möchten.",
+      "CREATE_TITLE": "Manuell erstellen",
+      "CREATE_DESCRIPTION": "Datenquelle, Transformationen und Schema-Zuordnung Schritt für Schritt einrichten.",
+      "IMPORT_TITLE": "Connector importieren",
+      "IMPORT_DESCRIPTION": "Eine bestehende Connector-Definition aus einer lokalen JSON-Datei oder einer URL importieren.",
+      "ASSISTANT_TITLE": "Mit KI erstellen",
+      "ASSISTANT_DESCRIPTION": "Wählen Sie die Quelldatei; der KI-Assistent ordnet dann jeden Schemaknoten zu und Sie prüfen das Ergebnis.",
+      "RECOMMENDED": "Empfohlen"
     }
   },
   "ERROR": {
@@ -476,5 +533,23 @@
     "INPUT_KEYS": "Eingabe-Schlüssel",
     "RETURN_KEYS": "Rückgabe-Schlüssel",
     "NOT_USED": "Kein Connector nutzt ihn"
+  },
+  "MAIN_IMPORT": "Datei hochladen",
+  "MAPPER_STEP": "Zuordnung",
+  "OPTIONAL": "Optional",
+  "COLUMNS": "Spalten",
+  "CONFIGURED": "Konfiguriert",
+  "NEED_TO_BE_CONFIGURED": "Muss konfiguriert werden",
+  "SETTINGS": "Einstellungen",
+  "SPECIFY_HEADER": "Kopfzeilen festlegen",
+  "TRANSFORMER": "Transformer",
+  "UPCOMING_STEP": "Verfügbar, sobald der vorherige Schritt erledigt ist",
+  "AI_SUGGESTED_TOOLTIP": "Vom KI-Assistenten hinzugefügt",
+  "OPEN_MENU": "Menü öffnen",
+  "CLOSE_MENU": "Menü schließen",
+  "AI_MODE": {
+    "TITLE": "KI-Modus",
+    "CHOOSE_FILE": "Wählen und prüfen Sie die Datei; nach den Kopfzeilen ordnet der KI-Assistent jeden Schemaknoten zu.",
+    "READY": "Der KI-Assistent ordnet jeden noch offenen Schemaknoten zu und prüft ihn an Ihren Daten."
   }
 }

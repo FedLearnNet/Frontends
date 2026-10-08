@@ -2,7 +2,12 @@ import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@an
 import {ConnectorCard} from "../../models/connector-card";
 import {ConnectorStepConfigs} from "../../enum/connector-step-config";
 import {ConnectorStepConfigChangeEmitter} from "../../models/connector-step-config";
-import {configToCards, configToConnectorDraft, connectorDraftToConfig} from "../../models/connector-config";
+import {
+  configToCards,
+  configToConnectorDraft,
+  configToConnectorDTO,
+  connectorDraftToConfig
+} from "../../models/connector-config";
 import {ConnectorStepConfigComponent} from "./components/config/config.component";
 import {
   CdkDrag,
@@ -69,13 +74,24 @@ import {ConnectorDTO} from "../../dto/connector";
 import {
   ResumeCachedConnectorDialogComponent
 } from './components/resume-cached-connector-dialog/resume-cached-connector-dialog.component';
-import {SkipTransformDialogComponent} from './components/skip-transform-dialog/skip-transform-dialog.component';
+import {
+  SkipTransformDialogComponent,
+  SkipTransformDialogResult
+} from './components/skip-transform-dialog/skip-transform-dialog.component';
+import {TransformerAssistantComponent} from './components/transformer-assistant/transformer-assistant.component';
 import {CohortDetailDto} from "@local-app/cohort/models";
 import {rematchMappingSchemaId} from "../../helper/connector-config-schema-helper";
 import {FileUploadSettings} from '../../models/input-config';
 import {Store} from '@ngrx/store';
 import {selectAllImports} from '../../store/import/import.selectors';
 import {ImportActivityChipComponent} from '../import/import-activity-chip/import-activity-chip.component';
+
+const SOURCE_STEPS = [
+  ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG,
+  ConnectorStepConfigs.STEP_SOURCE_APP_BASED,
+  ConnectorStepConfigs.STEP_SOURCE_FTP_CONFIG,
+  ConnectorStepConfigs.STEP_SOURCE_FUNCTION_CONFIG,
+];
 
 const BASE_MAPPING_CARD: ConnectorCard = {
   index: 99,
@@ -96,7 +112,7 @@ type RouteData = Data & {
   selector: 'app-manage-connector',
   templateUrl: './manage-connector.component.html',
   styleUrl: './manage-connector.component.scss',
-  imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent]
+  imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent, TransformerAssistantComponent]
 })
 export class ManageConnectorComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
@@ -128,6 +144,13 @@ export class ManageConnectorComponent implements OnInit {
 
   private mappingCard = signal<ConnectorCard>({...BASE_MAPPING_CARD});
 
+  readonly assistantConnector = signal<ConnectorDTO | undefined>(undefined);
+  /**
+   * Created with "Create with AI": the assistant maps the schema after the header step and stays at hand in every
+   * step. A connector created manually never offers it.
+   */
+  readonly aiMode = signal(false);
+
   @ViewChild('configComponent')
   set configComponent(ref: ConnectorStepConfigComponent | undefined) {
     this._configComponent = ref;
@@ -143,7 +166,6 @@ export class ManageConnectorComponent implements OnInit {
   functions: FunctionsDetailDTO[] = [TOOLS_TRANSFORMER_MODULE];
   transformer = new Map<string, FunctionsDetailDTO>()
   transformedData = new Map<string, any[]>()
-  /** Where each previewed step came from, so the wizard can show which ones were cached. */
   previewStages = new Map<string, PreviewStageDTO>()
   disableAddTransformer = true;
 
@@ -354,6 +376,10 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public onCardClick(card: ConnectorCard) {
+    if (card.upcoming) {
+      return;
+    }
+    this.assistantConnector.set(undefined);
     this.currentStep = {...card};
     this.saveConfigToLocalStorage();
   }
@@ -375,11 +401,15 @@ export class ManageConnectorComponent implements OnInit {
         this.ensureSelectorsCard();
         this.reAssignIndex();
         this.saveConfigToLocalStorage();
+        if (this.aiMode()) {
+          this.openTransformerAssistant();
+          return;
+        }
         this.dialog.open(SkipTransformDialogComponent, {
           width: '460px',
           autoFocus: false,
-        }).afterClosed().subscribe((addTransform: boolean | undefined) => {
-          if (addTransform) {
+        }).afterClosed().subscribe((result: SkipTransformDialogResult | undefined) => {
+          if (result === 'ADD') {
             this.addTransform();
           } else {
             this.currentStep = {...this.mappingCard()};
@@ -536,7 +566,58 @@ export class ManageConnectorComponent implements OnInit {
     this.currentStep = this.findCard(this.cards.length - 1);
   }
 
+  public openTransformerAssistant() {
+    const connector = configToConnectorDTO({
+      ...this.config,
+      cohortId: this.cohortId(),
+      transformer: Array.from(this.orderedTransformers().values()),
+    });
+    this.assistantConnector.set(connector);
+  }
+
+  public onAssistantApplied(patch: ConnectorDTO) {
+    this.assistantConnector.set(undefined);
+    this.applyAssistantSuggestions(patch);
+  }
+
+  public onAssistantCancelled() {
+    this.assistantConnector.set(undefined);
+  }
+
+  private applyAssistantSuggestions(patch: ConnectorDTO) {
+    (patch.transformer ?? []).forEach(transformer => {
+      const id = random(0, 100000, false).toString();
+      this.cards.push({
+        index: this.cards.length,
+        title: transformer.methodName ?? this.translate.instant('TRANSFORMER'),
+        configured: true,
+        optional: true,
+        step: ConnectorStepConfigs.TRANSFORM,
+        type: 'TRANSFORM',
+        id,
+        aiSuggested: true,
+      });
+      this.transformer.set(id, this.withFunctionDetails(transformer));
+    });
+    // The patch can map the patient id the user selected in the assistant, which replaces an empty mapping of it
+    const patchMappings = patch.schemaMapping ?? [];
+    const mapped = new Set(patchMappings.map(mapping => mapping.mapping));
+    this.config.schemaMapping = [
+      ...(this.config.schemaMapping ?? []).filter(mapping => !mapped.has(mapping.mapping)),
+      ...patchMappings,
+    ];
+    this.disableAddTransformer = false;
+    this.reAssignIndex();
+    this.syncCardState();
+    this.saveConfigToLocalStorage();
+    this.applyTransform();
+    this.currentStep = {...this.mappingCard()};
+  }
+
   public applyTransform() {
+    // The mapper validates against the config, which otherwise only gets the transformers on save, so its
+    // checks would test the raw file values even where a transformer already fixes them
+    this._config.transformer = Array.from(this.orderedTransformers().values());
     const config = cloneDeep(this.config)
     const transFormerCards = this.getTransformCards();
 
@@ -715,11 +796,29 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public getMappingCards(): ConnectorCard[] {
-    // When there are no transform cards, reserve one slot for the transformer placeholder
-    const offset = this.getTransformCards().length === 0 ? 1 : 0;
+    // Without transform cards the manual flow shows a transformer placeholder, which takes a number; AI mode has none
+    const offset = this.getTransformCards().length === 0 && !this.aiMode() ? 1 : 0;
     this.mappingCard().index = this.cards.length + offset;
 
     return [this.mappingCard()];
+  }
+
+  /** The steps still to come before the file is set, so the whole flow is visible from the start. */
+  public getUpcomingCards(): ConnectorCard[] {
+    const steps = this.cards.map(card => card.step);
+    const titles = [
+      ...(steps.some(step => SOURCE_STEPS.includes(step as ConnectorStepConfigs)) ? [] : ['SETTINGS']),
+      ...(steps.includes(ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG) ? [] : ['SPECIFY_HEADER']),
+      ...(this.aiMode() ? [] : ['TRANSFORMER']),
+      'MAPPER_STEP',
+    ];
+    return titles.map((title, offset) => ({
+      index: this.cards.length + offset,
+      title: this.translate.instant(title),
+      step: title,
+      type: 'CONFIG',
+      upcoming: true,
+    }));
   }
 
   public get transformerPlaceholderCard(): ConnectorCard {
@@ -895,12 +994,38 @@ export class ManageConnectorComponent implements OnInit {
 
   private clearConnectorValues(): void {
     localStorage.removeItem(this.getStorageName());
+    localStorage.removeItem(this.getAiModeStorageName());
+  }
+
+  private getAiModeStorageName(): string {
+    return this.getStorageName() + 'AiMode';
+  }
+
+  private setAiMode(aiMode: boolean): void {
+    this.aiMode.set(aiMode);
+    if (aiMode) {
+      localStorage.setItem(this.getAiModeStorageName(), 'true');
+    } else {
+      localStorage.removeItem(this.getAiModeStorageName());
+    }
+  }
+
+  /** The header step, after which the assistant takes over in AI mode. */
+  public isHeaderStep(): boolean {
+    return this.currentStep?.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG;
+  }
+
+  /** Whether the file is set up, so the assistant has data to work on. */
+  public isFileReady(): boolean {
+    return this.canShowDownstreamSteps();
   }
 
   private handleNewConnector(): void {
+    const requested = this.activatedRoute.snapshot.queryParamMap.get('assistant') === 'true';
     if (!this.hasStoredConfig()) {
       this.resetConnectorEditorState();
       this.clearConnectorValues();
+      this.setAiMode(requested);
       return;
     }
 
@@ -910,15 +1035,19 @@ export class ManageConnectorComponent implements OnInit {
       disableClose: true,
     }).afterClosed().subscribe(continueDraft => {
       if (continueDraft) {
+        // A draft started with AI stays in AI mode, also after a reload
+        const draftAiMode = localStorage.getItem(this.getAiModeStorageName()) === 'true';
         this.resetConnectorEditorState();
         this.loadConfigFromLocalStorage(true);
         this.loadTransformers(this._config.transformer);
         this.checkFile();
+        this.setAiMode(requested || draftAiMode);
         return;
       }
 
       this.resetConnectorEditorState();
       this.clearConnectorValues();
+      this.setAiMode(requested);
     });
   }
 

@@ -4,6 +4,8 @@ import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '
 import {MatIconModule} from '@angular/material/icon';
 import {TranslatePipe} from '@ngx-translate/core';
 
+export type SkipTransformDialogResult = 'ADD' | 'SKIP';
+
 @Component({
   selector: 'app-skip-transform-dialog',
   standalone: true,
@@ -19,13 +21,13 @@ import {TranslatePipe} from '@ngx-translate/core';
   styleUrl: './skip-transform-dialog.component.scss',
 })
 export class SkipTransformDialogComponent {
-  private readonly dialogRef = inject<MatDialogRef<SkipTransformDialogComponent, boolean>>(MatDialogRef);
+  private readonly dialogRef = inject<MatDialogRef<SkipTransformDialogComponent, SkipTransformDialogResult>>(MatDialogRef);
 
   addTransform(): void {
-    this.dialogRef.close(true);
+    this.dialogRef.close('ADD');
   }
 
   skip(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close('SKIP');
   }
 }

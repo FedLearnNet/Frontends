@@ -103,6 +103,9 @@
             <div class="loading-state">
               <mat-spinner diameter="28"></mat-spinner>
             </div>
+          } @else if (storeUnavailable() && !storeTools().length) {
+            <lib-badge iconName="cloud_off" color="ORANGE" [border]="true" [wrap]="true"
+                       [text]="'STORE_UNAVAILABLE' | translate"/>
           } @else {
             <div class="tool-list">
               @for (item of storeTools(); track item.app!.id) {

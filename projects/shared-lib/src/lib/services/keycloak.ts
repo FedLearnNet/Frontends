@@ -72,6 +72,10 @@ let reauthenticateInProgress = false;
 
 export const isReauthenticationPending = (): boolean => reauthenticateInProgress;
 
+/**
+ * Sends the user to Keycloak. Keycloak decides whether a login is needed: while its SSO session is
+ * still valid the user comes straight back, so the frontend never forces a password prompt itself.
+ */
 export const reauthenticate = (keycloak: Keycloak, returnPath?: string): void => {
   if (reauthenticateInProgress) {
     return;
@@ -80,7 +84,7 @@ export const reauthenticate = (keycloak: Keycloak, returnPath?: string): void =>
   reauthenticateInProgress = true;
   const redirectUri = getKeycloakRedirectUri(returnPath ?? getCurrentPath());
 
-  void keycloak.login({redirectUri, prompt: 'login'})
+  void keycloak.login({redirectUri})
     .catch((error) => {
       console.error('Failed to redirect to login, logging out', error);
       reauthenticateInProgress = false;
@@ -115,7 +119,13 @@ export const provideKeycloakAngular = () =>
       provideAppInitializer(() => {
         const keycloak = inject(Keycloak);
         keycloak.onAuthLogout = () => reauthenticate(keycloak);
-        keycloak.onAuthRefreshError = () => reauthenticate(keycloak);
+        // keycloak-js reports every failed refresh, also when Keycloak was just not reachable (e.g. after
+        // waking up). Only a rejected refresh token clears the token and really ends the session.
+        keycloak.onAuthRefreshError = () => {
+          if (!keycloak.authenticated) {
+            reauthenticate(keycloak);
+          }
+        };
       }),
     ]
   });

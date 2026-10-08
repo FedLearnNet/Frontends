@@ -1,0 +1,63 @@
+<div class="assistant">
+  <header class="assistant__header">
+    <span class="assistant__logo"><mat-icon>auto_awesome</mat-icon></span>
+    <div class="assistant__heading">
+      <h2>{{ 'DIALOG.TRANSFORMER_ASSISTANT.TITLE' | translate }}</h2>
+      <p>{{ 'DIALOG.TRANSFORMER_ASSISTANT.SUBTITLE' | translate }}</p>
+    </div>
+    @if (statusLabel(); as label) {
+      <span [class]="'status status--' + (waiting() ? 'waiting' : status().toLowerCase())">
+        @if (status() === 'RUNNING' && !waiting()) {
+          <span class="status__pulse"></span>
+        }
+        {{ label | translate }}
+      </span>
+    }
+  </header>
+
+  <div #stream class="assistant__stream" role="log" aria-live="polite">
+    <app-transformer-assistant-progress [progress]="progress()"
+                                        [nodes]="nodes()"
+                                        [current]="currentNode()"
+                                        [status]="status()"
+                                        [patientIdColumn]="patientIdColumn()"
+                                        [waiting]="waiting()"
+                                        [excluded]="excluded()"
+                                        (toggled)="toggleNode($event)"/>
+
+    @for (message of streamMessages(); track message.id) {
+      <lib-chat-message-bubble [message]="message"/>
+    }
+
+    @if (status() === 'ERROR') {
+      <lib-badge iconName="error" color="RED" [wrap]="true" [border]="true"
+                 [text]="'DIALOG.TRANSFORMER_ASSISTANT.ERROR' | translate: {error: error()}"/>
+    }
+  </div>
+
+  @if (pendingQuestion(); as question) {
+    @if (isColumnQuestion(question)) {
+      <app-transformer-assistant-question [question]="question" [agent]="pendingAgent()" [sampleRows]="sampleRows()"
+                                          (answered)="answer($event)"/>
+    } @else {
+      <lib-chat-input [connected]="true" [positionAbsolute]="false" (content)="send($event)"/>
+    }
+  }
+
+  <footer class="assistant__actions">
+    @if (status() === 'RUNNING') {
+      <lib-btn type="CUSTOM" variant="DANGER" icon="stop" [label]="'DIALOG.TRANSFORMER_ASSISTANT.STOP' | translate"
+               (clicked)="stop()"/>
+    }
+    <span class="spacer"></span>
+    <lib-btn type="CANCEL" (clicked)="cancel()"/>
+    @if (foundNodes().length > nodesToApply().length) {
+      <span class="assistant__selection">
+        {{ 'DIALOG.TRANSFORMER_ASSISTANT.SELECTION' | translate: {selected: nodesToApply().length, found: foundNodes().length} }}
+      </span>
+    }
+    <lib-btn type="CUSTOM" variant="PRIMARY" icon="check" [disabled]="nodesToApply().length === 0 || status() === 'RUNNING' || status() === 'ERROR'"
+             [label]="'DIALOG.TRANSFORMER_ASSISTANT.APPLY' | translate: {count: nodesToApply().length}"
+             (clicked)="apply()"/>
+  </footer>
+</div>

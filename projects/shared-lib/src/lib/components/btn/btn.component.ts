@@ -109,6 +109,8 @@ export class BtnComponent {
 
   resolvedIcon = computed(() => this.icon() ?? DEFAULT_ICONS[this.type()] ?? null);
   resolvedVariant = computed(() => this.variant() ?? DEFAULT_VARIANTS[this.type()] ?? 'PRIMARY');
+  /** An icon-only button has no visible text, so its label names it for screen readers. */
+  accessibleLabel = computed(() => this.ariaLabel() ?? (this.iconOnly() ? this.label() : undefined) ?? null);
   defaultLabelKey = computed(() => DEFAULT_LABEL_KEYS[this.type()] ?? '');
   isDisabled = computed(() => this.disabled() || this.loading());
   hasMenu = computed(() => this.appearance() === 'DEFAULT' && !!this.menuTriggerFor());

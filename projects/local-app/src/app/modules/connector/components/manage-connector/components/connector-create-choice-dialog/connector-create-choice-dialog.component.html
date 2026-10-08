@@ -6,11 +6,28 @@
 <mat-dialog-content class="dialog-content">
   <p class="dialog-intro">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.INTRO' | translate }}</p>
 
-  <div class="choice-grid" role="list">
+  <div class="choice-grid">
+    <button
+      type="button"
+      class="choice-card choice-card--recommended"
+      (click)="choose('assistant')"
+    >
+      <div class="choice-card__icon choice-card__icon--assistant">
+        <mat-icon>auto_awesome</mat-icon>
+      </div>
+      <div class="choice-card__body">
+        <div class="choice-card__title">
+          {{ 'DIALOG.CONNECTOR_CREATE_CHOICE.ASSISTANT_TITLE' | translate }}
+          <span class="choice-card__tag">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.RECOMMENDED' | translate }}</span>
+        </div>
+        <div class="choice-card__description">{{ 'DIALOG.CONNECTOR_CREATE_CHOICE.ASSISTANT_DESCRIPTION' | translate }}</div>
+      </div>
+      <mat-icon class="choice-card__arrow">arrow_forward</mat-icon>
+    </button>
+
     <button
       type="button"
       class="choice-card"
-      role="listitem"
       (click)="choose('create')"
     >
       <div class="choice-card__icon choice-card__icon--create">
@@ -26,7 +43,6 @@
     <button
       type="button"
       class="choice-card"
-      role="listitem"
       (click)="choose('import')"
     >
       <div class="choice-card__icon choice-card__icon--import">

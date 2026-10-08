@@ -24,16 +24,19 @@
 
 <mat-divider/>
 <h3>{{ 'SPECIFIC_SOURCE' | translate }}</h3>
-<p>{{ 'SPECIFIC_SOURCE_DESC' | translate }}</p>
+@if (storeUnavailable()) {
+  <lib-badge iconName="cloud_off" color="ORANGE" [border]="true" [wrap]="true"
+             [text]="'STORE_UNAVAILABLE' | translate"/>
+} @else {
+  <p>{{ 'SPECIFIC_SOURCE_DESC' | translate }}</p>
 
-<div class="source-wrapper">
-  @for (card of storeItems(); track getStoreItemId(card)) {
-    <lib-store-card
-      [class.selected]="isSelectedApp(card)"
-      (click)="toggleAppSelect(card)"
-      [linkToShop]="false"
-      [storeElement]="card"></lib-store-card>
-  }
-
-
-</div>
+  <div class="source-wrapper">
+    @for (card of storeItems(); track getStoreItemId(card)) {
+      <lib-store-card
+        [class.selected]="isSelectedApp(card)"
+        (click)="toggleAppSelect(card)"
+        [linkToShop]="false"
+        [storeElement]="card"></lib-store-card>
+    }
+  </div>
+}

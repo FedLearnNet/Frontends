@@ -1,7 +1,7 @@
 import {HttpEvent, HttpHandlerFn, HttpRequest} from '@angular/common/http';
 import {inject, Injector} from '@angular/core';
 import Keycloak from 'keycloak-js';
-import {catchError, from, Observable, switchMap, throwError} from 'rxjs';
+import {catchError, from, Observable, of, switchMap, throwError} from 'rxjs';
 import {notifySessionExpiredAndReauthenticate} from '@shared-lib/services/keycloak-auth.helper';
 import {isProtectedApiUrl} from '@shared-lib/services/keycloak';
 import {KeycloakSessionService} from '@shared-lib/services/keycloak-session.service';
@@ -23,6 +23,12 @@ export function sessionInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
 
   return from(sessionService.ensureValidSession(keycloak)).pipe(
     catchError((error: unknown) => {
+      if (keycloak.authenticated) {
+        // Keycloak was not reachable, the session itself is fine: send the request with the current token,
+        // the next request tries to refresh it again and the backend still rejects an expired one
+        console.warn('[session] Could not refresh the Keycloak token', {url: req.url, error});
+        return of(undefined);
+      }
       console.warn('[session] Keycloak session validation failed', {url: req.url, error});
       notifySessionExpiredAndReauthenticate(
         keycloak,

@@ -80,14 +80,19 @@ export class ListConnectorComponent implements OnInit {
     this.loadConnectors();
   }
 
+  /** Opening the wizard loads its module and the cohort's files, which takes a moment; the button shows it. */
+  readonly openingWizard = signal(false);
+
   onAddClick(): void {
     this.dialog.open(ConnectorCreateChoiceDialogComponent, {
       width: '720px',
       maxWidth: '95vw',
       autoFocus: false,
     }).afterClosed().subscribe((choice: ConnectorCreateChoice | undefined) => {
-      if (choice === 'create') {
-        this.router.navigate([this.baseRoute, 'new']);
+      if (choice === 'create' || choice === 'assistant') {
+        this.openingWizard.set(true);
+        this.router.navigate([this.baseRoute, 'new'], choice === 'assistant' ? {queryParams: {assistant: true}} : {})
+          .finally(() => this.openingWizard.set(false));
         return;
       }
 

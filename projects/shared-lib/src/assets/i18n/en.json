@@ -50,10 +50,11 @@
   "GENERIC_SOURCE_DESC": "Upload a CSV, Excel or JSON file, or a ZIP with several CSV files.",
   "SPECIFIC_SOURCE": "Specific Source",
   "SPECIFIC_SOURCE_DESC": "Extract data with an extractor app installed for this cohort, such as a database query or a dataset import.",
+  "STORE_UNAVAILABLE": "The global store is not reachable, so its apps cannot be shown right now.",
   "FILE_IMPORT_SETTINGS": "File Import Settings",
   "FILE_TYPE": "File Type",
   "FILE_TYPE_TOOLTIP": "The file with one row per patient, including the patient ID.",
-  "MAIN_IMPORT": "Main Import",
+  "MAIN_IMPORT": "Upload file",
   "MAIN_IMPORT_TOOLTIP": "The file with one row per patient, including the patient ID.",
   "MULTI_SUPPORTING_IMPORT": "Multi Supporting Import",
   "MULTI_SUPPORTING_IMPORT_TOOLTIP": "More files with data for the same patient IDs.",
@@ -568,11 +569,13 @@
     "EXPORT": "Export",
     "SKIP_TO_MAPPER": "Skip to mapper",
     "ADD_TRANSFORMATION": "Add transformation",
+    "LET_AI_SUGGEST": "Map with AI",
     "SELECTED": "Selected",
     "UPLOAD_FILE": "Upload File",
     "RETRY": "Retry",
     "STOP_IMPORT": "Stop import",
-    "CLOSE_KEEP_RUNNING": "Close, keep importing"
+    "CLOSE_KEEP_RUNNING": "Close, keep importing",
+    "CONTINUE_WITH_AI": "Continue with AI"
   },
   "GRID": {
     "CREATEDON": "Created On",
@@ -907,6 +910,44 @@
       "EDIT_CODE": "Edit code",
       "OPEN_DETAILS": "Details"
     },
+    "TRANSFORMER_ASSISTANT": {
+      "TITLE": "AI transformation assistant",
+      "WAITING": "Preparing the schema nodes...",
+      "RUNNING": "Running",
+      "NO_MATCH": "without match",
+      "DIRECT_MAPPING": "Direct mapping",
+      "STOP": "Stop",
+      "APPLY": "Apply {{count}} mappings",
+      "ERROR": "The assistant failed: {{error}}",
+      "PROGRESS": "{{done}} of {{total}} schema nodes",
+      "PENDING": "Waiting",
+      "CURRENT": "Now analysing",
+      "FINISHED": "All schema nodes analysed",
+      "STOPPED": "Stopped",
+      "DIRECT": "direct",
+      "TRANSFORMED": "transformed",
+      "SUBTITLE": "Finds a mapping for every unmapped schema node and validates it on your data",
+      "DONE": "Done",
+      "FAILED": "Failed",
+      "PATIENT_ID": "Patient ID",
+      "QUESTION": "The assistant needs your input",
+      "SELECT_COLUMN": "Select one column",
+      "SELECT_COLUMNS": "Select one or more columns",
+      "FILTER_COLUMNS": "Filter columns",
+      "NO_COLUMN_MATCHES": "No column matches the filter",
+      "CONFIRM_SELECTION": "Confirm",
+      "SELECTED": "{{count}} selected",
+      "WAITING_FOR_INPUT": "Waiting for your answer",
+      "WAITING_STATUS": "Needs your input",
+      "ANSWER_BELOW": "Answer the question below to continue",
+      "INCLUDE": "Apply {{node}}",
+      "KIND_DIRECT": "Direct",
+      "KIND_NATIVE": "Native",
+      "KIND_ETL_TOOL": "ETL tool",
+      "KIND_CUSTOM_CODE": "Custom code",
+      "SELECTION": "{{selected}} of {{found}} selected",
+      "SUGGESTED": "Suggested"
+    },
     "SKIP_TRANSFORM": {
       "TITLE": "Add a transformation?",
       "LEAD": "Transformations are optional and can be added later.",
@@ -997,7 +1038,10 @@
       "CREATE_TITLE": "Create manually",
       "CREATE_DESCRIPTION": "Set up the data source, transformations and schema mapping step by step.",
       "IMPORT_TITLE": "Import connector",
-      "IMPORT_DESCRIPTION": "Import an existing connector definition from a local JSON file or a remote URL."
+      "IMPORT_DESCRIPTION": "Import an existing connector definition from a local JSON file or a remote URL.",
+      "ASSISTANT_TITLE": "Create with AI",
+      "ASSISTANT_DESCRIPTION": "Choose the source file; the AI assistant then maps every schema node and you review the result.",
+      "RECOMMENDED": "Recommended"
     },
     "CONNECTOR_IMPORT": {
       "TITLE": "Import connector",
@@ -1111,7 +1155,12 @@
       "OVERVIEW_VALIDATION_TOOLTIP": "{{count}} preview examples passed. Reopen the mapping dialog for details.",
       "OVERVIEW_SINGLE_VALIDATION_TOOLTIP": "Validated preview value: {{value}}",
       "OVERVIEW_INVALIDATION_TOOLTIP": "At least one of {{count}} preview examples failed. Reopen the mapping dialog for details.",
-      "VIEW_VALIDATION_DETAILS": "View validation details"
+      "VIEW_VALIDATION_DETAILS": "View validation details",
+      "SUMMARY": "{{unmapped}} unmapped, {{valid}} valid, {{invalid}} invalid, {{pending}} pending",
+      "NOT_MAPPED": "Not mapped to a schema field",
+      "VISIT_HELP": "When a patient has several rows, e.g. one per encounter, the visit column tells them apart and the timestamp column says when a value was recorded.",
+      "MATCH_BY_NAME": "Match by name",
+      "MATCH_BY_NAME_HELP": "Maps unmapped columns whose name equals a schema field"
     }
   },
   "ERROR": {
@@ -1484,5 +1533,17 @@
     "INPUT_KEYS": "Input keys",
     "RETURN_KEYS": "Return keys",
     "NOT_USED": "No connector uses it"
+  },
+  "MAPPER_STEP": "Mapper",
+  "OPTIONAL": "Optional",
+  "COLUMNS": "Columns",
+  "UPCOMING_STEP": "Available once the step before is done",
+  "AI_SUGGESTED_TOOLTIP": "Added by the AI assistant",
+  "OPEN_MENU": "Open menu",
+  "CLOSE_MENU": "Close menu",
+  "AI_MODE": {
+    "TITLE": "AI mode",
+    "CHOOSE_FILE": "Choose and check the file; after the header step the AI assistant maps every schema node.",
+    "READY": "The AI assistant maps every schema node that is still open and validates it on your data."
   }
 }

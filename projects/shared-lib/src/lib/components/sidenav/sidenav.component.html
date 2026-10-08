@@ -1,14 +1,14 @@
 <aside class="shell">
   <div class="header">
     <div class="logo">
-      <button class="logo-mark" (click)="onToggle()">{{ initials() }}</button>
+      <button class="logo-mark" (click)="onToggle()" [attr.aria-label]="(collapsed() ? 'OPEN_MENU' : 'CLOSE_MENU') | translate">{{ initials() }}</button>
       <div class="brand" [class.hide]="collapsed()">
         <div class="brand-name">{{ title() }}</div>
       </div>
     </div>
 
     @if (!collapsed()) {
-      <button class="toggle" (click)="onToggle()" [attr.aria-pressed]="collapsed()">
+      <button class="toggle" (click)="onToggle()" [attr.aria-pressed]="collapsed()" [attr.aria-label]="'CLOSE_MENU' | translate">
         <mat-icon>{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
       </button>
     }
@@ -29,6 +29,7 @@
                 [class.disabled]="item.disabled"
                 [routerLink]="item.route || null"
                 routerLinkActive="active"
+                [attr.aria-label]="item.label | translate"
                 (isActiveChange)="setIsActive(item,$event)"
                 (click)="onItemClick(item)"
                 [matTooltip]="collapsed() ? (item.label | translate) : ''"
