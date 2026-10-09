@@ -1,13 +1,13 @@
-import {getAggregatorLocation} from './learning-request-data-selector-list.component';
+import {getAggregatorLocationKey} from './learning-request-data-selector-list.component';
 
 describe('LearningRequestDataSelectorListComponent', () => {
-  it('describes the connected FL-Net Platform as the aggregator', () => {
-    expect(getAggregatorLocation(true))
-      .toBe('The FL-Net Platform connected to this clinic');
+  it('resolves the platform-aggregator i18n key when the platform is the aggregator', () => {
+    expect(getAggregatorLocationKey(true))
+      .toBe('DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM');
   });
 
-  it('describes a randomly selected client as the aggregator', () => {
-    expect(getAggregatorLocation(false))
-      .toBe('Another participating client (selected randomly)');
+  it('resolves the random-clinic i18n key when a clinic is the aggregator', () => {
+    expect(getAggregatorLocationKey(false))
+      .toBe('DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC');
   });
 });

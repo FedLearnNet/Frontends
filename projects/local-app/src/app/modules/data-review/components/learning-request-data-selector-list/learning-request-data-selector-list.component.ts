@@ -66,10 +66,14 @@ interface FilterParams {
   cohorts: string[];
 }
 
-export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
+/**
+ * Returns the i18n key for the aggregator-location label, not the rendered text - the same
+ * keys back the create/edit-project toggle in global-app, so wording only lives in one place.
+ */
+export function getAggregatorLocationKey(platformIsCoordinator?: boolean): string {
   return platformIsCoordinator
-    ? 'The FL-Net Platform connected to this clinic'
-    : 'Another participating client (selected randomly)';
+    ? 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM'
+    : 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
 @Component({
@@ -116,7 +120,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   readonly data = inject<LearningRequestDataSelectorData>(MAT_DIALOG_DATA);
   readonly project: ProjectDetailDto = this.data.request.project;
-  readonly aggregatorLocation = getAggregatorLocation(this.project.platformIsCoordinator);
+  readonly aggregatorLocationKey = getAggregatorLocationKey(this.project.platformIsCoordinator);
 
   protected readonly TrainingStatusPending = FederatedLearningRequestStatus.PENDING;
 

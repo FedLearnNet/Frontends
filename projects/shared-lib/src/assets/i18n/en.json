@@ -967,7 +967,7 @@
       "MESSAGE_LINE_3": "Please note that all project details can be modified later if adjustments are required.",
       "AGGREGATOR_LOCATION_LABEL": "Where should the aggregator run?",
       "AGGREGATOR_LOCATION_RANDOM_CLINIC": "A random participating clinic",
-      "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform connected to this clinic"
+      "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform"
     },
     "JOIN_PROJECT": {
       "TITLE": "Join Project",
