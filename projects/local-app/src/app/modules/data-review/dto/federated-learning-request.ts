@@ -30,4 +30,5 @@ export interface FederatedLearningRequestDto extends BaseDto {
   project: ProjectDetailDto;
   modelNeedToBePublic?: boolean;
   modelCanBePublic?: boolean;
+  platformIsCoordinator?: boolean;
 }
