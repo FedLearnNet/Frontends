@@ -45,6 +45,9 @@
                 <lib-badge color="GRAY" [uppercase]="true" [text]="'N/A'"/>
               }
             </lib-info-item>
+            <lib-info-item title="Aggregator running on">
+              <lib-badge color="GRAY" [text]="exp.platformIsCoordinator ? 'Platform' : 'Random clinic'"/>
+            </lib-info-item>
           </lib-info-grid>
 
 

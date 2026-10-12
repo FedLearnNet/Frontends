@@ -120,7 +120,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   readonly data = inject<LearningRequestDataSelectorData>(MAT_DIALOG_DATA);
   readonly project: ProjectDetailDto = this.data.request.project;
-  readonly aggregatorLocationKey = getAggregatorLocationKey(this.project.platformIsCoordinator);
+  readonly aggregatorLocationKey = getAggregatorLocationKey(this.data.request.platformIsCoordinator);
 
   protected readonly TrainingStatusPending = FederatedLearningRequestStatus.PENDING;
 

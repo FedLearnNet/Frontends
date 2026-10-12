@@ -17,7 +17,6 @@ export interface ProjectCreateDto {
   name: string;
   description: string;
   queryId?: number;
-  platformIsCoordinator?: boolean;
 }
 
 export enum ProjectRole {
@@ -34,7 +33,6 @@ export interface ProjectDto extends BaseDto {
   exportConfig?: PatientDataExportConfigDTO;
   status: ProjectStatus;
   coordinatorHasData?: boolean;
-  platformIsCoordinator?: boolean;
   role?: ProjectRole;
   file?: FileDTO;
 }
