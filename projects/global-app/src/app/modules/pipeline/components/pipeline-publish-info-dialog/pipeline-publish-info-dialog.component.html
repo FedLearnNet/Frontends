@@ -1,3 +1,13 @@
 <lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
-                            [title]="'Detail run for ' + data.commitHash"/>
-<app-pipeline-publish-info-detail class="detail" [publishInfo]="data"></app-pipeline-publish-info-detail>
+                            [title]="data.publishInfo.commitHash ? 'Detail run for ' + data.publishInfo.commitHash : 'Scan results'"/>
+<app-pipeline-publish-info-detail class="detail" [publishInfo]="data.publishInfo">
+  @if (data.publishInfo.imageName) {
+    <button vulnerability-scan-actions mat-stroked-button type="button"
+            [disabled]="rescanning()"
+            matTooltip="Pull the existing image and check for newly disclosed vulnerabilities"
+            (click)="rescanVulnerabilities()">
+      <mat-icon>security</mat-icon>
+      {{ rescanning() ? 'Starting rescan…' : 'Rescan vulnerabilities' }}
+    </button>
+  }
+</app-pipeline-publish-info-detail>
