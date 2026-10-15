@@ -1,3 +1,4 @@
+import {computed, signal} from '@angular/core';
 import {ManageConnectorComponent} from './manage-connector.component';
 import {ConnectorStepConfigs} from '../../enum/connector-step-config';
 import {ConnectorCard} from '../../models/connector-card';
@@ -22,7 +23,11 @@ describe('ManageConnectorComponent wizard steps', () => {
         type: 'CONFIG',
       },
     ];
-    component.transformer = new Map();
+    const transformers = signal(new Map());
+    Object.assign(component, {
+      transformers,
+      transformerList: computed(() => Array.from(transformers().values())),
+    });
     component.disableAddTransformer = true;
     (component as any).translate = {instant: (key: string) => key};
   });
