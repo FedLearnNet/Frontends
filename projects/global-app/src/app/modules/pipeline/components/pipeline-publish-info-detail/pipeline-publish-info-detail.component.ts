@@ -11,6 +11,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
+import {JsonPipe} from '@angular/common';
 
 @Component({
   selector: 'app-pipeline-publish-info-detail',
@@ -23,7 +24,8 @@ import {KvComponent} from "@shared-lib/components/kv/kv.component";
     MatButton,
     BadgeComponent,
     StatusBadgeComponent,
-    KvComponent],
+    KvComponent,
+    JsonPipe],
   templateUrl: './pipeline-publish-info-detail.component.html',
   styleUrl: './pipeline-publish-info-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,12 +41,17 @@ export class PipelinePublishInfoDetailComponent {
 
   readonly vulnUnknown = computed(() => {
     const r = this.publishInfo().vulnerabilityScanResult;
-    return !r || r.success !== true;
+    return !r || (!r.success && this.vulnTotal() === 0);
+  });
+
+  readonly sastTotal = computed(() => {
+    const s = this.publishInfo().sastScanResult?.summary;
+    return s ? s.error + s.warning + s.info + s.unknown : 0;
   });
 
   readonly malwareUnknown = computed(() => {
     const r = this.publishInfo().malwareScanResult;
-    return !r || r.success !== true;
+    return !r || (!r.success && r.infectedCount === 0);
   });
 
   readonly malwareDisplayedColumns: string[] = ['file', 'signature'];
