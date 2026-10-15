@@ -1,0 +1,16 @@
+:host {
+  display: block;
+}
+
+.harmonizations {
+  width: 100%;
+  margin-top: 24px;
+
+  .mat-mdc-row {
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f7f8fc;
+    }
+  }
+}

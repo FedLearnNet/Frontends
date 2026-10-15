@@ -18,7 +18,7 @@ export class TransformerAssistantEffects {
   start$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(TransformerAssistantActions.start),
-      switchMap(({connector}) => this.socket.connect(connector).pipe(
+      switchMap(({connector, path}) => this.socket.connect(connector, path).pipe(
         map(message => TransformerAssistantActions.received({message})),
         takeUntil(this.actions$.pipe(ofType(TransformerAssistantActions.stop, TransformerAssistantActions.reset))),
         catchError((error: Error) => of(TransformerAssistantActions.connectionFailed({error: error.message}))),
@@ -34,6 +34,13 @@ export class TransformerAssistantEffects {
         type: TransformerAssistantMessageType.APPLY,
         schemaIds: nodes.map(node => node.schemaId),
       })),
+    );
+  }, {dispatch: false});
+
+  stop$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(TransformerAssistantActions.stop),
+      tap(() => this.socket.send({type: TransformerAssistantMessageType.STOP})),
     );
   }, {dispatch: false});
 

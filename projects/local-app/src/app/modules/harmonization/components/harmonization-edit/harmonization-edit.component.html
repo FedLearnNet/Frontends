@@ -1,0 +1,258 @@
+<lib-header
+  [title]="harmonization().name || defaultName() || ('HARMONIZATION.NEW' | translate)"
+  [description]="'HARMONIZATION.EDIT_DESCRIPTION' | translate"
+  [enableGoBack]="true"
+  [locationBack]="true">
+  @if (dirty()) {
+    <lib-badge suffix color="ORANGE" iconName="edit" [text]="'HARMONIZATION.UNSAVED' | translate"/>
+  }
+  <lib-btn suffix type="SAVE" [loading]="busy()" [disabled]="busy() || !dirty() || !harmonization().referenceFileId" (clicked)="save()"/>
+  <lib-btn suffix type="RUN" [label]="'HARMONIZATION.RUN' | translate" [loading]="busy()"
+           [disabled]="busy() || !!missing()" (clicked)="run()"/>
+</lib-header>
+
+<div class="pipeline">
+  <nav class="pipeline__steps" [attr.aria-label]="'HARMONIZATION.STEPS' | translate">
+    <mat-form-field appearance="outline" class="pipeline__name">
+      <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
+      <input matInput [ngModel]="harmonization().name" [placeholder]="defaultName()" (ngModelChange)="update({name: $event})"/>
+    </mat-form-field>
+    @let transformers = harmonization().transformer.length;
+    @for (card of cards().slice(0, 2); track card.index) {
+      <app-connector-cards [data]="card" [selected]="card.index === selected()" (click)="select(card.index)"/>
+    }
+    <!-- Like the transform steps of a connector: shown with their function, edited in its dialog and reordered by dragging -->
+    <div class="pipeline__transformers" cdkDropList (cdkDropListDropped)="dropTransformer($event)">
+      @for (card of cards().slice(2, 2 + transformers); track card.index) {
+        <app-connector-cards cdkDrag [data]="card" [function]="card.transformer" [selected]="card.index === selected()"
+                             [draggable]="true" [editable]="true" (edit)="editTransformer(card.index - 2)"
+                             (click)="select(card.index)"/>
+      }
+    </div>
+    <lib-btn type="CUSTOM" variant="PRIMARY" icon="transform" [label]="'BUTTON.ADD_TRANSFORM' | translate" [fullWidth]="true"
+             [disabled]="busy() || !!missing()" (clicked)="editTransformer()"/>
+    @for (card of cards().slice(2 + transformers); track card.index) {
+      <app-connector-cards [data]="card" [selected]="card.index === selected()" (click)="select(card.index)"/>
+    }
+  </nav>
+
+  <section class="pipeline__content">
+    @if (assistantOpen()) {
+      <div class="pipeline__assistant">
+        <app-transformer-assistant [connector]="assistantConnector" [path]="assistantPath()" [sampleRows]="sourceRows()"
+                                   (applied)="onAssistantApplied($event)" (cancelled)="assistantOpen.set(false)"/>
+      </div>
+    } @else {
+      @switch (step().kind) {
+        @case ('REFERENCE') {
+          <h3>{{ 'HARMONIZATION.REFERENCE' | translate }}</h3>
+          <p class="hint">{{ 'HARMONIZATION.REFERENCE_HINT' | translate }}</p>
+          <ol class="flow">
+            <ng-container *ngTemplateOutlet="fileSelect; context: {field: 'referenceFileId', key: 'referenceKey', columns: referenceColumns()}"/>
+            <li class="flow__step" [class.flow__step--disabled]="!harmonization().referenceKey" [class.flow__step--done]="harmonization().targets.length">
+              <span class="flow__number">3</span>
+              <div class="flow__body">
+                <div class="row">
+                  <div>
+                    <strong>{{ 'HARMONIZATION.STEP_CODEBOOK' | translate }}</strong>
+                    <p class="hint">{{ 'HARMONIZATION.STEP_CODEBOOK_HINT' | translate }}</p>
+                  </div>
+                  <span class="spacer"></span>
+                  @if (harmonization().targets.length) {
+                    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="filter">
+                      <mat-icon matPrefix>search</mat-icon>
+                      <input matInput [placeholder]="'HARMONIZATION.FILTER' | translate" [ngModel]="filter()" (ngModelChange)="filter.set($event)"/>
+                    </mat-form-field>
+                  }
+                </div>
+                @if (targetsLoading()) {
+                  <mat-progress-bar mode="indeterminate"/>
+                  <p class="hint">{{ 'HARMONIZATION.LOADING_CODEBOOK' | translate }}</p>
+                } @else if (harmonization().targets.length) {
+                  <div class="scroll scroll--limited">
+                    <table class="grid">
+                      <tr>
+                        <th>{{ 'HARMONIZATION.COLUMN' | translate }}</th>
+                        <th>{{ 'HARMONIZATION.TYPE' | translate }}</th>
+                        <th>{{ 'HARMONIZATION.MEANING' | translate }}</th>
+                        <th>{{ 'HARMONIZATION.ALLOWED_VALUES' | translate }}</th>
+                        <th>{{ 'HARMONIZATION.STATIC' | translate }}</th>
+                      </tr>
+                      @for (shown of shownTargets(); track shown.target.name) {
+                        @let target = shown.target;
+                        @let i = shown.index;
+                        <tr>
+                          <td><strong>{{ target.name }}</strong></td>
+                          <td>
+                            <mat-select class="grid__select" [value]="target.dataType.type" (selectionChange)="setType(i, $event.value)">
+                              @for (type of types; track type) {
+                                <mat-option [value]="type">{{ type }}</mat-option>
+                              }
+                            </mat-select>
+                          </td>
+                          <td class="grid__description">{{ target.dataType.description }}</td>
+                          <td>
+                            @if (target.dataType.type === 'CATEGORICAL') {
+                              <textarea class="grid__input" rows="2" [value]="target.dataType.allowedValues?.join(', ') ?? ''"
+                                        (change)="setAllowedValues(i, $any($event.target).value)"></textarea>
+                            }
+                          </td>
+                          <td>
+                            <mat-checkbox [checked]="target.staticColumn" (change)="updateTarget(i, {staticColumn: $event.checked})"/>
+                          </td>
+                        </tr>
+                      }
+                    </table>
+                  </div>
+                }
+              </div>
+            </li>
+          </ol>
+          @if (harmonization().referenceFileId) {
+            <ng-container *ngTemplateOutlet="previewTable; context: {title: 'HARMONIZATION.CODEBOOK_PREVIEW'}"/>
+          }
+        }
+        @case ('SOURCE') {
+          <h3>{{ 'HARMONIZATION.SOURCE' | translate }}</h3>
+          <p class="hint">{{ 'HARMONIZATION.SOURCE_HINT' | translate }}</p>
+          <ol class="flow">
+            <ng-container *ngTemplateOutlet="fileSelect; context: {field: 'sourceFileId', key: 'sourceKey', columns: sourceColumns()}"/>
+            <li class="flow__step" [class.flow__step--disabled]="!!missing()" [class.flow__step--done]="harmonization().mapping.length">
+              <span class="flow__number">3</span>
+              <div class="flow__body">
+                <strong>{{ 'HARMONIZATION.STEP_MAP' | translate }}</strong>
+                <p class="hint">{{ 'HARMONIZATION.STEP_MAP_HINT' | translate }}</p>
+                <div class="row">
+                  <lib-btn type="CUSTOM" variant="PRIMARY" icon="auto_awesome" [label]="'BUTTON.LET_AI_SUGGEST' | translate"
+                           [disabled]="busy() || !!missing()" (clicked)="openAssistant()"/>
+                  @if (missing(); as missing) {
+                    <span class="hint"><mat-icon inline>info</mat-icon> {{ missing | translate }}</span>
+                  }
+                </div>
+              </div>
+            </li>
+          </ol>
+          @if (harmonization().sourceFileId) {
+            <ng-container *ngTemplateOutlet="previewTable; context: {title: 'HARMONIZATION.SOURCE_PREVIEW'}"/>
+          }
+        }
+        @case ('TRANSFORM') {
+          @let transformer = harmonization().transformer[transformerIndex()];
+          <div class="row">
+            <h3>{{ transformer.methodName }}</h3>
+            <span class="spacer"></span>
+            <lib-btn type="EDIT" variant="SECONDARY" (clicked)="editTransformer(transformerIndex())"/>
+            <lib-btn type="REMOVE" (clicked)="removeTransformer(transformerIndex())"/>
+          </div>
+          <p class="hint">
+            {{ transformer.moduleName }}
+            @if (transformer.column) {
+              · {{ 'HARMONIZATION.COLUMN' | translate }}: {{ transformer.column }}
+            }
+            @for (entry of (transformer.returnMapping ?? {}) | keyvalue; track entry.key) {
+              · → {{ entry.value }}
+            }
+          </p>
+          <ng-container *ngTemplateOutlet="previewTable; context: {title: 'HARMONIZATION.TRANSFORM_PREVIEW'}"/>
+        }
+        @case ('MAPPING') {
+          <h3>{{ 'HARMONIZATION.MAPPING' | translate }}</h3>
+          <p class="hint">{{ 'HARMONIZATION.MAPPING_HINT' | translate }}</p>
+          <div class="scroll scroll--limited">
+            <table class="grid">
+              <tr>
+                <th>{{ 'HARMONIZATION.COLUMN' | translate }}</th>
+                <th>{{ 'HARMONIZATION.SOURCE_COLUMN' | translate }}</th>
+              </tr>
+              @for (target of harmonization().targets; track target.name; let i = $index) {
+                <tr>
+                  <td><strong>{{ target.name }}</strong></td>
+                  <td>
+                    <mat-select [value]="mapped().get(target.name) ?? null" (selectionChange)="setColumn(i, $event.value)"
+                                [placeholder]="(target.staticColumn ? 'HARMONIZATION.FROM_REFERENCE' : 'HARMONIZATION.NOT_MAPPED') | translate">
+                      <mat-option [value]="null">{{ 'HARMONIZATION.NOT_MAPPED' | translate }}</mat-option>
+                      @for (column of sourceColumns(); track column) {
+                        <mat-option [value]="column">{{ column }}</mat-option>
+                      }
+                    </mat-select>
+                  </td>
+                </tr>
+              }
+            </table>
+          </div>
+          @if (harmonizedPreview(); as preview) {
+            <p>{{ 'HARMONIZATION.JOIN_SUMMARY' | translate: {rows: preview.rows, unmatched: preview.unmatched.length} }}</p>
+          }
+          <ng-container *ngTemplateOutlet="rejectedBadges"/>
+          <ng-container *ngTemplateOutlet="previewTable; context: {title: 'HARMONIZATION.HARMONIZED_PREVIEW'}"/>
+        }
+        @case ('RESULT') {
+          <h3>{{ 'HARMONIZATION.RESULT' | translate }}</h3>
+          @if (result(); as result) {
+            <p>{{ 'HARMONIZATION.RESULT_SUMMARY' | translate: {rows: result.rows, unmatched: result.unmatched.length} }}</p>
+            <ng-container *ngTemplateOutlet="rejectedBadges"/>
+            <lib-btn type="DOWNLOAD" (clicked)="download(result.outputFileId)"/>
+          }
+          <ng-container *ngTemplateOutlet="previewTable; context: {title: 'HARMONIZATION.HARMONIZED_PREVIEW'}"/>
+        }
+      }
+    }
+  </section>
+</div>
+
+<ng-template #previewTable let-title="title">
+  <h4>{{ title | translate }}</h4>
+  <div class="scroll">
+    <app-dynamic-table [data]="preview()" [headerAction]="false" [renewColumns]="true" [loading]="previewLoading()"/>
+  </div>
+</ng-template>
+
+<ng-template #rejectedBadges>
+  <div class="badges">
+    @for (entry of rejected(); track entry[0]) {
+      <lib-badge color="RED" iconName="error" [text]="'HARMONIZATION.REJECTED' | translate: {column: entry[0], count: entry[1]}"/>
+    }
+  </div>
+</ng-template>
+
+<ng-template #fileSelect let-field="field" let-key="key" let-columns="columns">
+  <li class="flow__step" [class.flow__step--done]="value(field)">
+    <span class="flow__number">1</span>
+    <div class="flow__body">
+      <strong>{{ 'HARMONIZATION.STEP_FILE' | translate }}</strong>
+      <div class="row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ 'LABEL.FILE' | translate }}</mat-label>
+          <mat-select [value]="value(field)" (selectionChange)="set(field, $event.value)">
+            @for (file of files(); track file.id) {
+              <mat-option [value]="file.id">{{ file.fileName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <span class="hint">{{ 'HARMONIZATION.OR' | translate }}</span>
+        <label class="upload" [class.upload--disabled]="busy()">
+          <mat-icon>upload</mat-icon>{{ 'HARMONIZATION.UPLOAD' | translate }}
+          <input type="file" hidden accept=".csv,.tsv,.xlsx,.xls,.json,.zip" [disabled]="busy()" (change)="upload($event, field)"/>
+        </label>
+        @if (busy() && !value(field)) {
+          <mat-progress-bar class="flow__progress" mode="indeterminate"/>
+        }
+      </div>
+    </div>
+  </li>
+  <li class="flow__step" [class.flow__step--disabled]="!value(field)" [class.flow__step--done]="value(key)">
+    <span class="flow__number">2</span>
+    <div class="flow__body">
+      <strong>{{ 'HARMONIZATION.KEY' | translate }}</strong>
+      <p class="hint">{{ 'HARMONIZATION.KEY_HINT' | translate }}</p>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'HARMONIZATION.KEY' | translate }}</mat-label>
+        <mat-select [value]="value(key)" [disabled]="!value(field)" (selectionChange)="set(key, $event.value)">
+          @for (column of columns; track column) {
+            <mat-option [value]="column">{{ column }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </li>
+</ng-template>

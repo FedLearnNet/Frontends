@@ -146,6 +146,7 @@ export class AppComponent implements OnInit {
       title: 'OPERATIONS',
       items: [
         {label: 'MENU.SCHEMA', icon: 'account_tree', route: ['/schema']},
+        {label: 'MENU.HARMONIZATION', icon: 'merge_type', route: ['/harmonization']},
         {label: 'MENU.ADMIN', icon: 'admin_panel_settings', route: ['/admin']},
       ],
     });

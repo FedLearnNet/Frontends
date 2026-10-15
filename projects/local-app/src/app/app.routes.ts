@@ -49,6 +49,13 @@ export const routes: Routes = [
     canActivate: [AuthGuard]
   },
   {
+    path: 'harmonization',
+    loadChildren: () =>
+      import('./modules/harmonization/harmonization-routing.module').then(m => m.HarmonizationRoutingModule),
+    data: {breadcrumb: 'Harmonization'},
+    canActivate: [AuthGuard]
+  },
+  {
     path: 'schema',
     loadChildren: () =>
       import('../app/modules/schema/schema-routing.module').then(m => m.SchemaRoutingModule),

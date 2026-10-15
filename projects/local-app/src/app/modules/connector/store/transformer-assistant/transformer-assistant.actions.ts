@@ -5,7 +5,7 @@ import {TransformerAssistantMessageDTO} from '../../dto/transformer-assistant';
 export const TransformerAssistantActions = createActionGroup({
   source: 'Transformer Assistant',
   events: {
-    'Start': props<{connector: ConnectorDTO}>(),
+    'Start': props<{connector: ConnectorDTO; path?: string}>(),
     'Received': props<{message: TransformerAssistantMessageDTO}>(),
     'Connection Failed': props<{error: string}>(),
     'Send Message': props<{message: string; columns?: string[]}>(),

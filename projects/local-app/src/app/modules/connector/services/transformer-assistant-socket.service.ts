@@ -1,31 +1,54 @@
 import {inject, Injectable} from '@angular/core';
-import {from, Observable, switchMap} from 'rxjs';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {from, map, Observable, switchMap} from 'rxjs';
 import Keycloak from 'keycloak-js';
+import {SseClient} from 'ngx-sse-client';
+import {SKIP_LOADING} from '@shared-lib/interceptors/loading.interceptor';
 import {KeycloakSessionService} from '@shared-lib/services/keycloak-session.service';
 import {environment} from '@local-app/env/environment';
 import {ConnectorDTO} from '../dto/connector';
 import {TransformerAssistantMessageDTO, TransformerAssistantMessageType} from '../dto/transformer-assistant';
 
-/** A run that builds custom code takes longer than an access token lives, so the token is renewed while it runs. */
 const TOKEN_REFRESH_MS = 60_000;
+const WEBSOCKET_PATH = '/connectors/transformer-assistant';
 
 @Injectable({providedIn: 'root'})
 export class TransformerAssistantSocketService {
   private readonly keycloak = inject(Keycloak);
   private readonly sessionService = inject(KeycloakSessionService);
+  private readonly http = inject(HttpClient);
+  private readonly sseClient = inject(SseClient);
   private socket?: WebSocket;
+  private messagesUrl?: string;
 
-  connect(connector: ConnectorDTO): Observable<TransformerAssistantMessageDTO> {
+
+  connect(connector: ConnectorDTO, path?: string): Observable<TransformerAssistantMessageDTO> {
+    this.messagesUrl = path && `${environment.localLearningAPIURL ?? ''}${path}/messages`;
+    if (path) {
+      return this.follow(`${environment.localLearningAPIURL ?? ''}${path}`);
+    }
     // The WebSocket upgrade passes no HTTP interceptor, so the token is refreshed here before it is sent
     return from(this.sessionService.ensureValidSession(this.keycloak)).pipe(
       switchMap(() => this.open(connector)),
     );
   }
 
+  private follow(url: string): Observable<TransformerAssistantMessageDTO> {
+    return this.http.post<void>(url, {}).pipe(
+      switchMap(() => this.sseClient.stream(url, {keepAlive: false, responseType: 'event'}, {headers: new HttpHeaders().set(SKIP_LOADING, 'true')}, 'GET')),
+      map((event: Event) => {
+        if (event.type === 'error') {
+          throw (event as ErrorEvent).error ?? new Error('The connection to the transformer assistant was closed');
+        }
+        return JSON.parse((event as MessageEvent).data);
+      }),
+    );
+  }
+
   private open(connector: ConnectorDTO): Observable<TransformerAssistantMessageDTO> {
     return new Observable(subscriber => {
       const authorization = encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${this.keycloak.token}`);
-      const socket = new WebSocket(this.url(), ['bearer-token-carrier', authorization]);
+      const socket = new WebSocket(this.url(WEBSOCKET_PATH), ['bearer-token-carrier', authorization]);
       this.socket = socket;
 
       let disposed = false;
@@ -61,13 +84,15 @@ export class TransformerAssistantSocketService {
   }
 
   send(message: TransformerAssistantMessageDTO): void {
-    if (this.socket?.readyState === WebSocket.OPEN) {
+    if (this.messagesUrl) {
+      this.http.post<void>(this.messagesUrl, message).subscribe();
+    } else if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(message));
     }
   }
 
-  private url(): string {
-    const url = new URL(`${environment.localLearningAPIURL ?? ''}/connectors/transformer-assistant`, window.location.origin);
+  private url(path: string): string {
+    const url = new URL(`${environment.localLearningAPIURL ?? ''}${path}`, window.location.origin);
     url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
     return url.toString();
   }

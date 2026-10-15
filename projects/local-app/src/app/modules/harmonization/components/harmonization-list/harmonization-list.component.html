@@ -1,0 +1,38 @@
+<lib-header
+  [title]="'HARMONIZATION.TITLE' | translate"
+  [description]="'HARMONIZATION.DESCRIPTION' | translate">
+  <lib-btn suffix type="ADD" [label]="'HARMONIZATION.NEW' | translate" routerLink="new"/>
+</lib-header>
+
+<lib-page-wrapper
+  [error]="error()"
+  [isEmpty]="!harmonizations().length"
+  [isLoading]="loading()"
+  [skeletonOnLoading]="true">
+
+  <lib-empty-state
+    empty
+    icon="merge_type"
+    [title]="'HARMONIZATION.EMPTY' | translate"
+    [subtitle]="'HARMONIZATION.EMPTY_SUBTITLE' | translate"/>
+
+  <table mat-table [dataSource]="harmonizations()" class="harmonizations">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NAME' | translate }}</th>
+      <td mat-cell *matCellDef="let h"><strong>{{ h.name }}</strong></td>
+    </ng-container>
+
+    <ng-container matColumnDef="targets">
+      <th mat-header-cell *matHeaderCellDef>{{ 'HARMONIZATION.TARGETS' | translate }}</th>
+      <td mat-cell *matCellDef="let h">{{ h.targets?.length ?? 0 }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="updatedAt">
+      <th mat-header-cell *matHeaderCellDef>{{ 'CUSTOM_TRANSFORMERS.UPDATED' | translate }}</th>
+      <td mat-cell *matCellDef="let h">{{ h.updatedAt | date: 'short' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+    <tr mat-row *matRowDef="let row; columns: columns" [routerLink]="[row.id]"></tr>
+  </table>
+</lib-page-wrapper>
