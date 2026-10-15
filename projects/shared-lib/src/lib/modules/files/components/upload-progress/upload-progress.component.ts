@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatProgressBar, ProgressBarMode} from '@angular/material/progress-bar';
 import {MatIcon} from '@angular/material/icon';
 import {UploadProgress} from '@shared-lib/modules/files/model/file-response';
@@ -10,6 +10,7 @@ const BYTES_PER_MB = 1024 * 1024;
   selector: 'lib-upload-progress',
   imports: [MatProgressBar, MatIcon, ErrorCardComponent],
   templateUrl: './upload-progress.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './upload-progress.component.scss',
 })
 export class UploadProgressComponent {

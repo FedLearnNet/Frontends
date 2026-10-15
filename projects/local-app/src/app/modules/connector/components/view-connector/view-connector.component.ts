@@ -1,4 +1,4 @@
-import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -51,6 +51,7 @@ type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, coh
   selector: 'app-view-connector',
   templateUrl: './view-connector.component.html',
   styleUrl: './view-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatIcon, MatMenu, MatMenuItem, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, MatSlideToggle, MatSelect, MatOption, BtnComponent]
 })
 export class ViewConnectorComponent implements OnInit, OnDestroy {

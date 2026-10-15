@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, model, signal, untracked} from '@angular/core';
+import {Component, computed, effect, inject, model, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {
   ColumnRuleDTO,
   TabularSchemaDTO,
@@ -82,6 +82,7 @@ type SchemaForm = FormGroup<{
     MatChipsModule
   ],
   templateUrl: './app-detail-config-table-element.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-table-element.component.scss',
 })
 export class AppDetailConfigTableElementComponent {

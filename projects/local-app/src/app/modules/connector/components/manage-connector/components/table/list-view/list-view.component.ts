@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {MatListModule} from "@angular/material/list";
 import {
   MAT_DIALOG_DATA,
@@ -33,6 +33,7 @@ export interface ListViewComponentDialogData {
     TranslatePipe
 ],
   templateUrl: './list-view.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-view.component.scss'
 })
 export class ListViewComponentDialogComponent {

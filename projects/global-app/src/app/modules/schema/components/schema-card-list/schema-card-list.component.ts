@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {EMPTY, Observable} from "rxjs";
 import {SchemaService} from "@global-app/schema/services/schema.service";
 import {SchemaCardComponent} from '../schema-card/schema-card.component';
@@ -9,6 +9,7 @@ import {SchemaNodeDetailDTO} from "@global-app/schema/dto/schema";
   selector: 'app-schema-card-list',
   templateUrl: './schema-card-list.component.html',
   styleUrl: './schema-card-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SchemaCardComponent, AsyncPipe]
 })
 export class SchemaCardListComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, inject, signal, ViewChild, input } from '@angular/core';
+import { Component, inject, signal, ViewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import { MatPaginator } from "@angular/material/paginator";
 import { LoadLogData } from '../../../../../logs/model/log-wrapper';
 import { LogPage } from '../../../../../logs/dto/page';
@@ -15,12 +15,13 @@ import { GeneralLogTableComponent } from '../../../../../logs/components/general
     selector: 'app-run-change-log',
     templateUrl: './run-change-log.component.html',
     styleUrl: './run-change-log.component.scss',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [GeneralLogTableComponent]
 })
 export class RunConnectorChangeLogComponent {
   pageSize = signal<number>(25);
 
-  public data: LogPage<PatientDataTraceabilityLogDto>;
+  readonly data = signal<LogPage<PatientDataTraceabilityLogDto> | undefined>(undefined);
 
   protected readonly displayedColumns: string[] = ['actions', 'createdAt', 'patientId', 'committed', 'dryRun', 'userId'];
 
@@ -46,7 +47,7 @@ export class RunConnectorChangeLogComponent {
       maxWidth: '100vw',
       maxHeight: '100vh',
       autoFocus: false,
-      data: this.data.results.find(d => d.id === selectedId),
+      data: this.data()?.results.find(d => d.id === selectedId),
     });
   }
 
@@ -80,7 +81,7 @@ export class RunConnectorChangeLogComponent {
         params.search,
         params.filter
     ).subscribe({
-      next: (response) => (this.data = response),
+      next: (response) => this.data.set(response),
     });
   }
 }

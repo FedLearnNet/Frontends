@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, model, output} from '@angular/core';
+import {Component, computed, effect, inject, input, model, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {LocalStorageService} from '@shared-lib/services/local-storage.service';
 
@@ -6,6 +6,7 @@ import {LocalStorageService} from '@shared-lib/services/local-storage.service';
   selector: 'app-lib-mat-paginator',
   templateUrl: './mat-paginator.component.html',
   styleUrl: './mat-paginator.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatPaginator
   ]

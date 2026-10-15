@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -52,6 +52,7 @@ export interface PivotTableDialogResult {
     ErrorCardComponent
   ],
   templateUrl: './pivot-table-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pivot-table-dialog.component.scss',
 })
 export class PivotTableDialogComponent implements OnInit {

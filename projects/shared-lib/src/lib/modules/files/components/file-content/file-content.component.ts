@@ -1,4 +1,4 @@
-import {Component, computed, inject, input} from '@angular/core';
+import {Component, computed, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {DomSanitizer} from "@angular/platform-browser";
 import {FileContentDTO} from "@shared-lib/modules/files/dto/file";
 import {ToolConfigDataType} from "@shared-lib/modules/app-execution/dto/config";
@@ -10,6 +10,7 @@ import {CsvFileViewerComponent} from "@shared-lib/components/csv-file-viewer/csv
     CsvFileViewerComponent
   ],
   templateUrl: './file-content.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-content.component.scss',
 })
 export class FileContentComponent {

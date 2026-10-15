@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {WorkflowAppComponent} from "../workflow-app/workflow-app.component";
@@ -9,6 +9,7 @@ import {WorkflowAppComponent} from "../workflow-app/workflow-app.component";
     WorkflowAppComponent
   ],
   templateUrl: './workflow-pipeline.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-pipeline.component.scss'
 })
 export class WorkflowPipelineComponent {

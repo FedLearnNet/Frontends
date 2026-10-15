@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
 import {
   MatAccordion,
@@ -39,6 +39,7 @@ import {ToolConfigsDTO} from "@shared-lib/modules/app-execution/dto/config";
     MatExpansionPanelContent
   ],
   templateUrl: './experiment-workflow-node-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-workflow-node-detail.component.scss'
 })
 export class ExperimentWorkflowNodeDetailComponent {

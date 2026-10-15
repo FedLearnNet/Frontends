@@ -1,5 +1,5 @@
-import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular/core';
-import {provideHttpClient, withInterceptors} from '@angular/common/http';
+import {ApplicationConfig, isDevMode} from '@angular/core';
+import {provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {caseConversionInterceptor} from '@shared-lib/interceptors/case-conversion.interceptor';
 import {loadingInterceptor} from '@shared-lib/interceptors/loading.interceptor';
 import {CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, customBearerTokenInterceptor} from 'keycloak-angular';
@@ -57,7 +57,7 @@ export const appConfig: ApplicationConfig = {
       provide: CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [bearerTokenCondition]
     },
-    provideHttpClient(withInterceptors([
+    provideHttpClient(withXhr(), withInterceptors([
       caseConversionInterceptor,
       loadingInterceptor,
       sessionInterceptor,
@@ -70,7 +70,6 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({
         paramsInheritanceStrategy: 'always',
       })),
-    provideZoneChangeDetection({eventCoalescing: true}),
     provideTranslateService({
       fallbackLang: localStorage.getItem('language') || 'en',
       loader: provideTranslateHttpLoader({

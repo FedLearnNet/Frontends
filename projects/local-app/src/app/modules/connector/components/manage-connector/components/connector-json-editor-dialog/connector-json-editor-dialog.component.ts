@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -29,6 +29,7 @@ export interface EditConnectorJsonEditorData {
     MatDialogContent
   ],
   templateUrl: './connector-json-editor-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './connector-json-editor-dialog.component.scss',
 })
 export class ConnectorJsonEditorDialogComponent {

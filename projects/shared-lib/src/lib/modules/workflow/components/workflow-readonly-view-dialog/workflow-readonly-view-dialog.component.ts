@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit} from '@angular/core';
+import {Component, computed, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {
@@ -21,6 +21,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     SkeletonLoaderComponent
   ],
   templateUrl: './workflow-readonly-view-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-readonly-view-dialog.component.scss',
 })
 export class WorkflowReadonlyViewDialogComponent implements OnInit {

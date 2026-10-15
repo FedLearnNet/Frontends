@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, input, signal, viewChild} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
@@ -72,6 +72,7 @@ echarts.use([BarChart, BoxplotChart, GridComponent, LegendComponent, TooltipComp
   ],
   templateUrl: './cohort-statistics.component.html',
   styleUrl: './cohort-statistics.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})]
 })
 export class CohortStatisticsComponent {

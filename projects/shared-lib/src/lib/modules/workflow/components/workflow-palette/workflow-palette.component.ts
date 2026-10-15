@@ -1,4 +1,4 @@
-import {Component, inject, input, output} from '@angular/core';
+import {Component, inject, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {FExternalItemDirective} from "@foblex/flow";
 import {MatIconButton} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
@@ -34,6 +34,7 @@ import {TranslateService} from "@ngx-translate/core";
 
   ],
   templateUrl: './workflow-palette.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-palette.component.scss'
 })
 export class WorkflowPaletteComponent {

@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
@@ -11,6 +11,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     BtnComponent
   ],
   templateUrl: './sse-refresh-btn.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './sse-refresh-btn.component.scss'
 })
 export class SseRefreshBtnComponent {

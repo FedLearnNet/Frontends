@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, effect, inject, input, signal} from '@angular/core';
+import {AfterViewInit, Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -33,6 +33,7 @@ import { DragAndDropFileComponent } from '@shared-lib/components/drag-and-drop-f
   ],
   templateUrl: './patient-data-form-field.component.html',
   styleUrl: './patient-data-form-field.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[attr.data-patient-field-anchor]': 'node().id',
   },

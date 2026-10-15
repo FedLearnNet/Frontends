@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {MatButton} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
@@ -18,6 +18,7 @@ import {StoreDTO} from "@shared-lib/modules/store/dto/store";
     StoreCardComponent
   ],
   templateUrl: './workflow-overview-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-overview-card.component.scss',
 })
 export class WorkflowOverviewCardComponent {

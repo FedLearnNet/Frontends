@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {MatTableModule} from '@angular/material/table';
 import {MatIconModule} from '@angular/material/icon';
@@ -11,6 +11,7 @@ import {SchemaRootNodeDto} from '@local-app/cohort/dto/schema';
   selector: 'app-schema-overview',
   templateUrl: './schema-overview.component.html',
   styleUrl: './schema-overview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTableModule, MatIconModule, RouterLink, TranslatePipe, HeaderComponent, PageWrapperComponent],
 })
 export class SchemaOverviewComponent implements OnInit {

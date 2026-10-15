@@ -1,6 +1,6 @@
 import {CommonModule} from '@angular/common';
 import {CdkDragHandle} from "@angular/cdk/drag-drop";
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from "@angular/material/button";
 import {MatCardModule} from "@angular/material/card";
@@ -34,6 +34,7 @@ import {toSelectionKey} from "@shared-lib/modules/data-modeler/utils/patient-exp
     BadgeComponent
   ],
   templateUrl: './dataset-feature-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dataset-feature-card.component.scss',
 })
 export class DatasetFeatureCardComponent {

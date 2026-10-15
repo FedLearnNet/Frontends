@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatTabChangeEvent, MatTabsModule} from "@angular/material/tabs";
 import {ActivatedRoute, Router} from "@angular/router";
 import {PatientUpdateLogComponent} from "../patient-update-log/patient-update-log.component";
@@ -18,6 +18,7 @@ import {StatisticsAccessLogComponent} from "../statistics-access-log/statistics-
     TranslatePipe,
   ],
   templateUrl: './logs-overview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './logs-overview.component.scss'
 })
 export class LogsOverviewComponent implements OnInit {

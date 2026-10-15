@@ -1,4 +1,4 @@
-import {Component, computed, inject, model, OnDestroy, OnInit, output, signal} from '@angular/core';
+import {Component, computed, inject, model, OnDestroy, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ConnectorAppBasedExtractorService} from "../../../../../../../services/connector-app-based-extractor.service";
 import {
   AppBasedExtractorRequestDTO,
@@ -36,6 +36,7 @@ import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
   // One instance per extractor view, so a failed or running stream never shows up on another connector.
   providers: [ConnectorAppBasedExtractorService],
   templateUrl: './app-based-extractor.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-based-extractor.component.scss',
 })
 export class AppBasedExtractorComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, linkedSignal, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ReactiveFormsModule} from "@angular/forms";
 import {NgClass} from "@angular/common";
 import {MatSelectModule} from "@angular/material/select";
@@ -71,6 +71,7 @@ enum ViewState {
   ],
   templateUrl: './ai-task-execution.component.html',
   styleUrl: './ai-task-execution.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [
     trigger('containerAnim', [
       transition(':enter', [

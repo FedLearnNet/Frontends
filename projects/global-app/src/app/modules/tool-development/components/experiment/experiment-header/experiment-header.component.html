@@ -62,7 +62,7 @@
             <lib-kv label="Status">
               <lib-publish-badge [type]="model.publishStatus"></lib-publish-badge>
             </lib-kv>
-            <lib-kv label="Selected Model" [value]="model.selectedSubModel?.imageName"></lib-kv>
+            <lib-kv label="Selected Model" [value]="$safeNavigationMigration(model.selectedSubModel?.imageName)"></lib-kv>
           </div>
         }
       </div>

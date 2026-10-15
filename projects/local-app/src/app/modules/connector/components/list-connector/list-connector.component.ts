@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {
@@ -48,6 +48,7 @@ import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
   selector: 'app-list-connector',
   templateUrl: './list-connector.component.html',
   styleUrl: './list-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatTooltip, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, RouterLink, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, BadgeComponent, TimeBadgeComponent, StatusBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent]
 })
 export class ListConnectorComponent implements OnInit {

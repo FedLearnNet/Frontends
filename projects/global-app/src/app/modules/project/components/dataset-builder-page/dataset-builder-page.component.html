@@ -1,5 +1,5 @@
 <lib-header
-  [title]="project()?.name +' dataset builder'"
+  [title]="$safeNavigationMigration(project()?.name) +' dataset builder'"
   description="Plan your dataset"
   [enableSkeleton]="projectLoading()"
   [locationBack]="true"

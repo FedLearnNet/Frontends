@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -17,6 +17,7 @@ import {HttpErrorResponse} from "@angular/common/http";
     MatInputModule,
     MatButtonModule,],
   templateUrl: './create-issue-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-issue-dialog.component.scss',
 })
 export class CreateIssueDialogComponent {

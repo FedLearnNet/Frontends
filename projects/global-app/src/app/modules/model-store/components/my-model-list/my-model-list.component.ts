@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatTableDataSource, MatTableModule} from "@angular/material/table";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
@@ -26,6 +26,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
     HeaderComponent,
   ],
   templateUrl: './my-model-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './my-model-list.component.scss'
 })
 export class MyModelListComponent implements OnInit, AfterViewInit {

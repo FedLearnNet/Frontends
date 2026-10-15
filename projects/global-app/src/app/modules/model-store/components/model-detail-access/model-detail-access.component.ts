@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatTableModule} from "@angular/material/table";
 
 import {ModelDetailDto} from "@shared-lib/modules/app-execution/dto/model";
@@ -16,6 +16,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     TranslatePipe
 ],
     templateUrl: './model-detail-access.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './model-detail-access.component.scss'
 })
 export class ModelDetailAccessComponent {

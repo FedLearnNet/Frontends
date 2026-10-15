@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject} from '@angular/core';
+import {Component, computed, effect, inject, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
@@ -27,6 +27,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     SkeletonLoaderComponent
   ],
   templateUrl: './workflow-publish-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-publish-dialog.component.scss',
 })
 export class WorkflowPublishDialogComponent {

@@ -88,7 +88,7 @@
           }
             <span class="summary-divider">/</span>
             @if (isTriggerEnabled()) {
-              After {{ getTriggerConnectorName(connector.triggerSettings?.sourceConnectorId) }}
+              After {{ getTriggerConnectorName($safeNavigationMigration(connector.triggerSettings?.sourceConnectorId)) }}
             } @else {
               No trigger
             }
@@ -201,7 +201,7 @@
                 <mat-label>Source connector</mat-label>
                 <mat-select
                   [disabled]="!isTriggerEnabled() || availableTriggerConnectors.length === 0"
-                  [ngModel]="connector.triggerSettings?.sourceConnectorId"
+                  [ngModel]="$safeNavigationMigration(connector.triggerSettings?.sourceConnectorId)"
                   (ngModelChange)="onTriggerSourceChange($event)">
                   @for (triggerConnector of availableTriggerConnectors; track triggerConnector.id) {
                     <mat-option [value]="triggerConnector.id">{{ triggerConnector.name }}</mat-option>
@@ -216,7 +216,7 @@
                 @if (availableTriggerConnectors.length === 0) {
                   Add another connector in this cohort to create a trigger chain.
                 } @else if (isTriggerEnabled()) {
-                  Starts when {{ getTriggerConnectorName(connector.triggerSettings?.sourceConnectorId) }} finishes successfully.
+                  Starts when {{ getTriggerConnectorName($safeNavigationMigration(connector.triggerSettings?.sourceConnectorId)) }} finishes successfully.
                 } @else {
                   Trigger is off. This connector will not be started by another connector.
                 }

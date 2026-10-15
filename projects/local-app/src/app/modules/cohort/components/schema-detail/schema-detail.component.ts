@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {isEmpty} from 'lodash';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTableModule} from '@angular/material/table';
@@ -49,6 +49,7 @@ export interface DynamicColumnFlatNode {
   templateUrl: './schema-detail.component.html',
   styleUrl: './schema-detail.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
       MatIconModule,
       MatTableModule,

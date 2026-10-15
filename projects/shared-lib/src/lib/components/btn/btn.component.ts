@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -85,6 +85,7 @@ const DEFAULT_VARIANTS: Partial<Record<BtnType, BtnVariant>> = {
   imports: [MatButtonModule, MatIcon, MatMenuModule, TranslatePipe],
   templateUrl: './btn.component.html',
   styleUrl: './btn.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {'[class.full-width]': 'fullWidth()'},
 })
 export class BtnComponent {

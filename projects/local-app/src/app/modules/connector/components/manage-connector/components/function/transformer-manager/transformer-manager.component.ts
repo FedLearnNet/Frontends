@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, OnInit, signal, untracked, viewChild} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal, untracked, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
@@ -104,6 +104,7 @@ function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
     KvComponent,
     CodeTransformerComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideMarkdown()],
 })
 export class ConnectorTransformerFunctionManagerComponent implements OnInit {

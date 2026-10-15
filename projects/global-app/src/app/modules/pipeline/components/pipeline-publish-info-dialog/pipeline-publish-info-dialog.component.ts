@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -15,6 +15,7 @@ import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
     PipelinePublishInfoDetailComponent
   ],
   templateUrl: './pipeline-publish-info-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pipeline-publish-info-dialog.component.scss',
 })
 export class PipelinePublishInfoDialogComponent {

@@ -1,6 +1,6 @@
 <lib-header
   [title]="run ? 'Run ' + run.id : ('BUTTON.LOADING' | translate)"
-  [description]="connector?.name ? 'Connector: ' + connector?.name : 'Review run results, errors and execution logs.'"
+  [description]="connector?.name ? 'Connector: ' + $safeNavigationMigration(connector?.name) : 'Review run results, errors and execution logs.'"
   [enableGoBack]="true"
   [locationBack]="true">
   @if (run && connector && !run.dryRun && !isActive()) {

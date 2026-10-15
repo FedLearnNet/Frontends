@@ -1,11 +1,10 @@
-import {AfterViewInit, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute} from '@angular/router';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {MatDialog} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
-import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/paginator';
+import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {MatTableModule} from '@angular/material/table';
 import {TranslatePipe} from '@ngx-translate/core';
@@ -36,53 +35,42 @@ import {
     BadgeComponent,
   ],
   templateUrl: './metrics-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './metrics-grid.component.scss',
 })
-export class MetricsGridComponent implements OnInit, AfterViewInit {
+export class MetricsGridComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly responsiveService = inject(ResponsiveService);
   private readonly metricsRequestService = inject(RunMetricsRequestService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly INIT_PAGE_SIZE = 20;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
+  private readonly screenSize = toSignal(this.responsiveService.getScreenSize(), {initialValue: ''});
 
-  isXSmallScreen = false;
-  isLoadingResults = false;
-  error: string | null = null;
-
-  requests: RequestRunMetricsDto[] = [];
-  resultsLength = 0;
-  currentPage = 0;
-  currentPageSize = this.INIT_PAGE_SIZE;
+  readonly isXSmallScreen = computed(() => this.screenSize() === XSMALL);
+  readonly isLoadingResults = signal(true);
+  readonly error = signal<string | null>(null);
+  readonly requests = signal<RequestRunMetricsDto[]>([]);
+  readonly resultsLength = signal(0);
+  readonly paginatorReady = signal(false);
+  readonly currentPage = signal(0);
+  readonly currentPageSize = signal(this.INIT_PAGE_SIZE);
 
   displayedColumns: string[] = ['experiment', 'project', 'metrics', 'status', 'date'];
 
   protected readonly FederatedLearningRequestStatus = FederatedLearningRequestStatus;
 
   ngOnInit(): void {
-    this.responsiveService.getScreenSize()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(screenSize => {
-        this.isXSmallScreen = screenSize === XSMALL;
-      });
-
-    this.loadRequests();
+    setTimeout(() => this.loadRequests());
   }
 
-  ngAfterViewInit(): void {
-    if (!this.paginator) return;
-    this.paginator.page
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((event: PageEvent) => {
-        this.loadRequests(event.pageIndex, event.pageSize);
-      });
+  onPage(event: PageEvent): void {
+    this.loadRequests(event.pageIndex, event.pageSize);
   }
 
   openMetricsRequestDetail(id: number): void {
-    const request = this.requests.find(item => item.id === id);
+    const request = this.requests().find(item => item.id === id);
     if (!request) return;
 
     this.dialog.open(MetricsRequestDetailComponent, {
@@ -95,7 +83,7 @@ export class MetricsGridComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((updated: RequestRunMetricsDto | undefined) => {
         if (updated) {
-          this.loadRequests(this.currentPage, this.currentPageSize);
+          this.loadRequests(this.currentPage(), this.currentPageSize());
         }
       });
   }
@@ -114,24 +102,35 @@ export class MetricsGridComponent implements OnInit, AfterViewInit {
     }
   }
 
-  private loadRequests(page = this.currentPage, pageSize = this.currentPageSize): void {
-    this.isLoadingResults = true;
-    this.error = null;
-    this.currentPage = page;
-    this.currentPageSize = pageSize;
+  private loadRequests(page = this.currentPage(), pageSize = this.currentPageSize()): void {
+    const nextPage = Math.max(page, 0);
+    this.isLoadingResults.set(true);
+    this.error.set(null);
+    this.currentPage.set(nextPage);
+    this.currentPageSize.set(pageSize);
 
-    this.metricsRequestService.getAllRequests(page, pageSize, FederatedLearningRequestStatus.PENDING)
+    this.metricsRequestService.getAllRequests(nextPage, pageSize, FederatedLearningRequestStatus.PENDING)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => {
-          this.requests = response.results ?? [];
-          this.resultsLength = response.totalCount ?? this.requests.length;
-          this.isLoadingResults = false;
-        },
+        next: (response) => this.applyPage(response.results ?? [], response.totalCount),
         error: (err: Error) => {
-          this.error = err.message ?? String(err);
-          this.isLoadingResults = false;
+          this.error.set(err.message ?? String(err));
+          this.isLoadingResults.set(false);
         },
       });
+  }
+
+  private applyPage(results: RequestRunMetricsDto[], totalCount?: number): void {
+    const total = totalCount ?? results.length;
+    this.requests.set(results);
+    this.isLoadingResults.set(false);
+    if (this.paginatorReady()) {
+      this.resultsLength.set(total);
+      return;
+    }
+    setTimeout(() => {
+      this.resultsLength.set(total);
+      this.paginatorReady.set(true);
+    });
   }
 }

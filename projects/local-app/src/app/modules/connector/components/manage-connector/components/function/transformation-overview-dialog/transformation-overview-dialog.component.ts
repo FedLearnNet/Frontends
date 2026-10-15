@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
@@ -79,6 +79,7 @@ const TREATMENT_META: Record<ColumnTreatment, TreatmentMeta> = {
   standalone: true,
   templateUrl: './transformation-overview-dialog.component.html',
   styleUrl: './transformation-overview-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogContent,
     MatIcon,

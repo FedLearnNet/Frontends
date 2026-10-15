@@ -9,6 +9,7 @@ import {
   signal,
   viewChild,
   viewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CohortDataService } from '@local-app/cohort/services/cohort-data.service';
@@ -42,6 +43,7 @@ export function buildPatientEditorSnapshot(patient: PatientDto, externalPatientI
   selector: 'app-patient-editor',
   templateUrl: './patient-editor.component.html',
   styleUrl: './patient-editor.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     TranslatePipe,
     PatientDataComponent,

@@ -1,4 +1,4 @@
-import {Component, computed, input, signal} from '@angular/core';
+import {Component, computed, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
 import * as echarts from 'echarts/core';
 import {ECharts} from 'echarts/core';
@@ -27,6 +27,7 @@ echarts.use([
   ],
   templateUrl: './app-run-output-visualization.component.html',
   styleUrl: './app-run-output-visualization.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})],
 })
 export class AppRunOutputVisualizationComponent {

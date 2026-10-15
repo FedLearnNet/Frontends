@@ -8,7 +8,8 @@ import {
   OnInit,
   signal,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   MatCell,
@@ -46,6 +47,7 @@ import {MatProgressBar} from '@angular/material/progress-bar';
   templateUrl: './run-log.component.html',
   styleUrl: './run-log.component.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatPaginator, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TitleCasePipe, TranslatePipe, TimeBadgeComponent, MatProgressBar]
 })
 export class RunConnectorLogComponent implements OnInit, AfterViewInit {

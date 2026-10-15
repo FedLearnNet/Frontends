@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatTab, MatTabGroup, MatTabLabel} from "@angular/material/tabs";
 
 import {AppRunTestComponent} from "./components/app-run-test/app-run-test.component";
@@ -34,6 +34,7 @@ import {TOOL_TYPE_CONFIG_DEFAULT_OPTIONS, TOOL_TYPE_CONFIG_MAP} from "../../mode
     StartAppWarningComponent
   ],
   templateUrl: './app-runs.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-runs.component.scss'
 })
 export class AppRunsComponent {

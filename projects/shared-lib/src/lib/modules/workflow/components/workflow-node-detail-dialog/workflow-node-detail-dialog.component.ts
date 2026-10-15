@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -41,6 +41,7 @@ import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
     TranslatePipe
   ],
   templateUrl: './workflow-node-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-node-detail-dialog.component.scss'
 })
 export class WorkflowNodeDetailDialogComponent {

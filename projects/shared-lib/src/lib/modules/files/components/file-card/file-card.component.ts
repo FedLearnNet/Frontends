@@ -1,4 +1,4 @@
-import {Component, inject, input, output, signal} from '@angular/core';
+import {Component, inject, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {DatePipe} from "@angular/common";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
@@ -15,6 +15,7 @@ import {MatDialog} from "@angular/material/dialog";
   selector: 'lib-file-card',
   imports: [DatePipe, MatIconModule, MatButtonModule, MatTooltipModule, MatChipsModule, BytesPipe],
   templateUrl: './file-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-card.component.scss'
 })
 export class FileCardComponent {

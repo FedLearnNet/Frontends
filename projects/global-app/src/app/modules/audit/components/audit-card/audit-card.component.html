@@ -1,4 +1,4 @@
-<div class="audit-card" [ngClass]="audit().decision?.toLowerCase()">
+<div class="audit-card" [ngClass]="$safeNavigationMigration(audit().decision?.toLowerCase())">
   <div class="audit-card__header">
     @if(audit().decision === 'ACCEPT'){
       <lib-status-badge type="SUCCESS" text="Accepted" size="SMALL"></lib-status-badge>

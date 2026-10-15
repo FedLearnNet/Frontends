@@ -5,9 +5,9 @@ import {
   effect,
   forwardRef,
   input,
-  model,
   output,
   signal,
+  linkedSignal
 } from '@angular/core';
 import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -33,7 +33,9 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
   ],
 })
 export class ToolSlugInputComponent implements ControlValueAccessor {
-  value = model<string>('');
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
+  valueInput = input<string>('', {alias: 'value'});
+  value = linkedSignal(this.valueInput);
   toolName = input<string>('');
 
   appearance= input< "fill" | "outline">('outline');

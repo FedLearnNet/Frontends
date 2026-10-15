@@ -51,7 +51,7 @@
 
           @if ((uploadResponse$ | async)?.inProgress) {
             <div class="progress-container">
-              <mat-progress-bar mode="determinate" [value]="(uploadResponse$ | async)?.progress"/>
+              <mat-progress-bar mode="determinate" [value]="$safeNavigationMigration((uploadResponse$ | async)?.progress)"/>
               <span>{{ (uploadResponse$ | async)?.progress }}%</span>
             </div>
           }

@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 
 export type InfoCardType = 'INFO' | 'WARNING' | 'SUCCESS' | 'ERROR' | 'PRIMARY';
@@ -17,6 +17,7 @@ const DEFAULT_ICONS: Record<InfoCardType, string> = {
   selector: 'lib-info-card',
   imports: [MatIcon],
   templateUrl: './info-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './info-card.component.scss',
 })
 export class InfoCardComponent {

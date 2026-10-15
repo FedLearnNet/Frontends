@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeComponent, BadgeColor, BadgeSize} from '@shared-lib/components/badge/badge.component';
 import {MatTooltip} from '@angular/material/tooltip';
 
@@ -6,6 +6,7 @@ import {MatTooltip} from '@angular/material/tooltip';
   selector: 'lib-docker-image-tag',
   imports: [BadgeComponent, MatTooltip],
   templateUrl: './docker-image-tag.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './docker-image-tag.component.scss',
 })
 export class DockerImageTagComponent {

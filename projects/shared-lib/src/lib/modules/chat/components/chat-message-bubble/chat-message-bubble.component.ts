@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {BaseChatMessageDTO} from "@shared-lib/modules/app-execution/dto/chat";
 import {DatePipe} from "@angular/common";
 import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
@@ -40,6 +40,7 @@ import {MatButton} from "@angular/material/button";
     provideMarkdown(),
   ],
   templateUrl: './chat-message-bubble.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './chat-message-bubble.component.scss',
 })
 export class ChatMessageBubbleComponent {

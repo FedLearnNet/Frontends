@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
 import {DatePipe} from "@angular/common";
 
@@ -12,6 +12,7 @@ import {DatePipe} from "@angular/common";
     provideMarkdown(),
   ],
   templateUrl: './chat-bubble.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './chat-bubble.component.scss',
 })
 export class ChatBubbleComponent {

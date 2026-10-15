@@ -1,6 +1,6 @@
 <app-general-log-table
     [tableKey]="'run-change-log-' + runId()"
-    [loadedData]="data"
+    [loadedData]="data()"
     [allowSearch]="false"
     [displayedColumns]="displayedColumns"
     (openDetail)="openDetail($event)"
