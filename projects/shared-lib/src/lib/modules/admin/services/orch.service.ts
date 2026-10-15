@@ -11,6 +11,7 @@ import {
   ContainerLogDTO,
   ContainerRunDTO,
   InfoDTO,
+  RegistryImagesDTO,
   InspectVolumeResponseDTO
 } from "../dto/orch";
 import {ApiService} from "@shared-lib/services/api.service";
@@ -49,6 +50,10 @@ export class OrchRelayService {
           )
         )
       );
+  }
+
+  getRegistryImages(): Observable<RegistryImagesDTO> {
+    return this.apiService.get<RegistryImagesDTO>(`${this.baseUrl()}/docker/registry/images`);
   }
 
   // ---- Running Containers ----
