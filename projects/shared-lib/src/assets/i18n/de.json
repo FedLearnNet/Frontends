@@ -373,6 +373,12 @@
     "TABLE_MEASURING": "{{rows}} Zeilen · {{columns}} Spalten",
     "TABLE_RATE": "{{rate}}/s"
   },
+  "QUERY_OPERATOR": {
+    "AND": "und",
+    "OR": "oder",
+    "EXISTS": "existiert",
+    "REGEX": "regex"
+  },
   "PREVIEW_CACHE": {
     "TITLE": "Datenquelle der Vorschau",
     "FROM_CACHE": "Aus dem Cache",
