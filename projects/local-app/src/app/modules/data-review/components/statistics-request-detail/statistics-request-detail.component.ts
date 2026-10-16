@@ -43,7 +43,6 @@ interface StatisticsRequestDetailData {
     SkeletonLoaderComponent,
     StatusBadgeComponent,
     TimeBadgeComponent,
-    QueryDetailCardComponent,
     QueryDetailCardComponent
   ],
   templateUrl: './statistics-request-detail.component.html',
@@ -65,6 +64,7 @@ export class StatisticsRequestDetailComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.data.request.queryId) {
+      this.isLoadingQuery.set(false);
       return;
     }
 
