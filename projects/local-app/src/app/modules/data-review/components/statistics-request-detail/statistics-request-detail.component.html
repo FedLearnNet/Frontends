@@ -82,9 +82,9 @@
 
   <div class="detail-section">
     <h4>{{ 'GRID.QUERY' | translate }}</h4>
-    @if (query) {
-      <lib-query-detail-card [query]="query!" />
-    } @else if (isLoadingQuery) {
+    @if (query()) {
+      <lib-query-detail-card [query]="query()!" />
+    } @else if (isLoadingQuery()) {
       <lib-skeleton-loader />
     } @else {
       <span class="muted">{{ 'NO_DATA_FOUND' | translate }}</span>
