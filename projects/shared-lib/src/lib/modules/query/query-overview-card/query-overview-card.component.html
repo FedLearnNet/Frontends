@@ -10,6 +10,25 @@
     <p class="ts">{{ query().createdAt | date }}</p>
   </div>
   <div class="meta">
-    <p>{{ queryString() }}</p>
+    <p>
+      @for (group of groups(); track $index) {
+        @if (!$first) {<span> {{ 'QUERY_OPERATOR.AND' | translate | uppercase }} </span>}
+        <span>(</span>
+        @for (label of group.labels; track $index) {
+          @if (!$first) {<span> {{ 'QUERY_OPERATOR.OR' | translate | uppercase }} </span>}
+          @if (label) {<span>{{ label }}: </span>}
+          @for (condition of group.conditions; track $index) {
+            @if (!$first) {<span> {{ 'QUERY_OPERATOR.AND' | translate | uppercase }} </span>}
+            <span>{{ condition.operator | translate }}</span>
+            @if (condition.value) {<span> {{ condition.value }}</span>}
+          } @empty {
+            <span>—</span>
+          }
+        }
+        <span>)</span>
+      } @empty {
+        <span>—</span>
+      }
+    </p>
   </div>
 </div>
