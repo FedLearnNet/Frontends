@@ -6,7 +6,7 @@ import {getBffUrl} from "@shared-lib/services/auth.helper";
 import {getCurrentPath, toAbsolutePath} from "@shared-lib/utils/url.helper";
 
 /*
- * Backend-for-frontend (BFF) auth: our API runs the OIDC login with Keycloak and keeps
+ * Backend-for-frontend: API runs the OIDC login with Keycloak and keeps
  * the tokens in an HttpOnly session cookie. The browser never sees a token, it only follows redirects.
  */
 const RETURN_PATH_KEY = 'bff.returnPath';
@@ -24,7 +24,7 @@ export const login = (returnPath: string = getCurrentPath()): void => {
   try {
     sessionStorage.setItem(RETURN_PATH_KEY, returnPath);
   } catch {
-    // without session storage the user just lands on the start page
+    console.warn('Could not store return path in session storage');
   }
   window.location.assign(getBffUrl('login'));
 };
