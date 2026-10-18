@@ -8,7 +8,7 @@ export interface Environment {
     // Global Services
     globalLearningApiUrl?: string; // http(s) address of the global learning service
     globalLearningApiWSProtocol?: string; // ws(s) replace http or https://
-    datamodelerApiUrl?: string;
+    datamodelerApiPrefix?: string; // data modeler path behind the global API, default: DEFAULT_DATAMODELER_API_PREFIX
     allowGlobalDataModeling?: boolean; // If false, disables certain parts showing the data models
 
     // address of the global web frontend. Only needed by the local app for certain frontend

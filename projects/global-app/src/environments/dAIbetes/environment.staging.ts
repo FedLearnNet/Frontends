@@ -7,8 +7,6 @@ export const environment: Environment = {
   project: 'dAIbetes',
   // TODO: create the reelevant project settings
   appTitle: 'dAIbetesNet-Platform Staging',
-
-  datamodelerApiUrl: `https://${GLOBAL_BASE_DOMAIN}/data-modeler`,
   globalLearningApiUrl: `https://${GLOBAL_BASE_DOMAIN}/api`,
   allowGlobalDataModeling: true,
 

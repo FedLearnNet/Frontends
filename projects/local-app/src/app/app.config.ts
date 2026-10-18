@@ -1,6 +1,5 @@
 import {ApplicationConfig, isDevMode} from '@angular/core';
 import {provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
-import {caseConversionInterceptor} from '@shared-lib/interceptors/case-conversion.interceptor';
 import {loadingInterceptor} from '@shared-lib/interceptors/loading.interceptor';
 import {provideBffAuth} from '@shared-lib/services/auth';
 import {provideTranslateService} from "@ngx-translate/core";
@@ -49,7 +48,6 @@ import {SearchEffects} from "./modules/search/store/search.effects";
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(withXhr(), withInterceptors([
-      caseConversionInterceptor,
       loadingInterceptor,
       authInterceptor
     ])),

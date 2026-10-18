@@ -7,8 +7,6 @@ export const environment: Environment = {
   project: 'FL-Net',
   // TODO: create the reelevant project settings
   appTitle: 'Federated Learning Network',
-
-  datamodelerApiUrl: `https://${GLOBAL_BASE_DOMAIN}/data-modeler`,
   globalLearningApiUrl: `https://${GLOBAL_BASE_DOMAIN}/api`,
   allowGlobalDataModeling: true,
 

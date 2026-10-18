@@ -4,7 +4,6 @@ export const environment: Environment = {
   production: true,
   project: 'FL-Net',
   appTitle: 'Federated Learning Network - Staging',
-  datamodelerApiUrl: `data-modeler`,
   globalLearningApiUrl: `api`,
   allowGlobalDataModeling: true,
 
