@@ -16,14 +16,10 @@ export interface Environment {
     // Only the local app has to set this!
     globalWebUrl?: string;
 
+    // The login itself runs in the learning API (backend-for-frontend), Keycloak is only linked for account management.
     keycloak: {
         url: string; // Base URL of the Keycloak server, so without any path (except e.g. /auth if deployed on auth)
         realm: string;
-        clientId: string;
-        bearerExcludedUrls: string[],
-        redirectOnHttp401: boolean;
         baseHref?: string;
-        /** Client-side idle window — must match Keycloak realm SSO Session Idle. */
-        sessionIdleTimeoutMs: number;
     },
 }

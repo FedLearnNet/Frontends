@@ -10,7 +10,7 @@ import {FooterComponent, FooterGroup} from "@shared-lib/components/footer/footer
 import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {MatDialog} from "@angular/material/dialog";
 import {CreateIssueDialogComponent} from "@shared-lib/components/create-issue-dialog/create-issue-dialog.component";
-import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
+import {getAppUrl} from "@shared-lib/utils/url.helper";
 
 
 @Component({
@@ -135,7 +135,7 @@ export class AppComponent implements OnInit {
     {
       title: 'Developers',
       links: [
-        {label: 'Documentation', href: getKeycloakRedirectUri('documentation/')},
+        {label: 'Documentation', href: getAppUrl('documentation/')},
         {label: 'Report an Issue', action: () => this.dialog.open(CreateIssueDialogComponent, {width: '600px'})},
       ],
     },

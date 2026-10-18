@@ -1,5 +1,4 @@
-<!-- gitlab-create-issue-dialog.component.html -->
-<h2 mat-dialog-title>GitLab Issue erstellen</h2>
+<h2 mat-dialog-title>Report an issue</h2>
 
 <div mat-dialog-content [formGroup]="form" class="dialog-content">
 
@@ -29,24 +28,10 @@
     }
   </mat-form-field>
 
-  <!-- LATEST ERROR HISTORY -->
-  @if (errors().length > 0) {
-    <div class="error-history">
-      <h3>Previous errors</h3>
-
-      <ul>
-        @for (err of errors(); track $index) {
-          <li>
-            <strong>{{ $index + 1 }}.</strong> {{ err }}
-          </li>
-        }
-      </ul>
-
-      <p class="hint">
-        These errors will be appended to the description on the next submit.
-      </p>
-    </div>
-  }
+  <p class="hint">
+    The issue opens prefilled on GitHub, where you review and submit it with your GitHub account.
+    The repository is public: do not include patient data, credentials or internal addresses.
+  </p>
 
 </div>
 
@@ -56,7 +41,6 @@
     mat-button
     type="button"
     (click)="cancel()"
-    [disabled]="loading()"
   >
     Cancel
   </button>
@@ -66,14 +50,8 @@
     color="primary"
     type="button"
     (click)="submit()"
-    [disabled]="loading() || form.invalid"
+    [disabled]="form.invalid"
   >
-
-    @if (!loading()) {
-      Create Issue
-    } @else {
-      Creating...
-    }
-
+    Continue on GitHub
   </button>
 </div>

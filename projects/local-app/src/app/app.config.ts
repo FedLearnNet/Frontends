@@ -2,9 +2,7 @@ import {ApplicationConfig, isDevMode} from '@angular/core';
 import {provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {caseConversionInterceptor} from '@shared-lib/interceptors/case-conversion.interceptor';
 import {loadingInterceptor} from '@shared-lib/interceptors/loading.interceptor';
-import {CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, customBearerTokenInterceptor} from 'keycloak-angular';
-import {bearerTokenCondition} from '@shared-lib/services/keycloak-bearer.config';
-import {provideKeycloakAngular} from '@shared-lib/services/keycloak';
+import {provideBffAuth} from '@shared-lib/services/auth';
 import {provideTranslateService} from "@ngx-translate/core";
 import {provideTranslateHttpLoader} from "@ngx-translate/http-loader";
 import {provideStore} from '@ngrx/store';
@@ -17,7 +15,6 @@ import {provideEffects} from '@ngrx/effects';
 import {provideStoreDevtools} from '@ngrx/store-devtools';
 import {provideRouterStore} from '@ngrx/router-store';
 import {authInterceptor} from '@shared-lib/interceptors/auth.interseptor';
-import {sessionInterceptor} from '@shared-lib/interceptors/session.interceptor';
 import {provideRouter, withComponentInputBinding, withRouterConfig} from "@angular/router";
 import {routes} from "./app.routes";
 import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
@@ -51,18 +48,12 @@ import {SearchEffects} from "./modules/search/store/search.effects";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {
-      provide: CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [bearerTokenCondition]
-    },
     provideHttpClient(withXhr(), withInterceptors([
       caseConversionInterceptor,
       loadingInterceptor,
-      sessionInterceptor,
-      authInterceptor,
-      customBearerTokenInterceptor
+      authInterceptor
     ])),
-    provideKeycloakAngular(),
+    provideBffAuth(),
     provideRouter(routes,
       withComponentInputBinding(),
       withRouterConfig({

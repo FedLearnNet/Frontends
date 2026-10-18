@@ -1,7 +1,7 @@
 import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from "@angular/router";
 import {MatIcon} from "@angular/material/icon";
-import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
+import {getAppUrl} from "@shared-lib/utils/url.helper";
 
 export interface FooterLink {
   label: string;
@@ -27,7 +27,7 @@ export interface FooterGroup {
 })
 export class FooterComponent {
   year = new Date().getFullYear();
-  documentationHref = getKeycloakRedirectUri('documentation/');
+  documentationHref = getAppUrl('documentation/');
   brand = input<string>('PoSyMed');
   tagline = input<string>('Clinical-grade tooling platform');
 
