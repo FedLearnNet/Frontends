@@ -27,6 +27,46 @@ export interface MalwareFindingDTO {
   rawLine?: string;
 }
 
+export interface SastSummaryDTO {
+  error: number;
+  warning: number;
+  info: number;
+  unknown: number;
+}
+
+export interface SastFindingDTO {
+  ruleId: string;
+  severity: 'ERROR' | 'WARNING' | 'INFO' | 'UNKNOWN';
+  message: string;
+  filePath: string;
+  startLine: number;
+  endLine?: number;
+  startColumn?: number;
+  endColumn?: number;
+  metadata: Record<string, unknown>;
+}
+
+export interface SastScanErrorDTO {
+  type: string;
+  message: string;
+  level?: string;
+  code?: number;
+  filePath?: string;
+}
+
+export interface SastScanResultDTO {
+  tool: string;
+  version?: string;
+  target: string;
+  success: boolean;
+  complete: boolean;
+  scannedFiles?: number;
+  summary: SastSummaryDTO;
+  findings: SastFindingDTO[];
+  errors: SastScanErrorDTO[];
+  rawReport?: Record<string, unknown>;
+}
+
 
 export interface MalwareScanResultDTO {
   tool: string;
@@ -43,6 +83,8 @@ export interface AppPublishInfoDTO {
   filePaths?: string[];
 
   vulnerabilityScanResult?: SecurityScanResultDTO;
+
+  sastScanResult?: SastScanResultDTO;
 
   malwareScanResult?: MalwareScanResultDTO;
 }

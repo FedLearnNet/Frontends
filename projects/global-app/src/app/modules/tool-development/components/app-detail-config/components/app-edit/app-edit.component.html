@@ -52,7 +52,7 @@
       [imageName]="app().imageName"
       [color]="app().imageName && !app().publishInfo ? 'GRAY' : undefined"
       [border]="!!(app().publishInfo && app().imageName)"
-      [clickable]="!!(app().publishInfo && app().imageName)"
+      [clickable]="!!app().imageName"
       size="MEDIUM"
       (clicked)="showPipelinePublishInfo()"/>
   </div>

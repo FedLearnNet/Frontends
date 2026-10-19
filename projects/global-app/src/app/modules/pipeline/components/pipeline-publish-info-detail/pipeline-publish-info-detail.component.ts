@@ -13,10 +13,11 @@ import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper
 import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {AuthorDto} from "@shared-lib/modules/store/dto/app-author";
 import {PipelineService} from "../../service/pipeline.service";
-import {PipelineStatus, PipelineType} from "../../dto/pipeline";
+import {PipelineRunMode, PipelineStatus, PipelineType} from "../../dto/pipeline";
 import {finalize, startWith, switchMap, takeWhile} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
+import {JsonPipe} from '@angular/common';
 
 @Component({
   selector: 'app-pipeline-publish-info-detail',
@@ -29,7 +30,8 @@ import {KvComponent} from "@shared-lib/components/kv/kv.component";
     MatButton,
     BadgeComponent,
     StatusBadgeComponent,
-    KvComponent],
+    KvComponent,
+    JsonPipe],
   templateUrl: './pipeline-publish-info-detail.component.html',
   styleUrl: './pipeline-publish-info-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,7 +56,7 @@ export class PipelinePublishInfoDetailComponent {
     this.rescanning.set(true);
     this.pipelines.create({
       pipelineType: PipelineType.APP,
-      runMode: 'SCAN_ONLY',
+      runMode: PipelineRunMode.SCAN_ONLY,
       appVersionId: this.appVersionId(),
       autoStart: true,
     }).pipe(
@@ -87,7 +89,7 @@ export class PipelinePublishInfoDetailComponent {
 
   readonly malwareUnknown = computed(() => {
     const r = this.publishInfo().malwareScanResult;
-    return !r || r.success !== true;
+    return !r || (!r.success && r.infectedCount === 0);
   });
 
   readonly malwareDisplayedColumns: string[] = ['file', 'signature'];
