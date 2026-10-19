@@ -176,6 +176,7 @@ export class AppEditComponent {
       data: {
         publishInfo: {...app.publishInfo, imageName: app.imageName},
         appVersionId: app.latestVersionId,
+        authors: app.authors,
       },
       height: '80vh',
       width: '90vw',

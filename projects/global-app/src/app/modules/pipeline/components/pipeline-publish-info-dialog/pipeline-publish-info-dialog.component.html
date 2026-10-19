@@ -1,7 +1,7 @@
 <lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
                             [title]="data.publishInfo.commitHash ? 'Detail run for ' + data.publishInfo.commitHash : 'Scan results'"/>
 <app-pipeline-publish-info-detail class="detail" [publishInfo]="data.publishInfo">
-  @if (data.publishInfo.imageName) {
+  @if (isToolOwner() && data.publishInfo.imageName) {
     <button vulnerability-scan-actions mat-stroked-button type="button"
             [disabled]="rescanning()"
             matTooltip="Pull the existing image and check for newly disclosed vulnerabilities"
