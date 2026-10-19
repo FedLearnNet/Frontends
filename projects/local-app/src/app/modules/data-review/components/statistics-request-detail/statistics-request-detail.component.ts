@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy, signal} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {MatButtonModule} from "@angular/material/button";
@@ -43,7 +43,6 @@ interface StatisticsRequestDetailData {
     SkeletonLoaderComponent,
     StatusBadgeComponent,
     TimeBadgeComponent,
-    QueryDetailCardComponent,
     QueryDetailCardComponent
   ],
   templateUrl: './statistics-request-detail.component.html',
@@ -57,25 +56,25 @@ export class StatisticsRequestDetailComponent implements OnInit {
 
   readonly data = inject<StatisticsRequestDetailData>(MAT_DIALOG_DATA);
 
-  query?: LocalQueryDto;
-  isLoadingQuery = false;
+  protected readonly isLoadingQuery = signal(true);
+  protected readonly query = signal<LocalQueryDto | undefined>(undefined);
   isSubmitting = false;
 
   protected readonly pendingStatus = FederatedLearningRequestStatus.PENDING;
 
   ngOnInit(): void {
     if (!this.data.request.queryId) {
+      this.isLoadingQuery.set(false);
       return;
     }
 
-    this.isLoadingQuery = true;
     this.logService.getQueryInfo(this.data.request.queryId).subscribe({
       next: (query) => {
-        this.query = query;
-        this.isLoadingQuery = false;
+        this.query.set(query);
+        this.isLoadingQuery.set(false);
       },
       error: () => {
-        this.isLoadingQuery = false;
+        this.isLoadingQuery.set(false);
       }
     });
   }
