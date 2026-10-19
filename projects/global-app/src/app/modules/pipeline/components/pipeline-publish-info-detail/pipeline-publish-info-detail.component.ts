@@ -87,6 +87,11 @@ export class PipelinePublishInfoDetailComponent {
     return !this.publishInfo().vulnerabilityScanResult?.summary;
   });
 
+  readonly sastTotal = computed(() => {
+    const summary = this.publishInfo().sastScanResult?.summary;
+    return summary ? summary.error + summary.warning + summary.info + summary.unknown : 0;
+  });
+
   readonly malwareUnknown = computed(() => {
     const r = this.publishInfo().malwareScanResult;
     return !r || (!r.success && r.infectedCount === 0);

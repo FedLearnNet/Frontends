@@ -41,7 +41,7 @@
     </mat-card>
   </section>
 
-  <mat-tab-group class="tabs" (selectedTabChange)="selectTab($event.tab.textLabel)">
+  <mat-tab-group class="tabs">
     <mat-tab label="Engine">
       <div class="tab-grid">
         <mat-card class="panel panel--soft">
@@ -61,11 +61,13 @@
       </div>
     </mat-tab>
 
-    <mat-tab label="Registry">
-      <ng-template matTabContent>
-        <lib-admin-docker-registry/>
-      </ng-template>
-    </mat-tab>
+    @if (supportsRegistry) {
+      <mat-tab label="Registry">
+        <ng-template matTabContent>
+          <lib-admin-docker-registry/>
+        </ng-template>
+      </mat-tab>
+    }
 
     <mat-tab label="Containers">
       <div class="tab-grid">
@@ -443,48 +445,6 @@
         </mat-card>
       </div>
     </mat-tab>
-    @if (supportsRegistry) {
-      <mat-tab label="Registry">
-        <div class="tab-grid">
-          <mat-card class="panel">
-            <div class="panel__header">
-              <div>
-                <h2>Registry images</h2>
-                <p>{{ registryImages()?.registry || 'Repositories and tags in the deployed registry.' }}</p>
-              </div>
-              <button mat-stroked-button (click)="loadRegistry()" [disabled]="registryLoading()">
-                <mat-icon>refresh</mat-icon>
-                Refresh registry
-              </button>
-            </div>
-            @if (registryLoading()) {
-              <mat-progress-bar mode="indeterminate"/>
-            }
-            @if (registryError(); as error) {
-              <div class="empty-state" role="alert">{{ error }}</div>
-            } @else if (registryImages(); as images) {
-              <div class="table-wrap">
-                <table mat-table [dataSource]="images.repositories" class="table">
-                  <ng-container matColumnDef="repository">
-                    <th mat-header-cell *matHeaderCellDef>Repository</th>
-                    <td mat-cell *matCellDef="let repository">{{ repository.name }}</td>
-                  </ng-container>
-                  <ng-container matColumnDef="tags">
-                    <th mat-header-cell *matHeaderCellDef>Tags</th>
-                    <td mat-cell *matCellDef="let repository">{{ repository.tags.join(', ') || 'No tags' }}</td>
-                  </ng-container>
-                  <tr mat-header-row *matHeaderRowDef="['repository', 'tags']"></tr>
-                  <tr mat-row *matRowDef="let row; columns: ['repository', 'tags']"></tr>
-                </table>
-              </div>
-              @if (!images.repositories.length) {
-                <div class="empty-state">No repositories found in this registry.</div>
-              }
-            }
-          </mat-card>
-        </div>
-      </mat-tab>
-    }
   </mat-tab-group>
 
 </lib-page-wrapper>

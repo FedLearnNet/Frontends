@@ -174,9 +174,10 @@ export class AppEditComponent {
     }
     this.dialog.open(PipelinePublishInfoDialogComponent, {
       data: {
-        ...info, 
-        appVersionId: this.app().latestVersionId, 
-        authors: this.app().authors
+        ...app.publishInfo,
+        imageName: app.imageName,
+        appVersionId: app.latestVersionId,
+        authors: app.authors,
       },
       height: '80vh',
       width: '90vw',
