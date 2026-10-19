@@ -142,3 +142,8 @@ export interface ContainerLogDTO extends BaseDto {
   containerId?: string;
   log?: string;
 }
+
+export interface RegistryImagesDTO {
+  registry: string;
+  repositories: {name: string; tags: string[]}[];
+}

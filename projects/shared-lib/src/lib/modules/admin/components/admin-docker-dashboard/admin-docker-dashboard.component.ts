@@ -23,7 +23,9 @@ import {
 import {
   AdminDockerVolumeDetailDialogComponent
 } from '@shared-lib/modules/admin/components/admin-docker-volume-detail-dialog/admin-docker-volume-detail-dialog.component';
-import {ContainerDTO, ContainerRunDTO, InfoDTO, InspectVolumeResponseDTO} from '@shared-lib/modules/admin/dto/orch';
+import {ContainerDTO, ContainerRunDTO, InfoDTO, InspectVolumeResponseDTO, RegistryImagesDTO} from '@shared-lib/modules/admin/dto/orch';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {finalize} from 'rxjs';
 import {OrchRelayService} from '@shared-lib/modules/admin/services/orch.service';
 import {OrchActions} from '@shared-lib/modules/admin/store/orch.actions';
 import {
@@ -82,6 +84,11 @@ export class AdminDockerDashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly containerSearch = signal('');
+  readonly supportsRegistry = this.orchService.supportsRegistry;
+  readonly registryImages = signal<RegistryImagesDTO | null>(null);
+  readonly registryLoading = signal(false);
+  readonly registryError = signal<string | null>(null);
+  private registrySelected = false;
   readonly fcHardCleanup = signal(false);
   readonly fcSelection = new SelectionModel<string>(true, []);
 
@@ -139,8 +146,26 @@ export class AdminDockerDashboardComponent implements OnInit {
 
   refreshAll(): void {
     this.store.dispatch(OrchActions.loadDashboard());
+    if (this.registrySelected) this.loadRegistry();
   }
 
+  selectTab(label: string): void {
+    this.registrySelected = label === 'Registry';
+    if (this.registrySelected && !this.registryImages()) this.loadRegistry();
+  }
+
+  loadRegistry(): void {
+    if (this.registryLoading()) return;
+    this.registryLoading.set(true);
+    this.registryError.set(null);
+    this.orchService.getRegistryImages().pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.registryLoading.set(false)),
+    ).subscribe({
+      next: images => this.registryImages.set(images),
+      error: () => this.registryError.set('Could not load the registry catalogue. Check the registry configuration and connection.'),
+    });
+  }
 
   openRunDetail(id: number): void {
     this.dialog.open(AdminDockerRunDetailDialogComponent, {
