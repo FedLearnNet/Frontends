@@ -173,7 +173,7 @@ export class AppEditComponent {
       return;
     }
     this.dialog.open(PipelinePublishInfoDialogComponent, {
-      data: info,
+      data: {...info, appVersionId: this.app().latestVersionId, authors: this.app().authors},
       height: '80vh',
       width: '90vw',
       maxWidth: '100vw',

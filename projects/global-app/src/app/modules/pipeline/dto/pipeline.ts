@@ -53,6 +53,7 @@ export interface PipelineDTO extends BaseDto {
 
 export interface PipelineCreateDTO {
   pipelineType: PipelineType;
+  runMode?: 'ALL' | 'LOCAL_BUILD' | 'SCAN_ONLY';
   modelSubId?: number;
   appVersionId?: number;
 

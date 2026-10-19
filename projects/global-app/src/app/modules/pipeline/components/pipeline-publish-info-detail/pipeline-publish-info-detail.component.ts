@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, model, signal} from '@angular/core';
 import {AppPublishInfoDTO, MalwareFindingDTO} from "@shared-lib/modules/store/dto/publish-info";
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
@@ -10,6 +10,12 @@ import {MatButton} from "@angular/material/button";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
+import {AuthStateService} from "@shared-lib/services/auth-state.service";
+import {AuthorDto} from "@shared-lib/modules/store/dto/app-author";
+import {PipelineService} from "../../service/pipeline.service";
+import {PipelineStatus, PipelineType} from "../../dto/pipeline";
+import {finalize, startWith, switchMap, takeWhile} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 
 @Component({
@@ -29,7 +35,45 @@ import {KvComponent} from "@shared-lib/components/kv/kv.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PipelinePublishInfoDetailComponent {
-  publishInfo = input.required<AppPublishInfoDTO>();
+  private readonly auth = inject(AuthStateService);
+  private readonly pipelines = inject(PipelineService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  publishInfo = model.required<AppPublishInfoDTO>();
+  appVersionId = input<number>();
+  authors = input<AuthorDto[]>([]);
+  readonly rescanning = signal(false);
+  readonly canRescan = computed(() => {
+    const username = this.auth.userProfile()?.username;
+    return !!username && !!this.appVersionId() && !!this.publishInfo().imageName
+      && this.authors().some(author => author.keycloakId === username);
+  });
+
+  rescan(): void {
+    if (!this.canRescan() || this.rescanning()) return;
+    this.rescanning.set(true);
+    this.pipelines.create({
+      pipelineType: PipelineType.APP,
+      runMode: 'SCAN_ONLY',
+      appVersionId: this.appVersionId(),
+      autoStart: true,
+    }).pipe(
+      switchMap(pipeline => this.pipelines.stream(pipeline.id).pipe(startWith(pipeline))),
+      takeWhile(pipeline => pipeline.pipelineStatus === PipelineStatus.PENDING
+        || pipeline.pipelineStatus === PipelineStatus.RUNNING, true),
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.rescanning.set(false)),
+    ).subscribe({
+      next: pipeline => {
+        const result = pipeline.publishInfo?.vulnerabilityScanResult;
+        if (result) {
+          this.publishInfo.update(info => ({...info, vulnerabilityScanResult: result}));
+        }
+      },
+      error: () => { /* PipelineService displays the error. */
+      },
+    });
+  }
 
   readonly vulnTotal = computed(() => {
     const s = this.publishInfo().vulnerabilityScanResult?.summary;
@@ -38,8 +82,7 @@ export class PipelinePublishInfoDetailComponent {
   });
 
   readonly vulnUnknown = computed(() => {
-    const r = this.publishInfo().vulnerabilityScanResult;
-    return !r || r.success !== true;
+    return !this.publishInfo().vulnerabilityScanResult?.summary;
   });
 
   readonly malwareUnknown = computed(() => {

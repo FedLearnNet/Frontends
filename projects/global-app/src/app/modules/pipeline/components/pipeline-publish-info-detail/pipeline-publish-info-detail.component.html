@@ -114,13 +114,19 @@
           Vulnerability scan
         </div>
 
-        @if (publishInfo().vulnerabilityScanResult; as v) {
-          <div class="chips">
+        <div class="chips">
+          @if (publishInfo().vulnerabilityScanResult; as v) {
             <lib-status-badge [size]="'SMALL'"
                               [type]="v.success ? 'SUCCESS': 'FAILED'"/>
             <lib-badge color="GRAY" [text]="v.tool"></lib-badge>
-          </div>
-        }
+          }
+          @if (canRescan()) {
+            <button mat-stroked-button (click)="rescan()" [disabled]="rescanning()">
+              <mat-icon>refresh</mat-icon>
+              {{ rescanning() ? 'Rescanning…' : 'Rescan vulnerabilities' }}
+            </button>
+          }
+        </div>
       </div>
 
       <mat-divider></mat-divider>
