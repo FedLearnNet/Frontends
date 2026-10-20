@@ -48,5 +48,17 @@
 
   <div class="footer__bottom">
     <p class="footer__copyright">© {{ year }} {{ brand() }}. {{ copyright() }}</p>
+    @if (versionLoading()) {
+      <p class="footer__version">
+        <lib-skeleton-line width="12ch"/>
+      </p>
+    } @else if (version()) {
+      <p class="footer__version">
+        Version {{ version() }}
+        @if (versionHint()) {
+          <span class="footer__versionHint">· {{ versionHint() }}</span>
+        }
+      </p>
+    }
   </div>
 </footer>

@@ -5,7 +5,6 @@ export const environment: Environment = {
   project: 'dAIbetes',
   appTitle: 'dAIbetesNet-Client',
   localLearningAPIURL: 'local-learning-api',
-  globalWebUrl: "https://daibetes-net.cosy.bio/",
   keycloak: {
     url: '/auth',
     realm: 'FLNet-Client',
