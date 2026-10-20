@@ -1,13 +1,13 @@
-import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
-import Keycloak from "keycloak-js";
 import {MatButton} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatIcon} from "@angular/material/icon";
 import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {BadgeColor, BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
-import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
+import {login, logout} from "@shared-lib/services/auth";
+import {getAccountManagementUrl} from "@shared-lib/services/auth.helper";
 
 @Component({
   selector: 'app-lib-user-menu',
@@ -24,7 +24,6 @@ import {getKeycloakRedirectUri} from "@shared-lib/services/keycloak";
   ]
 })
 export class UserMenuComponent {
-  private readonly keycloak = inject(Keycloak, {optional: true});
   private readonly authState = inject(AuthStateService);
 
   readonly isLoggedIn = this.authState.isLoggedIn;
@@ -62,15 +61,15 @@ export class UserMenuComponent {
   });
 
   public login() {
-    void this.keycloak?.login();
+    login();
   }
 
   public accountManagement() {
-    void this.keycloak?.accountManagement();
+    window.location.assign(getAccountManagementUrl());
   }
 
   public logout() {
-    void this.keycloak?.logout({redirectUri: getKeycloakRedirectUri()});
+    logout();
   }
 
   public isAdminRole(role: string): boolean {

@@ -1,5 +1,6 @@
 import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {TranslatePipe} from "@ngx-translate/core";
 import {MatCard} from "@angular/material/card";
 import {MatIcon} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -20,7 +21,8 @@ type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemD
     MatIcon,
     MatTooltip,
     StatusBadgeComponent,
-    TimeBadgeComponent
+    TimeBadgeComponent,
+    TranslatePipe
   ],
   templateUrl: './query-detail-card.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

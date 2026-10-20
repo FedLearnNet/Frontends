@@ -1272,6 +1272,12 @@
       "NOT_EXISTS": "Does not exist"
     }
   },
+  "QUERY_OPERATOR": {
+    "AND": "and",
+    "OR": "or",
+    "EXISTS": "exists",
+    "REGEX": "regex"
+  },
   "SUCCESS": {
     "SHEETS_MERGED": "Sheets merged successfully",
     "CSV_FILES_MERGED": "CSV files merged successfully"

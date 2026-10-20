@@ -9,6 +9,9 @@
                             [type]="pipelineStatusToBadgeStatus(pipelineStatus)"/>
 
           <div>Pipeline #{{ pipelineId() }}</div>
+          @if (pipeline(); as p) {
+            <div>{{ pipelineRunModeLabels[p.runMode] }}</div>
+          }
         }
       </div>
       <div class="btns">

@@ -1,4 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, HostBinding, HostListener, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, HostBinding, HostListener, inject, input, output} from '@angular/core';
+import {MatDialog} from '@angular/material/dialog';
+import {
+  PipelinePublishInfoDialogComponent
+} from '../../../../../../../global-app/src/app/modules/pipeline/components/pipeline-publish-info-dialog/pipeline-publish-info-dialog.component';
 import {StoreDTO} from "@shared-lib/modules/store/dto/store";
 import {MatCard, MatCardFooter} from "@angular/material/card";
 import {PlaceholderImageComponent} from "@shared-lib/components/placeholder-image/placeholder-image.component";
@@ -6,6 +10,7 @@ import {RouterLink} from "@angular/router";
 import {AppCardTagsComponent} from "@shared-lib/modules/store/components/app-card-tags/app-card-tags.component";
 import {NgTemplateOutlet} from "@angular/common";
 import {AppDto} from "@shared-lib/modules/store/dto/app";
+import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {AppTypeBadgeComponent} from "@shared-lib/modules/store/components/app-type-badge/app-type-badge.component";
 import {StoreRatingComponent} from "@shared-lib/modules/store/components/store-rating/store-rating.component";
@@ -57,6 +62,7 @@ export type StoreCardSize = 'x-small' | 'small' | 'medium' | 'large' | 'x-large'
   ],
 })
 export class StoreCardComponent {
+  private readonly dialog = inject(MatDialog);
   storeElement = input.required<StoreDTO>();
   linkToShop = input.required<boolean>();
   enableHover = input<boolean>(true);
@@ -133,5 +139,19 @@ export class StoreCardComponent {
       return;
     }
     this.itemClicked.emit(this.storeElement());
+  }
+
+  showPipelinePublishInfo(): void {
+    const app = this.storeElement().app as AppDetailDto | undefined;
+    const info = app?.publishInfo;
+    if (!info) return;
+    this.dialog.open(PipelinePublishInfoDialogComponent, {
+      data: {...info, appVersionId: app?.latestVersionId, authors: app?.authors},
+      height: '80vh',
+      width: '90vw',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      autoFocus: false,
+    });
   }
 }

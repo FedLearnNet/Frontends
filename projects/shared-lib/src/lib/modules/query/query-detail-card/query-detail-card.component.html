@@ -55,7 +55,7 @@
             @if (group.operator && group.operator!.length) {
               @for (op of group.operator; track $index) {
                 <div class="cond">
-                  <lib-badge [text]="prettify(op.operator)" color="ORANGE" [size]="'SMALL'" [border]="true"/>
+                  <lib-badge [text]="prettify(op.operator) | translate" color="ORANGE" [size]="'SMALL'" [border]="true"/>
                   @if (op.value) {
                     <lib-badge [text]="prettyValue(op.value)" color="GRAY" [size]="'MEDIUM'"/>
                   }
