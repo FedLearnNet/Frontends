@@ -11,6 +11,7 @@ import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {CohortStarService} from "@local-app/utils/services/cohort-star.service";
+import {InfoService} from "@local-app/utils/services/info.service";
 import {CohortService} from "@local-app/cohort/services/cohort.service";
 import {CohortDto, isCohortDeleting} from "@local-app/cohort/models";
 import {Store} from "@ngrx/store";
@@ -50,9 +51,17 @@ export class AppComponent implements OnInit {
   private readonly store = inject(Store);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly infoService = inject(InfoService);
 
   readonly unreadCount = this.store.selectSignal(selectUnreadCount);
   readonly reviewCounts = this.store.selectSignal(selectReviewCounts);
+
+  readonly version = computed(() => this.infoService.info()?.version ?? null);
+  readonly versionLoading = this.infoService.loading;
+  readonly versionHint = computed(() => {
+    const info = this.infoService.info();
+    return info?.globalVersionNewer ? `Platform runs ${info.globalVersion}, update this Client` : null;
+  });
 
   title = environment.appTitle;
   project = environment.project;

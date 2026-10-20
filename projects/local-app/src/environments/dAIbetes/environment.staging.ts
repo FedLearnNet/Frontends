@@ -5,7 +5,6 @@ export const environment: Environment = {
   project: 'dAIbetes',
   appTitle: 'dAIbetes - Local App - STAGING',
   localLearningAPIURL: 'local-learning-api',
-  globalWebUrl: "https://dev.federated-learning.net/",
   keycloak: {
     url: '/auth',
     realm: 'FLNet-Client',
