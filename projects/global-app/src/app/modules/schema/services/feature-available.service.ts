@@ -1,3 +1,4 @@
+import {DEFAULT_DATAMODELER_API_PREFIX} from '@shared-lib/constants/datamodeler.constants';
 import {inject, Injectable} from '@angular/core';
 import {ApiService} from '@shared-lib/services/api.service';
 import {environment} from '@global-app/env/environment';
@@ -14,7 +15,8 @@ export class FeatureAvailableService {
   readonly apiService: ApiService = inject(ApiService);
   private readonly translate: TranslateService = inject(TranslateService);
 
-  private readonly apiUrl = environment.datamodelerApiUrl;
+  private readonly apiUrl = environment.globalLearningApiUrl;
+  private readonly apiPrefix = environment.datamodelerApiPrefix ?? DEFAULT_DATAMODELER_API_PREFIX;
   private readonly path = 'feature-available';
 
   get(): Observable<FeatureAvailableDTO> {
@@ -27,6 +29,6 @@ export class FeatureAvailableService {
   }
 
   private getBaseUrl(): string {
-    return `${this.apiUrl}/${this.path}`;
+    return `${this.apiUrl}/${this.apiPrefix}/${this.path}`;
   }
 }

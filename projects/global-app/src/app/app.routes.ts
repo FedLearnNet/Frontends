@@ -1,5 +1,6 @@
 import {Routes} from '@angular/router';
-import {ADMIN_REALM_ROLE, AllowDataModelingRouteGuard, AuthGuard} from "@shared-lib/services/keycloak";
+import {AllowDataModelingRouteGuard, AuthGuard} from "@shared-lib/services/auth";
+import {ADMIN_REALM_ROLE} from "@shared-lib/services/auth.helper";
 import {DashboardComponent} from "@global-app/utils/components/dashboard/dashboard.component";
 import {
   ModelWorkflowDetailComponent

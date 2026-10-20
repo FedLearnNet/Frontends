@@ -66,7 +66,9 @@
               }
             </div>
             <div class="right-side--bottom">
-              <lib-docker-image-tag [imageName]="data.image" size="MEDIUM" [border]="true"/>
+              <lib-docker-image-tag [imageName]="data.image" size="MEDIUM" [border]="true"
+                                    [clickable]="!!data.app?.publishInfo && !data.isModel"
+                                    (clicked)="showPipelinePublishInfo()"/>
               <lib-store-rating [editMode]="false"
                                 [rating]="data.rating"/>
             </div>

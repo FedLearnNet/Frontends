@@ -15,12 +15,26 @@ export enum PipelineType {
   APP = "APP",
 }
 
+export enum PipelineRunMode {
+  ALL = "ALL",
+  LOCAL_BUILD = "LOCAL_BUILD",
+  SCAN_ONLY = "SCAN_ONLY",
+}
+
+export const pipelineRunModeLabels: Record<PipelineRunMode, string> = {
+  [PipelineRunMode.ALL]: 'Build and publish',
+  [PipelineRunMode.LOCAL_BUILD]: 'Local build',
+  [PipelineRunMode.SCAN_ONLY]: 'Vulnerability rescan',
+};
+
 export enum StepName {
   PREFLIGHT = "PREFLIGHT",
   CLONE_REPO = "CLONE_REPO",
   BUILD_IMAGE = "BUILD_IMAGE",
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_FILES = "FETCH_FILES",
+  SAST = "SAST",
+  PULL_IMAGE = "PULL_IMAGE",
   PUSH_IMAGE = "PUSH_IMAGE",
   SCAN_IMAGE = "SCAN_IMAGE",
   MALWARE_CHECK = "MALWARE_CHECK",
@@ -43,6 +57,7 @@ export interface PipelineStepDTO extends BaseDto {
 export interface PipelineDTO extends BaseDto {
   pipelineStatus: PipelineStatus;
   pipelineType: PipelineType;
+  runMode: PipelineRunMode;
   pipelineSteps?: PipelineStepDTO[];
   publishInfo?: AppPublishInfoDTO;
   secret?: string;
@@ -53,6 +68,7 @@ export interface PipelineDTO extends BaseDto {
 
 export interface PipelineCreateDTO {
   pipelineType: PipelineType;
+  runMode?: PipelineRunMode;
   modelSubId?: number;
   appVersionId?: number;
 
