@@ -18,6 +18,7 @@ import {finalize, startWith, switchMap, takeWhile} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {JsonPipe} from '@angular/common';
+import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 
 @Component({
   selector: 'app-pipeline-publish-info-detail',
@@ -31,6 +32,7 @@ import {JsonPipe} from '@angular/common';
     BadgeComponent,
     StatusBadgeComponent,
     KvComponent,
+    TimeBadgeComponent,
     JsonPipe],
   templateUrl: './pipeline-publish-info-detail.component.html',
   styleUrl: './pipeline-publish-info-detail.component.scss',

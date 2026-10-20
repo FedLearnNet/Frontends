@@ -19,6 +19,10 @@ export interface SecurityScanResultDTO {
 
   rawReport?: Record<string, unknown>;
 
+  startedAt?: Date;
+
+  finishedAt?: Date;
+
 }
 
 export interface MalwareFindingDTO {
@@ -65,6 +69,8 @@ export interface SastScanResultDTO {
   findings: SastFindingDTO[];
   errors: SastScanErrorDTO[];
   rawReport?: Record<string, unknown>;
+  startedAt?: Date;
+  finishedAt?: Date;
 }
 
 
@@ -73,6 +79,8 @@ export interface MalwareScanResultDTO {
   success: boolean;
   infectedCount: number;
   findings: MalwareFindingDTO[];
+  startedAt?: Date;
+  finishedAt?: Date;
 }
 
 export interface AppPublishInfoDTO {

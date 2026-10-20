@@ -154,6 +154,16 @@
         } @else {
           @let v = publishInfo().vulnerabilityScanResult!;
           <lib-kv label="Target" [value]="v.target"></lib-kv>
+          @if (v.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="v.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (v.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="v.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
           <div class="chips">
             <lib-badge color="RED" text="Critical" size="LARGE" [border]="true">{{ v.summary.critical }}
             </lib-badge>
@@ -214,6 +224,16 @@
           <lib-kv label="Target" [value]="s.target"/>
           <lib-kv label="Scanner version" [value]="s.version"/>
           <lib-kv label="Scanned files" [value]="s.scannedFiles"/>
+          @if (s.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="s.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (s.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="s.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
           @if (!s.complete) {
             <div class="empty">Scan incomplete. Findings may be partial.</div>
           }
@@ -288,6 +308,16 @@
           <div class="empty">No malware scan result present.</div>
         } @else {
           @let m = publishInfo().malwareScanResult!;
+          @if (m.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="m.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (m.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="m.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
           @if ((m.findings.length) === 0) {
             <div class="empty">No infected files reported.</div>
           } @else {
