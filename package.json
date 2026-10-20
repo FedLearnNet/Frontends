@@ -1,6 +1,6 @@
 {
   "name": "federated-db-frontend",
-  "version": "1.0.0.rc0",
+  "version": "1.0.0.dev",
   "scripts": {
     "ng": "ng",
     "watch": "ng build --watch --configuration development",
