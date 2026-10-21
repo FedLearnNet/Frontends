@@ -5,7 +5,6 @@ export const environment: Environment = {
   project: 'FLNet',
   appTitle: 'FLNet-Client',
   localLearningAPIURL: 'local-learning-api',
-  globalWebUrl: "https://federated-learning.net/",
   keycloak: {
     url: '/auth',
     realm: 'FLNet-Client',

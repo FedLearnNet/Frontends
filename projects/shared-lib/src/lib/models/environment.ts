@@ -11,11 +11,6 @@ export interface Environment {
     datamodelerApiPrefix?: string; // data modeler path behind the global API, default: DEFAULT_DATAMODELER_API_PREFIX
     allowGlobalDataModeling?: boolean; // If false, disables certain parts showing the data models
 
-    // address of the global web frontend. Only needed by the local app for certain frontend
-    // services of the global platform.
-    // Only the local app has to set this!
-    globalWebUrl?: string;
-
     // The login itself runs in the learning API (backend-for-frontend), Keycloak is only linked for account management.
     keycloak: {
         url: string; // Base URL of the Keycloak server, so without any path (except e.g. /auth if deployed on auth)

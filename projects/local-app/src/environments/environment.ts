@@ -5,7 +5,6 @@ export const environment: Environment = {
   project: 'FEDDB-Local',
   appTitle: 'FEDDB-LOCAL - Local App - DEFAULT',
   localLearningAPIURL: undefined,
-  globalWebUrl: "https://platform.microbaiome.featurecloud.ai/",
   keycloak: {
     url: 'https://staging.featurecloud.ai/feddb/local-auth',
     realm: 'fedDB-local',
