@@ -28,8 +28,8 @@
           <lib-info-item title="Requested At">
             <lib-time-badge [date]="project.createdAt"/>
           </lib-info-item>
-          <lib-info-item title="Aggregator running on">
-            {{ aggregatorLocation }}
+          <lib-info-item [title]="'GRID.AGGREGATOR_RUNNING_ON' | translate">
+            {{ aggregatorLocationKey | translate }}
           </lib-info-item>
           <lib-info-item title="Public Model">
             @if (data.request.modelCanBePublic) {
