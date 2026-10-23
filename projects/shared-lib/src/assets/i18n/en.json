@@ -632,6 +632,7 @@
     "VIEW_DETAILS": "View Details",
     "PROJECT": "Project",
     "PLATFORM_AGGREGATOR_SUPPORT": "platform aggregator support",
+    "AGGREGATOR_RUNNING_ON": "Aggregator running on",
     "SELECTED_DATA": "Selected Data",
     "QUERY": "Query",
     "COHORT_NAME": "Cohort Name",
@@ -964,10 +965,7 @@
       "TITLE": "Create New Project",
       "MESSAGE_LINE_1": "A project consists of a name, description, query information, selected data attributes, and your workflow.",
       "MESSAGE_LINE_2": "Should you initiate a federated learning process, this information will be shared with the participating hospitals. It is important to ensure that your inputs are clear and descriptive to facilitate understanding and collaboration with the institutions involved.",
-      "MESSAGE_LINE_3": "Please note that all project details can be modified later if adjustments are required.",
-      "AGGREGATOR_LOCATION_LABEL": "Where should the aggregator run?",
-      "AGGREGATOR_LOCATION_RANDOM_CLINIC": "A random participating clinic",
-      "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform"
+      "MESSAGE_LINE_3": "Please note that all project details can be modified later if adjustments are required."
     },
     "JOIN_PROJECT": {
       "TITLE": "Join Project",
@@ -979,7 +977,10 @@
       "MESSAGE_LINE_FEDERATED_1": "A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version. This copy, along with your query information, will be sent to all relevant hospitals.",
       "MESSAGE_LINE_FEDERATED_2": "The hospitals will review your project and approve patient participation; they may choose to exclude certain individuals. You can monitor the status at any time. If you are satisfied with the number of patients, you may accept and initiate the study at your discretion.",
       "MESSAGE_LINE_LOCAL_1": "A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version. This copy, will be used as a foundation for your local experiment.",
-      "MESSAGE_LINE_LOCAL_2": "You can start your controller at anytime. See bootstrap."
+      "MESSAGE_LINE_LOCAL_2": "You can start your controller at anytime. See bootstrap.",
+      "AGGREGATOR_LOCATION_LABEL": "Where should the aggregator run?",
+      "AGGREGATOR_LOCATION_RANDOM_CLINIC": "A random participating clinic",
+      "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform"
     },
     "START_NEW_SCHEMA": {
       "TITLE": "Start New Schema"

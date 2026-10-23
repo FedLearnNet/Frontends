@@ -45,8 +45,11 @@
                 <lib-badge color="GRAY" [uppercase]="true" [text]="'N/A'"/>
               }
             </lib-info-item>
-            <lib-info-item title="Aggregator running on">
-              <lib-badge color="GRAY" [text]="exp.platformIsCoordinator ? 'Platform' : 'Random clinic'"/>
+            <lib-info-item [title]="'GRID.AGGREGATOR_RUNNING_ON' | translate">
+              <lib-badge color="GRAY"
+                         [text]="(exp.platformIsCoordinator
+                           ? 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM'
+                           : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC') | translate"/>
             </lib-info-item>
           </lib-info-grid>
 

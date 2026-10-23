@@ -57,13 +57,13 @@
     </mat-form-field>
     @if (platformAggregatorSupported()) {
       <div class="aggregator-location">
-        <p>{{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
+        <p>{{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
         <mat-radio-group formControlName="platformIsCoordinator">
           <mat-radio-button [value]="false">
-            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
+            {{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
           </mat-radio-button>
           <mat-radio-button [value]="true">
-            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM' | translate }}
+            {{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM' | translate }}
           </mat-radio-button>
         </mat-radio-group>
       </div>

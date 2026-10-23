@@ -68,12 +68,12 @@ interface FilterParams {
 
 /**
  * Returns the i18n key for the aggregator-location label, not the rendered text - the same
- * keys back the create/edit-project toggle in global-app, so wording only lives in one place.
+ * keys back the create-federated-experiment toggle in global-app, so wording only lives in one place.
  */
 export function getAggregatorLocationKey(platformIsCoordinator?: boolean): string {
   return platformIsCoordinator
-    ? 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM'
-    : 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
+    ? 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM'
+    : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
 @Component({
