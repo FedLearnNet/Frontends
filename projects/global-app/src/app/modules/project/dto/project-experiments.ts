@@ -13,6 +13,7 @@ export interface ProjectFederatedCreateExperimentDTO {
   description: string;
 
   modelNeedToBePublic: boolean;
+  platformIsCoordinator: boolean;
 }
 
 export interface ProjectFederatedExperimentStepDTO extends BaseWorkflowStepDTO {
@@ -50,6 +51,8 @@ export interface ProjectFederatedExperimentDTO extends BaseWorkflowExperimentDTO
   //model access
   modelCanBePublic: boolean;
   modelNeedToBePublic: boolean;
+
+  platformIsCoordinator: boolean;
 
   workflow: WorkflowDTO;
   projectVersion: ProjectDetailDto;
