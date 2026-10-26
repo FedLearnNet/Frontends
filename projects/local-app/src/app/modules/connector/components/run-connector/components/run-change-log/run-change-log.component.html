@@ -1,8 +1,19 @@
-<app-general-log-table
-    [tableKey]="'run-change-log-' + runId()"
-    [loadedData]="data()"
-    [allowSearch]="false"
-    [displayedColumns]="displayedColumns"
-    (openDetail)="openDetail($event)"
-    (loadData)="loadData($event)"
-/>
+@if (!data()) {
+  <lib-skeleton-loader
+    variant="table"
+    density="compact"
+    [showHeader]="false"
+    [tableCols]="displayedColumns.length"
+    [tableRows]="10"/>
+}
+<!-- The table must stay mounted: it emits the initial loadData itself. -->
+<div [hidden]="!data()">
+  <app-general-log-table
+      [tableKey]="'run-change-log-' + runId()"
+      [loadedData]="data()"
+      [allowSearch]="false"
+      [displayedColumns]="displayedColumns"
+      (openDetail)="openDetail($event)"
+      (loadData)="loadData($event)"
+  />
+</div>
