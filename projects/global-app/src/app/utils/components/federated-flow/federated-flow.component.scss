@@ -1,0 +1,605 @@
+// Colours follow the FL-Net figure: blue aggregator, light-blue stage cards, one tone per site.
+:host {
+  --flow-fg: #1f2733;
+  --flow-muted: #5c6675;
+  --flow-line: rgba(2, 6, 23, 0.12);
+  --flow-agg: #3f6391;
+  --flow-agg-active: #2f5283;
+  --flow-card: #9fb0da;
+  --flow-card-active: #3f6391;
+  --flow-accent: #2f7de1;
+
+  display: block;
+}
+
+.flow {
+  --padX: clamp(18px, 3.6vw, 40px);
+  max-width: 1200px;
+  margin: clamp(28px, 4vw, 48px) auto 0;
+  padding: 0 var(--padX);
+  color: var(--flow-fg);
+
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: var(--flow-muted);
+    }
+  }
+
+  &__play {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--flow-line);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--flow-fg);
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--flow-agg);
+    }
+  }
+
+  &__figure {
+    padding: clamp(8px, 1.6vw, 20px);
+    border: 1px solid var(--flow-line);
+    border-radius: 16px;
+    background: #fff;
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      font-family: inherit;
+    }
+  }
+
+  &__note {
+    margin: 4px 0 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--flow-muted);
+  }
+}
+
+// ---- Figure ---------------------------------------------------------------------------------
+
+svg text {
+  fill: var(--flow-fg);
+  font-size: 13px;
+}
+
+.arrowhead {
+  fill: var(--flow-card);
+}
+
+.num {
+  circle {
+    fill: #111;
+  }
+
+  text {
+    fill: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+}
+
+.agg {
+  &__bar {
+    fill: var(--flow-agg);
+    transition: fill 300ms;
+  }
+
+  &__icon {
+    line {
+      stroke: #fff;
+      stroke-width: 1.5;
+    }
+
+    circle {
+      fill: var(--flow-agg);
+      stroke: #fff;
+      stroke-width: 2;
+    }
+  }
+
+  &__title {
+    fill: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+
+  &__formula,
+  &__label,
+  &__sub {
+    fill: #fff !important;
+    font-size: 13px;
+  }
+
+  &__chip {
+    rect {
+      fill: #e8eef8;
+      transition: fill 250ms;
+    }
+
+    text {
+      fill: var(--flow-agg) !important;
+      font-size: 12px !important;
+    }
+  }
+
+  &__dot {
+    fill: transparent;
+    stroke: #fff;
+    stroke-width: 1.5;
+    transition: fill 300ms;
+
+    &.is-done {
+      fill: #c9d8f0;
+    }
+  }
+
+  &.is-active .agg__bar {
+    fill: var(--flow-agg-active);
+  }
+
+  &.is-active .agg__icon circle {
+    animation: flf-pulse 600ms ease-in-out 3 alternate;
+  }
+
+  &.is-active .agg__chip rect {
+    animation: flf-chip 1.2s ease-out calc(var(--i) * 220ms) both;
+  }
+}
+
+.site {
+  --tone: #a79fd6;
+  --tone-soft: #f7f6fc;
+  --tone-dark: #5b4fa8;
+
+  &[data-tone='green'] {
+    --tone: #9ccc98;
+    --tone-soft: #f3f9f2;
+    --tone-dark: #3d7d3a;
+  }
+
+  &[data-tone='brown'] {
+    --tone: #c3a898;
+    --tone-soft: #fbf7f4;
+    --tone-dark: #7a5a48;
+  }
+
+  &__box {
+    fill: var(--tone-soft);
+    stroke: var(--tone);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+  }
+
+  &__icon rect {
+    fill: var(--tone-dark);
+  }
+
+  &__window {
+    fill: #fff !important;
+  }
+
+  &__cross {
+    fill: #fff;
+  }
+
+  &__h {
+    fill: var(--tone-dark) !important;
+    font-size: 9px !important;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__name {
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+}
+
+.link {
+  stroke: var(--flow-card);
+  stroke-width: 2.5;
+  transition: stroke 250ms;
+
+  &--down {
+    stroke: var(--flow-agg);
+  }
+
+  &--up {
+    stroke: var(--tone);
+  }
+
+  &.is-active {
+    stroke: var(--flow-accent);
+  }
+}
+
+.pill {
+  rect {
+    fill: #fff;
+    stroke: var(--tone);
+    stroke-width: 2;
+  }
+
+  text {
+    font-size: 13px;
+    text-anchor: middle;
+  }
+}
+
+.lock {
+  circle {
+    fill: #fff;
+    stroke: var(--tone);
+    stroke-width: 2;
+  }
+
+  &__shackle {
+    fill: none;
+    stroke: var(--tone-dark);
+    stroke-width: 1.8;
+  }
+
+  &__body {
+    fill: var(--tone-dark);
+  }
+
+  &.is-active circle {
+    animation: flf-lock 700ms ease-in-out 2 alternate;
+  }
+}
+
+.card {
+  &__box {
+    fill: #fff;
+    stroke: var(--flow-card);
+    stroke-width: 2;
+    transition: stroke 250ms, stroke-width 250ms;
+  }
+
+  &.is-active .card__box {
+    stroke: var(--flow-card-active);
+    stroke-width: 3;
+  }
+
+  // A halo keeps the label readable where the W(t+1) connector crosses it.
+  &__label {
+    fill: var(--flow-muted) !important;
+    paint-order: stroke;
+    stroke: var(--tone-soft);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  &__strong {
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__text {
+    text-anchor: middle;
+  }
+
+  &__muted {
+    fill: var(--flow-muted) !important;
+    text-anchor: middle;
+  }
+
+  &__small {
+    fill: var(--flow-muted) !important;
+    font-size: 11px !important;
+  }
+}
+
+.db {
+  path,
+  ellipse {
+    fill: #3c5f7d;
+  }
+
+  &__band {
+    fill: none !important;
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+
+  &__dot {
+    fill: #fff;
+  }
+}
+
+.nn {
+  &__edge {
+    stroke: #b7c0cc;
+    stroke-width: 0.8;
+  }
+
+  &__node {
+    fill: #1f86b5;
+    transform-box: fill-box;
+    transform-origin: center;
+
+    &[data-kind='in'] {
+      fill: #d0415d;
+    }
+
+    &[data-kind='out'] {
+      fill: #f0b43c;
+    }
+  }
+}
+
+.loss {
+  fill: none;
+  stroke: #2f7de1;
+  stroke-width: 2.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+
+  &__area {
+    fill: #eaf2fc;
+  }
+}
+
+.epoch {
+  fill: #cfe0f6;
+}
+
+.w-cell {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.stays {
+  rect {
+    fill: #fff;
+    stroke: var(--tone);
+    stroke-width: 2;
+  }
+
+  text {
+    font-size: 13px;
+    text-anchor: middle;
+  }
+}
+
+// Packets are hidden until their step plays.
+.packet {
+  opacity: 0;
+
+  rect {
+    fill: var(--tone-dark);
+  }
+
+  text {
+    fill: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &--down rect {
+    fill: var(--flow-agg);
+  }
+}
+
+// ---- Steps ----------------------------------------------------------------------------------
+
+.flow[data-phase='1'] .packet--record {
+  animation: flf-travel 1.1s ease-in-out calc(var(--delay) + var(--k) * 260ms) both;
+}
+
+.flow[data-phase='2'] .card--train {
+  .nn__node {
+    animation: flf-pulse 500ms ease-in-out calc(var(--delay) + var(--col) * 120ms) 4 alternate;
+  }
+
+  .loss {
+    animation: flf-draw 2s ease-out var(--delay) both;
+  }
+
+  .epoch {
+    animation: flf-epoch 600ms ease-out calc(var(--delay) + var(--e) * 550ms) both;
+  }
+}
+
+.flow[data-phase='3'] .w-cell {
+  animation: flf-pop 450ms ease-out calc(var(--delay) + var(--c) * 45ms) both;
+}
+
+.flow[data-phase='4'] .packet--up,
+.flow[data-phase='6'] .packet--down {
+  animation: flf-travel 1.3s ease-in-out var(--delay) both;
+}
+
+@keyframes flf-travel {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  12%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx, 0), var(--ty, 0));
+  }
+}
+
+@keyframes flf-pulse {
+  to {
+    transform: scale(1.45);
+  }
+}
+
+@keyframes flf-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flf-epoch {
+  from {
+    fill: #cfe0f6;
+  }
+  to {
+    fill: #2f7de1;
+  }
+}
+
+@keyframes flf-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes flf-chip {
+  0%,
+  100% {
+    fill: #e8eef8;
+  }
+  40% {
+    fill: #ffd98a;
+  }
+}
+
+@keyframes flf-lock {
+  to {
+    stroke: var(--flow-accent);
+    stroke-width: 4;
+  }
+}
+
+// ---- Captions -------------------------------------------------------------------------------
+
+.flow__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+
+  @media (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}
+
+.step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid var(--flow-line);
+  border-radius: 12px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 200ms, background 200ms;
+
+  &__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 14px;
+  }
+
+  &__text {
+    color: var(--flow-muted);
+    font-size: 13px;
+  }
+
+  &__bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 0;
+    background: var(--flow-agg);
+  }
+
+  &.active {
+    border-color: var(--flow-agg);
+    background: #f3f6fb;
+  }
+
+  // On phones only the active step keeps its explanation.
+  @media (max-width: 760px) {
+    padding: 8px 12px;
+
+    &:not(.active) .step__text {
+      display: none;
+    }
+  }
+}
+
+.flow--playing .step.active .step__bar {
+  animation: flf-progress var(--ms) linear both;
+}
+
+@keyframes flf-progress {
+  to {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

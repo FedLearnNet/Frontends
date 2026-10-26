@@ -1,0 +1,96 @@
+<section class="hero">
+  <div class="hero__text">
+    <span class="hero__eyebrow">
+      <span class="hero__dot" aria-hidden="true"></span>
+      {{ project() }} · Federated learning for clinical research
+    </span>
+
+    <h1>Train on hospital data <span class="hero__accent">without moving it</span></h1>
+
+    <p class="hero__lead">
+      Each site keeps its patient data. Models and analyses travel to the data, and only the results
+      come back: harmonized, approved and traceable.
+    </p>
+
+    <div class="hero__cta">
+      <button type="button" class="hero__btn hero__btn--primary" (click)="primaryCta.emit()">
+        {{ primaryCtaLabel() }}
+        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+      </button>
+      <button type="button" class="hero__btn" (click)="secondaryCta.emit()">
+        <mat-icon aria-hidden="true">description</mat-icon>
+        {{ secondaryCtaLabel() }}
+      </button>
+    </div>
+
+  </div>
+
+  <!-- A small federation: only model updates travel, the data stays in each hospital -->
+  <div class="hero__visual">
+    <svg viewBox="0 0 440 300" role="img"
+         aria-label="Three hospitals send encrypted model updates to a global model and receive the new model back. Patient data stays in each hospital.">
+      <g class="agg">
+        <rect class="agg__ring" x="16" y="16" width="408" height="72" rx="13"/>
+        <rect class="agg__bar" x="20" y="20" width="400" height="64" rx="10"/>
+        <g class="agg__icon" transform="translate(58,52)">
+          <line x1="-18" y1="-10" x2="0" y2="0"/><line x1="-18" y1="10" x2="0" y2="0"/>
+          <line x1="0" y1="0" x2="18" y2="-8"/><line x1="0" y1="0" x2="18" y2="8"/>
+          <line x1="0" y1="-16" x2="18" y2="-8"/><line x1="0" y1="16" x2="18" y2="8"/>
+          <circle cx="-18" cy="-10" r="4.5"/><circle cx="-18" cy="10" r="4.5"/>
+          <circle cx="0" cy="-16" r="4.5"/><circle cx="0" cy="0" r="4.5"/><circle cx="0" cy="16" r="4.5"/>
+          <circle cx="18" cy="-8" r="4.5"/><circle cx="18" cy="8" r="4.5"/>
+        </g>
+        <text class="agg__title" x="94" y="48">Global model</text>
+        <text class="agg__formula" x="94" y="69">W<tspan dy="-4" font-size="9">(t+1)</tspan><tspan dy="4"> = Σ</tspan><tspan dy="3" font-size="9">k</tspan><tspan dy="-3"> (n</tspan><tspan dy="3" font-size="9">k</tspan><tspan dy="-3">/n) ΔW</tspan><tspan dy="3" font-size="9">k</tspan></text>
+        <text class="agg__only" x="404" y="58">weights only</text>
+      </g>
+
+      @for (site of sites; track site.label) {
+        <g class="site" [attr.data-tone]="site.tone" [style.--delay]="site.delay + 'ms'">
+          <line class="link link--down" [attr.x1]="site.x + 36" y1="84" [attr.x2]="site.x + 36" y2="170"/>
+          <line class="link link--up" [attr.x1]="site.x + 84" y1="84" [attr.x2]="site.x + 84" y2="170"/>
+
+          <rect class="site__box" [attr.x]="site.x" y="170" width="120" height="112" rx="10"/>
+          <g [attr.transform]="'translate(' + (site.x + 10) + ',180)'" class="site__icon">
+            <rect x="0" y="7" width="24" height="16" rx="1.5"/>
+            <rect x="7" y="0" width="10" height="23" rx="1.5"/>
+            <circle class="site__cross" cx="12" cy="7" r="4"/>
+          </g>
+          <text class="site__name" [attr.x]="site.x + 42" y="197">{{ site.label }}</text>
+
+          <!-- Local training around the local data -->
+          <g [attr.transform]="'translate(' + (site.x + 60) + ',236)'">
+            <circle class="site__train" r="23"/>
+            <g class="db" transform="scale(0.62)">
+              <path d="M-22,-18 v36 a22,7 0 0 0 44,0 v-36"/>
+              <ellipse cx="0" cy="-18" rx="22" ry="7"/>
+              <path class="db__band" d="M-22,-6 a22,7 0 0 0 44,0 M-22,6 a22,7 0 0 0 44,0"/>
+            </g>
+          </g>
+          <text class="site__stays" [attr.x]="site.x + 60" y="274">data stays here</text>
+
+          @for (lx of [site.x + 36, site.x + 84]; track $index) {
+            <g class="lock" [attr.transform]="'translate(' + lx + ',170)'">
+              <circle r="9"/>
+              <path class="lock__shackle" d="M-3,-1 v-2.5 a3,3 0 0 1 6,0 v2.5"/>
+              <rect class="lock__body" x="-4.2" y="-1" width="8.4" height="6" rx="1"/>
+            </g>
+          }
+
+          <g [attr.transform]="'translate(' + (site.x + 84) + ',150)'">
+            <g class="packet packet--up">
+              <rect x="-15" y="-10" width="30" height="20" rx="5"/>
+              <text y="4">ΔW</text>
+            </g>
+          </g>
+          <g [attr.transform]="'translate(' + (site.x + 36) + ',104)'">
+            <g class="packet packet--down">
+              <rect x="-13" y="-10" width="26" height="20" rx="5"/>
+              <text y="4">W</text>
+            </g>
+          </g>
+        </g>
+      }
+    </svg>
+  </div>
+</section>
