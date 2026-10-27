@@ -91,9 +91,9 @@ const routes: Routes = [
           {
             path: 'run/:run-id',
             component: RunConnectorViewComponent,
+            // `connector` is inherited from the componentless parent route.
             resolve: {
               run: runResolver,
-              connector: connectorResolver,
             },
             data: { breadcrumb: (data: any) => `Run ${data.run.id}` },
           },
