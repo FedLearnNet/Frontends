@@ -1,0 +1,13 @@
+<section class="json-preview" [attr.aria-label]="'QUERY_BUILDER.JSON_TITLE' | translate">
+  <header class="json-preview__header">
+    <span class="json-preview__title">
+      <mat-icon>data_object</mat-icon>
+      {{ 'QUERY_BUILDER.JSON_TITLE' | translate }}
+    </span>
+    <button mat-button type="button" class="json-preview__copy" (click)="copy()">
+      <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+      {{ (copied() ? 'QUERY_BUILDER.COPIED' : 'QUERY_BUILDER.COPY') | translate }}
+    </button>
+  </header>
+  <pre class="json-preview__code" tabindex="0">{{ json() }}</pre>
+</section>

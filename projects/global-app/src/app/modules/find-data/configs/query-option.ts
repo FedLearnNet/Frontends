@@ -7,6 +7,17 @@ const EXISTENCE_OPERATORS = [
   {label: 'Does not exist', value: QueryOperatorTypes.NOT_EXISTS}
 ];
 
+const MEMBERSHIP_OPERATORS = [
+  {label: 'In', value: QueryOperatorTypes.IN},
+  {label: 'Not in', value: QueryOperatorTypes.NOT_IN}
+];
+
+const CHANGE_OPERATORS = [
+  {label: 'Has changed', value: QueryOperatorTypes.HAS_CHANGED},
+  {label: 'Changed from', value: QueryOperatorTypes.CHANGED_FROM},
+  {label: 'Changed to', value: QueryOperatorTypes.CHANGED_TO}
+];
+
 export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
   {
     type: DataTypes.INT,
@@ -18,7 +29,9 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
       {label: 'Greater than or equal', value: QueryOperatorTypes.BIGGER_EQUAL},
       {label: 'Less than', value: QueryOperatorTypes.SMALLER},
       {label: 'Less than or equal', value: QueryOperatorTypes.SMALLER_EQUAL},
-      ...EXISTENCE_OPERATORS
+      ...MEMBERSHIP_OPERATORS,
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   },
   {
@@ -31,7 +44,9 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
       {label: 'Greater than or equal', value: QueryOperatorTypes.BIGGER_EQUAL},
       {label: 'Less than', value: QueryOperatorTypes.SMALLER},
       {label: 'Less than or equal', value: QueryOperatorTypes.SMALLER_EQUAL},
-      ...EXISTENCE_OPERATORS
+      ...MEMBERSHIP_OPERATORS,
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   },
   {
@@ -45,7 +60,9 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
       {label: 'Matches regex', value: QueryOperatorTypes.REGEX},
       {label: 'Starts with', value: QueryOperatorTypes.START_WIDTH},
       {label: 'Ends with', value: QueryOperatorTypes.END_WIDTH},
-      ...EXISTENCE_OPERATORS
+      ...MEMBERSHIP_OPERATORS,
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   },
   {
@@ -54,7 +71,8 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     options: [
       {label: 'Equals', value: QueryOperatorTypes.EQUAL},
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
-      ...EXISTENCE_OPERATORS
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   },
   {
@@ -67,7 +85,8 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
       {label: 'On or before', value: QueryOperatorTypes.SMALLER_EQUAL},
       {label: 'After', value: QueryOperatorTypes.BIGGER},
       {label: 'On or after', value: QueryOperatorTypes.BIGGER_EQUAL},
-      ...EXISTENCE_OPERATORS
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   },
   {
@@ -78,12 +97,17 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
       {label: 'In', value: QueryOperatorTypes.IN},
       {label: 'Not in', value: QueryOperatorTypes.NOT_IN},
-      ...EXISTENCE_OPERATORS
+      ...EXISTENCE_OPERATORS,
+      ...CHANGE_OPERATORS
     ]
   }
 ];
 
 export function isOperatorWithValue(operator: QueryOperatorTypes | string | null | undefined): boolean {
   return operator !== QueryOperatorTypes.EXISTS
-    && operator !== QueryOperatorTypes.NOT_EXISTS;
+    && operator !== QueryOperatorTypes.NOT_EXISTS
+    && operator !== QueryOperatorTypes.HAS_CHANGED
+    && operator !== 'exists'
+    && operator !== '!exists'
+    && operator !== 'has_changed';
 }

@@ -1,0 +1,41 @@
+.interval {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.interval__part {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-form-field {
+    width: 76px;
+  }
+
+  mat-form-field + mat-form-field {
+    width: 116px;
+  }
+
+  button {
+    --mat-icon-button-state-layer-size: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    color: #64748b;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.interval__add {
+  --mat-text-button-horizontal-padding: 8px;
+  min-height: 36px;
+  color: #475569;
+  font-size: 12px;
+}

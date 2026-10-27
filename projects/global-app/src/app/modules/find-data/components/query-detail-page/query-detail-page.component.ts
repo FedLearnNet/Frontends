@@ -10,7 +10,6 @@ import {MatIconModule} from "@angular/material/icon";
 import {MatInputModule} from "@angular/material/input";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatTabsModule} from "@angular/material/tabs";
-import {cloneDeep} from "lodash";
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
@@ -19,11 +18,15 @@ import {InfoItemComponent} from "@shared-lib/components/info-item/info-item.comp
 import {StatusBadeType} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {QueryConfig} from '@global-app/find-data/models';
-import {CreateQueryDTO, QueryDetailDTO, QueryDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
+import {CreateQueryDTO, QueryDetailDTO, QueryDTO} from "@global-app/find-data/dto/query";
 import {
-  QueryBuilderItemComponent
-} from "@global-app/find-data/components/query-builder-item/query-builder-item.component";
+  QueryBuilderGroupComponent
+} from "@global-app/find-data/components/query-builder-group/query-builder-group.component";
+import {createEmptyGroup, QueryGroupNode} from '@global-app/find-data/models/query-tree';
+import {hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
+import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
 import {QueryService} from "@global-app/find-data/services/query.service";
+import {QueryJsonPreviewComponent} from '@global-app/find-data/components/query-json-preview/query-json-preview.component';
 import {
   QueryStatisticsPanelComponent
 } from "@global-app/find-data/components/query-statistics-panel/query-statistics-panel.component";
@@ -51,7 +54,8 @@ type QueryDetailTab = 'overview' | 'builder' | 'versions' | 'statistics';
     InfoGridComponent,
     InfoItemComponent,
     TimeBadgeComponent,
-    QueryBuilderItemComponent,
+    QueryBuilderGroupComponent,
+    QueryJsonPreviewComponent,
     QueryStatisticsPanelComponent,
     PageWrapperComponent,
     QueryDetailCardComponent,
@@ -82,16 +86,31 @@ export class QueryDetailPageComponent implements OnInit {
   readonly hasVersionsTab = computed(() => this.olderQueries().length > 0);
   readonly hasStatisticsTab = computed(() => !!this.query()?.latestDataStatisticsRequest);
 
-  queryList: QueryItemDTO[] = [];
+  queryRoot: QueryGroupNode = createEmptyGroup();
   queryDetailForm = this.formBuilder.group({
     name: ['', Validators.required],
     description: ['', Validators.required],
   });
   readonly queryListChangeTick = signal(0);
+  readonly treeValid = computed(() => {
+    this.queryListChangeTick();
+    return isQueryTreeValid(this.queryRoot);
+  });
   readonly formValue = toSignal(
     this.queryDetailForm.valueChanges.pipe(startWith(this.queryDetailForm.getRawValue())),
     {initialValue: this.queryDetailForm.getRawValue()}
   );
+
+  readonly showJson = signal(false);
+  readonly requestPreview = computed(() => {
+    this.queryListChangeTick();
+    const formValue = this.formValue();
+    return {
+      name: formValue.name ?? '',
+      description: formValue.description ?? '',
+      query: serializeQueryTree(this.queryRoot),
+    };
+  });
 
   readonly hasChanges = computed(() => {
     const currentQuery = this.query();
@@ -101,9 +120,10 @@ export class QueryDetailPageComponent implements OnInit {
 
     this.queryListChangeTick();
     const formValue = this.formValue();
+    const savedQuery = serializeQueryTree(hydrateQueryTree(currentQuery.query, this.queryConfigs()));
     return currentQuery.name !== (formValue.name ?? '')
       || currentQuery.description !== (formValue.description ?? '')
-      || JSON.stringify(currentQuery.query) !== JSON.stringify(this.queryList);
+      || JSON.stringify(savedQuery) !== JSON.stringify(serializeQueryTree(this.queryRoot));
   });
 
   ngOnInit(): void {
@@ -156,22 +176,8 @@ export class QueryDetailPageComponent implements OnInit {
     return 'Draft';
   }
 
-  onAddQueryItem(): void {
-    this.queryList.push({
-      ontologyId: '',
-      dataTypeId: '',
-      operator: [],
-    });
-    this.markQueryListChanged();
-  }
-
-  removeQueryItem(indexNumber: number): void {
-    this.queryList.splice(indexNumber, 1);
-    this.markQueryListChanged();
-  }
-
-  handleQueryItemChange(index: number, queryItem: QueryItemDTO): void {
-    this.queryList[index] = queryItem;
+  onQueryChange(group: QueryGroupNode): void {
+    this.queryRoot = group;
     this.markQueryListChanged();
   }
 
@@ -299,7 +305,7 @@ export class QueryDetailPageComponent implements OnInit {
     return {
       name: value.name ?? '',
       description: value.description ?? '',
-      query: this.queryList,
+      query: serializeQueryTree(this.queryRoot),
       groupId: currentQuery?.groupId,
     };
   }
@@ -310,7 +316,7 @@ export class QueryDetailPageComponent implements OnInit {
       ...currentQuery,
       name: value.name ?? '',
       description: value.description ?? '',
-      query: currentQuery.hasFired && this.hasChanges() ? currentQuery.query : this.queryList,
+      query: currentQuery.hasFired && this.hasChanges() ? currentQuery.query : serializeQueryTree(this.queryRoot),
     };
   }
 
@@ -326,13 +332,13 @@ export class QueryDetailPageComponent implements OnInit {
 
   private isInvalid(): boolean {
     this.queryDetailForm.markAllAsTouched();
-    return this.queryDetailForm.invalid || this.queryList.length === 0;
+    return this.queryDetailForm.invalid || !isQueryTreeValid(this.queryRoot);
   }
 
   private hydratePage(query: QueryDetailDTO): void {
     this.pageError.set(null);
     this.query.set(query);
-    this.queryList = cloneDeep(query.query ?? []);
+    this.queryRoot = hydrateQueryTree(query.query, this.queryConfigs());
     this.markQueryListChanged();
     this.queryDetailForm.patchValue({
       name: query.name,

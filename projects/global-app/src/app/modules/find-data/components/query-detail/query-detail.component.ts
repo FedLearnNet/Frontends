@@ -4,25 +4,27 @@ import {
   Component,
   inject,
   OnInit,
-  QueryList,
-  ViewChildren
+  signal
 } from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {QueryJsonPreviewComponent} from '@global-app/find-data/components/query-json-preview/query-json-preview.component';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {QueryService} from '@global-app/find-data/services/query.service';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {QueryConfig} from '@global-app/find-data/models';
 import {
-  QueryBuilderItemComponent
-} from '@global-app/find-data/components/query-builder-item/query-builder-item.component';
-import {CreateQueryDTO, QueryDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
+  QueryBuilderGroupComponent
+} from '@global-app/find-data/components/query-builder-group/query-builder-group.component';
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {createEmptyGroup, QueryGroupNode} from '@global-app/find-data/models/query-tree';
+import {hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
+import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
 
-import {MatButtonModule, MatIconButton} from "@angular/material/button";
-import {MatIconModule} from "@angular/material/icon";
+import {MatDividerModule} from "@angular/material/divider";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {MatDividerModule} from "@angular/material/divider";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
-import {cloneDeep} from "lodash";
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {
   CloseableDialogTitleComponent
@@ -40,16 +42,16 @@ interface QueryDetail {
   imports: [
     MatDialogContent,
     MatDialogActions,
-    MatButtonModule,
-    MatIconModule,
-    MatIconButton,
     MatDividerModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatInputModule,
-    QueryBuilderItemComponent,
+    QueryBuilderGroupComponent,
+    QueryJsonPreviewComponent,
+    MatButtonModule,
+    MatIconModule,
     TranslatePipe,
     CloseableDialogTitleComponent,
     BtnComponent
@@ -66,26 +68,32 @@ export class QueryDetailComponent implements OnInit {
   public data = inject<QueryDetail>(MAT_DIALOG_DATA);
   private readonly translate: TranslateService = inject(TranslateService);
 
-
-  @ViewChildren(QueryBuilderItemComponent) children!: QueryList<QueryBuilderItemComponent>;
-
   queryConfigs: QueryConfig[] = [];
-  queryList: QueryItemDTO[] = [];
+  queryRoot: QueryGroupNode = createEmptyGroup();
   queryDetailForm = this.formBuilder.group({
     name: ['', Validators.required],
     description: ['', Validators.required],
   });
 
   changed: boolean = false;
+  readonly showJson = signal(false);
+
+  requestPreview(): unknown {
+    return {
+      name: this.queryDetailForm.get('name')!.value ?? '',
+      description: this.queryDetailForm.get('description')!.value ?? '',
+      query: serializeQueryTree(this.queryRoot),
+    };
+  }
 
   ngOnInit(): void {
-    this.queryConfigs = this.data.queryConfigs;
+    this.queryConfigs = this.data.queryConfigs ?? [];
     if (this.data.queryData) {
       this.queryDetailForm.patchValue({
         name: this.data.queryData.name,
         description: this.data.queryData.description,
       });
-      this.queryList = cloneDeep(this.data.queryData.query);
+      this.queryRoot = hydrateQueryTree(this.data.queryData.query, this.queryConfigs);
     }
     this.cdr.detectChanges();
   }
@@ -97,20 +105,8 @@ export class QueryDetailComponent implements OnInit {
     return !this.data.queryData.hasResult && this.data.queryData.hasFired;
   }
 
-
-  onAddQueryItem(): void {
-    this.queryList.push({
-      ontologyId: '',
-      dataTypeId: '',
-      operator: [],
-    });
-
-    this.handleQueryChange();
-    this.cdr.detectChanges();
-  }
-
-  removeQueryItem(indexNumber: number): void {
-    this.queryList.splice(indexNumber, 1);
+  onQueryChange(group: QueryGroupNode): void {
+    this.queryRoot = group;
     this.handleQueryChange();
     this.cdr.detectChanges();
   }
@@ -133,41 +129,44 @@ export class QueryDetailComponent implements OnInit {
 
     const name = this.queryDetailForm.get('name')!.value!;
     const description = this.queryDetailForm.get('description')!.value!;
+    const query = serializeQueryTree(this.queryRoot);
 
     if (!this.changed && this.data.queryData && this.data.queryData.id) {
-      const dto: QueryDTO = this.data.queryData;
-      dto.description = description;
-      dto.name = name;
-      if (!dto.hasFired) {
-        dto.query = this.queryList;
-      }
-
-      this.queryService.updateQuery(dto).subscribe(query => {
-        this.dialogRef.close(query);
-      })
+      const dto = this.data.queryData;
+      this.queryService.updateQuery({
+        id: dto.id,
+        name,
+        description,
+        query: dto.hasFired ? dto.query : query,
+      }).subscribe(updated => {
+        this.dialogRef.close(updated);
+      });
     } else {
-      const dto: CreateQueryDTO = {
-        name: name,
-        description: description,
-        query: this.queryList,
+      const dto = {
+        name,
+        description,
+        query,
         groupId: this.data.queryData?.groupId,
-      }
+      };
       if (run) {
-        this.queryService.createAndRunQuery(dto).subscribe(query => {
-          this.dialogRef.close(query);
-        })
+        this.queryService.createAndRunQuery(dto).subscribe(created => {
+          this.dialogRef.close(created);
+        });
       } else {
-        this.queryService.createQuery(dto).subscribe(query => {
-          this.dialogRef.close(query);
-        })
+        this.queryService.createQuery(dto).subscribe(created => {
+          this.dialogRef.close(created);
+        });
       }
     }
+  }
 
+  get treeValid(): boolean {
+    return isQueryTreeValid(this.queryRoot);
   }
 
   isQueryDetailInvalid(): boolean {
     this.queryDetailForm.markAllAsTouched();
-    return this.queryDetailForm.invalid;
+    return this.queryDetailForm.invalid || !isQueryTreeValid(this.queryRoot);
   }
 
   getSubmitButtonLabel(): string {
@@ -177,13 +176,12 @@ export class QueryDetailComponent implements OnInit {
   }
 
   handleQueryChange(): void {
-    if (!this.data.queryData) {
+    if (!this.data.queryData?.hasFired) {
       return;
     }
-    if (!this.data.queryData.hasFired) {
-      return;
-    }
-    this.changed = JSON.stringify(this.data.queryData.query) !== JSON.stringify(this.queryList);
+    const current = serializeQueryTree(hydrateQueryTree(this.data.queryData.query, this.queryConfigs));
+    const next = serializeQueryTree(this.queryRoot);
+    this.changed = JSON.stringify(current) !== JSON.stringify(next);
     this.cdr.detectChanges();
   }
 }

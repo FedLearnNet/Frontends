@@ -82,12 +82,12 @@
 
                 <div class="builder-card__actions">
                   <lib-btn
-                    [disabled]="isBusy() || !hasChanges()"
+                    [disabled]="isBusy() || !hasChanges() || !treeValid()"
                     type="SAVE"
                     variant="RAISED"
                     (clicked)="saveQuery()"/>
                   <lib-btn
-                    [disabled]="isBusy()"
+                    [disabled]="isBusy() || !treeValid()"
                     type="SEND"
                     [label]="'BUTTON.SAVE_AND_RUN_QUERY' | translate"
                     label="Send Request to All Clinics" (clicked)="saveAndRunQuery()"/>
@@ -113,21 +113,27 @@
                 </mat-form-field>
               </form>
 
-              <div class="builder-list">
-                @for (_ of queryList; track $index) {
-                  <app-query-builder-item
-                    [(queryItem)]="queryList[$index]"
-                    [queryConfigs]="queryConfigs()"
-                    [isLastItem]="$last"
-                    (queryItemChange)="handleQueryItemChange($index, $event)"
-                    (removeQueryItem)="removeQueryItem($index)"/>
-                }
+              <div class="builder-toolbar">
+                <lib-btn
+                  type="CUSTOM"
+                  variant="SECONDARY"
+                  icon="data_object"
+                  [attr.aria-expanded]="showJson()"
+                  [label]="(showJson() ? 'QUERY_BUILDER.HIDE_JSON' : 'QUERY_BUILDER.SHOW_JSON') | translate"
+                  (click)="showJson.set(!showJson())"
+                ></lib-btn>
               </div>
 
-              <button mat-stroked-button color="primary" (click)="onAddQueryItem()">
-                <mat-icon>add</mat-icon>
-                {{ 'BUTTON.ADD_CONDITION' | translate }}
-              </button>
+              @if (showJson()) {
+                <app-query-json-preview class="builder-json" [body]="requestPreview()"/>
+              }
+
+              <div class="builder-list">
+                <app-query-builder-group
+                  [group]="queryRoot"
+                  [queryConfigs]="queryConfigs()"
+                  (groupChange)="onQueryChange($event)"/>
+              </div>
             </div>
           </div>
         }

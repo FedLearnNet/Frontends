@@ -1,4 +1,5 @@
 import {BaseDto} from "@shared-lib/base/base-dto";
+import {Lang2Group} from "@global-app/find-data/dto/lang2-query";
 
 export enum QueryOperatorTypes {
   EQUAL = 'EQUAL',
@@ -15,7 +16,10 @@ export enum QueryOperatorTypes {
   CONTAINS = 'CONTAINS',
   NOT_CONTAINS = 'NOT_CONTAINS',
   START_WIDTH = 'START_WIDTH',
-  END_WIDTH = 'END_WIDTH'
+  END_WIDTH = 'END_WIDTH',
+  HAS_CHANGED = 'HAS_CHANGED',
+  CHANGED_FROM = 'CHANGED_FROM',
+  CHANGED_TO = 'CHANGED_TO',
 }
 
 export interface QueryOperatorDTO {
@@ -34,7 +38,7 @@ export interface EnhancedQueryItemDTO extends QueryItemDTO {
 }
 
 export interface CreateQueryDTO {
-  query: QueryItemDTO[];
+  query: Lang2Group;
   description: string;
   name: string;
   groupId?: string;
@@ -42,7 +46,7 @@ export interface CreateQueryDTO {
 
 
 export interface QueryDTO extends BaseDto {
-  query: QueryItemDTO[];
+  query: Lang2Group;
   description: string;
   name: string;
   globalUniqueId: string;

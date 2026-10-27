@@ -103,6 +103,21 @@
   grid-template-columns: 1fr 1fr;
 }
 
+.builder-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+
+  mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.builder-json {
+  display: block;
+  margin-bottom: 12px;
+}
+
 .builder-list {
   display: grid;
   gap: 12px;
