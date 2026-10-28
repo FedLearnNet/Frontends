@@ -64,7 +64,6 @@ function validateGroup(group: QueryGroupNode, path: string): QueryTreeIssue[] {
     }
     issues.push(...validateBounds(relation.atLeast, relation.atMost, relationPath));
   });
-
   return issues;
 }
 
@@ -102,9 +101,6 @@ function validateLeaf(leaf: QueryLeafNode, path: string): QueryTreeIssue[] {
     }
   }
 
-  if (leaf.valueAggregation === 'average' && leaf.valueMode !== 'absolute') {
-    issues.push({path, code: 'average-requires-absolute'});
-  }
   if (leaf.valueMode === 'delta' && leaf.valueAggregation === 'average') {
     issues.push({path, code: 'delta-average'});
   }
@@ -143,9 +139,6 @@ function validateEndpoint(group: QueryGroupNode, index: number, path: string): Q
   const child = group.children[index];
   if (!child || child.kind !== 'leaf') {
     return [{path, code: 'relation-not-leaf'}];
-  }
-  if (child.valueAggregation === 'average') {
-    return [{path, code: 'relation-average'}];
   }
   return [];
 }

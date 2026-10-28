@@ -80,7 +80,7 @@ export class QueryBuilderGroupComponent {
   }));
   readonly allowRelation = computed(() => canAddRelation(this.group()));
   readonly leafChoices = computed(() => this.group().children.flatMap((child, index) => {
-    if (child.kind !== 'leaf' || child.valueAggregation === 'average') {
+    if (child.kind !== 'leaf') {
       return [];
     }
     const name = child.catalogName || child.ontologyId || '…';

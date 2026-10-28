@@ -108,12 +108,3 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     ]
   }
 ];
-
-export function isOperatorWithValue(operator: QueryOperatorTypes | string | null | undefined): boolean {
-  return operator !== QueryOperatorTypes.EXISTS
-    && operator !== QueryOperatorTypes.NOT_EXISTS
-    && operator !== QueryOperatorTypes.HAS_CHANGED
-    && operator !== 'exists'
-    && operator !== '!exists'
-    && operator !== 'has_changed';
-}
