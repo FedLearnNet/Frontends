@@ -82,8 +82,12 @@ describe('QueryBuilderItemComponent', () => {
     fixture.detectChanges();
 
     const labels = component.operatorOptions().map(option => option.label);
+    expect(labels).toContain('Greater than (>)');
+    expect(labels).toContain('Greater than or equal (>=)');
+    expect(labels).toContain('Less than (<)');
+    expect(labels).toContain('Less than or equal (<=)');
     expect(labels).toContain('Contains (contains)');
-    expect(labels).toContain('Does not contain (!contains)');
+    expect(labels).not.toContain('Does not contain (!contains)');
     expect(labels).toContain('Starts with (startsWith)');
     expect(labels).toContain('Ends with (endsWith)');
     expect(labels).toContain('In (in)');
@@ -169,5 +173,44 @@ describe('QueryBuilderItemComponent', () => {
     fixture.detectChanges();
 
     expect(emittedValues).toEqual([]);
+  });
+
+  it('opens advanced filters when a loaded condition already uses them', () => {
+    const changed: Partial<QueryLeafNode>[] = [
+      {valueMode: 'delta'},
+      {deltaWindow: true, deltaInterval: [{count: 1, unit: 'days'}]},
+      {timeFilterChoice: 'after', timeAfter: '2024-01-01'},
+      {timeAggregation: 'last'},
+      {valueAggregation: 'average'},
+      {atLeast: 1},
+      {atMost: 2},
+    ];
+
+    for (const partial of changed) {
+      fixture.componentRef.setInput('leaf', {...createEmptyLeaf(), ...partial});
+      fixture.detectChanges();
+      expect(component.advancedOpen()).withContext(JSON.stringify(partial)).toBeTrue();
+    }
+  });
+
+  it('keeps advanced filters closed for a default condition and after the user collapses them', () => {
+    fixture.componentRef.setInput('leaf', {
+      ...createEmptyLeaf(),
+      operator: QueryOperatorTypes.EQUAL,
+      value: '70',
+      datatypeHint: 'Integer',
+    });
+    fixture.detectChanges();
+    expect(component.advancedOpen()).toBeFalse();
+
+    const loaded = {...createEmptyLeaf(), timeAggregation: 'first' as const};
+    fixture.componentRef.setInput('leaf', loaded);
+    fixture.detectChanges();
+    expect(component.advancedOpen()).toBeTrue();
+
+    component.advancedOpen.set(false);
+    fixture.componentRef.setInput('leaf', {...loaded, value: '5'});
+    fixture.detectChanges();
+    expect(component.advancedOpen()).toBeFalse();
   });
 });

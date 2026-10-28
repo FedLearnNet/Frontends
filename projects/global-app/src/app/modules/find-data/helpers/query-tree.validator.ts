@@ -1,3 +1,4 @@
+import {QueryOperatorTypes} from '@global-app/find-data/dto/query';
 import {isLang2Group} from '@global-app/find-data/dto/lang2-query';
 import {
   IntervalPart,
@@ -6,6 +7,21 @@ import {
   QueryNode,
 } from '@global-app/find-data/models/query-tree';
 import {isChangeOperator, operatorHasValue, relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
+import {DataTypes} from '@global-app/schema/dto/datatype';
+
+const TEXT_OPERATORS = new Set<QueryOperatorTypes>([
+  QueryOperatorTypes.CONTAINS,
+  QueryOperatorTypes.START_WIDTH,
+  QueryOperatorTypes.END_WIDTH,
+  QueryOperatorTypes.REGEX,
+]);
+
+const NON_TEXT_CATALOG_TYPES = new Set<DataTypes>([
+  DataTypes.INT,
+  DataTypes.FLOAT,
+  DataTypes.DATE,
+  DataTypes.BOOLEAN,
+]);
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -66,6 +82,12 @@ function validateLeaf(leaf: QueryLeafNode, path: string): QueryTreeIssue[] {
   }
   if (leaf.operator && operatorHasValue(leaf.operator) && leaf.value.trim() === '') {
     issues.push({path, code: 'missing-value'});
+  }
+  if (leaf.operator === QueryOperatorTypes.NOT_CONTAINS) {
+    issues.push({path, code: 'unsupported-operator'});
+  }
+  if (leaf.operator && TEXT_OPERATORS.has(leaf.operator) && leaf.catalogType !== '' && NON_TEXT_CATALOG_TYPES.has(leaf.catalogType)) {
+    issues.push({path, code: 'text-operator-type'});
   }
   if (leaf.datatypeHint === 'Integer' && leaf.value.trim() !== '' && !/^-?\d+$/.test(leaf.value.trim())) {
     issues.push({path, code: 'integer-value'});

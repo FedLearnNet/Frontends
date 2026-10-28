@@ -448,7 +448,21 @@ describe('query tree validator', () => {
     }))).toBeTrue();
 
     expect(isQueryTreeValid(group([
-      leaf({operator: QueryOperatorTypes.CONTAINS, value: 'Employee', datatypeHint: 'String', atLeast: 2}),
+      leaf({operator: QueryOperatorTypes.CONTAINS, value: 'Employee', datatypeHint: 'String', catalogType: DataTypes.STRING, atLeast: 2}),
+    ]))).toBeTrue();
+  });
+
+  it('rejects operators the backend cannot execute', () => {
+    expect(codes(group([
+      leaf({operator: QueryOperatorTypes.NOT_CONTAINS, value: 'Employee'}),
+    ]))).toContain('unsupported-operator');
+
+    expect(codes(group([
+      leaf({operator: QueryOperatorTypes.CONTAINS, value: '12', catalogType: DataTypes.INT}),
+    ]))).toContain('text-operator-type');
+
+    expect(isQueryTreeValid(group([
+      leaf({operator: QueryOperatorTypes.SMALLER, value: '12', catalogType: DataTypes.STRING, datatypeHint: 'Integer'}),
     ]))).toBeTrue();
   });
 

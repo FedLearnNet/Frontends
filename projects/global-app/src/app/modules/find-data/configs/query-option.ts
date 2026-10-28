@@ -12,6 +12,20 @@ const MEMBERSHIP_OPERATORS = [
   {label: 'Not in', value: QueryOperatorTypes.NOT_IN}
 ];
 
+const COMPARISON_OPERATORS = [
+  {label: 'Greater than', value: QueryOperatorTypes.BIGGER},
+  {label: 'Greater than or equal', value: QueryOperatorTypes.BIGGER_EQUAL},
+  {label: 'Less than', value: QueryOperatorTypes.SMALLER},
+  {label: 'Less than or equal', value: QueryOperatorTypes.SMALLER_EQUAL}
+];
+
+const TEXT_MATCH_OPERATORS = [
+  {label: 'Contains', value: QueryOperatorTypes.CONTAINS},
+  {label: 'Matches regex', value: QueryOperatorTypes.REGEX},
+  {label: 'Starts with', value: QueryOperatorTypes.START_WIDTH},
+  {label: 'Ends with', value: QueryOperatorTypes.END_WIDTH}
+];
+
 const CHANGE_OPERATORS = [
   {label: 'Has changed', value: QueryOperatorTypes.HAS_CHANGED},
   {label: 'Changed from', value: QueryOperatorTypes.CHANGED_FROM},
@@ -25,10 +39,7 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     options: [
       {label: 'Equals', value: QueryOperatorTypes.EQUAL},
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
-      {label: 'Greater than', value: QueryOperatorTypes.BIGGER},
-      {label: 'Greater than or equal', value: QueryOperatorTypes.BIGGER_EQUAL},
-      {label: 'Less than', value: QueryOperatorTypes.SMALLER},
-      {label: 'Less than or equal', value: QueryOperatorTypes.SMALLER_EQUAL},
+      ...COMPARISON_OPERATORS,
       ...MEMBERSHIP_OPERATORS,
       ...EXISTENCE_OPERATORS,
       ...CHANGE_OPERATORS
@@ -40,10 +51,7 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     options: [
       {label: 'Equals', value: QueryOperatorTypes.EQUAL},
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
-      {label: 'Greater than', value: QueryOperatorTypes.BIGGER},
-      {label: 'Greater than or equal', value: QueryOperatorTypes.BIGGER_EQUAL},
-      {label: 'Less than', value: QueryOperatorTypes.SMALLER},
-      {label: 'Less than or equal', value: QueryOperatorTypes.SMALLER_EQUAL},
+      ...COMPARISON_OPERATORS,
       ...MEMBERSHIP_OPERATORS,
       ...EXISTENCE_OPERATORS,
       ...CHANGE_OPERATORS
@@ -55,11 +63,8 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     options: [
       {label: 'Equals', value: QueryOperatorTypes.EQUAL},
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
-      {label: 'Contains', value: QueryOperatorTypes.CONTAINS},
-      {label: 'Does not contain', value: QueryOperatorTypes.NOT_CONTAINS},
-      {label: 'Matches regex', value: QueryOperatorTypes.REGEX},
-      {label: 'Starts with', value: QueryOperatorTypes.START_WIDTH},
-      {label: 'Ends with', value: QueryOperatorTypes.END_WIDTH},
+      ...COMPARISON_OPERATORS,
+      ...TEXT_MATCH_OPERATORS,
       ...MEMBERSHIP_OPERATORS,
       ...EXISTENCE_OPERATORS,
       ...CHANGE_OPERATORS
@@ -95,6 +100,7 @@ export const QUERY_OPERATOR_OPTIONS_CONFIG: DataTypeOperatorMap[] = [
     options: [
       {label: 'Equals', value: QueryOperatorTypes.EQUAL},
       {label: 'Not equal', value: QueryOperatorTypes.NOT_EQUAL},
+      ...TEXT_MATCH_OPERATORS,
       {label: 'In', value: QueryOperatorTypes.IN},
       {label: 'Not in', value: QueryOperatorTypes.NOT_IN},
       ...EXISTENCE_OPERATORS,

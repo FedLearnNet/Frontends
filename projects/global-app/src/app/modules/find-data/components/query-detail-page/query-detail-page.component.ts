@@ -13,17 +13,24 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
-import {InfoGridComponent} from "@shared-lib/components/info-grid/info-grid.component";
-import {InfoItemComponent} from "@shared-lib/components/info-item/info-item.component";
 import {StatusBadeType} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {QueryConfig} from '@global-app/find-data/models';
+import {Lang2Group} from '@global-app/find-data/dto/lang2-query';
 import {CreateQueryDTO, QueryDetailDTO, QueryDTO} from "@global-app/find-data/dto/query";
 import {
   QueryBuilderGroupComponent
 } from "@global-app/find-data/components/query-builder-group/query-builder-group.component";
-import {createEmptyGroup, QueryGroupNode} from '@global-app/find-data/models/query-tree';
-import {hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
+import {
+  createEmptyGroup,
+  QueryGroupNode,
+  QueryLeafNode,
+  QueryNode,
+  RelationKind,
+  TemporalRelationDraft,
+} from '@global-app/find-data/models/query-tree';
+import {describeQueryLeaf, formatInterval, hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
+import {relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
 import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
 import {QueryService} from "@global-app/find-data/services/query.service";
 import {QueryJsonPreviewComponent} from '@global-app/find-data/components/query-json-preview/query-json-preview.component';
@@ -31,7 +38,6 @@ import {
   QueryStatisticsPanelComponent
 } from "@global-app/find-data/components/query-statistics-panel/query-statistics-panel.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
-import {QueryDetailCardComponent} from "@shared-lib/modules/query/query-detail-card/query-detail-card.component";
 import {startWith} from "rxjs/operators";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 
@@ -51,14 +57,11 @@ type QueryDetailTab = 'overview' | 'builder' | 'versions' | 'statistics';
     TranslatePipe,
     BadgeComponent,
     HeaderComponent,
-    InfoGridComponent,
-    InfoItemComponent,
     TimeBadgeComponent,
     QueryBuilderGroupComponent,
     QueryJsonPreviewComponent,
     QueryStatisticsPanelComponent,
     PageWrapperComponent,
-    QueryDetailCardComponent,
     BtnComponent
   ],
   templateUrl: './query-detail-page.component.html',
@@ -84,7 +87,28 @@ export class QueryDetailPageComponent implements OnInit {
     )
   );
   readonly hasVersionsTab = computed(() => this.olderQueries().length > 0);
+  readonly versionViews = computed(() => {
+    const queries = this.olderQueries();
+    const configs = this.queryConfigs();
+    const unknown = this.translate.instant('QUERY_BUILDER.UNKNOWN_VARIABLE');
+    return queries.map((query, index) => ({
+      query,
+      sequence: queries.length - index,
+      outline: outlineQuery(query.query, configs, unknown),
+    }));
+  });
   readonly hasStatisticsTab = computed(() => !!this.query()?.latestDataStatisticsRequest);
+  readonly currentOutline = computed(() => {
+    const current = this.query();
+    if (!current) {
+      return null;
+    }
+    return outlineQuery(
+      current.query,
+      this.queryConfigs(),
+      this.translate.instant('QUERY_BUILDER.UNKNOWN_VARIABLE'),
+    );
+  });
 
   queryRoot: QueryGroupNode = createEmptyGroup();
   queryDetailForm = this.formBuilder.group({
@@ -370,4 +394,79 @@ export class QueryDetailPageComponent implements OnInit {
   private markQueryListChanged(): void {
     this.queryListChangeTick.update(value => value + 1);
   }
+}
+
+interface VersionLeafView {
+  kind: 'leaf';
+  name: string;
+  detail: string;
+}
+
+interface VersionGroupView {
+  kind: 'group';
+  connector: 'AND' | 'OR';
+  children: VersionNodeView[];
+  relations: string[];
+}
+
+type VersionNodeView = VersionLeafView | VersionGroupView;
+
+const RELATION_TEXT: Record<RelationKind, string> = {
+  within: 'within',
+  in_the_following: 'in the following',
+  same_time: 'same time',
+  anytime_after: 'anytime after',
+  same_visit: 'same visit',
+  same_group: 'same group',
+};
+
+function outlineQuery(query: Lang2Group, configs: QueryConfig[], unknown: string): VersionGroupView {
+  return outlineGroup(hydrateQueryTree(query, configs), unknown);
+}
+
+function outlineGroup(group: QueryGroupNode, unknown: string): VersionGroupView {
+  return {
+    kind: 'group',
+    connector: group.connectingOperator === '$or' ? 'OR' : 'AND',
+    children: group.children.map(child => outlineNode(child, unknown)),
+    relations: group.relations.map(relation => outlineRelation(group, relation, unknown)),
+  };
+}
+
+function outlineNode(node: QueryNode, unknown: string): VersionNodeView {
+  return node.kind === 'group' ? outlineGroup(node, unknown) : outlineLeaf(node, unknown);
+}
+
+function outlineLeaf(leaf: QueryLeafNode, unknown: string): VersionLeafView {
+  const name = leaf.catalogName || unknown;
+  const sentence = describeQueryLeaf(leaf, () => name);
+  const prefix = `${name} `;
+  return {
+    kind: 'leaf',
+    name,
+    detail: sentence.startsWith(prefix) ? sentence.slice(prefix.length) : '',
+  };
+}
+
+function outlineRelation(group: QueryGroupNode, relation: TemporalRelationDraft, unknown: string): string {
+  const source = endpointName(group.children[relation.source ?? -1], unknown);
+  const target = endpointName(group.children[relation.target ?? -1], unknown);
+  const interval = relationNeedsInterval(relation.kind) ? formatInterval(relation.interval) : '';
+  const phrase = interval ? `${RELATION_TEXT[relation.kind]} ${interval}` : RELATION_TEXT[relation.kind];
+  const bounds = [
+    relation.atLeast !== null ? `at least ${relation.atLeast}` : '',
+    relation.atMost !== null ? `at most ${relation.atMost}` : '',
+  ].filter(Boolean);
+  const suffix = bounds.length ? ` (${bounds.join(', ')})` : '';
+  return `${source} · ${phrase} · ${target}${suffix}`;
+}
+
+function endpointName(node: QueryNode | undefined, unknown: string): string {
+  if (!node) {
+    return '?';
+  }
+  if (node.kind === 'leaf') {
+    return node.catalogName || unknown;
+  }
+  return node.connectingOperator === '$or' ? 'OR' : 'AND';
 }

@@ -251,10 +251,15 @@ export class QueryBuilderItemComponent {
   private formSnapshot: LeafFormValue | null = null;
   private lastEmitted = '';
   private syncing = false;
+  private advancedLeafId = '';
 
   constructor() {
     effect(() => {
       const leaf = this.leaf();
+      if (leaf.id !== this.advancedLeafId) {
+        this.advancedLeafId = leaf.id;
+        this.advancedOpen.set(leafUsesAdvancedFilters(leaf));
+      }
       const serialized = JSON.stringify(leaf);
       if (serialized === this.lastEmitted) {
         return;
@@ -515,4 +520,17 @@ function optionalNumber(value: unknown): number | null {
   }
   const parsed = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function leafUsesAdvancedFilters(leaf: QueryLeafNode): boolean {
+  return leaf.valueMode !== 'absolute'
+    || leaf.deltaWindow
+    || leaf.deltaInterval.length > 0
+    || leaf.timeFilterChoice !== 'anytime'
+    || leaf.timeAfter.trim() !== ''
+    || leaf.timeBefore.trim() !== ''
+    || leaf.timeAggregation !== 'None'
+    || leaf.valueAggregation !== 'None'
+    || leaf.atLeast !== null
+    || leaf.atMost !== null;
 }
