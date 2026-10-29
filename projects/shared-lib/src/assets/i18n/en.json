@@ -8,6 +8,7 @@
     "PLACEHOLDER": "Search cohorts, patients, schemas…",
     "START_TYPING": "Start typing to search across your workspace",
     "NO_RESULTS": "No results for \"{{ query }}\"",
+    "REFINE_TO_SEE_MORE": "Showing first {{ count }} of {{ total }} results, refine your search to see more",
     "NOT_LINKABLE": "No detail page available",
     "FAILED": "Search failed",
     "NAV": "Navigate",

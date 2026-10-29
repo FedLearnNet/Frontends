@@ -277,16 +277,13 @@ export class DetailSchemaComponent implements OnInit {
     if (!id) return;
     const schemaGroup = cloneDeep(this.findNodeById(id));
     const dialogRef = this.dialog.open(DetailSchemaCardComponent, {
-      height: '80vh',
-      width: '90vw',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
-      autoFocus: false,
+      ...DetailSchemaCardComponent.dialogConfig,
       data: schemaGroup
     });
 
+    // The title's close button resolves with '' rather than undefined, so treat any falsy result as "cancelled".
     dialogRef.afterClosed().subscribe((result?: SchemaStructureDTO) => {
-      if (result === undefined || (result as any) === "") {
+      if (!result) {
         return;
       }
       this.loading.set(true);
@@ -325,11 +322,12 @@ export class DetailSchemaComponent implements OnInit {
     schemaGroup.current = {name: '', description: '', type: SchemaNodeType.ATOMIC_ATTRIBUTE} as SchemaStructureDTO;
 
     const dialogRef = this.dialog.open(DetailSchemaCardComponent, {
+      ...DetailSchemaCardComponent.dialogConfig,
       data: schemaGroup
     });
 
     dialogRef.afterClosed().subscribe((result?: SchemaStructureDTO) => {
-      if (result !== undefined) {
+      if (result) {
         this.loading.set(true);
         this.schemaService.persist(this.toSchemaNodeDTO(result, id)).subscribe({
           next: createdSchema => {

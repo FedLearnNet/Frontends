@@ -9,6 +9,7 @@
     "PLACEHOLDER": "Kohorten, Patienten, Schemata durchsuchen…",
     "START_TYPING": "Tippen, um den gesamten Arbeitsbereich zu durchsuchen",
     "NO_RESULTS": "Keine Ergebnisse für \"{{ query }}\"",
+    "REFINE_TO_SEE_MORE": "Die ersten {{ count }} von {{ total }} Ergebnissen werden angezeigt, Suche verfeinern, um mehr zu sehen",
     "NOT_LINKABLE": "Keine Detailseite verfügbar",
     "FAILED": "Suche fehlgeschlagen",
     "NAV": "Navigieren",
@@ -312,7 +313,8 @@
     "PIVOT_VALUE_COLUMN_REQUIRED": "Wähle für jede Tabelle mit aktivierter Pivotierung eine Wertespalte aus.",
     "RUN_EXTRACTOR_BEFORE_PREVIEW": "Führe zuerst den Extraktor aus. Er hat noch keine Ausgabe erzeugt.",
     "SELECT_APP_OUTPUT": "Der Extraktor hat mehrere Ausgaben erzeugt. Wähle die zu importierenden aus.",
-    "MERGE_APP_OUTPUTS": "Mehrere Ausgaben sind ausgewählt. Führe sie zusammen, bevor du fortfährst."
+    "MERGE_APP_OUTPUTS": "Mehrere Ausgaben sind ausgewählt. Führe sie zusammen, bevor du fortfährst.",
+    "NO_DATA_TYPES_FOUND": "Keine Datentypen gefunden. Wähle eine Ontologie, die Datentypen hat."
   },
   "VALIDATION": {
     "REQUIRED": "{{ fieldName }} ist erforderlich"
