@@ -1402,7 +1402,7 @@
       "TEMPORAL": "Should these conditions happen close together in time, in a specific order, at the same time, or during the same visit? Both ends must be conditions in this group."
     },
     "AGGREGATION": {
-      "NONE": "None",
+      "NONE": "Any",
       "AVERAGE": "Average"
     },
     "RELATION": {
