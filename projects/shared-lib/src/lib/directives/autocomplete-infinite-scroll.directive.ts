@@ -31,7 +31,6 @@ export class AutocompleteInfiniteScrollDirective {
     this.detach();
     const panel: HTMLElement | undefined = this.autocomplete.panel?.nativeElement;
     if (!panel) {
-      // The panel view query may resolve only after the overlay has rendered.
       afterNextRender(() => this.autocomplete.isOpen && this.attach(), {injector: this.injector});
       return;
     }

@@ -281,7 +281,6 @@ export class DetailSchemaComponent implements OnInit {
       data: schemaGroup
     });
 
-    // The title's close button resolves with '' rather than undefined, so treat any falsy result as "cancelled".
     dialogRef.afterClosed().subscribe((result?: SchemaStructureDTO) => {
       if (!result) {
         return;
