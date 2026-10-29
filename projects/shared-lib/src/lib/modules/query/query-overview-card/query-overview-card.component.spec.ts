@@ -1,5 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { QueryOverviewCardComponent } from './query-overview-card.component';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {TranslateModule} from '@ngx-translate/core';
+import {QueryOverviewCardComponent} from './query-overview-card.component';
 import {QueryDetailDTO} from "@global-app/find-data/dto/query";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
 
@@ -9,7 +10,7 @@ describe('QueryOverviewCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [QueryOverviewCardComponent]
+      imports: [QueryOverviewCardComponent, TranslateModule.forRoot()]
     })
     .compileComponents();
 
@@ -66,11 +67,10 @@ describe('QueryOverviewCardComponent', () => {
       keycloakId: 'abc',
       globalUniqueId: 'global-9',
       groupId: 'group-1',
-      query: [{
-        ontologyId: 'vitals',
-        dataTypeId: 'weight',
-        operator: [{operator: 'EQUAL' as any, value: '70'}],
-      }],
+      query: {
+        connecting_operator: '$and',
+        conditions: [],
+      },
       enhancedQuery: [{
         ontologyId: 'vitals',
         dataTypeId: 'weight',
@@ -83,5 +83,39 @@ describe('QueryOverviewCardComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Vitals / weight: = 70');
+  });
+
+  it('should render a lang2 group summary', () => {
+    const query: QueryDetailDTO = {
+      id: 9,
+      version: 1,
+      createdAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-01T00:00:00Z'),
+      name: 'Global query',
+      description: 'desc',
+      result: 0,
+      hasResult: false,
+      hasFired: false,
+      keycloakId: 'abc',
+      globalUniqueId: 'global-9',
+      groupId: 'group-1',
+      query: {
+        connecting_operator: '$and',
+        conditions: [{
+          ontology_id: 'value-ontology-uuid',
+          data_type_id: 'value-datatype-uuid',
+          operator: '>',
+          value: 100,
+          value_mode: 'absolute',
+          time_aggregation_method: 'None',
+          value_aggregation_method: 'None',
+        }],
+      },
+    };
+
+    fixture.componentRef.setInput('query', query);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('value-ontology-uuid / value-datatype-uuid > 100');
   });
 });

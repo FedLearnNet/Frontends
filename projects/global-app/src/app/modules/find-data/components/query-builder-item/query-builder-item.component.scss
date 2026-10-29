@@ -1,46 +1,251 @@
-@use "projects/shared-lib/src/lib/styles/main.scss";
+@use '../query-builder-shared' as qb;
 
-$white-color: #FFFFFF;
+:host {
+  display: block;
+}
 
-.query-builder-item {
-  display: flex;;
-  flex: 1 1 auto;
+@include qb.field;
+@include qb.info-button;
+@include qb.segmented;
+
+.leaf-card {
+  @include qb.compact-fields;
+  container-type: inline-size;
+  border: 1px solid #e6e8ec;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.leaf-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.leaf-row {
+  padding: 10px 12px;
+
+  & + & {
+    border-top: 1px solid #f1f3f5;
+  }
+}
+
+.leaf-row--main {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    32px
+    minmax(200px, 2fr)
+    minmax(140px, 1fr)
+    minmax(160px, 1.5fr)
+    minmax(130px, 1fr)
+    minmax(130px, 1fr)
+    auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.advanced-bar {
+  display: flex;
+  padding: 0 12px 10px;
+}
+
+.advanced-toggle {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 4px;
+  min-height: 28px;
+  padding: 2px 8px 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: qb.$qb-teal;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 
-  form {
-    display: flex;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 
-  .item {
-    width: 100%;
+  &:hover {
+    background: qb.$qb-teal-soft;
+  }
 
-    mat-form-field {
-      padding-right: 10px;
+  &:focus-visible {
+    outline: 2px solid qb.$qb-teal;
+    outline-offset: 1px;
+  }
+}
+
+.leaf-row--options {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.15fr) minmax(0, 1.45fr);
+  align-items: start;
+  gap: 10px;
+  margin: 0 12px 12px;
+  padding: 10px;
+  border-radius: 10px;
+  background: #f4f6f8;
+}
+
+.option-block {
+  height: 100%;
+  padding: 10px;
+  border: 1px solid #e6e8ec;
+  border-radius: 8px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.occurrence .count-field {
+  width: 100%;
+  max-width: 180px;
+}
+
+.catalog-field {
+  .clear-catalog {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: qb.$qb-muted;
+    transform: translateY(-50%);
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
-
-    .columns {
-      width: 40%;
-    }
   }
 
-  //.columns, .options, .value {
-  //  ::ng-deep {
-  //    .mat-mdc-select-arrow,
-  //    .mat-mdc-select-value,
-  //    .mat-mdc-select-placeholder,
-  //    .mat-mdc-input-element {
-  //      color: $white-color;
-  //      caret-color: $white-color;
-  //    }
-  //  }
-  //}
-  //}
+  input {
+    padding-right: 28px;
+  }
+}
 
-  .item-buttons {
+.index-badge {
+  align-self: end;
+  min-width: 28px;
+  height: 28px;
+  margin-bottom: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e8eef2;
+  color: qb.$qb-text;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.leaf-actions {
+  display: flex;
+  align-items: center;
+  align-self: end;
+  color: qb.$qb-muted;
+
+  button {
+    --mat-icon-button-state-layer-size: 36px;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
   }
 
-  .hidden {
-    visibility: hidden;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
+}
+
+.readonly-field {
+  --mat-form-field-outlined-outline-color: #e6e8ec;
+  --mat-form-field-outlined-hover-outline-color: #e6e8ec;
+  background: #f4f6f8;
+  border-radius: 4px;
+
+  input {
+    color: qb.$qb-muted;
+    cursor: default;
+  }
+}
+
+.date-field {
+  width: 160px;
+}
+
+.count-field {
+  width: 148px;
+}
+
+.input-suffix {
+  padding-left: 8px;
+  color: qb.$qb-muted;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.result-text {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: qb.$qb-teal-soft;
+  color: qb.$qb-teal;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.leaf-summary {
+  margin: 0;
+  padding: 8px 12px;
+  border-top: 1px solid #f1f3f5;
+  color: qb.$qb-muted;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+@container (max-width: 1100px) {
+  .leaf-row--main {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    padding-left: 52px;
+    padding-right: 164px;
+  }
+
+  .index-badge {
+    position: absolute;
+    top: 34px;
+    left: 12px;
+  }
+
+  .leaf-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  .leaf-row--options {
+    grid-template-columns: 1fr;
+  }
+
+  .occurrence .count-field {
+    max-width: none;
+  }
+}
+
+::ng-deep .mat-mdc-form-field-infix {
+  align-content: center;
 }

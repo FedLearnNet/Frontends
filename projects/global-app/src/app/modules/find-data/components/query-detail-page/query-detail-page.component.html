@@ -47,28 +47,60 @@
       @switch (selectedTab()) {
         @case ('overview') {
           <div class="tab-content">
-            <div class="meta-grid">
-              <lib-info-grid [title]="'GRID.OVERVIEW' | translate">
-                <lib-info-item [title]="'GRID.CREATED_AT' | translate">
-                  <lib-time-badge [date]="query.createdAt"/>
-                </lib-info-item>
-                <lib-info-item [title]="'GRID.DESCRIPTION' | translate">
-                  {{ query.description || '—' }}
-                </lib-info-item>
-                <lib-info-item [title]="'GRID.RESULT' | translate">
-                  <strong>{{ query.hasResult ? query.result : '—' }}</strong>
-                </lib-info-item>
-                <lib-info-item [title]="'GRID.STATISTICS_REQUEST' | translate">
-                  @if (query.latestDataStatisticsRequestTimestamp) {
-                    <lib-time-badge [date]="query.latestDataStatisticsRequestTimestamp!"/>
-                  } @else {
-                    —
-                  }
-                </lib-info-item>
-              </lib-info-grid>
+            <div class="versions-intro">
+              <div class="builder-card__eyebrow">{{ 'GRID.OVERVIEW' | translate }}</div>
+              <h2>{{ 'QUERY_BUILDER.OVERVIEW_TITLE' | translate }}</h2>
+              <p>{{ 'QUERY_BUILDER.OVERVIEW_INTRO' | translate }}</p>
             </div>
 
-            <lib-query-detail-card [query]="query"></lib-query-detail-card>
+            <article class="version-card">
+              <header class="version-card__head">
+                <div>
+                  <h3>{{ query.name }}</h3>
+                  <p class="version-card__description">
+                    {{ query.description || ('QUERY_BUILDER.NO_DESCRIPTION' | translate) }}
+                  </p>
+                </div>
+                <lib-badge
+                  [text]="getQueryStatusText(query)"
+                  [color]="getQueryStatusBadgeColor(query)"
+                  [border]="true"/>
+              </header>
+
+              <dl class="version-meta">
+                <div>
+                  <dt>{{ 'GRID.CREATED_AT' | translate }}</dt>
+                  <dd><lib-time-badge [date]="query.createdAt"/></dd>
+                </div>
+                <div>
+                  <dt>{{ 'GRID.RESULT' | translate }}</dt>
+                  <dd>
+                    @if (query.hasResult) {
+                      {{ 'QUERY_BUILDER.PATIENT_RESULT' | translate:{count: query.result} }}
+                    } @else {
+                      {{ 'QUERY_BUILDER.NO_RESULT' | translate }}
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ 'GRID.STATISTICS_REQUEST' | translate }}</dt>
+                  <dd>
+                    @if (query.latestDataStatisticsRequestTimestamp) {
+                      <lib-time-badge [date]="query.latestDataStatisticsRequestTimestamp"/>
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+              </dl>
+
+              @if (currentOutline(); as outline) {
+                <div class="version-query">
+                  <div class="version-query__label">{{ 'QUERY_BUILDER.QUERY_TEXT' | translate }}</div>
+                  <ng-container *ngTemplateOutlet="versionNode; context: { $implicit: outline }"/>
+                </div>
+              }
+            </article>
           </div>
         }
         @case ('builder') {
@@ -82,12 +114,12 @@
 
                 <div class="builder-card__actions">
                   <lib-btn
-                    [disabled]="isBusy() || !hasChanges()"
+                    [disabled]="isBusy() || !hasChanges() || !treeValid()"
                     type="SAVE"
                     variant="RAISED"
                     (clicked)="saveQuery()"/>
                   <lib-btn
-                    [disabled]="isBusy()"
+                    [disabled]="isBusy() || !treeValid()"
                     type="SEND"
                     [label]="'BUTTON.SAVE_AND_RUN_QUERY' | translate"
                     label="Send Request to All Clinics" (clicked)="saveAndRunQuery()"/>
@@ -113,21 +145,27 @@
                 </mat-form-field>
               </form>
 
-              <div class="builder-list">
-                @for (_ of queryList; track $index) {
-                  <app-query-builder-item
-                    [(queryItem)]="queryList[$index]"
-                    [queryConfigs]="queryConfigs()"
-                    [isLastItem]="$last"
-                    (queryItemChange)="handleQueryItemChange($index, $event)"
-                    (removeQueryItem)="removeQueryItem($index)"/>
-                }
+              <div class="builder-toolbar">
+                <lib-btn
+                  type="CUSTOM"
+                  variant="SECONDARY"
+                  icon="data_object"
+                  [attr.aria-expanded]="showJson()"
+                  [label]="(showJson() ? 'QUERY_BUILDER.HIDE_JSON' : 'QUERY_BUILDER.SHOW_JSON') | translate"
+                  (click)="showJson.set(!showJson())"
+                ></lib-btn>
               </div>
 
-              <button mat-stroked-button color="primary" (click)="onAddQueryItem()">
-                <mat-icon>add</mat-icon>
-                {{ 'BUTTON.ADD_CONDITION' | translate }}
-              </button>
+              @if (showJson()) {
+                <app-query-json-preview class="builder-json" [body]="requestPreview()"/>
+              }
+
+              <div class="builder-list">
+                <app-query-builder-group
+                  [group]="queryRoot"
+                  [queryConfigs]="queryConfigs()"
+                  (groupChange)="onQueryChange($event)"/>
+              </div>
             </div>
           </div>
         }
@@ -136,36 +174,55 @@
             <div class="tab-content">
               <div class="versions-intro">
                 <div class="builder-card__eyebrow">{{ 'GRID.VERSIONS' | translate }}</div>
-                <h2>Previous query versions</h2>
-                <p>Older versions stay read-only so you can compare each query definition with the result it
-                  produced.</p>
+                <h2>{{ 'QUERY_BUILDER.VERSIONS_TITLE' | translate }}</h2>
+                <p>{{ 'QUERY_BUILDER.VERSIONS_INTRO' | translate }}</p>
               </div>
 
-              <div class="versions-list">
-                @for (olderQuery of olderQueries(); track olderQuery.id) {
-                  <section class="version-card">
-                    <lib-info-grid [title]="olderQuery.name + ' - ' +olderQuery.globalUniqueId">
-                      <lib-info-item [title]="'GRID.CREATED_AT' | translate">
-                        <lib-time-badge [date]="olderQuery.createdAt"/>
-                      </lib-info-item>
-                      <lib-info-item [title]="'GRID.STATUS' | translate">
+              <ol class="version-timeline">
+                @for (item of versionViews(); track item.query.id) {
+                  <li class="version-entry">
+                    <div class="version-rail" aria-hidden="true">
+                      <span class="version-marker">{{ item.sequence }}</span>
+                    </div>
+                    <article class="version-card">
+                      <header class="version-card__head">
+                        <div>
+                          <h3>{{ item.query.name }}</h3>
+                          <p class="version-card__description">
+                            {{ item.query.description || ('QUERY_BUILDER.NO_DESCRIPTION' | translate) }}
+                          </p>
+                        </div>
                         <lib-badge
-                          [text]="getQueryStatusText(olderQuery)"
-                          [color]="getQueryStatusBadgeColor(olderQuery)"
+                          [text]="getQueryStatusText(item.query)"
+                          [color]="getQueryStatusBadgeColor(item.query)"
                           [border]="true"/>
-                      </lib-info-item>
-                      <lib-info-item [title]="'GRID.RESULT' | translate">
-                        <strong>{{ olderQuery.hasResult ? olderQuery.result : '—' }}</strong>
-                      </lib-info-item>
-                      <lib-info-item [title]="'GRID.DESCRIPTION' | translate">
-                        {{ olderQuery.description || '—' }}
-                      </lib-info-item>
-                    </lib-info-grid>
+                      </header>
 
-                    <lib-query-detail-card [query]="olderQuery"></lib-query-detail-card>
-                  </section>
+                      <dl class="version-meta">
+                        <div>
+                          <dt>{{ 'GRID.CREATED_AT' | translate }}</dt>
+                          <dd><lib-time-badge [date]="item.query.createdAt"/></dd>
+                        </div>
+                        <div>
+                          <dt>{{ 'GRID.RESULT' | translate }}</dt>
+                          <dd>
+                            @if (item.query.hasResult) {
+                              {{ 'QUERY_BUILDER.PATIENT_RESULT' | translate:{count: item.query.result} }}
+                            } @else {
+                              {{ 'QUERY_BUILDER.NO_RESULT' | translate }}
+                            }
+                          </dd>
+                        </div>
+                      </dl>
+
+                      <div class="version-query">
+                        <div class="version-query__label">{{ 'QUERY_BUILDER.QUERY_TEXT' | translate }}</div>
+                        <ng-container *ngTemplateOutlet="versionNode; context: { $implicit: item.outline }"/>
+                      </div>
+                    </article>
+                  </li>
                 }
-              </div>
+              </ol>
             </div>
           }
         }
@@ -177,6 +234,32 @@
           }
         }
       }
+
+      <ng-template #versionNode let-node>
+        @if (node.kind === 'group') {
+          <div class="version-group" [class.version-group--or]="node.connector === 'OR'">
+            <span class="version-connector">
+              {{ (node.connector === 'OR' ? 'QUERY_BUILDER.MATCH_ANY' : 'QUERY_BUILDER.MATCH_ALL') | translate }}
+            </span>
+            @for (child of node.children; track $index) {
+              <ng-container *ngTemplateOutlet="versionNode; context: { $implicit: child }"/>
+            }
+            @for (relation of node.relations; track $index) {
+              <p class="version-relation">
+                <span>{{ 'QUERY_BUILDER.RELATIONSHIP' | translate }}</span>
+                {{ relation }}
+              </p>
+            }
+          </div>
+        } @else {
+          <div class="version-condition">
+            <span class="version-condition__name">{{ node.name }}</span>
+            @if (node.detail) {
+              <span class="version-condition__detail">{{ node.detail }}</span>
+            }
+          </div>
+        }
+      </ng-template>
     }
   </mat-tab-nav-panel>
 </lib-page-wrapper>

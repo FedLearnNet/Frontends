@@ -21,24 +21,29 @@
 
   <div class="query-builder--container">
     <div class="query-builder--container--header">
-      {{ 'MENU.QUERY_BUILDER' | translate }}
+      <span>{{ 'MENU.QUERY_BUILDER' | translate }}</span>
+
+      <lib-btn
+        type="CUSTOM"
+        variant="SECONDARY"
+        icon="data_object"
+        [attr.aria-expanded]="showJson()"
+        [label]="(showJson() ? 'QUERY_BUILDER.HIDE_JSON' : 'QUERY_BUILDER.SHOW_JSON') | translate"
+        (click)="showJson.set(!showJson())"
+      ></lib-btn>
     </div>
 
-    @for (_ of queryList; track $index) {
-      <app-query-builder-item [(queryItem)]="queryList[$index]"
-                              [queryConfigs]="queryConfigs"
-                              [isLastItem]="$last"
-                              (removeQueryItem)="removeQueryItem($index)"
-                              (queryabilityChanged)="handleQueryChange()"
-      />
+    @if (showJson()) {
+      <app-query-json-preview class="json-preview" [body]="requestPreview()"/>
     }
 
-    <button mat-icon-button (click)="onAddQueryItem()">
-      <mat-icon>add_circle_outline</mat-icon>
-    </button>
+    <app-query-builder-group
+      [group]="queryRoot"
+      [queryConfigs]="queryConfigs"
+      (groupChange)="onQueryChange($event)"/>
   </div>
 
-  @if (data.queryData && queryList.length !== 0) {
+  @if (data.queryData) {
     <div class="query-execution--container">
       @if (isQueryRunning()) {
         <div class="query-progress-indicator">
@@ -61,6 +66,10 @@
 <mat-divider/>
 
 <div mat-dialog-actions class="dialog--footer">
+  @if (!treeValid) {
+    <p class="query-invalid">{{ 'QUERY_BUILDER.INVALID' | translate }}</p>
+  }
+
   <lib-btn
     [disabled]="isQueryDetailInvalid()"
     type="CREATE"

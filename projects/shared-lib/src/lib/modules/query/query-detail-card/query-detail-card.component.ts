@@ -8,6 +8,8 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
 import {EnhancedQueryItemDTO, QueryDTO, QueryDetailDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
+import {isLang2Group, Lang2Group} from "@global-app/find-data/dto/lang2-query";
+import {NgTemplateOutlet} from "@angular/common";
 import {parseValue, prettifyOperator} from "../../../../../../local-app/src/app/modules/logs/helper/query.helper";
 
 type QueryCardDto = LocalQueryDto | QueryDTO | QueryDetailDTO;
@@ -22,7 +24,8 @@ type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemD
     MatTooltip,
     StatusBadgeComponent,
     TimeBadgeComponent,
-    TranslatePipe
+    TranslatePipe,
+    NgTemplateOutlet
   ],
   templateUrl: './query-detail-card.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -36,8 +39,18 @@ export class QueryDetailCardComponent {
     if ('enhancedQuery' in query && query.enhancedQuery?.length) {
       return query.enhancedQuery;
     }
-    return query.query ?? [];
+    return [];
   });
+
+  readonly lang2Query = computed<Lang2Group | null>(() => {
+    const query = this.query();
+    if ('enhancedQuery' in query && query.enhancedQuery?.length) {
+      return null;
+    }
+    return isLang2Group(query.query) ? query.query : null;
+  });
+
+  readonly isGroup = isLang2Group;
 
   readonly statusText = computed(() => {
     const query = this.query();
