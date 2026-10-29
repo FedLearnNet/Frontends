@@ -1,6 +1,6 @@
 <lib-closeable-dialog-title
   (maximizedChanged)="toggleMaximize($event)"
-  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: $safeNavigationMigration(data.current?.name)}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
+  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: model().name}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
 >
 
 </lib-closeable-dialog-title>
@@ -11,31 +11,29 @@
     @if (data.current) {
       <mat-form-field class="full-width">
         <mat-label>{{ 'GRID.NAME' | translate }}</mat-label>
-        <input matInput required [placeholder]="('GRID.NAME' | translate)" [(ngModel)]="data.current.name"
-               [disabled]="isDisabled()">
+        <input matInput [placeholder]="('GRID.NAME' | translate)" [formField]="schemaForm.name">
       </mat-form-field>
 
       <mat-form-field class="full-width">
         <mat-label>{{ 'GRID.DESCRIPTION' | translate }}</mat-label>
-        <textarea matInput required [placeholder]="('GRID.DESCRIPTION' | translate)" [(ngModel)]="data.current.description"
-                  [disabled]="isDisabled()"></textarea>
+        <textarea matInput [placeholder]="('GRID.DESCRIPTION' | translate)" [formField]="schemaForm.description"></textarea>
       </mat-form-field>
 
       <mat-form-field class="full-width">
         <mat-label>{{ 'GRID.TYPE' | translate }}</mat-label>
-        <mat-select required [(ngModel)]="data.current.type" [disabled]="isDisabled()">
+        <mat-select [formField]="schemaForm.type">
           @for (type of schemaTypes; track type) {
             <mat-option [value]="type">{{ getSchemaName(type) }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
-      @if (isSchemaAttribute(data.current.type)) {
+      @if (isAttribute()) {
         <section class="schema-node-dialog__section">
           <div class="schema-node-dialog__section-header">
             <h3>{{ 'MENU.ONTOLOGY' | translate }}</h3>
-            @if (data.current.ontologyId) {
-              <lib-badge [text]="data.current.ontologyId" color="BLUE" [border]="true"></lib-badge>
+            @if (selectedOntology()?.id; as ontologyId) {
+              <lib-badge [text]="ontologyId" color="BLUE" [border]="true"></lib-badge>
             }
           </div>
 
@@ -46,12 +44,11 @@
               type="text"
               matInput
               [placeholder]="('GRID.ONTOLOGY' | translate)"
-              [formControl]="ontologyCtrl"
+              [formField]="schemaForm.ontology"
               (input)="onOntologyInput($event)"
               [matAutocomplete]="autoOntology"/>
 
             <mat-autocomplete requireSelection #autoOntology="matAutocomplete"
-                              (optionSelected)="selectOntology($event.option.value)"
                               [displayWith]="ontologyLabel"
                               appAutocompleteInfiniteScroll (scrolledToEnd)="ontologies.loadMore()">
               @for (option of ontologies.items(); track option.id) {
@@ -83,8 +80,8 @@
         <section class="schema-node-dialog__section">
           <div class="schema-node-dialog__section-header">
             <h3>{{ 'MENU.DATA_TYPE' | translate }}</h3>
-            @if (data.current.dataTypeId) {
-              <lib-badge [text]="data.current.dataTypeId" color="BLUE" [border]="true"></lib-badge>
+            @if (selectedDatatype()?.id; as dataTypeId) {
+              <lib-badge [text]="dataTypeId" color="BLUE" [border]="true"></lib-badge>
             }
           </div>
 
@@ -95,12 +92,11 @@
                 type="text"
                 matInput
                 [placeholder]="('GRID.DATA_TYPE' | translate)"
-                [formControl]="datatypeCtrl"
+                [formField]="schemaForm.dataType"
                 (input)="onDatatypeInput($event)"
                 [matAutocomplete]="autoDatatype"/>
 
               <mat-autocomplete requireSelection #autoDatatype="matAutocomplete"
-                                (optionSelected)="selectDatatype($event.option.value)"
                                 [displayWith]="datatypeLabel"
                                 appAutocompleteInfiniteScroll (scrolledToEnd)="datatypes.loadMore()">
                 @for (option of datatypes.items(); track option.id) {
@@ -138,7 +134,5 @@
   </lib-page-wrapper>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  @if (!isDisabled()) {
-    <lib-btn type="SAVE" [disabled]="!isValid()" (clicked)="save()"></lib-btn>
-  }
+    <lib-btn type="SAVE" [disabled]="!schemaForm().valid()" (clicked)="save()"></lib-btn>
 </mat-dialog-actions>

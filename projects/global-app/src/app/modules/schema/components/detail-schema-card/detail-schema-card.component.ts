@@ -1,11 +1,12 @@
-import {ChangeDetectionStrategy, Component, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal, untracked} from '@angular/core';
 import {forkJoin, of} from "rxjs";
-import {FormControl, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {apply, form, FormField} from "@angular/forms/signals";
 import {MAT_DIALOG_DATA, MatDialogConfig, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {DataTypeNodeDTO} from "@global-app/schema/dto/datatype";
 import {DataTypeService} from "@global-app/schema/services/datatype.service";
 import {OntologyService} from "@global-app/schema/services/ontology.service";
 import {SchemaDetailDialog} from "@global-app/schema/model/schema";
+import {schemaNodeFormSchema, toSchemaNodeForm} from "@global-app/schema/model/schema-node-form";
 import {OntologyNodeDTO} from "@global-app/schema/dto/ontology";
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
@@ -14,7 +15,7 @@ import {OntologyCardComponent} from '../ontology-card/ontology-card.component';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {DatatypeCardComponent} from '../datatype-card/datatype-card.component';
 import {TranslatePipe} from '@ngx-translate/core';
-import {SchemaNodeType} from "@global-app/schema/dto/schema";
+import {SchemaNodeDetailDTO, SchemaNodeType} from "@global-app/schema/dto/schema";
 import {pagedSearch} from "@shared-lib/utils/paged-search";
 import {AutocompleteInfiniteScrollDirective} from "@shared-lib/directives/autocomplete-infinite-scroll.directive";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
@@ -32,13 +33,11 @@ const DEFAULT_WIDTH = 'min(960px, 94vw)';
   selector: 'app-detail-schema-card',
   templateUrl: './detail-schema-card.component.html',
   styleUrl: './detail-schema-card.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogModule,
     MatFormFieldModule,
     MatInput,
-    ReactiveFormsModule,
-    FormsModule,
+    FormField,
     MatSelectModule,
     OntologyCardComponent,
     MatAutocompleteModule,
@@ -54,7 +53,6 @@ const DEFAULT_WIDTH = 'min(960px, 94vw)';
   host: {'[class.maximized]': 'maximized()'}
 })
 export class DetailSchemaCardComponent implements OnInit {
-  /** Open with this config so the dialog sizes to its content and scrolls instead of overflowing the viewport. */
   static readonly dialogConfig: MatDialogConfig = {
     width: DEFAULT_WIDTH,
     maxWidth: '100vw',
@@ -62,26 +60,31 @@ export class DetailSchemaCardComponent implements OnInit {
     autoFocus: false,
   };
 
-  readonly dialogRef = inject(MatDialogRef<DetailSchemaCardComponent>);
   readonly data = inject<SchemaDetailDialog>(MAT_DIALOG_DATA);
-  readonly dataTypeService: DataTypeService = inject(DataTypeService);
-  readonly ontologyService: OntologyService = inject(OntologyService);
-
-  readonly ontologyCtrl = new FormControl<OntologyNodeDTO | null>(null);
-  readonly datatypeCtrl = new FormControl<DataTypeNodeDTO | null>(null);
+  readonly dialogRef = inject(MatDialogRef<DetailSchemaCardComponent>);
+  readonly dataTypeService = inject(DataTypeService);
+  readonly ontologyService = inject(OntologyService);
 
   schemaTypes: SchemaNodeType[] = [SchemaNodeType.GROUP, SchemaNodeType.ATOMIC_ATTRIBUTE, SchemaNodeType.LIST_ATTRIBUTE];
 
-  readonly loading = signal<boolean>(false);
+  readonly loading = signal<boolean>(true);
   readonly error = signal<string | null>(null);
   readonly maximized = signal<boolean>(false);
 
-  readonly selectedOntology = signal<OntologyNodeDTO | undefined>(
-    this.data.current?.ontology?.id === this.data.current?.ontologyId ? this.data.current?.ontology : undefined
-  );
-  readonly selectedDatatype = signal<DataTypeNodeDTO | undefined>(
-    this.data.current?.dataType?.id === this.data.current?.dataTypeId ? this.data.current?.dataType : undefined
-  );
+  readonly model = signal(toSchemaNodeForm(this.data.current));
+
+  readonly schemaForm = form(this.model, p => {
+    apply(p, schemaNodeFormSchema);
+  });
+
+  readonly selectedOntology = computed(() => this.model().ontology);
+  readonly selectedDatatype = computed(() => this.model().dataType);
+  readonly isAttribute = computed(() => {
+    const type = this.model().type;
+    return !!type && isSchemaAttribute(type);
+  });
+
+  private datatypesOntologyId = this.data.current?.ontologyId;
 
   readonly ontologies = pagedSearch(
     (search, page, pageSize) => this.ontologyService.getAllFiltered(search, page, pageSize),
@@ -90,7 +93,7 @@ export class DetailSchemaCardComponent implements OnInit {
 
   readonly datatypes = pagedSearch<DataTypeNodeDTO>(
     (search, page, pageSize) => {
-      const ontologyId = this.data.current?.ontologyId;
+      const ontologyId = this.datatypesOntologyId;
       return ontologyId
         ? this.dataTypeService.getAll(page, pageSize, ontologyId, search)
         : of({page, pageSize, totalCount: 0, results: []});
@@ -98,12 +101,15 @@ export class DetailSchemaCardComponent implements OnInit {
     {pageSize: 20}
   );
 
-  private readonly syncDatatypeCtrlState = effect(() => {
-    if (this.selectedOntology()) {
-      this.datatypeCtrl.enable({emitEvent: false});
-    } else {
-      this.datatypeCtrl.disable({emitEvent: false});
-    }
+  private readonly resetDatatypeOnOntologyChange = effect(() => {
+    if (this.loading()) return;
+    const ontologyId = this.selectedOntology()?.id;
+    untracked(() => {
+      if (ontologyId === this.datatypesOntologyId) return;
+      this.datatypesOntologyId = ontologyId;
+      this.schemaForm.dataType().value.set(null);
+      this.datatypes.reload();
+    });
   });
 
   ngOnInit(): void {
@@ -114,37 +120,12 @@ export class DetailSchemaCardComponent implements OnInit {
     this.loadMissingSelections();
   }
 
-  isDisabled(): boolean {
-    return false;
-  }
-
   onOntologyInput(event: Event): void {
     this.ontologies.search((event.target as HTMLInputElement).value);
   }
 
   onDatatypeInput(event: Event): void {
     this.datatypes.search((event.target as HTMLInputElement).value);
-  }
-
-  selectOntology(ontology: OntologyNodeDTO): void {
-    const current = this.data.current!;
-    if (current.ontologyId === ontology.id) return;
-
-    current.ontologyId = ontology.id;
-    current.ontology = ontology;
-    this.selectedOntology.set(ontology);
-
-    current.dataTypeId = undefined;
-    this.selectedDatatype.set(undefined);
-    this.datatypeCtrl.setValue(null, {emitEvent: false});
-    this.datatypes.reload();
-  }
-
-  selectDatatype(dataType: DataTypeNodeDTO): void {
-    const current = this.data.current!;
-    current.dataTypeId = dataType.id;
-    current.dataType = dataType;
-    this.selectedDatatype.set(dataType);
   }
 
   private loadMissingSelections(): void {
@@ -157,10 +138,7 @@ export class DetailSchemaCardComponent implements OnInit {
     this.loading.set(true);
     forkJoin([ontology$, dataType$]).subscribe({
       next: ([ontology, dataType]) => {
-        this.selectedOntology.set(ontology);
-        this.selectedDatatype.set(dataType);
-        this.ontologyCtrl.setValue(ontology ?? null, {emitEvent: false});
-        this.datatypeCtrl.setValue(dataType ?? null, {emitEvent: false});
+        this.model.update(m => ({...m, ontology: ontology ?? null, dataType: dataType ?? null}));
         this.loading.set(false);
       },
       error: err => {
@@ -179,14 +157,19 @@ export class DetailSchemaCardComponent implements OnInit {
     }
   }
 
-  isValid(): boolean {
-    const current = this.data.current;
-    return !!(current?.name?.trim() && current.description?.trim() && current.type);
-  }
-
   save(): void {
-    if (!this.isValid()) return;
-    const schema = this.data.current!;
+    if (!this.schemaForm().valid()) return;
+    const {name, description, type, ontology, dataType} = this.model();
+    const schema = {
+      ...this.data.current,
+      name: name.trim(),
+      description: description.trim(),
+      type: type!,
+      ontologyId: ontology?.id,
+      ontology: ontology ?? undefined,
+      dataTypeId: dataType?.id,
+      dataType: dataType ?? undefined,
+    } as SchemaNodeDetailDTO;
     if (!schema.id && this.data.parent?.id) {
       schema.parentId = this.data.parent.id;
     }
@@ -198,7 +181,5 @@ export class DetailSchemaCardComponent implements OnInit {
   protected readonly datatypeLabel = (dataType: DataTypeNodeDTO | null): string =>
     dataType ? `${dataType.name ?? ''} (${dataType.id})`.trim() : '';
 
-  protected readonly isSchemaAttribute = isSchemaAttribute;
   protected readonly getSchemaName = getSchemaName;
-  protected readonly JSON = JSON;
 }
