@@ -9,6 +9,7 @@ export interface SchemaNodeForm {
   type: SchemaNodeType | null;
   ontology: OntologyNodeDTO | null;
   dataType: DataTypeNodeDTO | null;
+  anyDataType: DataTypeNodeDTO | null;
 }
 
 export function toSchemaNodeForm(node?: SchemaNodeDetailDTO): SchemaNodeForm {
@@ -18,6 +19,7 @@ export function toSchemaNodeForm(node?: SchemaNodeDetailDTO): SchemaNodeForm {
     type: node?.type ?? null,
     ontology: node?.ontology?.id === node?.ontologyId ? node?.ontology ?? null : null,
     dataType: node?.dataType?.id === node?.dataTypeId ? node?.dataType ?? null : null,
+    anyDataType: null,
   };
 }
 

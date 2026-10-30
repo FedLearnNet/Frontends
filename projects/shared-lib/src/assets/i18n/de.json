@@ -314,6 +314,7 @@
     "RUN_EXTRACTOR_BEFORE_PREVIEW": "Führe zuerst den Extraktor aus. Er hat noch keine Ausgabe erzeugt.",
     "SELECT_APP_OUTPUT": "Der Extraktor hat mehrere Ausgaben erzeugt. Wähle die zu importierenden aus.",
     "MERGE_APP_OUTPUTS": "Mehrere Ausgaben sind ausgewählt. Führe sie zusammen, bevor du fortfährst.",
+    "NO_MATCHING_DATA_TYPES": "Keine passenden Datentypen gefunden.",
     "NO_DATA_TYPES_FOUND": "Keine Datentypen gefunden. Wähle eine Ontologie, die Datentypen hat."
   },
   "VALIDATION": {

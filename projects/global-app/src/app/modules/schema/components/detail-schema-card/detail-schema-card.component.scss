@@ -51,3 +51,22 @@
 mat-dialog-content.schema-node-dialog {
   max-height: none;
 }
+
+.schema-node-dialog__datatype-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  mat-form-field {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  lib-btn {
+    margin-top: 8px;
+  }
+}
+
+.schema-node-dialog__add-datatype {
+  margin-bottom: 14px;
+}

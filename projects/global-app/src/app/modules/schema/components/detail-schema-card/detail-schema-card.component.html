@@ -1,6 +1,6 @@
 <lib-closeable-dialog-title
   (maximizedChanged)="toggleMaximize($event)"
-  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: model().name}) : ('BUTTON.ADD_NEW_SCHEMA' | translate)"
+  [title]="data.current?.id ? ('BUTTON.EDIT_NAME' | translate: {name: model().name}) : ('BUTTON.ADD_NEW_SCHEMA_NODE' | translate)"
 >
 
 </lib-closeable-dialog-title>
@@ -85,39 +85,78 @@
             }
           </div>
 
-            <mat-form-field class="full-width">
-              <mat-label>{{ 'GRID.DATA_TYPE' | translate }}</mat-label>
+          <mat-form-field class="full-width">
+            <mat-label>{{ (selectedOntology() ? 'GRID.RECOMMENDED_DATA_TYPE' : 'GRID.DATA_TYPE') | translate }}</mat-label>
 
-              <input
-                type="text"
-                matInput
-                [placeholder]="('GRID.DATA_TYPE' | translate)"
-                [formField]="schemaForm.dataType"
-                (input)="onDatatypeInput($event)"
-                [matAutocomplete]="autoDatatype"/>
+            <input
+              type="text"
+              matInput
+              [placeholder]="('GRID.RECOMMENDED_DATA_TYPE' | translate)"
+              [formField]="schemaForm.dataType"
+              (input)="onDatatypeInput($event)"
+              [matAutocomplete]="autoDatatype"/>
 
-              <mat-autocomplete requireSelection #autoDatatype="matAutocomplete"
-                                [displayWith]="datatypeLabel"
-                                appAutocompleteInfiniteScroll (scrolledToEnd)="datatypes.loadMore()">
-                @for (option of datatypes.items(); track option.id) {
-                  <mat-option [value]="option">
-                    {{ option.name }} ({{ option.id }})
-                  </mat-option>
-                }
-                @if (datatypes.loading()) {
-                  <mat-option disabled>{{ 'LOADING' | translate }}…</mat-option>
-                } @else if (datatypes.items().length === 0) {
-                  <mat-option disabled>{{ 'WARNING.NO_DATA_TYPES_FOUND' | translate }}</mat-option>
-                } @else if (datatypes.limitReached()) {
-                  <mat-option disabled>
-                    {{ 'SEARCH.REFINE_TO_SEE_MORE' | translate: {count: datatypes.items().length, total: datatypes.totalCount()} }}
-                  </mat-option>
-                }
-              </mat-autocomplete>
-              @if (!selectedOntology()) {
-                <mat-hint>Select an ontology first to choose one of its DataTypes.</mat-hint>
+            <mat-autocomplete requireSelection #autoDatatype="matAutocomplete"
+                              [displayWith]="datatypeLabel"
+                              appAutocompleteInfiniteScroll (scrolledToEnd)="datatypesOfOntology.loadMore()">
+              @for (option of datatypesOfOntology.items(); track option.id) {
+                <mat-option [value]="option">
+                  {{ option.name }} ({{ option.id }})
+                </mat-option>
               }
-            </mat-form-field>
+              @if (datatypesOfOntology.loading()) {
+                <mat-option disabled>{{ 'LOADING' | translate }}…</mat-option>
+              } @else if (datatypesOfOntology.items().length === 0) {
+                <mat-option disabled>{{ 'WARNING.NO_DATA_TYPES_FOUND' | translate }}</mat-option>
+              } @else if (datatypesOfOntology.limitReached()) {
+                <mat-option disabled>
+                  {{ 'SEARCH.REFINE_TO_SEE_MORE' | translate: {count: datatypesOfOntology.items().length, total: datatypesOfOntology.totalCount()} }}
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+
+          @if (showAnyDatatype()) {
+            <div class="schema-node-dialog__datatype-row">
+              <mat-form-field class="full-width">
+                <mat-label>{{ 'GRID.DATA_TYPE' | translate }}</mat-label>
+
+                <input
+                  type="text"
+                  matInput
+                  [placeholder]="('GRID.DATA_TYPE' | translate)"
+                  [formField]="schemaForm.anyDataType"
+                  (input)="onAnyDatatypeInput($event)"
+                  [matAutocomplete]="autoAnyDatatype"/>
+
+                <mat-autocomplete requireSelection #autoAnyDatatype="matAutocomplete"
+                                  [displayWith]="datatypeLabel"
+                                  appAutocompleteInfiniteScroll (scrolledToEnd)="datatypes.loadMore()">
+                  @for (option of datatypes.items(); track option.id) {
+                    <mat-option [value]="option">
+                      {{ option.name }} ({{ option.id }})
+                    </mat-option>
+                  }
+                  @if (datatypes.loading()) {
+                    <mat-option disabled>{{ 'LOADING' | translate }}…</mat-option>
+                  } @else if (datatypes.items().length === 0) {
+                    <mat-option disabled>{{ 'WARNING.NO_MATCHING_DATA_TYPES' | translate }}</mat-option>
+                  } @else if (datatypes.limitReached()) {
+                    <mat-option disabled>
+                      {{ 'SEARCH.REFINE_TO_SEE_MORE' | translate: {count: datatypes.items().length, total: datatypes.totalCount()} }}
+                    </mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+              <lib-btn type="REMOVE" [iconOnly]="true" [ariaLabel]="'BUTTON.DELETE' | translate" (clicked)="removeAnyDatatype()"></lib-btn>
+            </div>
+          } @else {
+            <div class="schema-node-dialog__add-datatype">
+              <lib-btn type="ADD" variant="SECONDARY" size="SMALL"
+                       [label]="'BUTTON.ADD_NEW_DATA_TYPE' | translate"
+                       (clicked)="addAnyDatatype()"></lib-btn>
+            </div>
+          }
 
           @if (selectedDatatype()) {
             <app-datatype-card [dataType]="selectedDatatype()!"/>

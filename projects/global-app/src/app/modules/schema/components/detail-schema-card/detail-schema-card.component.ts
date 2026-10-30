@@ -1,6 +1,6 @@
 import {Component, computed, effect, inject, OnInit, signal, untracked} from '@angular/core';
 import {forkJoin, of} from "rxjs";
-import {apply, form, FormField} from "@angular/forms/signals";
+import {apply, disabled, form, FormField} from "@angular/forms/signals";
 import {MAT_DIALOG_DATA, MatDialogConfig, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {DataTypeNodeDTO} from "@global-app/schema/dto/datatype";
 import {DataTypeService} from "@global-app/schema/services/datatype.service";
@@ -72,13 +72,15 @@ export class DetailSchemaCardComponent implements OnInit {
   readonly maximized = signal<boolean>(false);
 
   readonly model = signal(toSchemaNodeForm(this.data.current));
+  readonly showAnyDatatype = signal<boolean>(false);
 
   readonly schemaForm = form(this.model, p => {
     apply(p, schemaNodeFormSchema);
+    disabled(p.dataType, {when: () => this.showAnyDatatype()});
   });
 
   readonly selectedOntology = computed(() => this.model().ontology);
-  readonly selectedDatatype = computed(() => this.model().dataType);
+  readonly selectedDatatype = computed(() => this.showAnyDatatype() ? this.model().anyDataType : this.model().dataType);
   readonly isAttribute = computed(() => {
     const type = this.model().type;
     return !!type && isSchemaAttribute(type);
@@ -92,6 +94,13 @@ export class DetailSchemaCardComponent implements OnInit {
   );
 
   readonly datatypes = pagedSearch<DataTypeNodeDTO>(
+    (search, page, pageSize) => {
+      return this.dataTypeService.getAll(page, pageSize, undefined, search);
+    },
+    {pageSize: 20}
+  );
+
+  readonly datatypesOfOntology = pagedSearch<DataTypeNodeDTO>(
     (search, page, pageSize) => {
       const ontologyId = this.datatypesOntologyId;
       return ontologyId
@@ -108,7 +117,7 @@ export class DetailSchemaCardComponent implements OnInit {
       if (ontologyId === this.datatypesOntologyId) return;
       this.datatypesOntologyId = ontologyId;
       this.schemaForm.dataType().value.set(null);
-      this.datatypes.reload();
+      this.datatypesOfOntology.reload();
     });
   });
 
@@ -125,7 +134,21 @@ export class DetailSchemaCardComponent implements OnInit {
   }
 
   onDatatypeInput(event: Event): void {
+    this.datatypesOfOntology.search((event.target as HTMLInputElement).value);
+  }
+
+  onAnyDatatypeInput(event: Event): void {
     this.datatypes.search((event.target as HTMLInputElement).value);
+  }
+
+  addAnyDatatype(): void {
+    this.schemaForm.dataType().value.set(null);
+    this.showAnyDatatype.set(true);
+  }
+
+  removeAnyDatatype(): void {
+    this.schemaForm.anyDataType().value.set(null);
+    this.showAnyDatatype.set(false);
   }
 
   private loadMissingSelections(): void {
@@ -159,7 +182,8 @@ export class DetailSchemaCardComponent implements OnInit {
 
   save(): void {
     if (!this.schemaForm().valid()) return;
-    const {name, description, type, ontology, dataType} = this.model();
+    const {name, description, type, ontology} = this.model();
+    const dataType = this.selectedDatatype();
     const schema = {
       ...this.data.current,
       name: name.trim(),
