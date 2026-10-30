@@ -47,6 +47,7 @@
               <p class="shop-card-desc">{{ data.app!.shortDescription }}</p>
             }
           }
+          <ng-content select="[card-extra]"></ng-content>
         </div>
         @if (size() === 'x-large') {
           <div class="right-side">

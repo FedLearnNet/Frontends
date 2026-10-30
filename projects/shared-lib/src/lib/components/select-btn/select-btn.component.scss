@@ -78,6 +78,12 @@
   }
 }
 
+.select-btn__icon-image {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
 .select-btn__copy {
   display: flex;
   min-width: 0;
