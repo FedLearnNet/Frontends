@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, effect, ElementRef, inject, input, output, signal} from '@angular/core';
+import {AfterViewInit, Component, computed, effect, ElementRef, inject, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
 import * as echarts from "echarts/core";
 import {TreeChart} from "echarts/charts";
@@ -29,6 +29,7 @@ type TreeNode = {
   imports: [NgxEchartsDirective],
   templateUrl: './schema-detail-tree.component.html',
   styleUrl: './schema-detail-tree.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})],
 })
 export class SchemaDetailTreeComponent implements AfterViewInit {

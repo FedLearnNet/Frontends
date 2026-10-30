@@ -1,4 +1,4 @@
-import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -43,7 +43,7 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
-import { getCleanConnectorConfig } from '../../helper/connector-config-helper';
+import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 
 type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, cohort: CohortDetailDto }
 
@@ -51,11 +51,12 @@ type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, coh
   selector: 'app-view-connector',
   templateUrl: './view-connector.component.html',
   styleUrl: './view-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, MatTooltip, MatIcon, MatMenu, MatMenuItem, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, MatSlideToggle, MatSelect, MatOption, BtnComponent]
 })
 export class ViewConnectorComponent implements OnInit, OnDestroy {
   private static readonly REFRESH_PERIOD = 5000;
-  private static readonly DEFAULT_CRON_EXPRESSION = '0 2 * * *';
+  private static readonly DEFAULT_CRON_EXPRESSION = '0 0 2 * * ?';
 
   readonly cohortId = input<string | null>();
 
@@ -68,6 +69,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   showCronHelp = false;
   runs: ConnectorRunDTO[] = [];
 
+  editBackup: Record<string, unknown> = {};
   editModes: Record<string, boolean> = {
     name: false,
     description: false,
@@ -76,7 +78,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   runDataSource: MatTableDataSource<ConnectorRunDTO>;
   @ViewChild(MatPaginator) paginator: MatPaginator;
-  displayedRunColumns: string[] = ['id', 'status', 'date', 'newEntities', 'deletedEntities',
+  displayedRunColumns: string[] = ['id', 'status', 'date', 'duration', 'newEntities', 'deletedEntities',
     'updatedEntities', 'failedEntities', 'unchangedEntities', 'action'];
 
   private refreshSub?: Subscription;
@@ -120,8 +122,19 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
     });
   }
 
+
   toggleEditMode(field: string): void {
+    if (!this.editModes[field] && this.connector) {
+      this.editBackup[field] = (this.connector as any)[field];
+    }
     this.editModes[field] = !this.editModes[field];
+  }
+
+  cancelEdit(field: string): void {
+    if (this.connector) {
+      (this.connector as any)[field] = this.editBackup[field];
+    }
+    this.editModes[field] = false;
   }
 
   save(field: string): void {
@@ -148,6 +161,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
           version: connector.version ?? this.connector?.version,
           updatedAt: connector.updatedAt ?? this.connector?.updatedAt,
         };
+        this.keepSavedAutomation();
         this.savingAutomationSettings = false;
       },
       error: () => {
@@ -157,7 +171,23 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   toggleAutomationSettings(): void {
+    if (!this.showAutomationSettings) {
+      this.keepSavedAutomation();
+    } else if (this.connector && this.savedAutomation) {
+      // Hiding discards what was not saved, so the summary only ever shows saved settings.
+      this.connector.scheduleSettings = this.savedAutomation.scheduleSettings;
+      this.connector.triggerSettings = this.savedAutomation.triggerSettings;
+    }
     this.showAutomationSettings = !this.showAutomationSettings;
+  }
+
+  private savedAutomation?: Pick<ConnectorDTO, 'scheduleSettings' | 'triggerSettings'>;
+
+  private keepSavedAutomation(): void {
+    this.savedAutomation = structuredClone({
+      scheduleSettings: this.connector?.scheduleSettings,
+      triggerSettings: this.connector?.triggerSettings,
+    });
   }
 
   toggleCronHelp(): void {
@@ -236,7 +266,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   checkRunningAndStartRefresh(): void {
-    const hasRunning = this.runDataSource.data.some(row => row.status === 'RUNNING');
+    const hasRunning = this.runDataSource.data.some(row => this.isActive(row.status));
 
     if (hasRunning && !this.refreshSub) {
       this.refreshSub = interval(ViewConnectorComponent.REFRESH_PERIOD).subscribe(() => this.loadRuns());
@@ -313,6 +343,11 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   getTriggerConnectorName(sourceConnectorId?: number): string {
     return this.availableTriggerConnectors.find(connector => connector.id === sourceConnectorId)?.name ?? 'No connector selected';
+  }
+
+  public isActive(status?: string): boolean {
+    const normalized = status?.toUpperCase();
+    return normalized !== 'FINISHED' && normalized !== 'ERROR';
   }
 
   public convertStatus(status: string): StatusBadeType {

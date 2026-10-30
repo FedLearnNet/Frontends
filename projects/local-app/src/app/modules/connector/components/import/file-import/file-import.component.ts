@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, output, signal, untracked} from '@angular/core';
+import {Component, computed, effect, inject, input, output, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from '@ngrx/store';
 import {UploadFileAreaComponent} from '@shared-lib/modules/files/components/upload-file-area/upload-file-area.component';
 import {ImportActivity, ImportResultDTO, isImportFinished} from '../../../dto/import-progress';
@@ -16,6 +16,7 @@ export interface FileImportResult {
   selector: 'app-file-import',
   imports: [UploadFileAreaComponent, ImportActivityComponent],
   templateUrl: './file-import.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-import.component.scss',
 })
 export class FileImportComponent {

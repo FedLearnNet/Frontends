@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Breadcrumb } from '@shared-lib/models/breadcrumb';
 import { BreadcrumbService } from '@shared-lib/services/breadcrumb.service';
@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
         RouterLink,
     ],
     templateUrl: './breadcrumb.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./breadcrumb.component.scss']
 })
 export class BreadcrumbComponent {

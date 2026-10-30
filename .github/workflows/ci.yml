@@ -9,8 +9,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tsconfig*.json"
-      - ".eslintrc.json"
-      - ".eslintignore"
+      - "eslint.config.js"
       - ".github/workflows/ci.yml"
   pull_request:
     paths:
@@ -19,8 +18,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "tsconfig*.json"
-      - ".eslintrc.json"
-      - ".eslintignore"
+      - "eslint.config.js"
       - ".github/workflows/ci.yml"
   workflow_dispatch:
 

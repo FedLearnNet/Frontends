@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from '@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component';
@@ -37,6 +37,7 @@ export interface ConnectorImportDialogData {
     TranslatePipe,
   ],
   templateUrl: './connector-import-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './connector-import-dialog.component.scss',
 })
 export class ConnectorImportDialogComponent {

@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 
 export type SkeletonVariant = 'detail' | 'grid' | 'list' | 'table';
 export type Density = 'comfortable' | 'compact';
@@ -7,6 +7,7 @@ export type Density = 'comfortable' | 'compact';
   selector: 'lib-skeleton-loader',
   imports: [],
   templateUrl: './skeleton-loader.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './skeleton-loader.component.scss'
 })
 export class SkeletonLoaderComponent {

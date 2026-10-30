@@ -1,14 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  computed,
-  inject,
-  input,
-  model,
-  OnInit,
-  output,
-  signal
-} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, input, OnInit, output, signal, ChangeDetectionStrategy, linkedSignal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {FileUploadSettings} from "../../../../../models/input-config";
 import {ConnectorUploadService} from "../../../../../services/connector-upload.service";
@@ -24,6 +14,7 @@ import {RunNewFileComponent} from '../../../../run-connector/components/run-new-
 import {ConnectorFilesDTO, UploadInfoDTO} from '../../../../../dto/upload-info';
 import {
   connectorFilesDetailToFileInfo,
+  fileTypeLabel,
   isFileUploadSettings
 } from "../../../../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../../../../dto/connector";
@@ -41,6 +32,7 @@ import {
   selector: 'app-input-file',
   templateUrl: './input-file.component.html',
   styleUrl: './input-file.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatIcon, MatTooltip, MatButton, RunNewFileComponent, MatCardFooter, TranslatePipe, BadgeComponent, KvComponent, RouterLink]
 })
 export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
@@ -51,7 +43,9 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   private translate = inject(TranslateService);
 
   readonly cohortId = input<number>();
-  readonly config = model<ConnectorDTO>({} as ConnectorDTO);
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
+  readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
+  readonly config = linkedSignal(this.configInput);
   connectorExist = computed(() => {
     const config = this.config();
     return !!(config &&
@@ -122,6 +116,8 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   hasSelectableFiles(): boolean {
     return this.availableFiles().length > 0;
   }
+
+  readonly fileTypeLabel = fileTypeLabel;
 
   getDelimiterLabel(): string {
     if (this.settings.delimiter === 'CUSTOM') {

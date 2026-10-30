@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatIconButton} from "@angular/material/button";
 import {MatToolbar} from "@angular/material/toolbar";
 import {Store} from "@ngrx/store";
@@ -23,6 +23,7 @@ import {selectCurrentUpload, selectError} from "@global-app/project/store/projec
     ErrorCardComponent
   ],
   templateUrl: './project-experiment-data.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './project-experiment-data.component.scss'
 })
 export class ProjectExperimentDataComponent {

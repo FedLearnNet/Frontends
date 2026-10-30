@@ -101,7 +101,7 @@
               @if (stage.appBased || stage.blockedByStep) {
                 <app-app-based-transformer
                   [config]="config"
-                  [transformers]="transformer"
+                  [transformers]="transformers()"
                   [cohortId]="cohortId()"
                   [stepIndex]="stage.stepIndex"
                   [transformer]="getTransformer()"
@@ -114,8 +114,8 @@
             @if (isAwaitingAppRun()) {
               <!-- The rows at this point are this step's input, not its output; the empty state above
                    says so and offers the run rather than showing them under this step's heading. -->
-            } @else if (getPrimarySheetInfo() && getTransformedData()) {
-              <app-dynamic-table [data]="getTransformedData()"
+            } @else if (getPrimarySheetInfo() && getCurrentStepData()) {
+              <app-dynamic-table [data]="getCurrentStepData()!"
                                  [renamedColumns]="getPrimarySheetInfo()!.renamedColumns"
                                  [columns]="getPrimarySheetInfo()!.columns"
                                  [deletedColumns]="getPrimarySheetInfo()!.deletedColumns"
@@ -135,6 +135,7 @@
             [columns]="getLatestColumns()"
             [inputData]="getLatestData()"
             [validationConfig]="config"
+            [transformers]="transformerList()"
             [patientIdConflictColumn]="patientIdTransformerConflict"
             [(config)]="config.schemaMapping"
             (cardDetail)="onMappingCardContentChange($event)"/>

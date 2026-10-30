@@ -3,17 +3,14 @@ import {catchError, Observable,} from 'rxjs';
 import {ApiService} from '@shared-lib/services/api.service';
 import {environment} from '@global-app/env/environment';
 import {CreateQueryDTO, QueryDetailDTO, QueryDTO} from "@global-app/find-data/dto/query";
-import {EventSourcePolyfill} from "ng-event-source";
 import {HttpParams} from "@angular/common/http";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from '@ngx-translate/core';
-import Keycloak from "keycloak-js";
 
 @Injectable({
   providedIn: 'root'
 })
 export class QueryService {
-  private readonly keycloakService: Keycloak = inject(Keycloak);
   private readonly apiService: ApiService = inject(ApiService);
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
   private readonly apiUrl: string = environment.globalLearningApiUrl!;
@@ -47,13 +44,9 @@ export class QueryService {
 
 
   getAllQueriesSSE(): Observable<QueryDTO> {
-    const token = this.keycloakService.token;
     return new Observable<QueryDTO>((observer) => {
-      const eventSource = new EventSourcePolyfill(this.getBaseUrl() + '/sse', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // authenticated by the BFF session cookie
+      const eventSource = new EventSource(this.getBaseUrl() + '/sse');
       eventSource.onmessage = (event) => {
         try {
           const data: QueryDTO = JSON.parse(event.data);
@@ -62,7 +55,7 @@ export class QueryService {
           observer.error(error);
         }
       };
-      eventSource.onerror = (error: any) => {
+      eventSource.onerror = (error: Event) => {
         console.error('Failed to enable query update stream', error);
         observer.error(error);
         eventSource.close();

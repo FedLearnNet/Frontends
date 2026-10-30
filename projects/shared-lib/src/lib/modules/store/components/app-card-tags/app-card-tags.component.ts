@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {PublishBadeType, PublishBadgeComponent} from "@shared-lib/components/publish-badge/publish-badge.component";
 import {TranslatePipe} from "@ngx-translate/core";
 import {AppDto} from "@shared-lib/modules/store/dto/app";
@@ -20,6 +20,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
     BadgeComponent
   ],
   templateUrl: './app-card-tags.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-card-tags.component.scss'
 })
 export class AppCardTagsComponent {

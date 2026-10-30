@@ -62,10 +62,8 @@ export class StoreDetailAppComponent implements OnInit {
   private readonly appDetailStore = this.store.selectSignal(selectSelectedApp);
 
   storeElement = computed(() => {
-    return {
-      app: this.appDetail(),
-      model: undefined
-    }
+    const app = this.appDetail();
+    return app ? {app, model: undefined} : null;
   });
 
 

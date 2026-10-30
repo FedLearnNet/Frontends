@@ -1,7 +1,14 @@
-@if (loadingErrorLogs) {
+@if (loadError) {
   <h3>{{ 'ERROR.ERROR_TRY_AGAIN' | translate }}</h3>
+} @else if (loading) {
+  <lib-skeleton-loader
+    variant="table"
+    density="compact"
+    [showHeader]="false"
+    [tableCols]="displayedColumns.length"
+    [tableRows]="pageSize()"/>
 }
-<div class="log-table" [hidden]="loadingErrorLogs">
+<div class="log-table" [hidden]="loading || loadError">
   <mat-paginator [pageSize]="pageSize()"
                  [pageSizeOptions]="pageSizeOptions"
                  (page)="onPageChange($event)"

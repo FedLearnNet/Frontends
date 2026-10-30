@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {LARGE, MEDIUM, SMALL, XLARGE, XSMALL} from '@shared-lib/constants';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -17,6 +17,7 @@ import {SchemaNodeNestedDto} from "@local-app/cohort/dto/schema";
   selector: 'app-cohort-create',
   templateUrl: './cohort-create.component.html',
   styleUrl: './cohort-create.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatGridListModule,
     MatCardModule,

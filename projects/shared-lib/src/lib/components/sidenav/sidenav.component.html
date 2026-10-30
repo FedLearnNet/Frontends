@@ -16,7 +16,7 @@
 
   <nav class="nav">
     @for (section of sections(); track section.title ?? $index) {
-      <div class="section">
+      <div class="section" [class.nav-live]="!!sections()">
         @if (section.title) {
           <div class="section-title" [class.hide]="collapsed()">{{ section.title | translate | uppercase }}</div>
         }
@@ -26,6 +26,7 @@
             <li>
               <a
                 class="entry"
+                [class.nav-live]="!!sections()"
                 [class.disabled]="item.disabled"
                 [routerLink]="item.route || null"
                 routerLinkActive="active"
@@ -61,6 +62,7 @@
                   <li>
                     <a
                       class="entry"
+                      [class.nav-live]="!!sections()"
                       [class.disabled]="subItem.disabled"
                       [routerLink]="subItem.route || null"
                       routerLinkActive="active"

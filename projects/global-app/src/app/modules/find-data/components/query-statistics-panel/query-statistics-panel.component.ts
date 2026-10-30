@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, input, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
@@ -55,6 +55,7 @@ interface PropertyComparisonGroup {
   ],
   templateUrl: './query-statistics-panel.component.html',
   styleUrl: './query-statistics-panel.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})]
 })
 export class QueryStatisticsPanelComponent {

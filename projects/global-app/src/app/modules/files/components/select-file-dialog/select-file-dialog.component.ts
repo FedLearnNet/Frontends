@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -20,6 +20,7 @@ import {FileDTO} from "@shared-lib/modules/files/dto/file";
     SkeletonLoaderComponent
   ],
   templateUrl: './select-file-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './select-file-dialog.component.scss',
 })
 export class SelectFileDialogComponent implements OnInit {

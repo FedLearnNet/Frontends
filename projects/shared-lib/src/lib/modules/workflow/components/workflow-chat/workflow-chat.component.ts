@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {ChatBubbleComponent} from "@shared-lib/modules/chat/components/chat-bubble/chat-bubble.component";
 import {ChatInputComponent} from "@shared-lib/modules/chat/components/chat-input/chat-input.component";
 import {Store} from "@ngrx/store";
@@ -17,6 +17,7 @@ import {WorkflowChatActions} from "@shared-lib/modules/workflow/store/workflow-c
     ChatInputComponent
   ],
   templateUrl: './workflow-chat.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-chat.component.scss',
 })
 export class WorkflowChatComponent {

@@ -1,4 +1,4 @@
-import {Component, input, model} from '@angular/core';
+import {Component, input, model, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyNodeDTO} from "@global-app/schema/dto/ontology";
 import {MatChipGrid, MatChipInput, MatChipInputEvent, MatChipRemove, MatChipRow} from "@angular/material/chips";
 import {FormsModule} from "@angular/forms";
@@ -24,6 +24,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     TranslatePipe
   ],
   templateUrl: './ontology-edit.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ontology-edit.component.scss',
 })
 export class OntologyEditComponent {

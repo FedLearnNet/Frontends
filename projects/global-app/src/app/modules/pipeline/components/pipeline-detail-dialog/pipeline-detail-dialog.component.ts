@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -13,6 +13,7 @@ import {PipelineDetailComponent} from "../pipeline-detail/pipeline-detail.compon
     PipelineDetailComponent
   ],
   templateUrl: './pipeline-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pipeline-detail-dialog.component.scss'
 })
 export class PipelineDetailDialogComponent {

@@ -11,16 +11,12 @@
   <span class="spacer"></span>
   @if (!isProduction) {
     @if (connectorAppBasedExtractorService.connected()) {
-      <lib-badge color="GREEN" iconName="wifi" text="connected"></lib-badge>
+      <lib-badge color="GREEN" iconName="wifi" text="Connected"></lib-badge>
     } @else {
-      <lib-badge color="GRAY" iconName="wifi_off" text="disconnected"></lib-badge>
+      <lib-badge color="GRAY" iconName="wifi_off" text="Disconnected"></lib-badge>
     }
   }
-  @if (connectorAppBasedExtractorService.running()) {
-    <lib-status-badge type="RUNNING"></lib-status-badge>
-  } @else {
-    <lib-status-badge type="PENDING"></lib-status-badge>
-  }
+  <lib-status-badge [type]="status()"></lib-status-badge>
   <button mat-stroked-button class="toolbar__btn"
           (click)="showConfig.set(!showConfig())">
     <mat-icon>tune</mat-icon>

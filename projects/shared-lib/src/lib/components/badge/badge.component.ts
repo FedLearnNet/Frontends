@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 
 export type BadgeSize = 'X-SMALL' | 'SMALL' | 'MEDIUM' | 'LARGE';
@@ -12,6 +12,7 @@ export type BadgeColor = 'GREEN' | 'GRAY' | 'RED' | 'ORANGE' | 'BLUE' | 'WHITE';
     MatIcon
   ],
   templateUrl: './badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './badge.component.scss'
 })
 export class BadgeComponent {
@@ -35,7 +36,7 @@ export class BadgeComponent {
   );
 
   formattedText = computed(() => {
-    const text = this.text() ?? '';
+    const text = String(this.text() ?? '');
     return this.uppercase()
       ? text
       : text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();

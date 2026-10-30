@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {BaseChartDirective, provideCharts, withDefaultRegisterables} from "ng2-charts";
 
 import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
@@ -8,6 +8,7 @@ import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
     providers: [provideCharts(withDefaultRegisterables())],
     imports: [BaseChartDirective],
     templateUrl: './simple-metric-line.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './simple-metric-line.component.scss'
 })
 export class SimpleMetricLineComponent {

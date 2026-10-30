@@ -8,7 +8,7 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {TranslatePipe} from "@ngx-translate/core";
 import {StoreRatingComponent} from "@shared-lib/modules/store/components/store-rating/store-rating.component";
-import Keycloak from "keycloak-js";
+import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {Store} from '@ngrx/store';
 import {ModelVersionDto} from '@shared-lib/modules/app-execution/dto/model';
@@ -42,10 +42,10 @@ import {MatProgressBar} from "@angular/material/progress-bar";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StoreReviewsComponent {
-  private readonly keycloak: Keycloak = inject(Keycloak);
+  private readonly authState = inject(AuthStateService);
   private readonly store = inject(Store);
 
-  readonly uid = this.keycloak?.profile?.username;
+  readonly uid = computed(() => this.authState.userProfile()?.username);
   app = input<AppDetailDto | null>(null);
   modelVersion = input<ModelVersionDto | null>(null);
 
@@ -76,7 +76,7 @@ export class StoreReviewsComponent {
   private readonly syncUserReview = effect(() => {
     const reviews = this.currentReviews();
 
-    if (!this.uid || !Array.isArray(reviews)) {
+    if (!this.uid() || !Array.isArray(reviews)) {
       return;
     }
     const mine = reviews.find(r => this.isReviewFromCurrentUser(r)) ?? null;
@@ -93,7 +93,7 @@ export class StoreReviewsComponent {
   });
 
   isReviewFromCurrentUser(r: StoreRatingDTO) {
-    return r.keycloakId === this.uid
+    return r.keycloakId === this.uid()
   }
 
   saveReview() {

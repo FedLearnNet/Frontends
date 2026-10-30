@@ -11,7 +11,8 @@ import {
   ContainerLogDTO,
   ContainerRunDTO,
   InfoDTO,
-  InspectVolumeResponseDTO
+  InspectVolumeResponseDTO,
+  RegistryImagesDTO,
 } from "../dto/orch";
 import {ApiService} from "@shared-lib/services/api.service";
 import {SseClient} from 'ngx-sse-client';
@@ -28,6 +29,7 @@ export class OrchRelayService {
   private readonly localApiURL = e1.localLearningAPIURL;
 
   private readonly path = 'admin/orch/relay';
+  readonly supportsRegistry = !this.localApiURL;
 
   private baseUrl(): string {
     if (this.localApiURL) {
@@ -49,6 +51,10 @@ export class OrchRelayService {
           )
         )
       );
+  }
+
+  getRegistryImages(): Observable<RegistryImagesDTO> {
+    return this.apiService.get<RegistryImagesDTO>(`${this.baseUrl()}/docker/registry/images`);
   }
 
   // ---- Running Containers ----

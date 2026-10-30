@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {GeneralLogTableComponent} from "../general-log-table/general-log-table.component";
 import {LogPage} from "../../dto/page";
 import {LogService} from "../../services/log-service";
@@ -14,6 +14,7 @@ import {AuditFieldEnum} from "../../services/log-service-filter-dto";
     GeneralLogTableComponent
   ],
   templateUrl: './patient-update-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-update-log.component.scss'
 })
 export class PatientUpdateLogComponent implements LoadLogDataResponse {
@@ -25,7 +26,7 @@ export class PatientUpdateLogComponent implements LoadLogDataResponse {
   displayedColumns: string[] = ['actions', 'createdAt', 'patientId', 'committed', 'dryRun', 'runId', 'connectorId', "userId"];
   filters: string[] = ['By User', "By Connector", 'Commited', "Dry Run"];
 
-  public data: LogPage<PatientDataTraceabilityLogDto>;
+  readonly data = signal<LogPage<PatientDataTraceabilityLogDto> | undefined>(undefined);
 
   public loadData(info: LoadLogData): void {
     const filter: Partial<Record<'externalPatientId' | 'keycloakId' | 'connectorId' | 'runId' | 'revisionType', string>> = {};
@@ -58,12 +59,12 @@ export class PatientUpdateLogComponent implements LoadLogDataResponse {
         undefined,
         filter,
     ).subscribe({
-      next: (data) => (this.data = data),
+      next: (data) => this.data.set(data),
     });
   }
 
   openDetail(id: number | string) {
-    const data = this.data.results.find(d => d.id === id)
+    const data = this.data()?.results.find(d => d.id === id)
     this.dialog.open(PatientUpdateLogDetailComponent, {
       height: '80vh',
       width: '90vw',

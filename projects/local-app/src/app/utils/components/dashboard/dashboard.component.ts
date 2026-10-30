@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {Router} from '@angular/router';
 import {environment} from '@local-app/env/environment';
 import {HeroComponent} from '@shared-lib/components/hero/hero.component';
@@ -12,6 +12,7 @@ import {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     HeroComponent,
     CapabilitiesComponent,

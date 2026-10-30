@@ -8,7 +8,7 @@ import {ConnectorRunLogRowDTO, ConnectorRunPatientLogDTO, RunErrorLogListRespons
 import {RunLogsType} from "../enum/run-logs";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from '@ngx-translate/core';
-import {SchemaNodeNestedDto, SchemaNodeTypeEnum, SchemaRootNodeDto} from '@local-app/cohort/dto/schema';
+import {isAttributeNode, SchemaNodeNestedDto, SchemaRootNodeDto} from '@local-app/cohort/dto/schema';
 import {ConnectorMappingConfig} from '../models/connector-model';
 import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-id-node';
 
@@ -105,7 +105,7 @@ export class ConnectorRunService {
   }
 
   findUnmappedRequiredFields(node: SchemaRootNodeDto | SchemaNodeNestedDto, mappings: ConnectorMappingConfig[] | MappingInput = [], unmappedFields: string[] = []): string[] {
-    if (node.nodeType === SchemaNodeTypeEnum.ATTRIBUTE) {
+    if (isAttributeNode(node)) {
       const mappedIds = this.normalizeMappings(mappings);
       const attributeNode = node as SchemaNodeNestedDto;
 

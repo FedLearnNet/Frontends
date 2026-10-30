@@ -1,4 +1,4 @@
-import {Component, computed, effect, input, output, signal} from '@angular/core';
+import {Component, computed, effect, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
 import {HumanInTheLoopDTO} from "@shared-lib/modules/app-execution/dto/chat";
 import {FormsModule} from "@angular/forms";
@@ -11,6 +11,7 @@ import {FormsModule} from "@angular/forms";
   ],
   templateUrl: './chat-human-in-the-loop.component.html',
   styleUrl: './chat-human-in-the-loop.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     provideMarkdown(),
   ],

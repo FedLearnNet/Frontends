@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MatTableModule} from "@angular/material/table";
 import {ProjectDetailDto} from "../../dto/project";
 import {MatDialog} from "@angular/material/dialog";
@@ -24,6 +24,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
     TimeBadgeComponent,
     HeaderComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './list-projects.component.scss'
 })
 export class ProjectListsComponent implements OnInit {

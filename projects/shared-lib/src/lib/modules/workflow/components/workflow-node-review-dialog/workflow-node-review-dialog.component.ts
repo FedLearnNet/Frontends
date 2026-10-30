@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatButton} from "@angular/material/button";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -7,7 +7,7 @@ import {
   RunHyperParamsComponent
 } from "@shared-lib/modules/experiments/components/run-hyper-params/run-hyper-params.component";
 import {StoreCardComponent} from "@shared-lib/modules/store/components/store-card/store-card.component";
-import {environment} from "@local-app/env/environment";
+import {InfoService} from "@local-app/utils/services/info.service";
 import {MatIcon} from "@angular/material/icon";
 
 @Component({
@@ -22,11 +22,13 @@ import {MatIcon} from "@angular/material/icon";
     MatIcon
   ],
   templateUrl: './workflow-node-review-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-node-review-dialog.component.scss'
 })
 export class WorkflowNodeReviewDialogComponent {
   readonly dialogRef = inject(MatDialogRef<WorkflowNodeReviewDialogComponent>);
   readonly data = inject<WorkflowNodeDetailDTO>(MAT_DIALOG_DATA);
+  private readonly infoService = inject(InfoService);
 
   hyperParams = this.data.hyperParams ?? {};
   storeElement = {
@@ -35,10 +37,10 @@ export class WorkflowNodeReviewDialogComponent {
   }
 
   get storeUrl() {
-    if (!environment.globalWebUrl) {
+    let globalUrl = this.infoService.info()?.globalWebUrl;
+    if (!globalUrl) {
       return undefined;
     }
-    let globalUrl = environment.globalWebUrl;
     if (!globalUrl.endsWith("/")) {
       globalUrl += "/";
     }

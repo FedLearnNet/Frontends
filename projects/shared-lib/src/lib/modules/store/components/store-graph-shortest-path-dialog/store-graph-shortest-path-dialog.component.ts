@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -33,6 +33,7 @@ import {MatButton} from "@angular/material/button";
     MatButton
   ],
   templateUrl: './store-graph-shortest-path-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-graph-shortest-path-dialog.component.scss',
 })
 export class StoreGraphShortestPathDialogComponent implements OnInit {

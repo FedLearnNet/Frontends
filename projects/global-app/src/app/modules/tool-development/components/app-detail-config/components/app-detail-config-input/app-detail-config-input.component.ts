@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, model} from '@angular/core';
+import {Component, computed, inject, input, model, ChangeDetectionStrategy} from '@angular/core';
 
 import {MatInputModule} from "@angular/material/input";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -54,6 +54,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     provideMarkdown(),
   ],
   templateUrl: './app-detail-config-input.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-input.component.scss'
 })
 export class AppDetailConfigInputComponent {

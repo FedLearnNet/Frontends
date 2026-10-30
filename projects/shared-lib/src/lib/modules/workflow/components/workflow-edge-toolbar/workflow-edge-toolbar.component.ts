@@ -1,4 +1,4 @@
-import {Component, model, output} from '@angular/core';
+import {Component, model, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatTooltip} from "@angular/material/tooltip";
 import {MatIcon} from "@angular/material/icon";
 import {WorkflowConnectionDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
@@ -10,6 +10,7 @@ import {WorkflowConnectionDTO} from "@shared-lib/modules/workflow/dto/workflow.d
     MatTooltip
   ],
   templateUrl: './workflow-edge-toolbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-edge-toolbar.component.scss'
 })
 export class WorkflowEdgeToolbarComponent {

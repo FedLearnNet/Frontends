@@ -1,4 +1,4 @@
-import {Component, computed, inject, input} from '@angular/core';
+import {Component, computed, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatCard, MatCardContent, MatCardHeader} from "@angular/material/card";
 import {MatChip, MatChipSet} from "@angular/material/chips";
 import {MatIcon} from "@angular/material/icon";
@@ -30,6 +30,7 @@ import {
     FederatedClientTypeBadgeComponent
   ],
   templateUrl: './app-run-federated-test-detail-participant-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-federated-test-detail-participant-card.component.scss',
 })
 export class AppRunFederatedTestDetailParticipantCardComponent {

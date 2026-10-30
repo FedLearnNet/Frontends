@@ -1,3 +1,4 @@
+import {DEFAULT_DATAMODELER_API_PREFIX} from '@shared-lib/constants/datamodeler.constants';
 import {inject, Injectable} from '@angular/core';
 import {SelectOption} from '@shared-lib/models';
 import {DataTypeOperatorMap, QueryConfig} from '@global-app/find-data/models';
@@ -20,7 +21,8 @@ export class QueryBuilderService {
   private readonly translate: TranslateService = inject(TranslateService);
   readonly snackBar = inject(MatSnackBar);
   readonly apiService: ApiService = inject(ApiService);
-  private readonly apiUrl = environment.datamodelerApiUrl;
+  private readonly apiUrl = environment.globalLearningApiUrl;
+  private readonly apiPrefix = environment.datamodelerApiPrefix ?? DEFAULT_DATAMODELER_API_PREFIX;
   private readonly path = 'query';
 
   private queryOperatorOptionsMap = new Map<DataTypes, DataTypeOperatorMap>();
@@ -116,6 +118,6 @@ export class QueryBuilderService {
 
 
   private getBaseUrl(): string {
-    return `${this.apiUrl}/${this.path}`;
+    return `${this.apiUrl}/${this.apiPrefix}/${this.path}`;
   }
 }

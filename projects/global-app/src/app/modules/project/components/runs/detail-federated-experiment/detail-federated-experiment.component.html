@@ -10,9 +10,8 @@
 
   <lib-page-wrapper
     [error]="error()"
-    [isLoading]="loading()"
-    [isEmpty]="exp === undefined"
-    [skeletonOnLoading]="true"
+    [isLoading]="false"
+    [isEmpty]="false"
   >
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab label="Meta">
@@ -22,7 +21,7 @@
               <lib-badge color="GRAY" [text]="''+exp.acceptanceCount"/>
             </lib-info-item>
             <lib-info-item title="Clinics">
-              <lib-badge color="GRAY" [text]="''+exp.participants.length"/>
+              <lib-badge color="GRAY" [text]="''+(exp?.participants?.length ?? 0)"/>
             </lib-info-item>
             <lib-info-item title="public model">
               @if (exp.modelNeedToBePublic) {
@@ -50,8 +49,8 @@
 
 
           <lib-info-grid
-            title="Participants{{ exp.participants.length > 0 ? ' (' + exp.participants.length + ')' : '' }}">
-            @for (p of exp.participants; track p.id) {
+            title="Participants{{ (exp?.participants?.length ?? 0) > 0 ? ' (' + exp.participants.length + ')' : '' }}">
+            @for (p of exp?.participants ?? []; track p.id) {
               <div class="participant-item">
                 <div>
                   <span class="label">Clinic ID:</span>
@@ -140,5 +139,12 @@
         </mat-tab>
       }
     </mat-tab-group>
+  </lib-page-wrapper>
+} @else {
+  <lib-page-wrapper
+    [error]="error()"
+    [isLoading]="loading() || !error()"
+    [skeletonOnLoading]="true"
+  >
   </lib-page-wrapper>
 }

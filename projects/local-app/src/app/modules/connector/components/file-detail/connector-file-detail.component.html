@@ -100,7 +100,10 @@
             @if (parsing.fileType === 'CSV' || parsing.fileType === 'MULTIPLE_CSV_ZIP') {
               <lib-kv label="Delimiter" [value]="delimiterLabel()"></lib-kv>
             }
-            <lib-kv label="Header row" [value]="parsing.hasHeader ? 'First row is the header' : 'No header row'"></lib-kv>
+            @if (parsing.fileType !== 'JSON') {
+              <lib-kv label="Header row"
+                      [value]="parsing.hasHeader ? 'First row is the header' : 'No header row'"></lib-kv>
+            }
             @if (parsing.fileType === 'EXCEL') {
               <lib-kv label="Sheets read" [value]="parsing.firstSheetOnly ? 'First sheet only' : 'All sheets'"></lib-kv>
             }

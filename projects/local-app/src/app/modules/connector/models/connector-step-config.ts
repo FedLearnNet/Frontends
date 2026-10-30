@@ -1,4 +1,4 @@
-import {EventEmitter, InputSignal, ModelSignal, OutputEmitterRef} from "@angular/core";
+import {EventEmitter, InputSignal, ModelSignal, OutputEmitterRef, WritableSignal} from "@angular/core";
 import {ConnectorDTO} from "../dto/connector";
 
 
@@ -9,7 +9,7 @@ export interface ConnectorStepConfigChangeEmitter {
 
 
 export interface ConnectorStepConfig<TConfig = ConnectorDTO> {
-  config: TConfig | ModelSignal<TConfig> | InputSignal<TConfig>;
+  config: TConfig | ModelSignal<TConfig> | InputSignal<TConfig> | WritableSignal<TConfig>;
   save: EventEmitter<ConnectorStepConfigChangeEmitter> | OutputEmitterRef<ConnectorStepConfigChangeEmitter>;
   configChange?: OutputEmitterRef<TConfig>;
 

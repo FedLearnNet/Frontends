@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, input} from '@angular/core';
+import {Component, inject, OnInit, input, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MatTableDataSource, MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
@@ -30,6 +30,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     BtnComponent,
   ],
   templateUrl: './app-run-test.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-test.component.scss'
 })
 export class AppRunTestComponent implements OnInit {

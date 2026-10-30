@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, effect, inject, input, model, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, input, model, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {catchError, debounceTime, distinctUntilChanged, map, merge, of, startWith, Subscription, take, tap} from 'rxjs';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
@@ -32,6 +32,7 @@ import {BtnComponent} from '@shared-lib/components/btn/btn.component';
   selector: 'app-cohort-detail',
   templateUrl: './cohort-detail.component.html',
   styleUrl: './cohort-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     ReactiveFormsModule,
     NgClass,

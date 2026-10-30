@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {PatientDataTraceabilityDetailLogDto, PatientDataTraceabilityLogDto} from "../../dto/logs";
@@ -31,6 +31,7 @@ import {
     MatIcon,
   ],
   templateUrl: './patient-update-log-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-update-log-detail.component.scss'
 })
 export class PatientUpdateLogDetailComponent implements OnInit {

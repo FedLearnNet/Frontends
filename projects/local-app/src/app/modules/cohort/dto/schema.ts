@@ -11,6 +11,12 @@ export enum SchemaNodeTypeEnum {
   LIST_ATTRIBUTE = "LIST_ATTRIBUTE",
 }
 
+export function isAttributeNode(node: { nodeType?: SchemaNodeTypeEnum | string }): boolean {
+  return node.nodeType === SchemaNodeTypeEnum.ATTRIBUTE
+    || node.nodeType === SchemaNodeTypeEnum.ATOMIC_ATTRIBUTE
+    || node.nodeType === SchemaNodeTypeEnum.LIST_ATTRIBUTE;
+}
+
 export function isSchemaDataColumnNode(node: SchemaNodeNestedDto): boolean {
   if (node.nodeType === SchemaNodeTypeEnum.GROUP
     || node.nodeType === SchemaNodeTypeEnum.ROOT

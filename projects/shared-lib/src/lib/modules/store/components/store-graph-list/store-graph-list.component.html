@@ -56,7 +56,7 @@
             {{ nodeName(e.fromAppId) }} <span class="edge-card__arrow">→</span> {{ nodeName(e.toAppId) }}
           </div>
           <div class="edge-card__meta">
-            <lib-badge [text]="'Matches: ' + e.matches?.length" color="GREEN" size="X-SMALL"></lib-badge>
+            <lib-badge [text]="'Matches: ' + $safeNavigationMigration(e.matches?.length)" color="GREEN" size="X-SMALL"></lib-badge>
           </div>
         </div>
 

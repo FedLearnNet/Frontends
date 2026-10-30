@@ -4,4 +4,9 @@
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
   }
+
+  &__disclaimer {
+    display: block;
+    margin-top: 1.5rem;
+  }
 }

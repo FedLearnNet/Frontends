@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ModelSubDto, ModelSubFileDTO} from "@shared-lib/modules/app-execution/dto/model";
 import {PipelineListComponent} from "../../../pipeline/components/pipeline-list/pipeline-list.component";
 import {FileCardComponent} from "@shared-lib/modules/files/components/file-card/file-card.component";
@@ -22,6 +22,7 @@ import {QueryDetailCardComponent} from "@shared-lib/modules/query/query-detail-c
     QueryDetailCardComponent,
   ],
   templateUrl: './model-version-sub-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-version-sub-detail.component.scss'
 })
 export class ModelVersionSubDetailComponent {

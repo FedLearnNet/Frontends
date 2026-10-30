@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnDestroy, output, signal} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MatIcon} from '@angular/material/icon';
@@ -32,6 +32,7 @@ import {RunStatusTypes} from '../../../../../../../../../../global-app/src/app/m
     StatusBadgeComponent,
   ],
   templateUrl: './app-based-transformer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-based-transformer.component.scss',
 })
 export class AppBasedTransformerComponent implements OnDestroy {

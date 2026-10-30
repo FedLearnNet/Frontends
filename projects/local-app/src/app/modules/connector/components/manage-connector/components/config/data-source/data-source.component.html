@@ -27,9 +27,9 @@
 <p>{{ 'SPECIFIC_SOURCE_DESC' | translate }}</p>
 
 <div class="source-wrapper">
-  @for (card of storeItems(); track $index) {
+  @for (card of storeItems(); track getStoreItemId(card)) {
     <lib-store-card
-      [class.selected]="selected() && getStoreItemId(card) === selected()!.id"
+      [class.selected]="isSelectedApp(card)"
       (click)="toggleAppSelect(card)"
       [linkToShop]="false"
       [storeElement]="card"></lib-store-card>

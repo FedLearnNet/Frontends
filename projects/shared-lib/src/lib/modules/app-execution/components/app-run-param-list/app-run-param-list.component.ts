@@ -1,4 +1,4 @@
-import {Component, computed, inject, input} from '@angular/core';
+import {Component, computed, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {TranslatePipe} from "@ngx-translate/core";
 import {DataAnalysisFileDTO} from "@shared-lib/modules/app-execution/dto/model-workflow-file";
 import {MatDialog} from "@angular/material/dialog";
@@ -12,6 +12,7 @@ import {
     TranslatePipe
   ],
   templateUrl: './app-run-param-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-param-list.component.scss'
 })
 export class AppRunParamListComponent {

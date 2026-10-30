@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 
@@ -9,6 +9,7 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
     HintCardComponent
   ],
   templateUrl: './run-hyper-params.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './run-hyper-params.component.scss'
 })
 export class RunHyperParamsComponent {

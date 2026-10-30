@@ -5,6 +5,7 @@ import {
   OnInit,
   input,
   signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -29,6 +30,7 @@ import { ConsoleOutputComponent } from '@shared-lib/modules/app-execution/compon
     ConsoleOutputComponent,
   ],
   templateUrl: './app-console-log.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-console-log.component.scss',
 })
 export class AppConsoleLogComponent implements OnInit {

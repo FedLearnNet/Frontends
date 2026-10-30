@@ -1,4 +1,4 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   FileDetailCardComponent
 } from "@shared-lib/modules/files/components/file-detail-card/file-detail-card.component";
@@ -37,6 +37,7 @@ import {TranslateService} from "@ngx-translate/core";
     PageWrapperComponent,
   ],
   templateUrl: './file-detail-component.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './file-detail-component.component.scss',
 })
 export class FileDetailComponentComponent {

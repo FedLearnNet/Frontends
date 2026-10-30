@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import {Store} from "@ngrx/store";
 import {selectById, selectStreaming} from "../../service/pipeline.selectors";
-import {PipelineDTO, PipelineStatus, PipelineStepDTO, StepName} from "../../dto/pipeline";
+import {PipelineDTO, pipelineRunModeLabels, PipelineStatus, PipelineStepDTO, StepName} from "../../dto/pipeline";
 import {getPipeline, startPipelineStream, stopPipeline, stopPipelineStream} from "../../service/pipeline.actions";
 import {MatStepperModule} from "@angular/material/stepper";
 import {MatTableModule} from "@angular/material/table";
@@ -62,8 +62,10 @@ export class PipelineDetailComponent implements OnInit, OnDestroy {
     const steps = this.pipeline()?.pipelineSteps ?? [];
     const order: StepName[] = [
       StepName.FETCH_CONFIG,
+      StepName.PULL_IMAGE,
       StepName.CLONE_REPO,
       StepName.FETCH_FILES,
+      StepName.SAST,
       StepName.BUILD_IMAGE,
       StepName.SCAN_IMAGE,
       StepName.MALWARE_CHECK,
@@ -128,4 +130,5 @@ export class PipelineDetailComponent implements OnInit, OnDestroy {
   protected trackByStep = (_: number, step: PipelineStepDTO) => step.id ?? step.name;
 
   protected readonly PipelineStatus = PipelineStatus;
+  protected readonly pipelineRunModeLabels = pipelineRunModeLabels;
 }

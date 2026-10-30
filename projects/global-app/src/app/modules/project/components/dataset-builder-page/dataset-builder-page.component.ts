@@ -1,6 +1,6 @@
 import {CdkDragDrop, DragDropModule, moveItemInArray} from "@angular/cdk/drag-drop";
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, signal, untracked} from '@angular/core';
+import {Component, computed, effect, inject, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCardModule} from "@angular/material/card";
@@ -75,6 +75,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     BtnComponent
   ],
   templateUrl: './dataset-builder-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dataset-builder-page.component.scss',
 })
 export class DatasetBuilderPageComponent {

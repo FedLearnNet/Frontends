@@ -58,7 +58,7 @@
 
       <app-cohort-criteria-editor
         [criteria]="criteria"
-        [schema]="cohort()?.schemaRoot">
+        [schema]="$safeNavigationMigration(cohort()?.schemaRoot)">
       </app-cohort-criteria-editor>
     </form>
 
@@ -76,13 +76,13 @@
           <span>Status</span>
           <lib-badge
             [text]="cohort()?.status || 'Not set'"
-            [color]="statusBadgeColor(cohort()?.status)"
+            [color]="statusBadgeColor($safeNavigationMigration(cohort()?.status))"
             [border]="true">
           </lib-badge>
         </div>
         <div class="cohort-view__meta-item cohort-view__meta-item--subtle" [class.is-empty]="!cohort()?.approvalDate">
           <span>Approval date</span>
-          <lib-time-badge [date]="cohort()?.approvalDate" color="GRAY" format="DATE" ></lib-time-badge>
+          <lib-time-badge [date]="$safeNavigationMigration(cohort()?.approvalDate)" color="GRAY" format="DATE" ></lib-time-badge>
         </div>
         <div class="cohort-view__meta-item cohort-view__meta-item--subtle" [class.is-empty]="!cohort()?.copyrightLabel">
           <span>Copyright label</span>

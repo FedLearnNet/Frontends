@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {ModelSubDto} from "@shared-lib/modules/app-execution/dto/model";
 import {modelSubStatusToBadgeStatus, pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
@@ -11,6 +11,7 @@ import {DockerImageTagComponent} from "@shared-lib/components/docker-image-tag/d
     DockerImageTagComponent,
   ],
   templateUrl: './model-version-sub-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-version-sub-card.component.scss'
 })
 export class ModelVersionSubCardComponent {

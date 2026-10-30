@@ -6,18 +6,15 @@ import {
   input,
   OnChanges,
   OnInit,
-  model,
   output,
   signal,
   SimpleChanges,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
+  linkedSignal
 } from '@angular/core';
 
-import {
-  ConnectorStepConfig,
-  ConnectorStepConfigChangeEmitter,
-} from "../../../../models/connector-step-config";
+import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter,} from "../../../../models/connector-step-config";
 import {ConnectorStepDataSourceConfigComponent} from "./data-source/data-source.component";
 import {ConnectorStepDataSourceInputFileConfigComponent} from "./input-file/input-file.component";
 import {ConnectorStepDataSourceInputFTPConfigComponent} from "./input-ftp/input-ftp.component";
@@ -29,8 +26,8 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {InputAppBasedComponent} from "./input-app-based/input-app-based.component";
 import {ConnectorDTO, ConnectorInputConfigDTO} from "../../../../dto/connector";
 import {isFileUploadSettings} from "../../../../helper/connector-config-helper";
-import { ConnectorService } from '../../../../services/connector-crud.service';
-import { ConnectorInputConfig, FileUploadSettings } from '../../../../models/input-config';
+import {ConnectorService} from '../../../../services/connector-crud.service';
+import {ConnectorInputConfig, FileUploadSettings} from '../../../../models/input-config';
 
 const componentMapper: { [key: string]: any } = {
   source_config: ConnectorStepDataSourceConfigComponent,
@@ -49,7 +46,9 @@ const componentMapper: { [key: string]: any } = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectorStepConfigComponent implements OnInit, OnChanges, ConnectorStepConfig<ConnectorDTO> {
-  readonly config = model<ConnectorDTO>({} as ConnectorDTO);
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
+  readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
+  readonly config = linkedSignal(this.configInput);
   readonly componentType = input<string | number>();
   readonly cohortId = input<number | undefined>(undefined);
   private readonly activeComponentType = signal<string | number | undefined>(undefined);
@@ -138,16 +137,24 @@ export class ConnectorStepConfigComponent implements OnInit, OnChanges, Connecto
       this.inputFileChanged.emit();
     }
 
-    if (this.shouldSaveConnector(prevConfig, nextConfig, prevFileId, nextFileId)) {
-      this.connectorService.save(this.config()).subscribe();
-    }
+    const fileRecovered = !this.fileExists(prevConfig) && this.fileExists(nextConfig);
 
-    if (this.fileExists(prevConfig) || !this.fileExists(nextConfig)) {
-      this.router.navigate([], {
-        relativeTo: this.activatedRoute,
-        queryParams: { uploaded: true },
+    if (this.shouldSaveConnector(prevConfig, nextConfig, prevFileId, nextFileId)) {
+      this.connectorService.save(this.config()).subscribe(() => {
+        if (fileRecovered) {
+          this.reloadWithUploadedFile();
+        }
       });
+    } else if (fileRecovered) {
+      this.reloadWithUploadedFile();
     }
+  }
+
+  private reloadWithUploadedFile(): void {
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: {uploaded: true},
+    });
   }
 
   private fileExists(input: ConnectorInputConfig): boolean {
@@ -159,10 +166,10 @@ export class ConnectorStepConfigComponent implements OnInit, OnChanges, Connecto
   }
 
   private shouldSaveConnector(
-      prevConfig: ConnectorInputConfig,
-      nextConfig: ConnectorInputConfig,
-      prevFileId: number | null,
-      nextFileId: number | null
+    prevConfig: ConnectorInputConfig,
+    nextConfig: ConnectorInputConfig,
+    prevFileId: number | null,
+    nextFileId: number | null
   ): boolean {
     if (!this.config().id) return false;
 

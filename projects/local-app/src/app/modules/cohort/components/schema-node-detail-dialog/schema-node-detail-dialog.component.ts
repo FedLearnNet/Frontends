@@ -1,4 +1,4 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -16,6 +16,7 @@ import {
     SchemaNodeDetailComponent
   ],
   templateUrl: './schema-node-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './schema-node-detail-dialog.component.scss',
 })
 export class SchemaNodeDetailDialogComponent {

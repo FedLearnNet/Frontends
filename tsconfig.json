@@ -3,7 +3,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "moduleResolution": "bundler",
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -18,56 +17,56 @@
     "paths": {
       // global-app paths
       "@global-app/find-data/*": [
-        "projects/global-app/src/app/modules/find-data/*"
+        "./projects/global-app/src/app/modules/find-data/*"
       ],
       "@global-app/schema/*": [
-        "projects/global-app/src/app/modules/schema/*"
+        "./projects/global-app/src/app/modules/schema/*"
       ],
       "@global-app/project/*": [
-        "projects/global-app/src/app/modules/project/*"
+        "./projects/global-app/src/app/modules/project/*"
       ],
       "@global-app/app-store/*": [
-        "projects/global-app/src/app/modules/app-store/*"
+        "./projects/global-app/src/app/modules/app-store/*"
       ],
       "@global-app/model-store/*": [
-        "projects/global-app/src/app/modules/model-store/*"
+        "./projects/global-app/src/app/modules/model-store/*"
       ],
       "@global-app/env/*": [
-        "projects/global-app/src/environments/*"
+        "./projects/global-app/src/environments/*"
       ],
       "@global-app/utils/*": [
-        "projects/global-app/src/app/utils/*"
+        "./projects/global-app/src/app/utils/*"
       ],
 
       // local-app paths
       "@local-app/cohort/*": [
-        "projects/local-app/src/app/modules/cohort/*"
+        "./projects/local-app/src/app/modules/cohort/*"
       ],
       "@local-app/data-review/*": [
-        "projects/local-app/src/app/modules/data-review/*"
+        "./projects/local-app/src/app/modules/data-review/*"
       ],
       "@local-app/env/*": [
-        "projects/local-app/src/environments/*"
+        "./projects/local-app/src/environments/*"
       ],
       "@local-app/utils/*": [
-        "projects/local-app/src/app/utils/*"
+        "./projects/local-app/src/app/utils/*"
       ],
       "@local-app/fl-project/*": [
-        "projects/local-app/src/app/modules/fl-project/*"
+        "./projects/local-app/src/app/modules/fl-project/*"
       ],
       "@local-app/information/*": [
-        "projects/local-app/src/app/modules/information/*"
+        "./projects/local-app/src/app/modules/information/*"
       ],
 
       // shared-lib paths
       "@shared-lib/*": [
-        "projects/shared-lib/src/lib/*"
+        "./projects/shared-lib/src/lib/*"
       ],
       "shared-lib": [
         "./dist/shared-lib"
       ],
       "@shared-lib/env/*": [
-        "projects/shared-lib/src/environments/*"
+        "./projects/shared-lib/src/environments/*"
       ]
     },
     "importHelpers": true,

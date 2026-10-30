@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal, WritableSignal} from '@angular/core';
+import {Component, inject, OnInit, signal, WritableSignal, ChangeDetectionStrategy} from '@angular/core';
 import {LocalApiHealthService} from "../../service/health.service";
 import {ServiceBox} from "../../model/health.model";
 import {MatCard} from "@angular/material/card";
@@ -12,6 +12,7 @@ import {UpDownUnknown} from "../../dto/health";
     MatIcon,
   ],
   templateUrl: './health-dashboard.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './health-dashboard.component.scss'
 })
 export class HealthDashboardComponent implements OnInit {

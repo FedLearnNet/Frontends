@@ -1,3 +1,4 @@
+import {Signal} from "@angular/core";
 import {SortDirection} from "@angular/material/sort";
 import {LogPage} from "../dto/page";
 
@@ -15,7 +16,7 @@ export interface LoadLogData {
 
 export interface LoadLogDataResponse {
 
-  data: LogPage<any>;
+  data: Signal<LogPage<any> | undefined>;
 
   loadData(info: LoadLogData): void;
 

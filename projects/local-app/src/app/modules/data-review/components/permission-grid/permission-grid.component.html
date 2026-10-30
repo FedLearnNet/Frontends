@@ -11,15 +11,15 @@
 <div class="permission-container">
   <div class="table-container">
     <mat-table
-      [dataSource]="permissions"
+      [dataSource]="permissions()"
       class="mat-elevation-z0"
-      [class.is-x-small-screen]="isXSmallScreen"
+      [class.is-x-small-screen]="isXSmallScreen()"
     >
       <!-- Action Column -->
       <ng-container matColumnDef="actions" sticky>
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.ACTION' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.ACTION' | translate }}:</span>
           }
           <button mat-icon-button color="primary" (click)="editRow(element)">
@@ -35,7 +35,7 @@
       <ng-container matColumnDef="cohortName">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.COHORT' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.COHORT' | translate }}:</span>
           }
           <span>{{ getCohortName(element.cohortId) }}</span>
@@ -46,7 +46,7 @@
       <ng-container matColumnDef="groupOrUser">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.USER' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element" class="group-or-user">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.USER' | translate }}:</span>
           }
           <span>{{ element.userId }}</span>
@@ -57,7 +57,7 @@
       <ng-container matColumnDef="isAllowedToQuery">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.IS_ALLOWED_TO_QUERY' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.IS_ALLOWED_TO_QUERY' | translate }}:</span>
           }
           <span>{{ element.isAllowedToQuery ? ('YES' | translate) : ('NO' | translate) }}</span>
@@ -68,7 +68,7 @@
       <ng-container matColumnDef="queryRetryTime">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY_RETRY_TIME' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.QUERY_RETRY_TIME' | translate }}:</span>
           }
           <span>{{ element.queryRetryTime }}</span>
@@ -79,7 +79,7 @@
       <ng-container matColumnDef="querySampleThreshold">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.QUERY_SAMPLE_THRESHOLD' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.QUERY_SAMPLE_THRESHOLD' | translate }}:</span>
           }
           <span>
@@ -96,7 +96,7 @@
       <ng-container matColumnDef="autoTrainingAccess">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_TRAINING_ACCESS' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.AUTO_TRAINING_ACCESS' | translate }}:</span>
           }
           <span>{{ element.autoTrainingAccess }}</span>
@@ -107,7 +107,7 @@
       <ng-container matColumnDef="autoStatisticsAccess">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_STATISTICS_ACCESS' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.AUTO_STATISTICS_ACCESS' | translate }}:</span>
           }
           <span>{{ element.autoStatisticsAccess }}</span>
@@ -118,7 +118,7 @@
       <ng-container matColumnDef="autoMetricsAccess">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.AUTO_METRICS_ACCESS' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.AUTO_METRICS_ACCESS' | translate }}:</span>
           }
           <span>{{ element.autoMetricsAccess }}</span>
@@ -129,7 +129,7 @@
       <ng-container matColumnDef="validFrom">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.VALID_FROM' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.VALID_FROM' | translate }}:</span>
           }
           @if (element.validFrom) {
@@ -144,7 +144,7 @@
       <ng-container matColumnDef="validUntil">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.VALID_UNTIL' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.VALID_UNTIL' | translate }}:</span>
           }
           @if (element.validUntil) {
@@ -159,7 +159,7 @@
       <ng-container matColumnDef="createdAt">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.CREATED_AT' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.CREATED_AT' | translate }}:</span>
           }
           <lib-time-badge [color]="'GRAY'" [format]="'SHORT'" [date]="element.createdAt" />
@@ -170,7 +170,7 @@
       <ng-container matColumnDef="updatedAt">
         <mat-header-cell *matHeaderCellDef>{{ 'GRID.UPDATED_AT' | translate }}</mat-header-cell>
         <mat-cell *matCellDef="let element">
-          @if (isXSmallScreen) {
+          @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.UPDATED_AT' | translate }}:</span>
           }
           <lib-time-badge [color]="'GRAY'" [format]="'SHORT'" [date]="element.updatedAt" />

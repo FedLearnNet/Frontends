@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -47,6 +47,7 @@ interface DiagramConfigGroup {
     MatDialogActions,
   ],
   templateUrl: './experiments-chart-generic-edit.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiments-chart-generic-edit.component.scss'
 })
 export class ExperimentsChartGenericEditComponent implements OnInit {

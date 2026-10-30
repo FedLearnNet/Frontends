@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   WorkflowReadonlyViewComponent
 } from "@shared-lib/modules/workflow/components/workflow-readonly-view/workflow-readonly-view.component";
@@ -47,6 +47,7 @@ export interface DataAnalysisWorkflowDetailDialogData {
     StatusTitleComponent
   ],
   templateUrl: './data-analysis-workflow-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './data-analysis-workflow-detail-dialog.component.scss',
 })
 export class DataAnalysisWorkflowDetailDialogComponent implements OnInit {

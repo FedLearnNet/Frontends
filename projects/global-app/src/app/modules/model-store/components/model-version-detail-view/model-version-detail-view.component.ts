@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, OnInit} from '@angular/core';
+import {Component, computed, effect, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {
   ModelVersionDetailComponent
 } from "@global-app/model-store/components/model-version-detail/model-version-detail.component";
@@ -24,6 +24,7 @@ import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/
     EmptyStateComponent
   ],
   templateUrl: './model-version-detail-view.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-version-detail-view.component.scss'
 })
 export class ModelVersionDetailViewComponent implements OnInit {

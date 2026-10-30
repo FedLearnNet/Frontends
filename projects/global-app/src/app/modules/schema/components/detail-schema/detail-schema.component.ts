@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {SchemaService} from "@global-app/schema/services/schema.service";
 import {SchemaNodeDTO, SchemaNodeType, SchemaStructureDTO} from "@global-app/schema/dto/schema";
 import {MatDialog} from "@angular/material/dialog";
@@ -34,6 +34,7 @@ interface SchemaOutlineRow {
   selector: 'app-detail-schema',
   templateUrl: './detail-schema.component.html',
   styleUrl: './detail-schema.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgStyle,
     HeaderComponent,
@@ -276,16 +277,12 @@ export class DetailSchemaComponent implements OnInit {
     if (!id) return;
     const schemaGroup = cloneDeep(this.findNodeById(id));
     const dialogRef = this.dialog.open(DetailSchemaCardComponent, {
-      height: '80vh',
-      width: '90vw',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
-      autoFocus: false,
+      ...DetailSchemaCardComponent.dialogConfig,
       data: schemaGroup
     });
 
     dialogRef.afterClosed().subscribe((result?: SchemaStructureDTO) => {
-      if (result === undefined || (result as any) === "") {
+      if (!result) {
         return;
       }
       this.loading.set(true);
@@ -324,11 +321,12 @@ export class DetailSchemaComponent implements OnInit {
     schemaGroup.current = {name: '', description: '', type: SchemaNodeType.ATOMIC_ATTRIBUTE} as SchemaStructureDTO;
 
     const dialogRef = this.dialog.open(DetailSchemaCardComponent, {
+      ...DetailSchemaCardComponent.dialogConfig,
       data: schemaGroup
     });
 
     dialogRef.afterClosed().subscribe((result?: SchemaStructureDTO) => {
-      if (result !== undefined) {
+      if (result) {
         this.loading.set(true);
         this.schemaService.persist(this.toSchemaNodeDTO(result, id)).subscribe({
           next: createdSchema => {

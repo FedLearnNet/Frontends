@@ -1,4 +1,4 @@
-import {Component, effect, inject, signal} from '@angular/core';
+import {Component, effect, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {MatPaginator, PageEvent} from "@angular/material/paginator";
@@ -29,6 +29,7 @@ import {MatDialogRef} from "@angular/material/dialog";
     TranslatePipe
   ],
   templateUrl: './ontology-select-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ontology-select-dialog.component.scss',
 })
 export class OntologySelectDialogComponent {

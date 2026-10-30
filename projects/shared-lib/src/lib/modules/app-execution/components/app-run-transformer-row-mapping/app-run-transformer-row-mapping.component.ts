@@ -1,4 +1,4 @@
-import {Component, computed, effect, input, model, signal} from '@angular/core';
+import {Component, computed, effect, input, model, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   AppTransformerMappings,
   FunctionExecutionMode,
@@ -83,6 +83,7 @@ type HyperparameterFG = FormGroup<{
 
   ],
   templateUrl: './app-run-transformer-row-mapping.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-transformer-row-mapping.component.scss',
 })
 export class AppRunTransformerRowMappingComponent {

@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {AutoplayOnViewDirective} from "@shared-lib/directives/autoplay-on-view.directive";
 import {MatButton} from "@angular/material/button";
 import {ErrorResponseDTO} from "@shared-lib/base/error";
@@ -11,6 +11,7 @@ import {HttpErrorResponse} from "@angular/common/http";
     AutoplayOnViewDirective
   ],
   templateUrl: './error-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './error-card.component.scss'
 })
 export class ErrorCardComponent {

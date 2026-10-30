@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, model, output, signal, viewChild} from '@angular/core';
+import {Component, computed, inject, input, model, output, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {
   AppDetailConfigHyperparamComponent
 } from "./components/app-detail-config-hyperparam/app-detail-config-hyperparam.component";
@@ -45,6 +45,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     BtnComponent,
   ],
   templateUrl: './app-detail-config.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config.component.scss'
 })
 export class AppDetailConfigComponent {

@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {DatePipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
@@ -34,6 +34,7 @@ export interface PreviewCacheDialogResult {
     HintCardComponent,
   ],
   templateUrl: './preview-cache-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './preview-cache-dialog.component.scss',
 })
 export class PreviewCacheDialogComponent {

@@ -1,8 +1,9 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'lib-kv',
   templateUrl: './kv.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './kv.component.scss',
 })
 export class KvComponent {

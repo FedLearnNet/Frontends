@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, input, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {interval} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BadgeColor, BadgeComponent, BadgeSize} from "@shared-lib/components/badge/badge.component";
@@ -15,6 +15,7 @@ export type DateFormat = 'LONG' | 'SHORT' | 'MEDIUM' | 'DATE';
   ],
   providers: [DatePipe],
   templateUrl: './time-badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './time-badge.component.scss'
 })
 export class TimeBadgeComponent {

@@ -18,6 +18,21 @@
     (runStarted)="toolRunStarted()"
     (runFinished)="setAppBasedResult($event)"
   ></app-app-based-extractor>
+
+  @if (outputNames().length > 1) {
+    <mat-form-field appearance="outline" class="output-select">
+      <mat-label>{{ 'APP_OUTPUT_TO_IMPORT' | translate }}</mat-label>
+      <mat-select multiple [value]="selectedOutputs()" (selectionChange)="selectOutputs($event.value)">
+        @for (output of outputNames(); track output) {
+          <mat-option [value]="output">{{ output }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ 'APP_OUTPUT_TO_IMPORT_HINT' | translate }}</mat-hint>
+    </mat-form-field>
+    @if (outputSelectionWarning(); as warning) {
+      <p class="output-warning">{{ warning | translate }}</p>
+    }
+  }
 }
 
 @if (!isToolBased() && sourceTables.length > 0) {
@@ -34,7 +49,6 @@
       [label]="'PIVOT_TABLE' | translate"
       type="CUSTOM"
       icon="pivot_table_chart"
-      label="Suggest mapping"
     >
     </lib-btn>
   </lib-info-card>

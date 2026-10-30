@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, model, signal, untracked} from '@angular/core';
+import {Component, computed, effect, inject, input, model, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CohortDetailDto, isCohortDeleting} from '@local-app/cohort/models';
 import {MatDialog} from '@angular/material/dialog';
@@ -41,6 +41,7 @@ export class DisplayColumn {
   selector: 'app-cohort-patients',
   templateUrl: './cohort-patients.component.html',
   styleUrl: './cohort-patients.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButtonModule,
     MatTableModule,

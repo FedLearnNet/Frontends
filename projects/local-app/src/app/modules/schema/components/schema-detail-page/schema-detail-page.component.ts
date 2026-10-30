@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {SchemaDetailComponent} from '@local-app/cohort/components/schema-detail/schema-detail.component';
@@ -8,6 +8,7 @@ import {SchemaRootNodeDto} from '@local-app/cohort/dto/schema';
   selector: 'app-schema-detail-page',
   templateUrl: './schema-detail-page.component.html',
   styleUrl: './schema-detail-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SchemaDetailComponent],
 })
 export class SchemaDetailPageComponent {

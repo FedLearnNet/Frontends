@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, OnInit, Signal, signal, viewChild} from '@angular/core';
+import {Component, computed, inject, input, OnInit, Signal, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {PatientLogTraceabilityComponent} from "../patient-log-traceability/patient-log-traceability.component";
 import {PatientLogQueryComponent} from "../patient-log-query/patient-log-query.component";
 import {PatientLogTrainingComponent} from "../patient-log-training/patient-log-training.component";
@@ -35,6 +35,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     HeaderComponent,
     BtnComponent,
   ],  templateUrl: './patient-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './patient-detail.component.scss'
 })
 export class PatientDetailComponent implements OnInit, HasPatientUnsavedChanges {

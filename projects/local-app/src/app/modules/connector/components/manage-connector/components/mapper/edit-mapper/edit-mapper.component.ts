@@ -15,6 +15,7 @@ import {
 import {MatDialog} from "@angular/material/dialog";
 import {ConnectorSelectMapperComponent, ConnectorSelectMapperResult} from "../select-mapper/select-mapper.component";
 import {ConnectorPreviewService} from "../../../../../services/connector-preview.service";
+import {FunctionsDetailDTO} from "../../../../../dto/function";
 import {ConnectorMappingConfig} from "../../../../../models/connector-model";
 import {ConnectorMappingElement} from "../../../../../models/connector-preview";
 import {getArrayOrString, isArray, ListViewComponentDialogComponent} from "../../table/list-view/list-view.component";
@@ -27,7 +28,7 @@ import {
 } from '../time-series-mapping-dialog/time-series-mapping-dialog.component';
 import {toSignal} from "@angular/core/rxjs-interop";
 import {map, Subscription} from "rxjs";
-import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from "@local-app/cohort/dto/schema";
+import {isAttributeNode, SchemaNodeNestedDto} from "@local-app/cohort/dto/schema";
 import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-id-node';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatToolbar} from '@angular/material/toolbar';
@@ -84,6 +85,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   columns = input<string[]>([]);
   inputData = input<any[]>([]);
   validationConfig = input<ConnectorDTO | undefined>(undefined);
+  transformers = input<FunctionsDetailDTO[]>([]);
   config = model<ConnectorMappingConfig[] | undefined>([]);
 
   patientIdConflictColumn = input<string | undefined>(undefined);
@@ -178,7 +180,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       return nodes.flatMap(node => {
         const currentPath = [...path, node.name];
 
-        if (node.nodeType === SchemaNodeTypeEnum.ATTRIBUTE) {
+        if (isAttributeNode(node)) {
           return [{
             displayValue: currentPath.join(' > '),
             value: currentPath.join('.'),
@@ -414,6 +416,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       ...validationConfig,
       cohortId: cohort.id,
       schemaMapping,
+      transformer: this.transformers(),
     });
     const request: PreviewValidationRequestDTO = {
       elements: this.flattenedSchemaFields().map(field => ({
@@ -800,7 +803,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   private findValidationTarget(
     owner: ConnectorMappingElement,
     schemaId: number | undefined
-  ): {displayValue: string; value: string; schemaId?: number} | undefined {
+  ): { displayValue: string; value: string; schemaId?: number } | undefined {
     if (owner.mappingConfig && (schemaId == null || owner.mappingConfig.schemaId === schemaId)) {
       return owner.mappingConfig;
     }

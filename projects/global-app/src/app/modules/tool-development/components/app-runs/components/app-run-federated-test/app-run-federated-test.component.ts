@@ -1,4 +1,4 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MatTableDataSource, MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
@@ -34,6 +34,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     BtnComponent,
   ],
   templateUrl: './app-run-federated-test.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-federated-test.component.scss'
 })
 export class AppRunFederatedTestComponent implements OnInit {

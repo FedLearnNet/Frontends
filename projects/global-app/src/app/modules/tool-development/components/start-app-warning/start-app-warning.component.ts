@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
@@ -11,6 +11,7 @@ import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.c
     ErrorCardComponent
   ],
   templateUrl: './start-app-warning.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './start-app-warning.component.scss',
 })
 export class StartAppWarningComponent {

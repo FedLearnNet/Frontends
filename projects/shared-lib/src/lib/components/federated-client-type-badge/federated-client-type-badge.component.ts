@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {FLNetParticipantRole} from "../../../../../global-app/src/app/modules/tool-development/dto/federated-test-run";
 import {BadgeSize} from "@shared-lib/components/badge/badge.component";
 import {MatIcon} from "@angular/material/icon";
@@ -9,6 +9,7 @@ import {MatIcon} from "@angular/material/icon";
     MatIcon
   ],
   templateUrl: './federated-client-type-badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './federated-client-type-badge.component.scss',
 })
 export class FederatedClientTypeBadgeComponent {

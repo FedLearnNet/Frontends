@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatDialogClose, MatDialogTitle} from "@angular/material/dialog";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
@@ -12,6 +12,7 @@ import {MatIconButton} from "@angular/material/button";
     MatIconButton
   ],
   templateUrl: './closeable-dialog-title.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './closeable-dialog-title.component.scss'
 })
 export class CloseableDialogTitleComponent {

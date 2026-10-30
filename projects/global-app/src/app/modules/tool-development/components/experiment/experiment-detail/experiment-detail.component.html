@@ -65,7 +65,7 @@
   </div>
   <div class="experiment--results">
     <app-experiment-runs-charts [experimentRuns]="runSelection.selected"
-                                [diagrams]="experiment()?.diagramConfigs"
+                                [diagrams]="$safeNavigationMigration(experiment()?.diagramConfigs)"
                                 (changed)="diagramsChanged($event!)" />
   </div>
 </div>

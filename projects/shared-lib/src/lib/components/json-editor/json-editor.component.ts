@@ -10,7 +10,8 @@ import {
   output,
   signal,
   untracked,
-  viewChild
+  viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {LanguagePipe, MarkdownComponent, provideMarkdown} from "ngx-markdown";
 import {FormsModule} from "@angular/forms";
@@ -35,6 +36,7 @@ export type JsonValue =
   ],
   templateUrl: './json-editor.component.html',
   styleUrl: './json-editor.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     provideMarkdown()
   ]

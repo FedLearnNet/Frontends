@@ -1,4 +1,4 @@
-import {Component, input, output} from '@angular/core';
+import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
 import {RouterLink} from "@angular/router";
@@ -11,6 +11,7 @@ import {RouterLink} from "@angular/router";
     RouterLink
   ],
   templateUrl: './hint-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './hint-card.component.scss'
 })
 export class HintCardComponent {

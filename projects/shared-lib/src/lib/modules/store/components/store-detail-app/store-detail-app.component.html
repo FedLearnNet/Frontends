@@ -60,7 +60,9 @@
         }
         @case (2) {
           @if (detail.publishInfo) {
-            <app-pipeline-publish-info-detail [publishInfo]="detail.publishInfo"/>
+            <app-pipeline-publish-info-detail [publishInfo]="detail.publishInfo"
+                                              [appVersionId]="detail.latestVersionId"
+                                              [authors]="detail.authors"/>
           }
         }
         @case (3) {

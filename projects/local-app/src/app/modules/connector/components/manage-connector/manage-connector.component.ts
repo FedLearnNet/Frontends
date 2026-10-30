@@ -1,12 +1,18 @@
-import {Component, computed, inject, input, OnInit, signal, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  input,
+  OnInit,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {ConnectorCard} from "../../models/connector-card";
 import {ConnectorStepConfigs} from "../../enum/connector-step-config";
 import {ConnectorStepConfigChangeEmitter} from "../../models/connector-step-config";
-import {
-  configToCards,
-  configToConnectorDraft,
-  connectorDraftToConfig
-} from "../../models/connector-config";
+import {configToCards, configToConnectorDraft, connectorDraftToConfig} from "../../models/connector-config";
 import {ConnectorStepConfigComponent} from "./components/config/config.component";
 import {
   CdkDrag,
@@ -27,7 +33,9 @@ import {
 } from "./components/function/transformation-overview-dialog/transformation-overview-dialog.component";
 import {FunctionService} from "../../services/function.service";
 import {FunctionExecutionMode, FunctionsDetailDTO} from "../../dto/function";
-import {AppBasedTransformerComponent} from './components/function/app-based-transformer/app-based-transformer.component';
+import {
+  AppBasedTransformerComponent
+} from './components/function/app-based-transformer/app-based-transformer.component';
 import {PreviewStageDTO} from "../../dto/preview";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
@@ -60,26 +68,24 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {
   connectorFilesDetailToFileInfo,
+  fileTypeLabel,
   getPatientIdMappedColumn,
   getPatientIdTransformerConflict,
   hydrateFileInfoData,
+  isAppBasedUploadSettings,
   isFileUploadSettings
 } from "../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../dto/connector";
 import {
   ResumeCachedConnectorDialogComponent
 } from './components/resume-cached-connector-dialog/resume-cached-connector-dialog.component';
-import {
-  SkipTransformDialogComponent
-} from './components/skip-transform-dialog/skip-transform-dialog.component';
+import {SkipTransformDialogComponent} from './components/skip-transform-dialog/skip-transform-dialog.component';
 import {CohortDetailDto} from "@local-app/cohort/models";
 import {rematchMappingSchemaId} from "../../helper/connector-config-schema-helper";
-import { FileUploadSettings } from '../../models/input-config';
+import {FileUploadSettings} from '../../models/input-config';
 import {Store} from '@ngrx/store';
 import {selectAllImports} from '../../store/import/import.selectors';
-import {
-  ImportActivityChipComponent
-} from '../import/import-activity-chip/import-activity-chip.component';
+import {ImportActivityChipComponent} from '../import/import-activity-chip/import-activity-chip.component';
 
 const BASE_MAPPING_CARD: ConnectorCard = {
   index: 99,
@@ -100,6 +106,7 @@ type RouteData = Data & {
   selector: 'app-manage-connector',
   templateUrl: './manage-connector.component.html',
   styleUrl: './manage-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent]
 })
 export class ManageConnectorComponent implements OnInit {
@@ -112,6 +119,7 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -145,7 +153,8 @@ export class ManageConnectorComponent implements OnInit {
   baseRoute = 'connector';
 
   functions: FunctionsDetailDTO[] = [TOOLS_TRANSFORMER_MODULE];
-  transformer = new Map<string, FunctionsDetailDTO>()
+  readonly transformers = signal(new Map<string, FunctionsDetailDTO>());
+  readonly transformerList = computed(() => Array.from(this.transformers().values()));
   transformedData = new Map<string, any[]>()
   /** Where each previewed step came from, so the wizard can show which ones were cached. */
   previewStages = new Map<string, PreviewStageDTO>()
@@ -170,9 +179,19 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   set config(value: ConnectorDTO) {
+    const outputChanged = this.selectedOutputOf(this._config) !== this.selectedOutputOf(value);
     this._config = value;
     this.syncCardState();
     this.saveConfigToLocalStorage();
+    if (outputChanged && this.getTransformCards().length > 0) {
+      this.transformedData.clear();
+      this.applyTransform();
+    }
+  }
+
+  private selectedOutputOf(config?: ConnectorDTO): string {
+    const inputConfig = config?.inputConfig;
+    return JSON.stringify(inputConfig && isAppBasedUploadSettings(inputConfig) ? inputConfig.selectedOutputs : undefined);
   }
 
   ngOnInit(): void {
@@ -228,8 +247,21 @@ export class ManageConnectorComponent implements OnInit {
     return 'connectorConfig' + this.cohortId();
   }
 
+  private orderedTransformers(): Map<string, FunctionsDetailDTO> {
+    const ordered = new Map<string, FunctionsDetailDTO>();
+    this.getTransformCards().forEach(card => {
+      const transformer = card.id ? this.transformers().get(card.id) : undefined;
+      if (transformer) {
+        ordered.set(card.id!, transformer);
+      }
+    });
+    return ordered;
+  }
+
   private saveConfigToLocalStorage(): void {
-    const draft = configToConnectorDraft(this._config);
+    const draft = configToConnectorDraft(this.transformers().size > 0
+      ? {...this._config, transformer: this.transformerList()}
+      : this._config);
     try {
       localStorage.setItem(this.getStorageName(), JSON.stringify(draft));
     } catch (error) {
@@ -243,7 +275,7 @@ export class ManageConnectorComponent implements OnInit {
       this._config = connectorDraftToConfig(JSON.parse(storedConfig));
       if (removeId) {
         (this._config.id as any) = null;
-        if(this.resolvedCohort()){
+        if (this.resolvedCohort()) {
           this._config = rematchMappingSchemaId(this._config, this.resolvedCohort()!)
         }
         this.saveConfigToLocalStorage();
@@ -278,17 +310,20 @@ export class ManageConnectorComponent implements OnInit {
     if (!transformers) {
       return;
     }
-    transformers.forEach((transformer, index) => {
-      this.transformer.set(index.toString(), this.withFunctionDetails(transformer));
+    this.transformers.update(current => {
+      const loaded = new Map(current);
+      transformers.forEach((transformer, index) => {
+        loaded.set(index.toString(), this.withFunctionDetails(transformer));
+      });
+      return loaded;
     });
     this.syncCardState();
     this.applyTransform();
   }
 
   private hydrateTransformerDetails(): void {
-    this.transformer.forEach((transformer, key) => {
-      this.transformer.set(key, this.withFunctionDetails(transformer));
-    });
+    this.transformers.update(current => new Map(Array.from(current,
+      ([key, transformer]) => [key, this.withFunctionDetails(transformer)] as const)));
   }
 
   private withFunctionDetails(
@@ -390,6 +425,9 @@ export class ManageConnectorComponent implements OnInit {
       );
     }
     this.reAssignIndex();
+    // Everything that sends the steps (preview, "Run step", save, draft) reads the map in its
+    // insertion order, so it has to follow the new card order.
+    this.transformers.set(this.orderedTransformers());
     this.applyTransform();
   }
 
@@ -419,13 +457,13 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public getTransformerForCard(card: ConnectorCard) {
-    return this.transformer.get(card.id!);
+    return this.transformers().get(card.id!);
   }
 
   public get patientIdTransformerConflict(): string | undefined {
     return getPatientIdTransformerConflict(
       this.config.schemaMapping,
-      Array.from(this.transformer.values())
+      this.transformerList()
     );
   }
 
@@ -444,7 +482,7 @@ export class ManageConnectorComponent implements OnInit {
         autoFocus: false,
         data: {
           sourceColumns,
-          transformers: Array.from(this.transformer.values()),
+          transformers: this.transformerList(),
         },
       }
     );
@@ -470,29 +508,54 @@ export class ManageConnectorComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: FunctionsDetailDTO | { delete: boolean }) => {
       if (!result) {
+        this.removeUnsavedTransformerCard(card);
         return;
       }
 
       if ('delete' in result) {
+        const hadTransformer = !!card.id && this.transformers().has(card.id);
         this.cards = this.cards.filter(c => c.id !== card.id);
-        this.disableAddTransformer = false;
-        if (this.transformer.has(card.id!)) {
-          this.transformer.delete(card.id!);
+        if (hadTransformer) {
+          this.transformers.update(current => {
+            const remaining = new Map(current);
+            remaining.delete(card.id!);
+            return remaining;
+          });
           this.transformedData.delete(card.id!);
-          this.reAssignIndex();
+        }
+        this.reAssignIndex();
+        if (this.currentStep?.id === card.id) {
           this.currentStep = this.getFallbackStepAfterDelete(card.index);
+        }
+        this.syncCardState();
+        this.changeDetectorRef.markForCheck();
+        if (hadTransformer) {
           this.applyTransform();
         }
         return;
       }
 
-      this.transformer.set(card.id!, result);
+      this.transformers.update(current => new Map(current).set(card.id!, result));
       this.cards[card.index].title = result.methodName;
       this.disableAddTransformer = false;
       this.cards[card.index].configured = true;
 
       this.applyTransform();
     });
+  }
+
+  private removeUnsavedTransformerCard(card: ConnectorCard): void {
+    if (!card.id || this.transformers().has(card.id)) {
+      return;
+    }
+
+    this.cards = this.cards.filter(existing => existing.id !== card.id);
+    this.reAssignIndex();
+    if (this.currentStep?.id === card.id) {
+      this.currentStep = this.getFallbackStepAfterDelete(card.index);
+    }
+    this.syncCardState();
+    this.changeDetectorRef.markForCheck();
   }
 
   public addTransform() {
@@ -519,16 +582,23 @@ export class ManageConnectorComponent implements OnInit {
     transFormerCards.forEach(c => {
       c.previewRunning = true;
     });
-    this.connectorPreviewService.preview(transFormerCards, config, this.transformer, this.cohortId()).subscribe({
+    this.changeDetectorRef.markForCheck();
+    this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId()).subscribe({
       next: (data) => {
         transFormerCards.forEach(c => {
           c.previewRunning = false;
         });
         this.transformedData = data.rows;
         this.previewStages = data.stages;
+        this.changeDetectorRef.markForCheck();
       },
       error: (error) => {
-        if (!(this.config.inputConfig as any)?.fileExists) {
+        transFormerCards.forEach(c => {
+          c.previewRunning = false;
+        });
+        this.changeDetectorRef.markForCheck();
+        const inputConfig = this.config.inputConfig;
+        if (inputConfig && isFileUploadSettings(inputConfig) && !inputConfig.fileExists) {
           return;
         }
 
@@ -624,7 +694,7 @@ export class ManageConnectorComponent implements OnInit {
     if (!this.currentStep.id) {
       return;
     }
-    return this.transformer.get(this.currentStep.id);
+    return this.transformers().get(this.currentStep.id);
 
   }
 
@@ -678,6 +748,12 @@ export class ManageConnectorComponent implements OnInit {
       return defaultData;
     }
     return this.transformedData.get(latestId)!;
+  }
+
+  /** The rows the selected transform step produced, which is what its preview table shows. */
+  public getCurrentStepData(): any[] | undefined {
+    const id = this.currentStep?.id;
+    return id ? this.transformedData.get(id) : undefined;
   }
 
   public getMappingCards(): ConnectorCard[] {
@@ -738,7 +814,7 @@ export class ManageConnectorComponent implements OnInit {
       return;
     }
 
-    this._config.transformer = Array.from(this.transformer.values());
+    this._config.transformer = this.transformerList();
     this.config.cohortId = this.cohortId();
 
     if (!this.config.name || !this.config.description) {
@@ -892,7 +968,7 @@ export class ManageConnectorComponent implements OnInit {
     this._config = {} as ConnectorDTO;
     this.cards = [this.initialCard];
     this.currentStep = this.initialCard;
-    this.transformer.clear();
+    this.transformers.set(new Map());
     this.transformedData.clear();
     this.disableAddTransformer = true;
     this.toolbarManagement.showToolbar = true;
@@ -988,6 +1064,12 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private checkFile(): void {
+    // Only an uploaded file can go missing. Other sources (an app's stored outputs, FTP, ...) have
+    // no FILE step to send the user back to, and doing so left the wizard without a current step.
+    if (!this.config?.inputConfig || !isFileUploadSettings(this.config.inputConfig)) {
+      return;
+    }
+
     const fileExists = (this.config?.inputConfig as FileUploadSettings)?.fileExists ?? false;
 
     if (!fileExists) {
@@ -1028,7 +1110,7 @@ export class ManageConnectorComponent implements OnInit {
     }
 
     this.getTransformCards().forEach(card => {
-      card.configured = !!card.id && this.transformer.has(card.id);
+      card.configured = !!card.id && this.transformers().has(card.id);
     });
 
     this.disableAddTransformer = !this.hasFileInfo() || this.getTransformCards().some(card => !card.configured);
@@ -1107,7 +1189,7 @@ export class ManageConnectorComponent implements OnInit {
     }
 
     if ('fileType' in inputConfig) {
-      return `FileType: ${inputConfig.fileType ?? this.translate.instant('UNKNOWN')}`;
+      return `FileType: ${fileTypeLabel(inputConfig as FileUploadSettings) ?? this.translate.instant('UNKNOWN')}`;
     }
 
     if (inputConfig.mode === 'FTP') {

@@ -1,12 +1,25 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
-import {GitlabCreateIssueDTO} from "@shared-lib/components/create-issue-dialog/gitliab-issue.dto";
-import {GitlabIssueService} from "@shared-lib/components/create-issue-dialog/gitlab-issue.service";
-import {HttpErrorResponse} from "@angular/common/http";
+import {environment} from "@shared-lib/env/environment";
+
+/** Public issue tracker; the user submits the prefilled issue with their own GitHub account, no token needed. */
+export const GITHUB_NEW_ISSUE_URL = 'https://github.com/FedLearnNet/.github/issues/new';
+
+// GitHub rejects very long URLs, so the body is cut well below the ~8k limit
+const MAX_BODY_LENGTH = 6000;
+
+export const buildGithubIssueUrl = (title: string, description: string, appTitle: string): string => {
+  const footer = `\n\n---\nReported from ${appTitle}`;
+  const body = description.length + footer.length > MAX_BODY_LENGTH
+    ? description.slice(0, MAX_BODY_LENGTH - footer.length - 1) + '…' + footer
+    : description + footer;
+  const params = new URLSearchParams({title, body});
+  return `${GITHUB_NEW_ISSUE_URL}?${params.toString()}`;
+};
 
 @Component({
   selector: 'lib-create-issue-dialog',
@@ -17,15 +30,12 @@ import {HttpErrorResponse} from "@angular/common/http";
     MatInputModule,
     MatButtonModule,],
   templateUrl: './create-issue-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-issue-dialog.component.scss',
 })
 export class CreateIssueDialogComponent {
   private readonly fb: FormBuilder = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<CreateIssueDialogComponent>);
-  private readonly gitlabIssueService = inject(GitlabIssueService);
-
-  loading = signal(false);
-  errors = signal<string[]>([]);
 
   form = this.fb.nonNullable.group({
     title: ['', [Validators.required, Validators.minLength(3)]],
@@ -36,49 +46,13 @@ export class CreateIssueDialogComponent {
     this.dialogRef.close(false);
   }
 
+  /** Opens the prefilled GitHub issue in a new tab, where the user reviews and submits it. */
   submit(): void {
     this.form.markAllAsTouched();
-    if (this.form.invalid || this.loading()) return;
+    if (this.form.invalid) return;
 
     const raw = this.form.getRawValue();
-
-    const errorBlock = this.buildErrorBlock();
-    const finalDescription = errorBlock
-      ? raw.description + '\n\n--- Previous errors ---\n' + errorBlock
-      : raw.description;
-
-    const payload: GitlabCreateIssueDTO = {
-      title: raw.title,
-      description: finalDescription,
-    };
-
-    this.loading.set(true);
-
-    this.gitlabIssueService.createIssue(payload).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.dialogRef.close(true);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.loading.set(false);
-        const msg = this.extractErrorMessage(err);
-        this.errors.update(prev => [...prev, msg]);
-      },
-    });
-  }
-
-  private buildErrorBlock(): string | null {
-    const list = this.errors();
-    if (!list.length) return null;
-    return list.map((e, i) => `${i + 1}. ${e}`).join('\n');
-  }
-
-  private extractErrorMessage(err: HttpErrorResponse): string {
-    if (typeof err.error === 'string') return err.error;
-
-    if (err.error && typeof err.error === 'object' && 'message' in err.error) {
-      return err.error.message;
-    }
-    return `HTTP ${err.status} – ${err.statusText || 'Unknown error'}`;
+    window.open(buildGithubIssueUrl(raw.title, raw.description, environment.appTitle), '_blank', 'noopener');
+    this.dialogRef.close(true);
   }
 }

@@ -1,4 +1,4 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {startWith} from 'rxjs';
 import {MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
@@ -49,6 +49,7 @@ import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.comp
     InfoCardComponent
   ],
   templateUrl: './new-app-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './new-app-dialog.component.scss'
 })
 export class NewAppDialogComponent {

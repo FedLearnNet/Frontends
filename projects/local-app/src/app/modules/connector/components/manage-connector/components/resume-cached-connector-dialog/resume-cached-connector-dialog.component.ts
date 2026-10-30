@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
@@ -14,6 +14,7 @@ import {MatIconModule} from '@angular/material/icon';
     MatIconModule,
   ],
   templateUrl: './resume-cached-connector-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './resume-cached-connector-dialog.component.scss',
 })
 export class ResumeCachedConnectorDialogComponent {

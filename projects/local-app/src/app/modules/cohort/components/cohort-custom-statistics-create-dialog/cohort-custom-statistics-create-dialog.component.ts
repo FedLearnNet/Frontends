@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {FormsModule} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
@@ -76,6 +76,7 @@ const TEMPORAL_TYPES = new Set(['DATETIME', 'DATE']);
     SelectBtnComponent,
   ],
   templateUrl: './cohort-custom-statistics-create-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-custom-statistics-create-dialog.component.scss',
 })
 export class CohortCustomStatisticsCreateDialogComponent {

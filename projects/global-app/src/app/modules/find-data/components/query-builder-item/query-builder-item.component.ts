@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, output} from '@angular/core';
+import {Component, computed, effect, inject, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
@@ -39,6 +39,7 @@ import {toSignal} from "@angular/core/rxjs-interop";
     TranslatePipe,
   ],
   templateUrl: './query-builder-item.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './query-builder-item.component.scss'
 })
 export class QueryBuilderItemComponent {

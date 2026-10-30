@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject} from '@angular/core';
+import {Component, computed, effect, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatProgressBar} from "@angular/material/progress-bar";
 import {MatIcon} from "@angular/material/icon";
 import {JsonPipe} from "@angular/common";
@@ -35,6 +35,7 @@ import {FileDTO} from "@shared-lib/modules/files/dto/file";
     MatTooltip
   ],
   templateUrl: './data-file-management.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './data-file-management.component.scss'
 })
 export class DataFileManagementComponent {
