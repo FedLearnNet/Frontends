@@ -3,19 +3,14 @@ import {ProjectStatus} from "@global-app/project/dto/project";
 import {MatIconModule} from "@angular/material/icon";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {projectStatusToBadgeStatus, runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
-import {animate} from "@angular/animations";
 import {
   ModelVersionDetailViewComponent
 } from "@global-app/model-store/components/model-version-detail-view/model-version-detail-view.component";
 import {selectSelectedProject} from "@global-app/project/store/project.selectors";
-import {Store} from "@ngrx/store";
-import {
-  selectConnectedById,
-  selectError,
-  selectLoading,
-  selectSelectedExperiment
-} from "@global-app/project/store/project-federated-experiments.selectors";
-import {ProjectFederatedExperimentsActions} from "@global-app/project/store/project-federated-experiments.actions";
+import {Action, Store} from "@ngrx/store";
+import {ProjectRunKind} from "@global-app/project/dto/project-experiments";
+import {selectError, selectLoading, selectSelectedRun} from "@global-app/project/store/project-runs.selectors";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
 import {
   ExperimentHeaderComponent
 } from "@global-app/project/components/runs/experiment-header/experiment-header.component";
@@ -70,70 +65,34 @@ export class DetailFederatedExperimentComponent {
   private readonly wths: WorkflowTrainingHelperService = inject(WorkflowTrainingHelperService);
   project = this.store.selectSignal(selectSelectedProject);
 
-  experiment = this.store.selectSignal(selectSelectedExperiment);
+  run = this.store.selectSignal(selectSelectedRun);
   error = this.store.selectSignal(selectError);
   selectedWorkflow = this.store.selectSignal(selectSelectedWorkflow);
   loading = this.store.selectSignal(selectLoading);
 
-  private readonly projectId = computed(() => this.project()?.id ?? null);
-
-  connected = computed(() => {
-    const id = this.experiment()?.id;
-    if (!id) return false;
-    return this.store.selectSignal(selectConnectedById(id))();
-  });
-
   showResultModel = signal(false);
-  isFinished = computed(() => this.experiment() ? this.experiment()!.experimentStatus === ProjectStatus.FINISHED : false);
-
-  mappedStatus = computed(() => {
-    if (!this.experiment()) {
-      return undefined;
-    }
-    return projectStatusToBadgeStatus(this.experiment()!.experimentStatus!);
-  })
+  isFinished = computed(() => this.run()?.experiment?.status === ProjectStatus.FINISHED);
 
   trainableApps = computed(() => this.wths.containsTrainableApps(this.selectedWorkflow()));
+
+  // The training runs a copy of the project's workflow, its steps name the nodes of that copy.
   dispatchWorkflow$ = effect(() => {
-    if (this.project() && this.project()!.workflowId) {
-      this.store.dispatch(WorkflowActions.loadWorkflow({id: this.project()!.workflowId!}));
+    const workflowId = this.run()?.experiment?.workflowId ?? this.project()?.workflowId;
+    if (workflowId) {
+      this.store.dispatch(WorkflowActions.loadWorkflow({id: workflowId}));
     }
   });
 
   start(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectFederatedExperimentsActions.startExperiment({
-      projectId: projectId!,
-      experimentId: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.start);
   }
 
   stop(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectFederatedExperimentsActions.stopExperiment({
-      projectId: projectId!,
-      experimentId: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.stop);
   }
 
   reload(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectFederatedExperimentsActions.loadExperiment({
-      projectId: projectId!,
-      id: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.follow);
   }
 
   viewModel(): void {
@@ -149,7 +108,14 @@ export class DetailFederatedExperimentComponent {
     });
   }
 
-  protected readonly animate = animate;
+  private dispatch(action: (props: { projectId: number; kind: ProjectRunKind; runId: number }) => Action): void {
+    const runId = this.run()?.id;
+    const projectId = this.project()?.id;
+    if (runId && projectId) {
+      this.store.dispatch(action({projectId, kind: 'federated', runId}));
+    }
+  }
+
   protected readonly projectStatusToBadgeStatus = projectStatusToBadgeStatus;
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
 }

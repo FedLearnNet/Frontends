@@ -14,6 +14,8 @@ import {AppTypeBadgeComponent} from "@shared-lib/modules/store/components/app-ty
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
+import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {PublishStatus} from "@shared-lib/modules/store/dto/enum";
 
 @Component({
   selector: 'app-app-list',
@@ -29,6 +31,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
     HeaderComponent,
     EmptyStateComponent,
     PageWrapperComponent,
+    BadgeComponent,
   ],
   templateUrl: './app-list.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -70,6 +73,10 @@ export class AppListComponent implements OnInit, AfterViewInit {
     }
   }
 
+
+  imageWarning(app: AppDetailDto): string | undefined {
+    return app.publishStatus === PublishStatus.PUBLISHED && !app.hasImage ? 'Published, but no image is available' : undefined;
+  }
 
   createNewApp(): void {
     this.dialog.open(NewAppDialogComponent, {

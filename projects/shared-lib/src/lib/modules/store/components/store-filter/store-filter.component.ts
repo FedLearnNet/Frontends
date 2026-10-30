@@ -73,6 +73,17 @@ export class StoreFilterComponent {
   });
   needsFilterAppTypes = computed(() => !(this.preFilteredAppTypes()!.length > 0));
   hideWorkflow = computed(() => this.storeConfig()?.hideWorkflow ?? false);
+  appTypeFilterChangeable = computed(() => this.storeConfig()?.allowFilterChange?.appType ?? true);
+  showAppTypeFilter = computed(() => this.needsFilterAppTypes() || this.appTypeFilterChangeable());
+
+  // with a prefilter only its categories are selectable, plus workflow
+  visibleAppTypes = computed(() => {
+    const selectable = this.storeConfig()?.filterAppTypes ?? this.preFilteredAppTypes() ?? [];
+    return this.appTypes().filter(t => {
+      if (t.id === 'workflow') return !this.hideWorkflow();
+      return selectable.length === 0 || selectable.includes(t.id as FederatedAppType);
+    });
+  });
 
   constructor() {
     const resize$ = typeof window !== 'undefined' ?
@@ -115,13 +126,8 @@ export class StoreFilterComponent {
           {name: t['SELF_LEARNED'], id: FederatedAppType.SELF_LEARNED},
           {name: t['EXTRACTOR'], id: FederatedAppType.EXTRACTOR},
           {name: t['INFERENCE'], id: 'model'},
+          {name: t['WORKFLOW'], id: 'workflow'},
         ]);
-        if (!this.hideWorkflow()) {
-          this.appTypes.update(types => {
-            types.push({name: t['WORKFLOW'], id: 'workflow'});
-            return types;
-          })
-        }
         this.privacyTechniques.set([
           {name: t['FEDERATED_COMPUTATION'], id: 'fc'},
           {name: t['DIFFERENTIAL_PRIVACY'], id: 'dp'},
@@ -152,19 +158,30 @@ export class StoreFilterComponent {
   }
 
   applyFilters(): void {
-    const appTypeFilters = !this.needsFilterAppTypes() ?
-      this.preFilteredAppTypes()!.map(f => f as string) :
-      this.appTypes().filter(f => f.checked).map(f => f.id as string);
     const params: StoreFilterParams = {
       search: this.searchQuery(),
       showUncertified: this.showUncertified(),
       minRating: this.selectedRating() === 'showAll' ? null : parseInt(this.selectedRating(), 10),
-      appTypes: appTypeFilters,
+      appTypes: this.appTypeFilters(),
       privacyTechniques: this.privacyTechniques().filter(f => f.checked).map(f => f.id as string),
       page: 0,
       hideWorkflow: this.hideWorkflow(),
+      onlyWithImage: this.storeConfig()?.onlyWithImage,
     };
     this.store.dispatch(StoreActions.loadList({params}));
+  }
+
+  private appTypeFilters(): string[] {
+    const checked = this.visibleAppTypes().filter(f => f.checked).map(f => f.id);
+    const preFiltered = this.preFilteredAppTypes() ?? [];
+    if (preFiltered.length === 0) return checked;
+    if (!this.appTypeFilterChangeable()) return preFiltered;
+
+    // nothing checked falls back to the prefilter, workflow alone lists all workflows
+    const categories = checked.filter(id => id !== 'workflow');
+    const workflow = checked.includes('workflow') ? ['workflow'] : [];
+    if (categories.length > 0) return [...categories, ...workflow];
+    return workflow.length > 0 ? workflow : preFiltered;
   }
 
   toggleMobileFilter() {
@@ -178,11 +195,7 @@ export class StoreFilterComponent {
   }
 
   toggleAppType(item: Filter) {
-    this.appTypes.update((arr) => {
-      const idx = arr.findIndex((x) => x.id === item.id);
-      if (idx >= 0) arr[idx] = {...arr[idx], checked: !arr[idx].checked} as Filter;
-      return arr;
-    });
+    this.appTypes.update((arr) => arr.map((x) => x.id === item.id ? {...x, checked: !x.checked} : x));
     this.onFilterChange();
   }
 

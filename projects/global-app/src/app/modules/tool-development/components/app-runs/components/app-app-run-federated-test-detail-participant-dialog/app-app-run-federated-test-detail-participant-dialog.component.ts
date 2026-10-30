@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {
   ExperimentWorkflowNodeDetailComponent
 } from "@shared-lib/modules/experiments/components/experiment-workflow-node-detail/experiment-workflow-node-detail.component";
@@ -9,15 +9,15 @@ import {TranslatePipe} from "@ngx-translate/core";
 import {ExperimentData} from "@shared-lib/modules/experiments/models/experiment-data";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
-import {FederatedParticipantDTO, FederatedTestRunDTO, FLNetParticipantRole} from "../../../../dto/federated-test-run";
+import {FLNetParticipantRole} from "../../../../dto/federated-test-run";
 import {FederatedRunService} from "../../../../service/federated-run.service";
-import {RunStatusTypes} from "../../../../dto/test-run";
+import {participantOf, participantsOf, RunStatusTypes, TestAttemptDTO, TestRunDTO} from "../../../../dto/test-run";
 import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.component";
 
 interface TestDetail {
   app: AppDetailDto;
-  run: FederatedTestRunDTO;
-  participant: FederatedParticipantDTO
+  run: TestRunDTO;
+  participant: TestAttemptDTO
 }
 
 
@@ -39,39 +39,40 @@ interface TestDetail {
 export class AppAppRunFederatedTestDetailParticipantDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AppAppRunFederatedTestDetailParticipantDialogComponent>);
   private readonly testRunService: FederatedRunService = inject(FederatedRunService);
-  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   readonly data = inject<TestDetail>(MAT_DIALOG_DATA);
 
-  experimentData = {
-    logs: [],
-    metric: [],
-    experimentId: this.data.run.id,
-    error: this.data.run.error,
-    stepId: this.data.app.id,
-    status: this.data.run.status,
-    hyperParams: this.data.participant.hyperParams,
-    inputData: {
-      data: this.data.participant.inputFilePaths,
-      files: [],
-    },
-    outputData: {
-      data: {},
-      files: [],
-    },
-  } as ExperimentData;
+  // The participant as listed first, then from the run detail with its logs and metrics.
+  protected readonly participant = signal<TestAttemptDTO>(this.data.participant);
+  // Who the attempt stands for.
+  protected readonly info = computed(() => participantOf(this.data.run, this.participant()));
+  protected readonly experimentData = computed<ExperimentData>(() => {
+    const participant = this.participant();
+    return {
+      logs: participant.logs ?? [],
+      metric: participant.metrics ?? [],
+      experimentId: this.data.run.id,
+      error: participant.failure?.message ?? undefined,
+      stepId: this.data.app.id,
+      status: participant.status,
+      hyperParams: (participant.params ?? {}) as { [key: string]: string },
+      inputData: {
+        data: this.info()?.inputFilePaths ?? {},
+        files: [],
+      },
+      outputData: {
+        data: {},
+        files: [],
+      },
+    };
+  });
 
   ngOnInit(): void {
-    this.testRunService.getLogs(this.data.app.id, this.data.run.id, this.data.participant.id).subscribe(logs => {
-      this.experimentData.logs = logs;
-      this.cdr.detectChanges();
-    });
-    this.testRunService.getMetrics(this.data.app.id, this.data.run.id, this.data.participant.id).subscribe(
-      (metrics) => {
-        this.experimentData.metric = metrics;
-        this.cdr.detectChanges();
+    this.testRunService.getRun(this.data.app.id, this.data.run.id).subscribe(run => {
+      const participant = participantsOf(run).find(attempt => attempt.id === this.data.participant.id);
+      if (participant) {
+        this.participant.set(participant);
       }
-    )
-    this.cdr.detectChanges();
+    });
   }
 
   onNoClick(): void {

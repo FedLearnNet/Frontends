@@ -11,7 +11,7 @@ import {TranslatePipe} from "@ngx-translate/core";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {Router} from "@angular/router";
 import {Store} from "@ngrx/store";
-import {ProjectFederatedExperimentsActions} from "@global-app/project/store/project-federated-experiments.actions";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
 import {MatDivider} from "@angular/material/list";
 import {hasExportSelections} from "@shared-lib/modules/data-modeler/utils/patient-export-config.util";
 import {WorkflowTrainingHelperService} from "@shared-lib/modules/workflow/service/workflow-traning.helper";
@@ -100,7 +100,7 @@ export class CreateFederatedExperimentComponent {
         description: this.newExperimentForm.value.description || '',
         modelNeedToBePublic: this.newExperimentForm.value.modelNeedToBePublic || false,
       }
-      this.store.dispatch(ProjectFederatedExperimentsActions.create({dto: createDto, projectId: this.project.id}));
+      this.store.dispatch(ProjectRunsActions.create({dto: createDto, projectId: this.project.id, kind: 'federated'}));
       this.dialogRef.close();
     }
   }

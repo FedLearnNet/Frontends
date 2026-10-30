@@ -1,9 +1,9 @@
 import {cloneDeep} from "lodash";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO} from "../../../dto/test-run";
 
 
-export function groupRunsByMetric(runs: ExperimentRunDTO[]): Map<string, ExperimentRunDTO[]> {
-  const metricMap = new Map<string, ExperimentRunDTO[]>();
+export function groupRunsByMetric(runs: TestAttemptDTO[]): Map<string, TestAttemptDTO[]> {
+  const metricMap = new Map<string, TestAttemptDTO[]>();
   runs.forEach(run => {
     getUniqueMetrics(run).forEach(metric => {
       const filteredRun = cloneDeep(run);
@@ -18,17 +18,14 @@ export function groupRunsByMetric(runs: ExperimentRunDTO[]): Map<string, Experim
   return metricMap;
 }
 
-export function getUniqueMetrics(run: ExperimentRunDTO): string[] {
+export function getUniqueMetrics(run: TestAttemptDTO): string[] {
   if (!run.metrics) {
     return [];
   }
   return Array.from(new Set(run.metrics.map(m => m.metric)));
 }
 
-export function getHyperParams(run: ExperimentRunDTO): string[] {
-  if (!run.hyperParams) {
-    return [];
-  }
-  return Object.keys(run.hyperParams);
+export function getHyperParams(run: TestAttemptDTO): string[] {
+  return Object.keys(run.params ?? {});
 }
 

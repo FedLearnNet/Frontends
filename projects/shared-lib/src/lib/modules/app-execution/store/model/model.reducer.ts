@@ -83,7 +83,7 @@ export const modelReducer = createReducer(
       loading: false
     })),
     on(ModelActions.selectSubModelFailure, (state, {error}): ModelState => ({...state, loading: false, error})),
-    on(DataAnalysisActions.addExperimentResults, (state): ModelState => ({
+    on(DataAnalysisActions.runResult, (state): ModelState => ({
       ...state,
       detail: null,
     })),

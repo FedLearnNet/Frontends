@@ -18,7 +18,7 @@
 
 <lib-page-wrapper
   [isEmpty]="!run()"
-  [error]="$safeNavigationMigration(run()?.error)"
+  [error]="error()"
 >
   <lib-empty-state
     empty
@@ -28,24 +28,24 @@
 
   @if (run(); as r) {
     @if (expanded()) {
-      @if (r.config) {
+      @if (federation(); as config) {
 
         <lib-info-grid title="Runtime config">
-          @if (r.config.pollInterval) {
+          @if (config.pollInterval) {
             <lib-info-item title="pollInterval">
-              {{ r.config.pollInterval }}
+              {{ config.pollInterval }}
             </lib-info-item>
           }
 
-          @if (r.config.timeout) {
+          @if (config.timeout) {
             <lib-info-item title="timeout">
-              {{ r.config.timeout }}
+              {{ config.timeout }}
             </lib-info-item>
           }
 
-          @if (r.config.maxPolls) {
+          @if (config.maxPolls) {
             <lib-info-item title="maxPolls">
-              {{ r.config.maxPolls }}
+              {{ config.maxPolls }}
             </lib-info-item>
           }
         </lib-info-grid>
@@ -56,7 +56,7 @@
       <mat-tab [label]="('FEDERATED.TAB_PARTICIPANTS' | translate)">
         <div class="fed-detail__participants">
           @if (app(); as app) {
-            @for (p of participants(); track p.participantId) {
+            @for (p of participants(); track p.id) {
               <app-app-run-federated-test-detail-participant-card
                 [participant]="p"
                 [app]="app"
@@ -273,10 +273,10 @@
       </mat-tab>
       <mat-tab [label]="('FEDERATED.TAB_RESULTS' | translate)">
         <div class="fed-detail__results">
-          @if (run()?.outputData; as output) {
+          @if (output(); as output) {
             <lib-app-run-output
               [appId]="r.federatedAppId!"
-              [outputData]="output"
+              [outputData]="$any(output)"
               [toolConfig]="toolConfig()"
               [runId]="r.id"
               [runType]="RunType.FEDERATED_RUN"></lib-app-run-output>

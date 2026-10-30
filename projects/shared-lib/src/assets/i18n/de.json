@@ -43,6 +43,7 @@
   "EMAIL": "E-Mail",
   "ROLES": "Rollen",
   "MENU": {
+    "SELECT_TOOL": "Tool auswählen",
     "COHORT": "Kohorte",
     "OVERVIEW": "Überblick",
     "PERMISSIONS": "Berechtigungen",

@@ -37,6 +37,8 @@ export interface AppDto extends BaseDto {
   longDescription: string;
   certificationLevel: number;
   hasImage?: boolean;
+  // build of a published version that has no image yet
+  buildStatus?: 'PENDING' | 'RUNNING';
   needsInternetAccess: boolean;
   needsHostAccess: boolean;
   //version

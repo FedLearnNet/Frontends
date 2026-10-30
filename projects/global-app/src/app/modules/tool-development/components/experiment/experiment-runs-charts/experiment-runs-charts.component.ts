@@ -29,7 +29,7 @@ import {
   ExperimentsChartGenericEditComponent
 } from "./experiments-chart-generic-edit/experiments-chart-generic-edit.component";
 import {MatDialog} from "@angular/material/dialog";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO} from "../../../dto/test-run";
 
 @Component({
     selector: 'app-experiment-runs-charts',
@@ -51,13 +51,13 @@ export class ExperimentRunsChartsComponent implements OnInit, OnChanges {
   private readonly dialog = inject(MatDialog);
   private readonly changeDetectorRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  readonly experimentRuns = input<ExperimentRunDTO[]>([]);
+  readonly experimentRuns = input<TestAttemptDTO[]>([]);
 
   @Input() diagrams?: ExperimentDiagramConfigDTO[] = [];
 
   readonly changed = output<ExperimentDiagramConfigDTO[] | undefined>();
 
-  metricGroupedRuns = new Map<string, ExperimentRunDTO[]>();
+  metricGroupedRuns = new Map<string, TestAttemptDTO[]>();
   hyperParamKeys: string[] = [];
 
 
@@ -87,7 +87,7 @@ export class ExperimentRunsChartsComponent implements OnInit, OnChanges {
     return Array.from(this.metricGroupedRuns.keys());
   }
 
-  getRunsByMetric(metric: string): ExperimentRunDTO[] {
+  getRunsByMetric(metric: string): TestAttemptDTO[] {
     return this.metricGroupedRuns.get(metric) || [];
   }
 

@@ -1,9 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {ExperimentService} from "../../../service/experiment-run.service";
 import {AppLogTableComponent} from "../../app-runs/components/app-log-table/app-log-table.component";
 import {EMPTY, Observable} from "rxjs";
-import {RunMessageLogDTO, RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
+import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {AsyncPipe} from "@angular/common";
 import {
@@ -17,7 +16,7 @@ import {
   AppRunOutputComponent
 } from "@shared-lib/modules/app-execution/components/app-run-output/app-run-output.component";
 import {RunType} from "../../../dto/socket";
-import {ExperimentDetailDTO, ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO, TestRunDTO, trialsOf} from "../../../dto/test-run";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
 import {
   RunHyperParamsComponent
@@ -47,47 +46,38 @@ import {
 })
 export class ExperimentRunDetailComponent implements OnInit {
   private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private readonly experimentService: ExperimentService = inject(ExperimentService);
   private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   private readonly modelSubService: ModelService = inject(ModelService);
 
+  // The attempt id of the trial.
   readonly runId = input<string>();
 
   public app?: AppDetailDto;
-  public experiment?: ExperimentDetailDTO;
-  public run?: ExperimentRunDTO;
+  public experiment?: TestRunDTO;
+  public run?: TestAttemptDTO;
 
-  public logs$: Observable<RunMessageLogDTO[]> = EMPTY;
   public metrics: Map<string, RunMessageMetricDTO[]> = new Map<string, RunMessageMetricDTO[]>();
   public model$: Observable<ModelSubDto> = EMPTY;
 
+  // The resolved experiment carries the logs and metrics of every trial.
   ngOnInit(): void {
-
     this.activatedRoute.data.subscribe((data) => {
       this.experiment = data["experiment"];
       this.app = data["app"];
       const runId = this.runId();
       if (this.experiment && runId) {
-        this.run = this.experiment.runs.find(run => run.id === +this.runId()!);
+        this.run = trialsOf(this.experiment).find(attempt => attempt.id === +runId);
       }
-
-      if (this.run && this.app) {
-        this.model$ = this.modelSubService.getSubModelForExperimentRun(+runId!);
-        this.logs$ = this.experimentService.getLogs(this.app.id, this.experiment!.id, +runId!);
-        this.experimentService.getMetricsByRun(this.app.id, this.experiment!.id, +runId!).subscribe(
-          (metrics) => {
-            this.metrics = metrics.reduce((acc, metric) => {
-              if (!acc.has(metric.metric)) {
-                acc.set(metric.metric, []);
-              }
-              acc.get(metric.metric)!.push(metric);
-              return acc;
-            }, new Map<string, RunMessageMetricDTO[]>());
-            this.cdr.detectChanges();
+      if (this.run) {
+        this.model$ = this.modelSubService.getSubModelForExperimentRun(this.run.id);
+        this.metrics = (this.run.metrics ?? []).reduce((acc, metric) => {
+          if (!acc.has(metric.metric)) {
+            acc.set(metric.metric, []);
           }
-        )
+          acc.get(metric.metric)!.push(metric);
+          return acc;
+        }, new Map<string, RunMessageMetricDTO[]>());
       }
-
       this.cdr.detectChanges();
     });
   }

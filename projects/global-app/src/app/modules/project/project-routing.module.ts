@@ -10,8 +10,7 @@ import {
   DetailLocalExperimentComponent
 } from "@global-app/project/components/runs/detail-local-experiment/detail-local-experiment.component";
 import {
-  projectFedExperimentResolver,
-  projectLocalExperimentResolver
+  projectRunResolver
 } from "@global-app/project/services/project-experiment-resolver";
 import {
   DatasetBuilderPageComponent
@@ -47,15 +46,17 @@ const routes: Routes = [
               {
                 path: 'federated/:experiment-id',
                 component: DetailFederatedExperimentComponent,
+                data: {kind: 'federated'},
                 resolve: {
-                  fedExperiment: projectFedExperimentResolver
+                  run: projectRunResolver
                 }
               },
               {
                 path: 'local/:experiment-id',
                 component: DetailLocalExperimentComponent,
+                data: {kind: 'local'},
                 resolve: {
-                  localExperiment: projectLocalExperimentResolver
+                  run: projectRunResolver
                 }
               }
             ]

@@ -31,8 +31,8 @@
 
   @if (outputs().length > 0) {
     <div class="run__outputs">
-      @for (output of outputs(); track output.key) {
-        <lib-badge [text]="output.fileName + ' · ' + (output.size | bytes)" [iconName]="outputIcon(output)"
+      @for (output of outputs(); track output.id) {
+        <lib-badge [text]="output.file.fileName + ' · ' + (output.file.size | bytes)" [iconName]="outputIcon(output)"
                    color="BLUE"/>
       }
     </div>

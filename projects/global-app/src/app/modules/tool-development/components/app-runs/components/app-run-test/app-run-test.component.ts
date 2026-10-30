@@ -15,6 +15,7 @@ import {TranslatePipe} from "@ngx-translate/core";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 
 @Component({
@@ -52,9 +53,6 @@ export class AppRunTestComponent implements OnInit {
         this.dataSource.data = runs;
       });
 
-      this.runTestEmbedService.getRunCreated$().subscribe((run) => {
-        this.updateOrAddRun(run);
-      });
       this.runTestEmbedService.getRunUpdate$().subscribe((run) => {
         this.updateOrAddRun(run);
       });
@@ -113,4 +111,5 @@ export class AppRunTestComponent implements OnInit {
   }
 
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly errorOf = errorOf;
 }

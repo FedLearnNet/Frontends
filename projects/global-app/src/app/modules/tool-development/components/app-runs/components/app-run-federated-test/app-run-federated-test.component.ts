@@ -7,7 +7,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {Router} from "@angular/router";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {FederatedRunService} from "../../../../service/federated-run.service";
-import {FederatedTestRunDTO} from "../../../../dto/federated-test-run";
+import {participantsOf, TestRunDTO} from "../../../../dto/test-run";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {ControllerSocketService} from "../../../../service/testembed-socket.service";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -19,6 +19,7 @@ import {
 import {LocalFiles} from "@shared-lib/modules/files/dto/file";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 @Component({
   selector: 'app-app-run-federated-test',
@@ -48,7 +49,7 @@ export class AppRunFederatedTestComponent implements OnInit {
   readonly localFiles = input<LocalFiles[]>([]);
 
   displayedColumns: string[] = ['position', 'status', 'participants', 'error', 'startTime'];
-  dataSource: MatTableDataSource<FederatedTestRunDTO> = new MatTableDataSource();
+  dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {
     const app = this.app();
@@ -58,22 +59,22 @@ export class AppRunFederatedTestComponent implements OnInit {
       this.dataSource.data = runs;
     });
 
-    this.socketService.getFederatedRunCreated$().subscribe((run) => this.updateOrAddRun(run));
     this.socketService.getFederatedRunUpdate$().subscribe((run) => this.updateOrAddRun(run));
   }
 
-  updateOrAddRun(run: FederatedTestRunDTO): void {
+  // Every update carries the whole run.
+  updateOrAddRun(run: TestRunDTO): void {
     const data = this.dataSource.data;
     const existing = data.find((r) => r.id === run.id);
     if (existing === undefined) {
       this.dataSource.data = [run, ...data];
     } else {
-      this.dataSource.data = data.map((r) => r.id === run.id ? {...r, ...run} : r);
+      this.dataSource.data = data.map((r) => r.id === run.id ? run : r);
     }
   }
 
-  participantCount(run: FederatedTestRunDTO): number {
-    return run.participants?.length ?? 0;
+  participantCount(run: TestRunDTO): number {
+    return participantsOf(run).length;
   }
 
   addNewFederatedTest(): void {
@@ -94,11 +95,12 @@ export class AppRunFederatedTestComponent implements OnInit {
     });
   }
 
-  showDetail(run: FederatedTestRunDTO): void {
+  showDetail(run: TestRunDTO): void {
     const appId = this.app()?.id;
     if (!appId) return;
     this.router.navigate(['/app', appId, 'test', 'federated', run.id]);
   }
 
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly errorOf = errorOf;
 }

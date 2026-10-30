@@ -26,7 +26,7 @@
 
     <ng-container matColumnDef="error">
       <th mat-header-cell *matHeaderCellDef>{{ 'GRID.ERROR' | translate }}</th>
-      <td mat-cell *matCellDef="let element">{{ element.error }}</td>
+      <td mat-cell *matCellDef="let element">{{ errorOf(element) }}</td>
     </ng-container>
 
     <ng-container matColumnDef="startTime">

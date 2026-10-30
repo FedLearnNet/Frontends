@@ -22,18 +22,10 @@ import {WorkflowEffects} from "@shared-lib/modules/workflow/store/workflow.effec
 import {featureKey as workflowKey, workflowReducer} from "@shared-lib/modules/workflow/store/workflow.reducer";
 import {featureKey as storeKey, storeReducer} from "@shared-lib/modules/store/store/store.reducer";
 import {StoreEffects} from "@shared-lib/modules/store/store/store.effects";
-import {ProjectLocalExperimentsEffects} from "@global-app/project/store/project-local-experiments.effects";
-import {
-  featureKey as localExperimentKey,
-  projectLocalExperimentReducer
-} from "@global-app/project/store/project-local-experiments.reducer";
+import {ProjectRunsEffects} from "@global-app/project/store/project-runs.effects";
+import {featureKey as projectRunsKey, projectRunsReducer} from "@global-app/project/store/project-runs.reducer";
 import {ProjectEffects} from "@global-app/project/store/project.effects";
 import {featureKey as projectKey, projectReducer} from "@global-app/project/store/project.reducer";
-import {
-  featureKey as fedExperimentKey,
-  projectFederatedExperimentReducer
-} from "@global-app/project/store/project-federated-experiments.reducer";
-import {ProjectFederatedExperimentsEffects} from "@global-app/project/store/project-federated-experiments.effects";
 import {WorkflowChatEffects} from "@shared-lib/modules/workflow/store/workflow-chat.effects";
 import {
   featureKey as workflowChatKey,
@@ -74,8 +66,7 @@ export const appConfig: ApplicationConfig = {
       [workflowKey]: workflowReducer,
       [workflowChatKey]: workflowChatReducer,
       [storeKey]: storeReducer,
-      [localExperimentKey]: projectLocalExperimentReducer,
-      [fedExperimentKey]: projectFederatedExperimentReducer,
+      [projectRunsKey]: projectRunsReducer,
       [projectKey]: projectReducer,
       [auditKey]: auditReducer,
       [orchKey]: orchReducer,
@@ -87,8 +78,7 @@ export const appConfig: ApplicationConfig = {
       FileEffects,
       PipelineEffects,
       StoreEffects,
-      ProjectLocalExperimentsEffects,
-      ProjectFederatedExperimentsEffects,
+      ProjectRunsEffects,
       ProjectEffects,
       WorkflowChatEffects,
       AuditEffects,

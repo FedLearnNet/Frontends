@@ -3,7 +3,6 @@ import {ApiService} from "@shared-lib/services/api.service";
 import {catchError, Observable} from "rxjs";
 import {environment} from "@global-app/env/environment";
 import {TestRunDTO} from "../dto/test-run";
-import {RunMessageLogDTO, RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
 import {TranslateService} from '@ngx-translate/core';
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 
@@ -27,20 +26,12 @@ export class TestRunService {
       );
   }
 
-
-  public getLogs(appId: number, runId: number): Observable<RunMessageLogDTO[]> {
-    return this.apiService.get<RunMessageLogDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/log`)
+  /** The test run with the logs and metrics of its attempts. */
+  public getRun(appId: number, runId: number): Observable<TestRunDTO> {
+    return this.apiService.get<TestRunDTO>(`${this.getBaseUrl()}${appId}/run/${runId}`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.LOGS').toLowerCase()})))
-      );
-  }
-
-  public getMetrics(appId: number, runId: number): Observable<RunMessageMetricDTO[]> {
-    return this.apiService.get<RunMessageMetricDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/metric`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.METRICS').toLowerCase()})))
+          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.RUNS').toLowerCase()})))
       );
   }
 
