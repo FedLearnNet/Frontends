@@ -12,7 +12,8 @@ import {AppService} from "../../service/app.service";
 import {Router} from "@angular/router";
 import {ToolTypeSelectorComponent} from "../tool-type-selector/tool-type-selector.component";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {FederatedAppType, PublishStatus} from "@shared-lib/modules/store/dto/enum";
+import {CommunicationEngine, FederatedAppType, PublishStatus} from "@shared-lib/modules/store/dto/enum";
+import {SelectBtnComponent} from "@shared-lib/components/select-btn/select-btn.component";
 import {SLUG_REGEX} from "../../helper/validator";
 import {MatInput} from "@angular/material/input";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -23,6 +24,7 @@ import {MatStep, MatStepLabel, MatStepper} from "@angular/material/stepper";
 import {StoreCardComponent} from "@shared-lib/modules/store/components/store-card/store-card.component";
 import {MatCheckbox} from "@angular/material/checkbox";
 import {TOOL_TYPE_CONFIG_MAP} from "../../model/tool-config-type";
+import {COMMUNICATION_ENGINE_CONFIG_MAP} from "../../model/communication-engine-config";
 import {environment} from "@global-app/env/environment";
 import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.component";
 
@@ -46,7 +48,8 @@ import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.comp
     StoreCardComponent,
     MatDialogActions,
     MatCheckbox,
-    InfoCardComponent
+    InfoCardComponent,
+    SelectBtnComponent
   ],
   templateUrl: './new-app-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -71,7 +74,8 @@ export class NewAppDialogComponent {
       {
         validators: [Validators.required]
       }),
-    supportsFederatedLearning: new FormControl<boolean>(false)
+    supportsFederatedLearning: new FormControl<boolean>(false),
+    communicationEngine: new FormControl<CommunicationEngine>(CommunicationEngine.FL_NET, {nonNullable: true}),
   });
 
   readonly name = this.form.controls.name;
@@ -79,6 +83,10 @@ export class NewAppDialogComponent {
   readonly shortDescription = this.form.controls.shortDescription;
   readonly type = this.form.controls.toolType;
   readonly supportsFederatedLearning = this.form.controls.supportsFederatedLearning;
+  readonly communicationEngine = this.form.controls.communicationEngine;
+
+  protected readonly CommunicationEngine = CommunicationEngine;
+  protected readonly communicationEngineConfig = COMMUNICATION_ENGINE_CONFIG_MAP;
 
   readonly basicsGroup = new FormGroup({
     name: this.form.controls.name,
@@ -133,9 +141,11 @@ export class NewAppDialogComponent {
     this.slug.markAsTouched();
     this.shortDescription.markAsTouched();
     if (stepper.selectedIndex === 1) this.type.markAsTouched();
+    if (stepper.selectedIndex === 2) this.communicationEngine.markAsTouched();
 
     if (stepper.selectedIndex === 0 && !this.isBasicsValid()) return;
     if (stepper.selectedIndex === 1 && !this.type.valid) return;
+    if (stepper.selectedIndex === 2 && !this.communicationEngine.valid) return;
 
     stepper.next();
   }

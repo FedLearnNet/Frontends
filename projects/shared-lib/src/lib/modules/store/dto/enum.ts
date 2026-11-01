@@ -14,3 +14,8 @@ export enum FederatedAppType {
   EVALUATION = 'EVALUATION',
   EXPORT = 'EXPORT',
 }
+
+export enum CommunicationEngine {
+  FL_NET = 'FL-NET',
+  FLOWER = 'FLOWER',
+}
