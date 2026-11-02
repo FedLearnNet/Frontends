@@ -55,10 +55,26 @@
       <textarea matInput [placeholder]="('GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate)"
                 formControlName="description" required rows="5"></textarea>
     </mat-form-field>
+    @if (platformAggregatorSupported()) {
+      <div class="aggregator-location">
+        <p>{{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
+        <mat-radio-group formControlName="platformIsCoordinator">
+          <mat-radio-button [value]="false">
+            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
+          </mat-radio-button>
+          <mat-radio-button [value]="true">
+            {{ 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM' | translate }}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <mat-divider></mat-divider>
+    }
+
     <mat-checkbox formControlName="modelNeedToBePublic">{{ 'BUTTON.MODEL_NEED_TO_BE_PUBLIC' | translate }}
     </mat-checkbox>
-    <mat-divider></mat-divider>
+
     <mat-checkbox formControlName="acceptProcess">{{ 'BUTTON.I_ACCEPT_THE_PROCESS' | translate }}</mat-checkbox>
+    <mat-divider></mat-divider>
   </form>
 
 </mat-dialog-content>

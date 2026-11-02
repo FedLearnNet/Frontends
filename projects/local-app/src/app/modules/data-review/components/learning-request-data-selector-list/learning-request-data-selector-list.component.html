@@ -29,7 +29,7 @@
             <lib-time-badge [date]="project.createdAt"/>
           </lib-info-item>
           <lib-info-item title="Aggregator running on">
-            {{ aggregatorLocation }}
+            {{ aggregatorLocationKey | translate }}
           </lib-info-item>
           <lib-info-item title="Public Model">
             @if (data.request.modelCanBePublic) {

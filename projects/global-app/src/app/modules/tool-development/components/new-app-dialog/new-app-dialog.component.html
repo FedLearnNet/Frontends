@@ -124,6 +124,38 @@
         }
       </mat-step>
 
+      <mat-step [stepControl]="communicationEngine">
+        <ng-template matStepLabel>Communication engine</ng-template>
+
+        <div class="section" role="list">
+          <lib-select-btn
+            role="listitem"
+            [iconImage]="communicationEngineConfig[CommunicationEngine.FL_NET].icon"
+            [title]="communicationEngineConfig[CommunicationEngine.FL_NET].label"
+            [description]="communicationEngineConfig[CommunicationEngine.FL_NET].description"
+            [selected]="communicationEngine.value === CommunicationEngine.FL_NET"
+            (clicked)="communicationEngine.setValue(CommunicationEngine.FL_NET)"
+          ></lib-select-btn>
+          <lib-select-btn
+            role="listitem"
+            [iconImage]="communicationEngineConfig[CommunicationEngine.FLOWER].icon"
+            [title]="communicationEngineConfig[CommunicationEngine.FLOWER].label"
+            [description]="communicationEngineConfig[CommunicationEngine.FLOWER].description"
+            [selected]="communicationEngine.value === CommunicationEngine.FLOWER"
+            (clicked)="communicationEngine.setValue(CommunicationEngine.FLOWER)"
+          ></lib-select-btn>
+        </div>
+
+        <lib-info-card
+          class="mt-2"
+          title="Communication engine"
+          subtitle="This cannot be changed after creation."
+          size="SMALL"
+          [border]="true"
+          type="INFO">
+        </lib-info-card>
+      </mat-step>
+
       <mat-step>
         <ng-template matStepLabel>Review</ng-template>
         <lib-info-card
@@ -140,7 +172,11 @@
             Something is missing or invalid. Please go back and fix the highlighted fields.
           </lib-error-card>
         } @else {
-          <lib-store-card [linkToShop]="false" [storeElement]="{app: previewApp()}" [size]="'large'"></lib-store-card>
+          <lib-store-card [linkToShop]="false" [storeElement]="{app: previewApp()}" [size]="'large'">
+            <p card-extra class="engine-line">
+              Communication engine: {{ communicationEngineConfig[communicationEngine.value].label }}
+            </p>
+          </lib-store-card>
         }
       </mat-step>
     </mat-stepper>
@@ -177,6 +213,16 @@
       <mat-icon>arrow_forward</mat-icon>
     </button>
   } @else if (stepper.selectedIndex === 2) {
+    <button
+      mat-flat-button
+      type="button"
+      (click)="goNext(stepper)"
+      [disabled]="!communicationEngine.valid"
+    >
+      Continue
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  } @else if (stepper.selectedIndex === 3) {
     <button
       mat-raised-button
       class="primary-cta"

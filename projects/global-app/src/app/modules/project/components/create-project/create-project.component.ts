@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -32,21 +32,17 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
   styleUrl: './create-project.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CreateProjectComponent implements OnInit {
+export class CreateProjectComponent {
   private readonly dialogRef: MatDialogRef<CreateProjectComponent> = inject(MatDialogRef);
   private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   newExperimentForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),
     description: new FormControl<string>('', [Validators.required]),
-    acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue])
+    acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue]),
   });
 
   queryId?: number;
-
-  ngOnInit() {
-    this.cdr.detectChanges();
-  }
 
   toggleMaximize(isMaximized: boolean): void {
     if (isMaximized) {
@@ -61,7 +57,7 @@ export class CreateProjectComponent implements OnInit {
       const createDto: ProjectCreateDto = {
         name: this.newExperimentForm.value.name || '',
         description: this.newExperimentForm.value.description || '',
-        queryId: this.queryId
+        queryId: this.queryId,
       }
       this.dialogRef.close(createDto);
     } else {

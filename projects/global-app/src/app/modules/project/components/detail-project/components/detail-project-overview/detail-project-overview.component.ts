@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, input, signal} from '@angular/core';
 import {ProjectDto} from '../../../../dto/project';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -62,7 +62,6 @@ export class DetailProjectOverviewComponent {
     this.description.disable();
     this.editModeDescription.set(false);
   });
-
 
   onEditName(event: MouseEvent): void {
     event.stopPropagation();
