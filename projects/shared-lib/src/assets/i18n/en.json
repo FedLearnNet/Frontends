@@ -1300,6 +1300,12 @@
       "CHANGED_TO": "Changed to"
     }
   },
+  "QUERY_STATUS": {
+    "DRAFT": "Draft",
+    "PENDING": "Pending",
+    "FINISHED": "Finished",
+    "FAILED": "Failed"
+  },
   "QUERY_OPERATOR": {
     "AND": "and",
     "OR": "or",

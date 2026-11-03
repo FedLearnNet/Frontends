@@ -55,6 +55,7 @@ export interface QueryDTO extends BaseDto {
   hasResult: boolean;
 
   hasFired: boolean;
+  error?: string | null;
   keycloakId: string;
 
   projectIds?: number[];

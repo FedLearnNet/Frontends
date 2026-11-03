@@ -11,7 +11,7 @@ import {MatInputModule} from "@angular/material/input";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatTabsModule} from "@angular/material/tabs";
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
-import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {BadgeColor, BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {StatusBadeType} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
@@ -32,6 +32,7 @@ import {
 import {describeQueryLeaf, formatInterval, hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
 import {relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
 import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
+import {queryStatus, queryStatusColor, queryStatusKey} from '@global-app/find-data/helpers/query-status';
 import {QueryService} from "@global-app/find-data/services/query.service";
 import {QueryJsonPreviewComponent} from '@global-app/find-data/components/query-json-preview/query-json-preview.component';
 import {
@@ -175,29 +176,23 @@ export class QueryDetailPageComponent implements OnInit {
   }
 
   getQueryStatusType(query: QueryDTO | null = this.query()): StatusBadeType {
-    if (!query) {
-      return 'INIT';
+    switch (query ? queryStatus(query) : 'draft') {
+      case 'failed':
+        return 'FAILED';
+      case 'finished':
+        return 'SUCCESS';
+      case 'pending':
+        return 'PENDING';
+      default:
+        return 'INIT';
     }
-    if (query.hasResult) {
-      return 'SUCCESS';
-    }
-    if (query.hasFired) {
-      return 'RUNNING';
-    }
-    return 'INIT';
   }
 
   getQueryStatusText(query: QueryDTO | null = this.query()): string {
     if (!query) {
       return 'Unknown';
     }
-    if (query.hasResult) {
-      return 'Completed';
-    }
-    if (query.hasFired) {
-      return 'Running';
-    }
-    return 'Draft';
+    return this.translate.instant(queryStatusKey(queryStatus(query)));
   }
 
   onQueryChange(group: QueryGroupNode): void {
@@ -314,14 +309,8 @@ export class QueryDetailPageComponent implements OnInit {
     }
   }
 
-  getQueryStatusBadgeColor(query: QueryDTO): 'GREEN' | 'BLUE' | 'GRAY' {
-    if (query.hasResult) {
-      return 'GREEN';
-    }
-    if (query.hasFired) {
-      return 'BLUE';
-    }
-    return 'GRAY';
+  getQueryStatusBadgeColor(query: QueryDTO): BadgeColor {
+    return queryStatusColor(query);
   }
 
   private buildCreateDto(currentQuery?: QueryDTO): CreateQueryDTO {

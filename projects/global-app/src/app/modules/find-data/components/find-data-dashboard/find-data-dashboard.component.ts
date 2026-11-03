@@ -22,6 +22,8 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
+import {BadgeColor, BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {queryStatus, queryStatusColor, queryStatusKey} from "@global-app/find-data/helpers/query-status";
 
 @Component({
   selector: 'app-find-data-dashboard',
@@ -40,7 +42,7 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
     EmptyStateComponent,
     PageWrapperComponent,
     TimeBadgeComponent,
-
+    BadgeComponent,
   ],
   templateUrl: './find-data-dashboard.component.html',
   styleUrl: './find-data-dashboard.component.scss',
@@ -69,14 +71,16 @@ export class FindDataDashboardComponent implements OnInit {
   dataSource: MatTableDataSource<QueryDTO> = new MatTableDataSource();
   queryList: QueryDTO[] = [];
   queryConfigs: QueryConfig[] = [];
-  displayedColumns: string[] = ['name', 'description', 'queryString', 'update', 'result', 'actions'];
+  displayedColumns: string[] = ['name', 'description', 'queryString', 'update', 'status', 'result', 'actions'];
 
   isLoading = signal<boolean>(false);
 
   ngOnInit(): void {
     this.isLoading.set(true);
     this.queryService.getAllQueries().subscribe((queries) => {
-      this.queryList = queries;
+      this.queryList = [...queries].sort((left, right) =>
+        new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+      );
       this.dataSource.data = this.queryList;
       this.isLoading.set(false);
       this.cdr.detectChanges();
@@ -87,13 +91,7 @@ export class FindDataDashboardComponent implements OnInit {
     });
 
     this.queryService.getAllQueriesSSE().subscribe((query: QueryDTO) => {
-      const existingQueryIndex = this.queryList.findIndex(q => q.id === query.id);
-      if (existingQueryIndex !== -1) {
-        this.queryList[existingQueryIndex] = query;
-      } else {
-        this.queryList.push(query);
-      }
-      this.dataSource.data = this.queryList;
+      this.placeQuery(query);
       this.cdr.detectChanges();
     });
 
@@ -133,14 +131,13 @@ export class FindDataDashboardComponent implements OnInit {
 
   onRunQuery(queryId: number): void {
     this.queryService.fireQuery(queryId).subscribe((firedQuery) => {
-      this.queryList = this.queryList.map(query => query.id === queryId ? firedQuery : query);
+      this.placeQuery(firedQuery);
       this.snackBar.open(
         this.translate.instant('QUERY_FIRED'),
         this.translate.instant('BUTTON.CLOSE'),
         {
           duration: 5000,
         });
-      this.dataSource.data = this.queryList;
       this.cdr.detectChanges();
     });
   }
@@ -164,13 +161,7 @@ export class FindDataDashboardComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((queryData: QueryDTO) => {
       if (!queryData) return;
-      const existingIndex = this.queryList.findIndex(q => q.id === queryData.id);
-      if (existingIndex !== -1) {
-        this.queryList[existingIndex] = queryData;
-      } else {
-        this.queryList.push(queryData);
-      }
-      this.dataSource.data = this.queryList;
+      this.placeQuery(queryData);
       this.cdr.detectChanges();
     });
   }
@@ -199,6 +190,24 @@ export class FindDataDashboardComponent implements OnInit {
 
   getQueryString(query: QueryDTO): string {
     return this.queryBuilderService.getFormattedQueryString(query, this.queryConfigs);
+  }
+
+  queryStatusText(query: QueryDTO): string {
+    return this.translate.instant(queryStatusKey(queryStatus(query)));
+  }
+
+  queryStatusBadgeColor(query: QueryDTO): BadgeColor {
+    return queryStatusColor(query);
+  }
+
+  private placeQuery(query: QueryDTO): void {
+    const existingIndex = this.queryList.findIndex(item => item.id === query.id);
+    if (existingIndex === -1) {
+      this.queryList.unshift(query);
+    } else {
+      this.queryList[existingIndex] = query;
+    }
+    this.dataSource.data = this.queryList;
   }
 
   constructor() {
