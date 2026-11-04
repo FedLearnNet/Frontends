@@ -136,7 +136,6 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   dataSource = new MatTableDataSource<PatientData>();
   readonly patientsLoading = signal(true);
   readonly patientsLoadError = signal<string | null>(null);
-  /** Set only after the detail request is applied, so the badge never flips 0 → 1 mid-check. */
   readonly cohortBadgeText = signal('…');
   readonly patientBadgeText = signal('…');
 

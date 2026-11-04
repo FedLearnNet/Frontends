@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Data} from "@angular/router";
 import {ConnectorRunDTO} from "../../dto/run";
 import {ConnectorDTO} from "../../dto/connector";
@@ -52,6 +52,7 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly connectorRunService = inject(ConnectorRunService);
   private readonly translate = inject(TranslateService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private refreshSub?: Subscription;
 
   ngOnInit(): void {
@@ -77,6 +78,8 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
     this.connectorRunService.get(this.run.id).subscribe((run) => {
       if (run) {
         this.run = run;
+        // The app is zoneless and `run` is a plain field, so request a re-render explicitly.
+        this.cdr.markForCheck();
       }
 
       this.checkRunningAndStartRefresh();
