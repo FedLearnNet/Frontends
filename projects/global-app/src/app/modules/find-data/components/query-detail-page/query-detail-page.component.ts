@@ -168,6 +168,10 @@ export class QueryDetailPageComponent implements OnInit {
     });
   }
 
+  isQueryPending(query: QueryDTO | null = this.query()): boolean {
+    return !!query && queryStatus(query) === 'pending';
+  }
+
   isQueryRunning(query: QueryDTO | null = this.query()): boolean {
     if (!query) {
       return false;

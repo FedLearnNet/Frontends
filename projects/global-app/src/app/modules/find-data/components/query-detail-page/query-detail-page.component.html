@@ -64,6 +64,7 @@
                 <lib-badge
                   [text]="getQueryStatusText(query)"
                   [color]="getQueryStatusBadgeColor(query)"
+                  [pulseCircle]="isQueryPending(query)"
                   [border]="true"/>
               </header>
 
@@ -195,6 +196,7 @@
                         <lib-badge
                           [text]="getQueryStatusText(item.query)"
                           [color]="getQueryStatusBadgeColor(item.query)"
+                          [pulseCircle]="isQueryPending(item.query)"
                           [border]="true"/>
                       </header>
 

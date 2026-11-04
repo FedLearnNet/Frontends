@@ -200,6 +200,10 @@ export class FindDataDashboardComponent implements OnInit {
     return queryStatusColor(query);
   }
 
+  isQueryPending(query: QueryDTO): boolean {
+    return queryStatus(query) === 'pending';
+  }
+
   private placeQuery(query: QueryDTO): void {
     const existingIndex = this.queryList.findIndex(item => item.id === query.id);
     if (existingIndex === -1) {

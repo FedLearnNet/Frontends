@@ -47,7 +47,7 @@
     <div class="query-execution--container">
       @if (isQueryRunning()) {
         <div class="query-progress-indicator">
-          <mat-spinner mode="indeterminate"/>
+          <mat-spinner mode="indeterminate" [diameter]="18"/>
         </div>
       }
       @if (data.queryData.hasResult) {

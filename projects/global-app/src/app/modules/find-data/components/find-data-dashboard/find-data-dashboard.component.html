@@ -78,6 +78,7 @@
           <lib-badge
             [text]="queryStatusText(element)"
             [color]="queryStatusBadgeColor(element)"
+            [pulseCircle]="isQueryPending(element)"
             [border]="true"/>
         </td>
       </ng-container>

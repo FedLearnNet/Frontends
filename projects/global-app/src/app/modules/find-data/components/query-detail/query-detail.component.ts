@@ -20,6 +20,7 @@ import {QueryDTO} from "@global-app/find-data/dto/query";
 import {createEmptyGroup, QueryGroupNode} from '@global-app/find-data/models/query-tree';
 import {hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
 import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
+import {queryStatus} from '@global-app/find-data/helpers/query-status';
 
 import {MatDividerModule} from "@angular/material/divider";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -102,7 +103,7 @@ export class QueryDetailComponent implements OnInit {
     if (!this.data.queryData) {
       return false;
     }
-    return !this.data.queryData.hasResult && this.data.queryData.hasFired;
+    return queryStatus(this.data.queryData) === 'pending';
   }
 
   onQueryChange(group: QueryGroupNode): void {
