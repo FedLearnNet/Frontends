@@ -1,0 +1,452 @@
+<section class="bx" [class.bx--solution]="mode() === 'solution'">
+  <header class="bx__head">
+    <h2>So, what is the bottleneck?</h2>
+    <p>The algorithm is not the problem. These five things keep federated learning out of the clinic.</p>
+  </header>
+
+  <!-- The five bottlenecks -->
+  <div class="bx__tabs" role="tablist" aria-label="Bottlenecks">
+    @for (b of bottlenecks; track b.id; let i = $index) {
+      <button type="button" role="tab" class="bx__tab" [class.active]="i === activeIndex()"
+              [attr.aria-selected]="i === activeIndex()" (click)="choose(i)">
+        <span class="bx__tab-id" [class.solved]="seen().has(b.id)">{{ b.id }}@if (seen().has(b.id)) { ✓}</span>
+        <span class="bx__tab-label">{{ b.short }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="bx__card">
+    <div class="bx__title">
+      <span class="bx__badge">{{ active().id }}@if (mode() === 'solution') { ✓}</span>
+      <div>
+        <h3>{{ active().title }}</h3>
+        <p>{{ active().subtitle }}</p>
+      </div>
+      <span class="bx__status">
+        <span class="bx__status-icon" aria-hidden="true">{{ mode() === 'problem' ? '!' : '✓' }}</span>
+        {{ mode() === 'problem' ? 'What goes wrong' : 'How ' + project() + ' solves it' }}
+      </span>
+    </div>
+
+    <div class="bx__body">
+      <div class="bx__figure">
+        @if (mode() === 'problem') {
+          <!-- Federated learning without FL-Net (slides "What goes wrong") -->
+          <svg class="scene" [attr.viewBox]="'0 0 ' + problemWidth() + ' 450'" role="img"
+               [attr.aria-label]="active().title + ': what goes wrong'">
+            <defs>
+              <marker id="bx-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7"
+                      orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+              </marker>
+            </defs>
+
+            <g class="agg">
+              <rect class="agg__bar" x="16" y="16" [attr.width]="problemWidth() - 32" height="74" rx="8"/>
+              <g class="agg__icon" transform="translate(56,53)">
+                <line x1="-22" y1="-12" x2="0" y2="-18"/><line x1="-22" y1="-12" x2="0" y2="0"/>
+                <line x1="-22" y1="12" x2="0" y2="0"/><line x1="-22" y1="12" x2="0" y2="18"/>
+                <line x1="0" y1="-18" x2="22" y2="-8"/><line x1="0" y1="0" x2="22" y2="-8"/>
+                <line x1="0" y1="0" x2="22" y2="8"/><line x1="0" y1="18" x2="22" y2="8"/>
+                <circle cx="-22" cy="-12" r="5"/><circle cx="-22" cy="12" r="5"/>
+                <circle cx="0" cy="-18" r="5"/><circle cx="0" cy="0" r="5"/><circle cx="0" cy="18" r="5"/>
+                <circle cx="22" cy="-8" r="5"/><circle cx="22" cy="8" r="5"/>
+              </g>
+              <g class="fade" [class.dim]="dimmed('agg-formula')">
+                @if (!(compact() && (lines('agg-formula').length || !dimmed('agg-query')))) {
+                  <text class="agg__title" x="100" y="46">Aggregator: global model</text>
+                }
+                <text class="agg__formula" x="100" y="72">W<tspan dy="-5" font-size="10">(t+1)</tspan><tspan dy="5"> = W</tspan><tspan dy="-5" font-size="10">(t)</tspan><tspan dy="5"> + Σ</tspan><tspan dy="3" font-size="10">k</tspan><tspan dy="-3"> (n</tspan><tspan dy="3" font-size="10">k</tspan><tspan dy="-3">/n) ΔW</tspan><tspan dy="3" font-size="10">k</tspan></text>
+              </g>
+              @for (line of lines('agg-formula'); track line) {
+                <text class="agg__bad" [attr.x]="compact() ? 100 : 350" [attr.y]="compact() ? 46 : 72">{{ line }}</text>
+              }
+
+              @if (!dimmed('agg-query')) {
+                @let qx = compact() ? 30 : 406;
+                <g class="query" [attr.transform]="'translate(' + qx + ',28)'">
+                  @for (chip of ['Site 1: ?', 'Site 2: ?', '…']; track chip; let i = $index) {
+                    <g [attr.transform]="'translate(' + (i * (compact() ? 96 : 118)) + ',0)'">
+                      <rect [attr.width]="compact() ? 88 : 110" height="20" rx="4"/>
+                      <text [attr.x]="compact() ? 44 : 55" y="14">{{ chip }}</text>
+                    </g>
+                  }
+                  <text class="query__line" x="0" y="44">Query: age &gt; 18 ∧ diabetes → total n = ?</text>
+                </g>
+              }
+            </g>
+
+            @for (site of problemSites(); track site.id) {
+              @let dx = downX(site);
+              @let ux = upX(site);
+              <g class="site" [attr.data-tone]="site.tone">
+                <rect class="site__box" [attr.x]="site.x" [attr.y]="SITE_Y" [attr.width]="site.width"
+                      [attr.height]="SITE_H" rx="10"/>
+                <g class="site__icon" [attr.transform]="'translate(' + (site.x + 14) + ',' + (SITE_Y + 8) + ')'">
+                  <rect x="0" y="10" width="36" height="24" rx="2"/>
+                  <rect x="10" y="0" width="16" height="34" rx="2"/>
+                  <circle class="site__cross" cx="18" cy="10" r="6"/>
+                  <text class="site__h" x="18" y="13.5">H</text>
+                </g>
+                <text class="site__name" [attr.x]="site.x + 58" [attr.y]="SITE_Y + 31">{{ site.label }}</text>
+                @for (line of lines('site-' + site.id); track line) {
+                  <text class="bad" [attr.x]="site.x + 112" [attr.y]="SITE_Y + 31">{{ line }}</text>
+                }
+
+                <line class="link link--down" [attr.x1]="dx" [attr.y1]="AGG_BOTTOM" [attr.x2]="dx" [attr.y2]="CARD_Y - 3"
+                      marker-end="url(#bx-arrow)"/>
+                <line class="link link--up" [attr.x1]="ux" [attr.y1]="CARD_Y" [attr.x2]="ux" [attr.y2]="AGG_BOTTOM + 3"
+                      marker-end="url(#bx-arrow)"/>
+                <g class="pill" [attr.transform]="'translate(' + (dx - 34) + ',100)'">
+                  <rect width="68" height="24" rx="12"/>
+                  <text x="34" y="16.5">W<tspan dy="-4" font-size="9">(t+1)</tspan></text>
+                </g>
+                <g class="num" [attr.transform]="'translate(' + (dx + 34) + ',100)'"><circle r="10"/><text y="4">6</text></g>
+                <g class="pill" [attr.transform]="'translate(' + (ux - 34) + ',100)'">
+                  <rect width="68" height="24" rx="12"/>
+                  <text x="34" y="16.5">ΔW<tspan dy="3" font-size="9">{{ site.id }}</tspan></text>
+                </g>
+                <g class="num" [attr.transform]="'translate(' + (ux + 34) + ',100)'"><circle r="10"/><text y="4">4</text></g>
+                @for (lx of [dx, ux]; track $index) {
+                  <g class="lock" [class.lock--open]="locksOpen()" [attr.transform]="'translate(' + lx + ',' + SITE_Y + ')'">
+                    <circle r="12"/>
+                    <path class="lock__shackle" [attr.d]="locksOpen() ? 'M-4,-3 v-4 a4,4 0 0 1 8,0' : 'M-4,-1 v-3 a4,4 0 0 1 8,0 v3'"/>
+                    <rect class="lock__body" x="-5.5" y="-1" width="11" height="8" rx="1.5"/>
+                  </g>
+                }
+
+                <!-- 1 Local data store -->
+                <g class="card fade" [class.dim]="dimmed('data-' + site.id)"
+                   [attr.transform]="'translate(' + (site.x + 16) + ',' + CARD_Y + ')'">
+                  <text class="card__label" x="0" y="-8">Local data store</text>
+                  <rect class="card__box" width="120" height="176" rx="8"/>
+                  <g class="db" transform="translate(60,48)">
+                    <path d="M-22,-18 v36 a22,7 0 0 0 44,0 v-36"/>
+                    <ellipse cx="0" cy="-18" rx="22" ry="7"/>
+                    <path class="db__band" d="M-22,-6 a22,7 0 0 0 44,0 M-22,6 a22,7 0 0 0 44,0"/>
+                  </g>
+                  <text class="card__strong" x="60" y="100">Patient data</text>
+                  @if (lines('data-' + site.id).length) {
+                    @for (line of lines('data-' + site.id); track line; let l = $index) {
+                      <text class="bad bad--center" x="60" [attr.y]="122 + l * 16">{{ line }}</text>
+                    }
+                  } @else {
+                    <text class="card__text" x="60" y="118">{{ site.records }} records</text>
+                    <text class="card__muted" x="60" y="150">Own data</text>
+                    <text class="card__muted" x="60" y="164">standard</text>
+                  }
+                  <g class="num" transform="translate(116,2)"><circle r="10"/><text y="4">1</text></g>
+                </g>
+                <line class="link link--inner" [attr.x1]="site.x + 138" [attr.y1]="CARD_Y + 88"
+                      [attr.x2]="site.x + 156" [attr.y2]="CARD_Y + 88" marker-end="url(#bx-arrow)"/>
+
+                <!-- 2 Local training -->
+                <g class="card fade" [class.dim]="dimmed('train-' + site.id)"
+                   [attr.transform]="'translate(' + (site.x + 160) + ',' + CARD_Y + ')'">
+                  <text class="card__label" x="0" y="-8">Local training</text>
+                  <rect class="card__box" width="120" height="176" rx="8"/>
+                  @for (edge of netEdges; track $index) {
+                    <line class="nn__edge" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2"/>
+                  }
+                  @for (node of netNodes; track $index) {
+                    <circle class="nn__node" [attr.data-kind]="node.kind" [attr.cx]="node.x" [attr.cy]="node.y" r="4.5"/>
+                  }
+                  @if (lines('train-' + site.id).length) {
+                    @for (line of lines('train-' + site.id); track line; let l = $index) {
+                      <text class="bad" x="10" [attr.y]="94 + l * 15">{{ line }}</text>
+                    }
+                  } @else {
+                    <text class="card__small" x="10" y="104">Training loss</text>
+                  }
+                  <path class="loss__area" d="M10,122 C40,124 52,126 64,140 S92,152 110,154 V160 H10 Z"/>
+                  <path class="loss" d="M10,122 C40,124 52,126 64,140 S92,152 110,154"/>
+                  <text class="card__small" x="10" y="172">Epochs</text>
+                  <g class="num" transform="translate(116,2)"><circle r="10"/><text y="4">2</text></g>
+                </g>
+                <line class="link link--inner" [attr.x1]="site.x + 282" [attr.y1]="CARD_Y + 88"
+                      [attr.x2]="site.x + 300" [attr.y2]="CARD_Y + 88" marker-end="url(#bx-arrow)"/>
+
+                <!-- 3 Result -->
+                <g class="card fade" [class.dim]="dimmed('result-' + site.id)"
+                   [attr.transform]="'translate(' + (site.x + 304) + ',' + CARD_Y + ')'">
+                  <text class="card__label" x="0" y="-8">Result</text>
+                  <rect class="card__box" width="120" height="176" rx="8"/>
+                  @for (cell of weightCells; track cell.i) {
+                    <rect [attr.x]="cell.x" [attr.y]="cell.y" width="18" height="14" rx="1.5" [attr.fill]="cell.fill"/>
+                  }
+                  <text class="card__text" x="60" y="104">Model weights W<tspan dy="3" font-size="9">{{ site.id }}</tspan></text>
+                  @for (line of lines('result-' + site.id); track line; let l = $index) {
+                    <text class="bad bad--center" x="60" [attr.y]="126 + l * 16">{{ line }}</text>
+                  }
+                  <g class="num" transform="translate(116,2)"><circle r="10"/><text y="4">3</text></g>
+                </g>
+
+                <g class="stays" [attr.transform]="'translate(' + (site.x + site.width - 216) + ',' + (SITE_Y + SITE_H - 13) + ')'">
+                  <rect width="204" height="26" rx="13"/>
+                  <text x="102" y="17.5">Patient data stays in {{ site.label }}</text>
+                </g>
+              </g>
+            }
+
+            <ng-container *ngTemplateOutlet="marks"/>
+          </svg>
+        } @else {
+          <!-- FL-Net: the platform above one site (slides "How FL-Net solves it") -->
+          <svg class="scene" [attr.viewBox]="'0 0 ' + solutionWidth() + ' 450'" role="img"
+               [attr.aria-label]="active().title + ': how ' + project() + ' solves it'">
+            <defs>
+              <marker id="bx-arrow-s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7"
+                      orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" class="arrowhead"/>
+              </marker>
+            </defs>
+
+            <rect class="platform" x="16" y="16" [attr.width]="solutionWidth() - 32" height="106" rx="10"/>
+            @if (compact()) {
+              <text class="platform__name platform__name--start" x="28" y="38">{{ project() }} platform</text>
+            } @else {
+              <g class="octopus" transform="translate(66,62)">
+                @for (a of [-70, -40, -12, 12, 40, 70]; track a) {
+                  <path [attr.transform]="'rotate(' + a + ')'" d="M0,0 q4,12 0,22 q-3,6 2,10"/>
+                }
+                <circle cy="-4" r="14"/>
+                <circle class="octopus__eye" cy="-2" r="5"/>
+                <circle class="octopus__pupil" cy="-2" r="2.2"/>
+              </g>
+              <text class="platform__name" x="66" y="108">Platform</text>
+            }
+
+            @for (item of platformItems(); track item.id; let i = $index) {
+              @let cx = item.x + item.w / 2;
+              @let cy = item.y + 26;
+              @if (i > 0) {
+                <line class="link link--platform" [attr.x1]="item.x - (compact() ? 11 : 20)" [attr.y1]="item.y + item.h / 2"
+                      [attr.x2]="item.x - 3" [attr.y2]="item.y + item.h / 2" marker-end="url(#bx-arrow-s)"/>
+              }
+              <g class="item fade" [class.dim]="dimmed(item.id)" [class.item--agg]="item.id === 'aggregator'">
+                @if (item.id === 'aggregator') {
+                  <rect class="item__agg" [attr.x]="item.x" [attr.y]="item.y" [attr.width]="item.w" [attr.height]="item.h" rx="8"/>
+                  @if (!compact()) {
+                  <g class="agg__icon" [attr.transform]="'translate(' + (item.x + 30) + ',' + (item.y + item.h / 2) + ') scale(0.7)'">
+                    <line x1="-22" y1="-12" x2="0" y2="0"/><line x1="-22" y1="12" x2="0" y2="0"/>
+                    <line x1="0" y1="0" x2="22" y2="-8"/><line x1="0" y1="0" x2="22" y2="8"/>
+                    <circle cx="-22" cy="-12" r="5"/><circle cx="-22" cy="12" r="5"/><circle cx="0" cy="0" r="5"/>
+                    <circle cx="22" cy="-8" r="5"/><circle cx="22" cy="8" r="5"/>
+                  </g>
+                  }
+                  <text class="item__agg-label" [attr.x]="item.x + (compact() ? 8 : 64)" [attr.y]="item.y + item.h / 2 + 5">Aggregator</text>
+                  @if (tag('aggregator'); as t) {
+                    <text class="good good--light" [attr.x]="item.x + (compact() ? 8 : 64)" [attr.y]="item.y + item.h / 2 + 22">{{ t }}</text>
+                  }
+                } @else {
+                  @switch (item.id) {
+                    @case ('schema') {
+                      <g [attr.transform]="'translate(' + cx + ',' + cy + ')'">
+                        <rect class="ico ico--onto" x="-24" y="-18" width="22" height="11" rx="5"/>
+                        <rect class="ico ico--dt" x="2" y="-18" width="22" height="11" rx="5"/>
+                        <path class="ico__line" d="M-13,-7 L-5,2 M13,-7 L5,2"/>
+                        <rect class="ico ico--schema" x="-13" y="2" width="26" height="11" rx="5"/>
+                      </g>
+                    }
+                    @case ('ddq') {
+                      <g class="ico__stroke" [attr.transform]="'translate(' + cx + ',' + cy + ')'">
+                        <circle cx="-3" cy="-3" r="12"/>
+                        <path d="M-10,-6 h14 M-10,-1 h14 M-10,4 h10 M6,6 l9,9"/>
+                      </g>
+                    }
+                    @case ('project') {
+                      <g [attr.transform]="'translate(' + cx + ',' + cy + ')'">
+                        <circle class="gear" r="11"/>
+                        <circle class="gear__hole" r="4"/>
+                      </g>
+                    }
+                    @case ('inference-tool') {
+                      <g [attr.transform]="'translate(' + cx + ',' + cy + ')'">
+                        @for (p of [-10, 0, 10]; track p) {
+                          @for (q of [-10, 0, 10]; track q) {
+                            <circle class="ico ico--node" [attr.cx]="p" [attr.cy]="q" r="3"/>
+                          }
+                        }
+                      </g>
+                    }
+                    @default {
+                      <g class="ico__stroke" [attr.transform]="'translate(' + cx + ',' + cy + ')'">
+                        <path d="M0,-13 L12,-6 V7 L0,14 L-12,7 V-6 Z M-12,-6 L0,1 L12,-6 M0,1 V14"/>
+                      </g>
+                    }
+                  }
+                  <text class="item__label" [attr.x]="cx" [attr.y]="item.y + item.h - 10">{{ item.label }}</text>
+                }
+              </g>
+            }
+
+            <!-- Channels between platform and site, all encrypted -->
+            <g class="fade" [class.dim]="dimmed('channels')">
+              @for (ch of channels; track ch.id) {
+                <line class="link" [class.link--down]="ch.dir === 'down'"
+                      [attr.x1]="ch.x" [attr.y1]="ch.dir === 'up' ? SOL_CARD_Y : PLATFORM_BOTTOM + 3"
+                      [attr.x2]="ch.x" [attr.y2]="ch.dir === 'up' ? PLATFORM_BOTTOM + 3 : SOL_CARD_Y - 3"
+                      marker-end="url(#bx-arrow-s)" [attr.marker-start]="ch.dir === 'both' ? 'url(#bx-arrow-s)' : null"/>
+                <g class="pill pill--solution" [attr.transform]="'translate(' + (ch.x - ch.w / 2) + ',144)'">
+                  <rect [attr.width]="ch.w" height="24" rx="12"/>
+                  <text [attr.x]="ch.w / 2" y="16.5">{{ ch.label }}</text>
+                </g>
+                @if (ch.n) {
+                  <g class="num" [attr.transform]="'translate(' + (ch.x + ch.w / 2) + ',144)'"><circle r="10"/><text y="4">{{ ch.n }}</text></g>
+                }
+                <g class="lock" [attr.transform]="'translate(' + ch.x + ',' + SOL_SITE.y + ')'">
+                  <circle r="12"/>
+                  <path class="lock__shackle" d="M-4,-1 v-3 a4,4 0 0 1 8,0 v3"/>
+                  <rect class="lock__body" x="-5.5" y="-1" width="11" height="8" rx="1.5"/>
+                </g>
+              }
+            </g>
+
+            <!-- Site 1 -->
+            <g class="site" data-tone="violet">
+              <rect class="site__box" [attr.x]="SOL_SITE.x" [attr.y]="SOL_SITE.y" [attr.width]="SOL_SITE.w"
+                    [attr.height]="SOL_SITE.h" rx="10"/>
+              <g class="site__icon" [attr.transform]="'translate(' + (SOL_SITE.x + 14) + ',' + (SOL_SITE.y + 8) + ')'">
+                <rect x="0" y="10" width="36" height="24" rx="2"/>
+                <rect x="10" y="0" width="16" height="34" rx="2"/>
+                <circle class="site__cross" cx="18" cy="10" r="6"/>
+                <text class="site__h" x="18" y="13.5">H</text>
+              </g>
+              <text class="site__name" [attr.x]="SOL_SITE.x + 58" [attr.y]="SOL_SITE.y + 31">Site 1</text>
+              @if (tag('site-header'); as t) {
+                <g [attr.transform]="'translate(' + (SOL_SITE.x + 112) + ',' + (SOL_SITE.y + 12) + ')'">
+                  <g class="tag">
+                    <rect [attr.width]="tagWidth(t)" height="24" rx="6"/>
+                    <text x="11" y="16.5">✓ {{ t }}</text>
+                  </g>
+                </g>
+              }
+
+              @for (card of solutionCards; track card.id; let i = $index) {
+                @if (i > 0) {
+                  <line class="link link--inner" [attr.x1]="card.x - 12" [attr.y1]="card.y + card.h / 2"
+                        [attr.x2]="card.x - 3" [attr.y2]="card.y + card.h / 2" marker-end="url(#bx-arrow-s)"/>
+                }
+                <g class="card fade" [class.dim]="dimmed(card.id)"
+                   [attr.transform]="'translate(' + card.x + ',' + card.y + ')'">
+                  <text class="card__label" x="0" y="-8">{{ card.label }}</text>
+                  <rect class="card__box" [attr.width]="card.w" [attr.height]="card.h" rx="8"/>
+                  @switch (card.id) {
+                    @case ('train') {
+                      <g transform="translate(-1,8) scale(0.85)">
+                        @for (edge of netEdges; track $index) {
+                          <line class="nn__edge" [attr.x1]="edge.x1" [attr.y1]="edge.y1" [attr.x2]="edge.x2" [attr.y2]="edge.y2"/>
+                        }
+                        @for (node of netNodes; track $index) {
+                          <circle class="nn__node" [attr.data-kind]="node.kind" [attr.cx]="node.x" [attr.cy]="node.y" r="4.5"/>
+                        }
+                      </g>
+                    }
+                    @case ('result') {
+                      @for (cell of weightCells; track cell.i) {
+                        <rect [attr.x]="cell.x - 4" [attr.y]="cell.y + 2" width="16" height="12" rx="1.5" [attr.fill]="cell.fill"/>
+                      }
+                    }
+                    @default {
+                      <g class="db" [class.db--muted]="card.id === 'data'" transform="translate(50,50)">
+                        <path d="M-22,-18 v36 a22,7 0 0 0 44,0 v-36"/>
+                        <ellipse cx="0" cy="-18" rx="22" ry="7"/>
+                        <path class="db__band" d="M-22,-6 a22,7 0 0 0 44,0 M-22,6 a22,7 0 0 0 44,0"/>
+                      </g>
+                      @if (card.id === 'etl') {
+                        <g transform="translate(70,70)">
+                          <circle class="check" r="10"/>
+                          <path class="check__mark" d="M-4.5,0 l3,3 l6,-6"/>
+                        </g>
+                      }
+                    }
+                  }
+                  <text class="card__text" [attr.x]="card.w / 2" y="112">{{ card.base }}</text>
+                  @if (tag(card.id); as t) {
+                    <g transform="translate(6,122)">
+                      <g class="tag">
+                        <rect [attr.width]="card.w - 12" height="20" rx="5"/>
+                        <text [attr.x]="(card.w - 12) / 2" y="14" class="tag__center">{{ t }}</text>
+                      </g>
+                    </g>
+                  }
+                  <g class="num" [attr.transform]="'translate(' + (card.w - 4) + ',2)'"><circle r="10"/><text y="4">{{ card.n }}</text></g>
+                </g>
+              }
+
+              <g class="stays" [attr.transform]="'translate(' + (SOL_SITE.x + SOL_SITE.w - 216) + ',' + (SOL_SITE.y + SOL_SITE.h - 13) + ')'">
+                <rect width="204" height="26" rx="13"/>
+                <text x="102" y="17.5">Patient data stays in Site 1</text>
+              </g>
+            </g>
+
+            @if (!compact()) {
+              <g class="ghost">
+                <rect x="506" [attr.y]="SOL_SITE.y" width="406" [attr.height]="SOL_SITE.h" rx="10"/>
+                <text x="709" [attr.y]="SOL_SITE.y + 110">Site 2 … Site N</text>
+                <text class="ghost__sub" x="709" [attr.y]="SOL_SITE.y + 134">Same local app, same Tools, same checks</text>
+              </g>
+            }
+
+            <ng-container *ngTemplateOutlet="marks"/>
+          </svg>
+        }
+
+        <!-- Dashed boxes and A/B/C markers on top of either figure -->
+        <ng-template #marks>
+          <svg:g class="marks">
+            @for (h of highlights(); track h.id + h.letter + mode()) {
+              <svg:g class="mark" [class.sel]="h.index === selected()" [style.--i]="h.index"
+                     (click)="select(h.index)">
+                <svg:rect class="mark__box" [attr.x]="h.box.x" [attr.y]="h.box.y" [attr.width]="h.box.w"
+                          [attr.height]="h.box.h" rx="10"/>
+                <svg:g class="mark__pin" [attr.transform]="'translate(' + h.box.x + ',' + h.box.y + ')'">
+                  <svg:circle r="12"/>
+                  <svg:text y="4.5">{{ h.letter }}</svg:text>
+                </svg:g>
+              </svg:g>
+            }
+          </svg:g>
+        </ng-template>
+      </div>
+
+      <!-- The findings, as on the slides' side panel -->
+      <aside class="bx__notes">
+        <ol>
+          @for (f of findings(); track $index; let i = $index) {
+            <li>
+              <button type="button" class="note" [class.sel]="i === selected()" (click)="select(i)"
+                      [style.--i]="i">
+                <span class="note__pin">{{ letters[i] }}</span>
+                <span>{{ f.text }}</span>
+              </button>
+            </li>
+          }
+        </ol>
+        @if (mode() === 'solution') {
+          <p class="proof"><strong>In our evaluation</strong>{{ active().proof }}</p>
+        }
+      </aside>
+    </div>
+
+    <div class="bx__actions">
+      @if (mode() === 'problem') {
+        <button type="button" class="bx__cta" (click)="toggleMode()">
+          <span aria-hidden="true">✓</span> How {{ project() }} solves it
+        </button>
+      } @else {
+        <button type="button" class="bx__back" (click)="toggleMode()">
+          <span aria-hidden="true">←</span> Show the problem
+        </button>
+        <button type="button" class="bx__cta" (click)="next()">
+          @if (isLast()) {
+            Start again with {{ bottlenecks[0].id }}
+          } @else {
+            Next: {{ bottlenecks[activeIndex() + 1].id }} {{ bottlenecks[activeIndex() + 1].short }}
+          }
+          <span aria-hidden="true">→</span>
+        </button>
+      }
+    </div>
+  </div>
+</section>

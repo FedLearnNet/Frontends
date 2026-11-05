@@ -41,35 +41,42 @@
             class="iframe"></iframe>
   </div>
 } @else {
-  <lib-hero
-    [title]="project + ' - from federated query to federated learning'"
-    [subtitle]="'Run cross-site analyses without local installs: '+project+' provisions, validates, and executes ' +
-     'federated workflows with policy-based access, reproducible runs, and end-to-end traceability.'"
-    [primaryCtaLabel]="'Start a federated project'"
-    [secondaryCtaLabel]="'Integrate your site'"
-    [badges]="flnetHeroBadges()"
-    [kpis]="flnetHeroKpis()"
-    [eyebrow]="project +' — Secure Privacy-Preserving Federated Learning Network'"
+  <app-start-hero
+    [project]="project"
     (primaryCta)="onProject()"
     (secondaryCta)="onViewDocs()"
   />
 
-  <lib-capabilities
-    [title]="'Everything you need for privacy-preserving, cross-site learning'"
-    [subtitle]="project + ' combines secure site onboarding, governance-aware data access, and reproducible federated ' +
-     'execution across institutions.'"
-    [items]="flnetCapabilities()"
-  />
+  <app-federated-flow/>
 
-  <lib-problem-solution
-    [title]="'From siloed data to governed, federated execution'"
-    [subtitle]="'A typical path from “manual exports + ad-hoc scripts” to FLNet’s controlled federation with auditable ' +
-     'runs and site-level enforcement.'"
-    [problemTitle]="'Problem'"
-    [solutionTitle]="project +' solution'"
-    [problems]="flnetProblems()"
-    [solutions]="flnetSolutions()"
-    [ctaLabel]="'Explore the FLNet workflow'"
-    (cta)="onViewDocs()"
-  />
+  <app-bottleneck-explorer [project]="project"/>
+
+  <section class="start-section">
+    <h2>Start here</h2>
+    <div class="start-actions">
+      @for (action of actions; track action.route) {
+        <a class="start-action" [routerLink]="action.route">
+          <mat-icon class="start-action__icon">{{ action.icon }}</mat-icon>
+          <span class="start-action__text">
+            <strong>{{ action.title }}</strong>
+            <span>{{ action.description }}</span>
+          </span>
+          <mat-icon class="start-action__arrow">arrow_forward</mat-icon>
+        </a>
+      }
+    </div>
+  </section>
+
+  <section class="start-section start-section--last">
+    <h2>How it works</h2>
+    <ol class="start-steps">
+      @for (step of steps; track step.title; let i = $index) {
+        <li class="start-step">
+          <span class="start-step__number">{{ i + 1 }}</span>
+          <strong>{{ step.title }}</strong>
+          <span>{{ step.description }}</span>
+        </li>
+      }
+    </ol>
+  </section>
 }
