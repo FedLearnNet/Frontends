@@ -1403,7 +1403,7 @@
       "CATALOG": "Pick the ontology and data type. The query only reads schema nodes mapped to that pair.",
       "OPERATOR": "How the value is compared. exists, !exists, and has_changed need no value. changed_from and changed_to compare a change and require delta.",
       "VALUE": "The value to compare. For in and !in, separate several values with commas.",
-      "DATATYPE": "Optional hint when the stored column is text but the comparison should be numeric or boolean.",
+      "DATATYPE": "Type to convert to when the stored value is string but the comparison should be numeric or boolean.",
       "VALUE_MODE": "Absolute uses the recorded value. Delta compares the change between consecutive values, no matter how far apart. Delta within a time window only compares values at most that far apart.",
       "TIME_FILTER": "Only look at events that happened during this time frame. After and before dates are exclusive.",
       "TIME_AGGREGATION": "Among the matching events, use every event, only the earliest, only the latest, or events inside a sliding window. A plain window uses the average. At least or at most counts how many events fall in that window and cannot use average.",
