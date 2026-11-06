@@ -9,10 +9,10 @@
     @for (q of queryList(); track q.id) {
       <mat-option
         [value]="q.id"
-        [disabled]="q.result == null"
+        [disabled]="q.result === null"
       >
         <span>{{ q.name }} </span>
-        @if (q.result != null) {
+        @if (q.result !== null) {
           <span> ({{ q.result }}) </span>
         } @else {
           <span> ({{ 'NO_RESULT' | translate }}) </span>
