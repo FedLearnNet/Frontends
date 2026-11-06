@@ -12,9 +12,20 @@
 
     &--header {
       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       padding-bottom: 15px;
     }
   }
+}
+
+.json-toggle mat-icon {
+  margin-right: 4px;
+}
+
+.json-preview {
+  margin-bottom: 12px;
 }
 
 .query-execution {

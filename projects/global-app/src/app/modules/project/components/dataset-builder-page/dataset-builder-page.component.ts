@@ -9,7 +9,9 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepperModule} from "@angular/material/stepper";
 import {Router} from "@angular/router";
-import {QueryDTO, QueryOperatorDTO} from "@global-app/find-data/dto/query";
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {isLang2Group, Lang2Leaf} from "@global-app/find-data/dto/lang2-query";
+import {collectLeaves} from "@global-app/find-data/helpers/query-tree.serializer";
 import {DataStatisticsResponseDTO, StatisticsColumnProfile} from "@global-app/find-data/dto/query-statistics";
 import {QueryStatisticsResponseService} from "@global-app/find-data/services/query-statistics-response.service";
 import {QueryService} from "@global-app/find-data/services/query.service";
@@ -243,21 +245,24 @@ export class DatasetBuilderPageComponent {
 
   private readonly loadSelectionOptionsEffect = effect((onCleanup) => {
     const query = this.query();
-    if (!query?.query?.length) {
+    const leaves = query?.query && isLang2Group(query.query) ? collectLeaves(query.query) : [];
+    if (leaves.length === 0) {
       this.rawSelectionOptions.set([]);
       return;
     }
 
     this.dataSelectionsLoading.set(true);
-    const requestedSelectionKeys = new Map<string, QueryDTO['query'][number]>();
+    const requestedSelectionKeys = new Map<string, Lang2Leaf>();
     const ontologyIds = new Set<string>();
 
-    for (const item of query.query) {
+    for (const item of leaves) {
       requestedSelectionKeys.set(toSelectionKey({
-        globalOntologyId: item.ontologyId,
-        globalDataTypeId: item.dataTypeId,
+        globalOntologyId: item.ontology_id,
+        globalDataTypeId: item.data_type_id,
       }), item);
-      ontologyIds.add(item.ontologyId);
+      if (item.ontology_id) {
+        ontologyIds.add(item.ontology_id);
+      }
     }
 
     const sub = this.dataTypeService.getAllForQuery(Array.from(ontologyIds)).subscribe({
@@ -686,7 +691,7 @@ export class DatasetBuilderPageComponent {
   private buildSelectionOptions(
     details: DataTypeDetailFlatten[],
     subscriptions: DataTypeSubscriptionDTO[],
-    requestedSelectionKeys: Map<string, QueryDTO['query'][number]>
+    requestedSelectionKeys: Map<string, Lang2Leaf>
   ): DatasetSelectionOption[] {
     const subscriptionMap = new Map(subscriptions.map(subscription => [subscription.dataTypeId, subscription.subscriptionsCount]));
 
@@ -704,7 +709,7 @@ export class DatasetBuilderPageComponent {
         const key = toSelectionKey(selection);
         const queryItem = requestedSelectionKeys.get(key);
         const ontologyQueryItem = queryItem ?? Array.from(requestedSelectionKeys.values()).find(
-          item => item.ontologyId === ontologyId
+          item => item.ontology_id === ontologyId
         );
 
         return [{
@@ -721,10 +726,10 @@ export class DatasetBuilderPageComponent {
           ontologyId: ontologyId,
           clinicCount: subscriptionMap.get(detail.id) ?? detail.subscriptionsCount ?? 0,
           querySummary: ontologyQueryItem
-            ? this.formatQuerySummary(ontologyQueryItem.operator)
+            ? this.formatQuerySummary(ontologyQueryItem)
             : 'Available through the current project query',
           queryOperators: ontologyQueryItem
-            ? ontologyQueryItem.operator.map(operator => this.formatQueryOperator(operator))
+            ? [this.formatLeafOperator(ontologyQueryItem)]
             : [],
           statisticsProfiles: [],
           statisticsClinicCount: 0,
@@ -864,20 +869,15 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private formatQuerySummary(operators: QueryOperatorDTO[]): string {
-    if (!operators.length) {
-      return 'No additional query filter';
-    }
-
-    return operators.map(operator => this.formatQueryOperator(operator)).join(' | ');
+  private formatQuerySummary(leaf: Lang2Leaf): string {
+    return this.formatLeafOperator(leaf);
   }
 
-  private formatQueryOperator(operator: QueryOperatorDTO): string {
-    const value = Array.isArray(operator.value) ? operator.value.join(', ') : operator.value;
-    if (value == null || value === '') {
-      return operator.operator;
+  private formatLeafOperator(leaf: Lang2Leaf): string {
+    if (leaf.value == null || leaf.value === '') {
+      return leaf.operator;
     }
-    return `${operator.operator}: ${value}`;
+    return `${leaf.operator}: ${leaf.value}`;
   }
 
   private averageMissingRate(profiles: StatisticsColumnProfile[]): number | null {
