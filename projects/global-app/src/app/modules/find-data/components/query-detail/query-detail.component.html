@@ -50,7 +50,7 @@
           <mat-spinner mode="indeterminate" [diameter]="18"/>
         </div>
       }
-      @if (data.queryData.hasResult) {
+      @if (data.queryData.result != null) {
         <div class="query-result">
           {{ 'GRID.RESULT' | translate }}: {{ data.queryData.result }}
         </div>

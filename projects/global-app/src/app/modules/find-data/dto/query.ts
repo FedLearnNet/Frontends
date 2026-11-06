@@ -51,7 +51,7 @@ export interface QueryDTO extends BaseDto {
   name: string;
   globalUniqueId: string;
   groupId: string;
-  result: number;
+  result: number | null;
   hasResult: boolean;
 
   hasFired: boolean;

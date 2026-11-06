@@ -76,7 +76,7 @@
                 <div>
                   <dt>{{ 'GRID.RESULT' | translate }}</dt>
                   <dd>
-                    @if (query.hasResult) {
+                    @if (queryHasPatientCount(query)) {
                       {{ 'QUERY_BUILDER.PATIENT_RESULT' | translate:{count: query.result} }}
                     } @else {
                       {{ 'QUERY_BUILDER.NO_RESULT' | translate }}
@@ -208,7 +208,7 @@
                         <div>
                           <dt>{{ 'GRID.RESULT' | translate }}</dt>
                           <dd>
-                            @if (item.query.hasResult) {
+                            @if (queryHasPatientCount(item.query)) {
                               {{ 'QUERY_BUILDER.PATIENT_RESULT' | translate:{count: item.query.result} }}
                             } @else {
                               {{ 'QUERY_BUILDER.NO_RESULT' | translate }}

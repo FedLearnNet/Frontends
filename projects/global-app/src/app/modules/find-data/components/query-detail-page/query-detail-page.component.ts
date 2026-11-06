@@ -32,7 +32,7 @@ import {
 import {describeQueryLeaf, formatInterval, hydrateQueryTree, serializeQueryTree} from '@global-app/find-data/helpers/query-tree.serializer';
 import {relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
 import {isQueryTreeValid} from '@global-app/find-data/helpers/query-tree.validator';
-import {queryStatus, queryStatusColor, queryStatusKey} from '@global-app/find-data/helpers/query-status';
+import {queryHasPatientCount, queryStatus, queryStatusColor, queryStatusKey} from '@global-app/find-data/helpers/query-status';
 import {QueryService} from "@global-app/find-data/services/query.service";
 import {QueryJsonPreviewComponent} from '@global-app/find-data/components/query-json-preview/query-json-preview.component';
 import {
@@ -167,6 +167,8 @@ export class QueryDetailPageComponent implements OnInit {
       this.syncSelectedTab(fragment);
     });
   }
+
+  readonly queryHasPatientCount = queryHasPatientCount;
 
   isQueryPending(query: QueryDTO | null = this.query()): boolean {
     return !!query && queryStatus(query) === 'pending';

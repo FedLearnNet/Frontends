@@ -89,7 +89,7 @@
           @if (isXSmallScreen) {
             <span class="column-name">{{ 'GRID.RESULT' | translate }}:</span>
           }
-          <span>{{ element.result }}</span>
+          <span>{{ element.result ?? '—' }}</span>
         </td>
       </ng-container>
 

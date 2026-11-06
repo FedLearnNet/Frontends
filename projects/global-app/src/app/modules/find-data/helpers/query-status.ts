@@ -3,7 +3,10 @@ import {QueryDTO} from '@global-app/find-data/dto/query';
 
 export type QueryRunStatus = 'draft' | 'pending' | 'finished' | 'failed';
 
-type QueryStatusFields = Pick<QueryDTO, 'hasFired' | 'hasResult'> & {error?: string | null};
+type QueryStatusFields = Pick<QueryDTO, 'hasFired' | 'hasResult'> & {
+  result?: number | null;
+  error?: string | null;
+};
 
 const STATUS_COLOR: Record<QueryRunStatus, BadgeColor> = {
   draft: 'GRAY',
@@ -12,12 +15,16 @@ const STATUS_COLOR: Record<QueryRunStatus, BadgeColor> = {
   failed: 'RED',
 };
 
+export function queryHasPatientCount(query: QueryStatusFields): boolean {
+  return query.hasResult && typeof query.result === 'number' && Number.isFinite(query.result);
+}
+
 export function queryStatus(query: QueryStatusFields): QueryRunStatus {
-  if (query.error?.trim()) {
-    return 'failed';
-  }
-  if (query.hasResult) {
+  if (queryHasPatientCount(query)) {
     return 'finished';
+  }
+  if (query.error?.trim() || query.hasResult) {
+    return 'failed';
   }
   if (query.hasFired) {
     return 'pending';
