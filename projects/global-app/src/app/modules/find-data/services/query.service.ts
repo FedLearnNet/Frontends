@@ -25,8 +25,12 @@ export class QueryService {
       );
   }
 
-  updateQuery(query: QueryDTO): Observable<QueryDTO> {
-    return this.apiService.put<QueryDTO>(`${this.getBaseUrl()}/${query.id}`, query)
+  updateQuery(query: Pick<QueryDTO, 'id' | 'name' | 'description' | 'query'>): Observable<QueryDTO> {
+    return this.apiService.put<QueryDTO>(`${this.getBaseUrl()}/${query.id}`, {
+      name: query.name,
+      description: query.description,
+      query: query.query,
+    })
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_UPDATE', {name: this.translate.instant('GRID.QUERY').toLowerCase()})))
