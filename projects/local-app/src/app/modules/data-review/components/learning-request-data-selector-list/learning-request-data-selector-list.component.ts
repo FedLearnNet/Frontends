@@ -44,6 +44,7 @@ import {
 import {TrainingReviewActions} from "@local-app/data-review/store/training-review.actions";
 import {TrainingUsedDataComponent} from "../../../training/components/training-used-data/training-used-data.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {TrainingService} from "@local-app/data-review/services/training.service";
 import {MatProgressBar} from "@angular/material/progress-bar";
 
@@ -66,10 +67,14 @@ interface FilterParams {
   cohorts: string[];
 }
 
-export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
+/**
+ * Returns the i18n key for the aggregator-location label, not the rendered text - the same
+ * keys back the create-federated-experiment toggle in global-app, so wording only lives in one place.
+ */
+export function getAggregatorLocationKey(platformIsCoordinator?: boolean): string {
   return platformIsCoordinator
-    ? 'The FL-Net Platform connected to this clinic'
-    : 'Another participating client (selected randomly)';
+    ? 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM'
+    : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
 @Component({
@@ -99,6 +104,7 @@ export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
     SkeletonLoaderComponent,
     TrainingUsedDataComponent,
     BadgeComponent,
+    HintCardComponent,
     MatProgressBar
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
@@ -116,7 +122,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   readonly data = inject<LearningRequestDataSelectorData>(MAT_DIALOG_DATA);
   readonly project: ProjectDetailDto = this.data.request.project;
-  readonly aggregatorLocation = getAggregatorLocation(this.project.platformIsCoordinator);
+  readonly aggregatorLocationKey = getAggregatorLocationKey(this.data.request.platformIsCoordinator);
 
   protected readonly TrainingStatusPending = FederatedLearningRequestStatus.PENDING;
 

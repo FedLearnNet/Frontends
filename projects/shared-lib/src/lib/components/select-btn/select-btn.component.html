@@ -8,7 +8,11 @@
   [attr.aria-pressed]="selected()"
   (click)="select()">
   <span class="select-btn__icon" aria-hidden="true">
-    <mat-icon>{{ icon() }}</mat-icon>
+    @if (iconImage()) {
+      <img class="select-btn__icon-image" [src]="iconImage()" alt=""/>
+    } @else {
+      <mat-icon>{{ icon() }}</mat-icon>
+    }
   </span>
 
   <span class="select-btn__copy">
