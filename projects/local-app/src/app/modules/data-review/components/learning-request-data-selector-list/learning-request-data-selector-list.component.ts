@@ -44,6 +44,7 @@ import {
 import {TrainingReviewActions} from "@local-app/data-review/store/training-review.actions";
 import {TrainingUsedDataComponent} from "../../../training/components/training-used-data/training-used-data.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {TrainingService} from "@local-app/data-review/services/training.service";
 import {MatProgressBar} from "@angular/material/progress-bar";
 
@@ -68,12 +69,12 @@ interface FilterParams {
 
 /**
  * Returns the i18n key for the aggregator-location label, not the rendered text - the same
- * keys back the create/edit-project toggle in global-app, so wording only lives in one place.
+ * keys back the create-federated-experiment toggle in global-app, so wording only lives in one place.
  */
 export function getAggregatorLocationKey(platformIsCoordinator?: boolean): string {
   return platformIsCoordinator
-    ? 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_PLATFORM'
-    : 'DIALOG.CREATE_NEW_PROJECT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
+    ? 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM'
+    : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
 @Component({
@@ -103,6 +104,7 @@ export function getAggregatorLocationKey(platformIsCoordinator?: boolean): strin
     SkeletonLoaderComponent,
     TrainingUsedDataComponent,
     BadgeComponent,
+    HintCardComponent,
     MatProgressBar
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
