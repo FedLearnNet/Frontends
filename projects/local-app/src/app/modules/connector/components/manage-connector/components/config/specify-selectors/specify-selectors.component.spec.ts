@@ -149,8 +149,8 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
       mergeConfig,
     }));
     previewService.previewPivot.and.returnValue(of([
-      [{patientId: 1, glucose: 123}],
-      [{patientId: 1, insulin: 8}],
+      {rows: [{patientId: 1, glucose: 123}], columns: ['patientId', 'glucose']},
+      {rows: [{patientId: 1, insulin: 8}], columns: ['patientId', 'insulin']},
     ]));
     dialog.open.and.returnValue({
       afterClosed: () => of({
@@ -174,7 +174,7 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
 
   it('reapplies saved pivot configuration after header preview data is reloaded', () => {
     previewService.previewPivot.and.returnValue(of([
-      [{patientId: 1, icd_A: true, icd_B: false}],
+      {rows: [{patientId: 1, icd_A: true, icd_B: false}], columns: ['patientId', 'icd_A', 'icd_B']},
     ]));
 
     createComponent(createConfig(
@@ -194,5 +194,26 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
     expect(component.sheets[0].info.json).toEqual([
       {patientId: 1, icd_A: true, icd_B: false},
     ]);
+  });
+
+  it('shows the merged columns in the order the preview sends, also for number-like names', () => {
+    const mergeConfig: SheetMergeResultDTO = {
+      uidColumn: 'patientId',
+      sheetUidMapping: {Sheet1: 'patientId', Sheet2: 'patientId'},
+      commonUidColumnName: 'patientId',
+    };
+    // A parsed row lists "2019" first; the preview's column list is the order to show.
+    previewService.previewPivot.and.returnValue(of([
+      {rows: [{patientId: 1, '2019': 5, sex: 'f'}], columns: ['patientId', 'sex', '2019']},
+    ]));
+
+    createComponent(createConfig({
+      Sheet1: sheet('Sheet1', ['patientId', '2019']),
+      Sheet2: sheet('Sheet2', ['patientId', 'sex']),
+    }, {mergeConfig}));
+
+    expect(previewService.previewPivot).toHaveBeenCalled();
+    expect(component.sheets[0].info.columns).toEqual(['patientId', 'sex', '2019']);
+    expect(component.sheets[0].info.json).toEqual([{patientId: 1, '2019': 5, sex: 'f'}]);
   });
 });

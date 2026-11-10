@@ -5,7 +5,7 @@ import {ApiService} from '@shared-lib/services/api.service';
 import {ApiErrorSnackbarService} from '@shared-lib/services/api-error-snackbar.service';
 import {TranslateService} from '@ngx-translate/core';
 import {SseClient} from 'ngx-sse-client';
-import {ConnectorPreviewService} from './connector-preview.service';
+import {ConnectorPreviewService, PreviewResult, PreviewTable} from './connector-preview.service';
 import {ConnectorConfigDTO} from '../dto/preview';
 import {ConnectorDTO} from '../dto/connector';
 import {ConnectorCard} from '../models/connector-card';
@@ -65,17 +65,36 @@ describe('ConnectorPreviewService', () => {
       ]
     }));
 
-    let result: any[][] | undefined;
-    service.previewPivot(request).subscribe(rows => result = rows);
+    let result: PreviewTable[] | undefined;
+    service.previewPivot(request).subscribe(tables => result = tables);
 
     expect(apiService.post).toHaveBeenCalled();
     const [url, body] = apiService.post.calls.mostRecent().args;
     expect(url).toMatch(/\/connectors\/preview\/pivot$/);
     expect(body).toEqual(request);
+    // Without a column order from the backend, the rows' keys give it.
     expect(result).toEqual([
-      [{patientId: 1, glucose: 123}],
-      [{patientId: 1, insulin: 8}],
+      {rows: [{patientId: 1, glucose: 123}], columns: ['patientId', 'glucose']},
+      {rows: [{patientId: 1, insulin: 8}], columns: ['patientId', 'insulin']},
     ]);
+  });
+
+  it('keeps the column order the backend sends, also for number-like column names', () => {
+    apiService.post.and.returnValue(of({
+      jsons: [JSON.stringify([{patient_id: 'p1', '2019': 5, sex: 'f'}])],
+      columns: [['patient_id', '2019', 'sex']],
+    }));
+
+    let pivot: PreviewTable[] | undefined;
+    service.previewPivot({} as ConnectorConfigDTO).subscribe(tables => pivot = tables);
+    let preview: PreviewResult | undefined;
+    service.preview([{id: 'step-1'}] as unknown as ConnectorCard[], {} as ConnectorDTO, new Map(), 7)
+      .subscribe(result => preview = result);
+
+    // A parsed row lists "2019" first, which is why the order travels next to the rows.
+    expect(Object.keys(pivot![0].rows[0])).toEqual(['2019', 'patient_id', 'sex']);
+    expect(pivot![0].columns).toEqual(['patient_id', '2019', 'sex']);
+    expect(preview!.columns.get('step-1')).toEqual(['patient_id', '2019', 'sex']);
   });
 
   it('includes pivot configuration in the normal preview request', () => {

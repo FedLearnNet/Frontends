@@ -67,6 +67,37 @@ describe('ManageConnectorComponent wizard steps', () => {
     expect(component.cards.map(card => card.index)).toEqual([0, 1, 2, 3]);
   });
 
+  it('gives the mapper the Specify Headers columns with the merge UID column first', () => {
+    component._config = {
+      mergeConfig: {uidColumn: 'patient_id', sheetUidMapping: {}, commonUidColumnName: 'Patient ID'},
+      fileInfo: {
+        Merged: {
+          columns: ['age', 'Patient ID', 'weight'],
+          renamedColumns: ['age', 'Patient ID', 'weight'],
+          deletedColumns: [false, false, false],
+          json: '[]',
+        },
+      },
+    } as unknown as ConnectorDTO;
+    component.transformedData = new Map();
+
+    expect(component.getMapperColumns()).toEqual(['Patient ID', 'age', 'weight']);
+  });
+
+  it('takes the transformed columns in the order the preview sent, also for number-like names', () => {
+    const step = {index: component.cards.length, title: 'step', configured: true, optional: true,
+      step: ConnectorStepConfigs.TRANSFORM, type: 'TRANSFORM', id: 't1', previewRunning: false} as ConnectorCard;
+    component._config = {} as ConnectorDTO;
+    component.cards = [...component.cards, step];
+    component.currentStep = step;
+    // A parsed row lists "2019" first; the preview's column list keeps the real order.
+    component.transformedData = new Map([['t1', [{patient_id: 'p1', '2019': 5, bmi: 22}]]]);
+    component.transformedColumns = new Map([['t1', ['patient_id', '2019', 'bmi']]]);
+
+    expect(component.getLatestColumns()).toEqual(['patient_id', '2019', 'bmi']);
+    expect(component.getCurrentStepColumns()).toEqual(['patient_id', '2019', 'bmi']);
+  });
+
   function configWithFileInfo(): ConnectorDTO {
     return {
       inputConfig: {
