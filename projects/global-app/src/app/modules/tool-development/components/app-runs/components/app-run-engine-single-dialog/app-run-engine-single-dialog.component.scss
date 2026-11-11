@@ -1,0 +1,19 @@
+.single-run {
+  &__intro {
+    margin-top: 0;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__section {
+    margin-top: 16px;
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+  }
+
+  &__field {
+    width: 100%;
+  }
+}

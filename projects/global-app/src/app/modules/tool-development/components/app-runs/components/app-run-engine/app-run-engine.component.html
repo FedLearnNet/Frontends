@@ -1,0 +1,133 @@
+<section class="engine-intro">
+  <div class="engine-intro__title">
+    <h3>Built image v{{ app().latestVersion }}</h3>
+    @if (hasImage()) {
+      <lib-badge text="Image ready" iconName="check_circle" color="GREEN" size="X-SMALL"/>
+    } @else if (app().buildStatus === PipelineStatus.RUNNING) {
+      <lib-badge text="Build running" iconName="autorenew" color="BLUE" size="X-SMALL" animate="PULSE"/>
+    } @else if (app().buildStatus === PipelineStatus.PENDING) {
+      <lib-badge text="Build planned" iconName="schedule" color="GRAY" size="X-SMALL"/>
+    } @else {
+      <lib-badge text="No image yet" iconName="warning" color="ORANGE" size="X-SMALL"/>
+    }
+  </div>
+  <p class="engine-intro__text">
+    Run the image the pipeline built, on the platform instead of your machine.
+    @if (!hasImage()) {
+      These options become available once a build of this version succeeded.
+    }
+  </p>
+</section>
+
+<div class="engine-cards">
+  <div class="engine-card">
+    <mat-icon class="engine-card__icon">science</mat-icon>
+    <div class="engine-card__body">
+      <h4>Self-test</h4>
+      <p>The tool generates input from its own schema and runs once. Its exit code decides pass or fail.</p>
+    </div>
+    <span [matTooltip]="selfTestHint()">
+      <button mat-flat-button [disabled]="!!selfTestHint()" (click)="runSelfTest()">Run self-test</button>
+    </span>
+  </div>
+
+  <div class="engine-card">
+    <mat-icon class="engine-card__icon">upload_file</mat-icon>
+    <div class="engine-card__body">
+      <h4>Run once with data</h4>
+      <p>Pick files from your file store; the container serves this one test run and stops.</p>
+    </div>
+    <span [matTooltip]="singleRunHint()">
+      <button mat-stroked-button [disabled]="!!singleRunHint()" (click)="runOnceWithData()">Choose data</button>
+    </span>
+  </div>
+
+  <div class="engine-card">
+    <mat-icon class="engine-card__icon">deployed_code</mat-icon>
+    <div class="engine-card__body">
+      <h4>Use as engine</h4>
+      <p>Connects like your local engine, so test runs, experiments and federated test runs use the built image.</p>
+    </div>
+    @if (connectingEngine(); as engine) {
+      <button mat-stroked-button (click)="stop(engine)">Stop</button>
+    } @else {
+      <span [matTooltip]="engineHint()">
+        <button mat-stroked-button [disabled]="!!engineHint()" (click)="startEngine()">Start</button>
+      </span>
+    }
+  </div>
+</div>
+
+<h4 class="engine-history-title">History</h4>
+@if (engines().length) {
+  <div class="engine-table">
+    <table mat-table [dataSource]="engines()">
+      <ng-container matColumnDef="mode">
+        <th mat-header-cell *matHeaderCellDef>Type</th>
+        <td mat-cell *matCellDef="let engine">
+          <span class="engine-mode">
+            <mat-icon>{{ modeIconOf(engine) }}</mat-icon>
+            {{ modeLabelOf(engine) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="version">
+        <th mat-header-cell *matHeaderCellDef>Version</th>
+        <td mat-cell *matCellDef="let engine">v{{ engine.federatedAppVersionName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let engine">
+          <lib-status-badge size="SMALL" [type]="runStatusToBadgeStatus(engine.status)"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Started</th>
+        <td mat-cell *matCellDef="let engine">
+          <lib-time-badge color="GRAY" size="X-SMALL" [date]="engine.createdAt"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef>Duration</th>
+        <td mat-cell *matCellDef="let engine">
+          <lib-time-badge color="GRAY" size="X-SMALL" [date]="engine.startedAt ?? engine.createdAt" [dateTo]="engine.finishedAt"
+                          [calcDuration]="true"/>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="result">
+        <th mat-header-cell *matHeaderCellDef>Result</th>
+        <td mat-cell *matCellDef="let engine">
+          <span class="engine-result" [matTooltip]="resultOf(engine)">{{ resultOf(engine) }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let engine" class="engine-actions-cell">
+          @if (isActive(engine)) {
+            <button mat-icon-button matTooltip="Stop and remove the container" (click)="stop(engine)">
+              <mat-icon>stop_circle</mat-icon>
+            </button>
+          }
+          <button mat-icon-button matTooltip="Console output" (click)="openLogs(engine)">
+            <mat-icon>article</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.engine-row--active]="isActive(row)"></tr>
+    </table>
+  </div>
+} @else {
+  <lib-empty-state title="No runs of the built image yet"
+                   subtitle="Start a self-test, a single run or the engine above."
+                   icon="deployed_code"
+                   size="SMALL"
+                   [compact]="true"/>
+}

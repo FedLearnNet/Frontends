@@ -1,0 +1,209 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [title]="title()"
+  description="Run with its steps. Select a step to inspect its attempts.">
+  <button suffix mat-raised-button type="button" (click)="run.reload()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="run.isLoading() && !run.hasValue()"
+  [skeletonOnLoading]="true"
+  [error]="run.error()">
+
+  @if (run.value(); as run) {
+    <lib-status-title [type]="runStatusToBadgeStatus(run.status)">
+      Run #{{ run.id }}
+    </lib-status-title>
+
+    @if (run.failure?.message) {
+      <lib-info-card class="section" type="ERROR" variant="BANNER"
+                     [title]="run.failure?.category + ' · ' + run.failure?.type"
+                     [subtitle]="run.failure?.message ?? undefined"/>
+    }
+
+    <lib-info-grid class="section" title="Meta-Data">
+      <lib-info-item title="Public ID">
+        <lib-badge color="GRAY" [uppercase]="true" [wrap]="true" [text]="run.publicId"/>
+      </lib-info-item>
+      <lib-info-item title="Purpose">
+        <lib-badge color="BLUE" [uppercase]="true" [text]="run.purpose"/>
+      </lib-info-item>
+      <lib-info-item title="Mode">
+        <lib-badge color="BLUE" [uppercase]="true" [text]="run.mode"/>
+      </lib-info-item>
+      <lib-info-item title="Location">
+        <lib-badge color="BLUE" [uppercase]="true" [text]="run.location"/>
+      </lib-info-item>
+      <lib-info-item title="Owner">
+        <lib-badge color="GRAY" [uppercase]="true" [wrap]="true" [text]="run.keycloakId || 'N/A'"/>
+      </lib-info-item>
+      <lib-info-item title="Steps">
+        <lib-badge color="GRAY" [text]="'' + run.steps.length"/>
+      </lib-info-item>
+      <!-- Clinic -->
+      @if (run.cohortId != null) {
+        <lib-info-item title="Cohort">
+          <lib-badge color="GRAY" [text]="'#' + run.cohortId"/>
+        </lib-info-item>
+      }
+      @if (run.toolType) {
+        <lib-info-item title="Tool type">
+          <lib-badge color="GRAY" [uppercase]="true" [text]="run.toolType"/>
+        </lib-info-item>
+      }
+      @if (run.connectorRunId != null) {
+        <lib-info-item title="Connector run">
+          <lib-badge color="GRAY" [text]="'#' + run.connectorRunId"/>
+        </lib-info-item>
+      }
+      @if (run.participantId) {
+        <lib-info-item title="Participant">
+          <lib-badge color="GRAY" [uppercase]="true" [wrap]="true" [text]="run.participantId"/>
+        </lib-info-item>
+      }
+      <!-- Platform -->
+      @if (run.experimentId != null) {
+        <lib-info-item title="Experiment">
+          <lib-badge color="GRAY" [text]="'#' + run.experimentId"/>
+        </lib-info-item>
+      }
+      @if (run.federatedAppVersionId != null) {
+        <lib-info-item title="App version">
+          <lib-badge color="GRAY" [uppercase]="true"
+                     [text]="'#' + run.federatedAppVersionId + (run.federatedAppVersionName ? ' · v' + run.federatedAppVersionName : '')"/>
+        </lib-info-item>
+      }
+      @if (run.testEngineId != null) {
+        <lib-info-item title="Test engine">
+          <lib-badge color="GRAY" [uppercase]="true"
+                     [text]="'#' + run.testEngineId + (run.testEngineMode ? ' · ' + run.testEngineMode : '')"/>
+        </lib-info-item>
+      }
+      @if (run.engineMode) {
+        <lib-info-item title="Engine mode">
+          <lib-badge color="GRAY" [uppercase]="true" [text]="run.engineMode"/>
+        </lib-info-item>
+      }
+    </lib-info-grid>
+
+    <lib-info-grid class="section" title="Timing">
+      <lib-info-item title="Created">
+        <lib-time-badge [date]="run.createdAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Started">
+        <lib-time-badge [date]="run.startedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Finished">
+        <lib-time-badge [date]="run.finishedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Duration">
+        <lib-time-badge [date]="run.startedAt" [dateTo]="run.finishedAt" [calcDuration]="true" color="GRAY"/>
+      </lib-info-item>
+    </lib-info-grid>
+
+    <lib-info-grid class="section" [title]="'Steps (' + run.steps.length + ')'" [disableFlex]="true">
+      <div class="table-wrap">
+        <table mat-table [dataSource]="run.steps" class="table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let step">#{{ step.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let step" [matTooltip]="step.publicId">{{ stepName(step) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="node">
+            <th mat-header-cell *matHeaderCellDef>Workflow node</th>
+            <td mat-cell *matCellDef="let step">{{ step.workflowNodeId ?? '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let step">
+              <lib-status-badge [text]="step.status" [type]="runStatusToBadgeStatus(step.status)" size="SMALL"/>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="attempts">
+            <th mat-header-cell *matHeaderCellDef>Attempts</th>
+            <td mat-cell *matCellDef="let step">
+              <lib-badge color="GRAY" [text]="'' + (step.attempts?.length ?? 0)"/>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="selected">
+            <th mat-header-cell *matHeaderCellDef>Shown attempt</th>
+            <td mat-cell *matCellDef="let step">{{ selectedTrial(step) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="started">
+            <th mat-header-cell *matHeaderCellDef>Started</th>
+            <td mat-cell *matCellDef="let step">
+              @if (step.startedAt) {
+                <lib-time-badge [date]="step.startedAt" format="SHORT" color="GRAY" size="SMALL"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Duration</th>
+            <td mat-cell *matCellDef="let step">
+              @if (step.startedAt) {
+                <lib-time-badge [date]="step.startedAt" [dateTo]="step.finishedAt" [calcDuration]="true"
+                                color="GRAY" size="SMALL"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="failure">
+            <th mat-header-cell *matHeaderCellDef>Failure</th>
+            <td mat-cell *matCellDef="let step">
+              @if (step.failure?.message) {
+                <lib-badge color="RED" iconName="error" [uppercase]="true"
+                           [text]="step.failure.category || step.failure.type || 'ERROR'"
+                           [matTooltip]="(step.failure.type ? step.failure.type + ': ' : '') + step.failure.message"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="stepColumns"></tr>
+          <tr mat-row class="clickable" *matRowDef="let row; columns: stepColumns" (click)="open(row)"></tr>
+        </table>
+      </div>
+      @if (!run.steps.length) {
+        <div class="empty-state">The run has no steps yet.</div>
+      }
+    </lib-info-grid>
+
+    @if (run.participants?.length) {
+      <lib-info-grid class="section" [title]="'Participants (' + run.participants!.length + ')'">
+        @for (participant of run.participants!; track participant.id) {
+          <lib-info-item [title]="participant.coordinator ? 'Coordinator' : 'Participant'">
+            <lib-federated-client-type-badge [clientType]="$any(participant.role ?? 'CLIENT')"
+                                             [clientName]="participant.participantId"/>
+            @if (participant.status) {
+              <lib-status-badge [text]="participant.status" [type]="runStatusToBadgeStatus(participant.status)"
+                                size="SMALL"/>
+            }
+            @if (participant.currentNodeId) {
+              <lib-badge color="GRAY" [uppercase]="true"
+                         [text]="'Node ' + participant.currentNodeId + (participant.stepStatus ? ' · ' + participant.stepStatus : '')"/>
+            }
+          </lib-info-item>
+        }
+      </lib-info-grid>
+    }
+  }
+</lib-page-wrapper>

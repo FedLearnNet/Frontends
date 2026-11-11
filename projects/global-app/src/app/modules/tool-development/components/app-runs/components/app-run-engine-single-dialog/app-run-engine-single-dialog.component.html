@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Run v{{ data.app.latestVersion }} once with data</h2>
+<mat-dialog-content class="single-run">
+  <p class="single-run__intro">
+    The platform starts the built image of {{ data.app.name }}, hands it this test run and stops it once the run ended.
+    The run shows up in the Test Runs tab.
+  </p>
+
+  <section class="single-run__section">
+    <h3>Inputs</h3>
+    @if (!files().length && inputConfigs.length) {
+      <lib-hint-card>Your file store is empty. Upload files there first.</lib-hint-card>
+    }
+    @for (config of inputConfigs; track config.name) {
+      <mat-form-field class="single-run__field">
+        <mat-label>{{ config.name }}</mat-label>
+        <mat-select [value]="selected()[variableOf(config)]" (valueChange)="select(config, $event)"
+                    [required]="config.required">
+          @if (!config.required) {
+            <mat-option [value]="undefined">None</mat-option>
+          }
+          @for (file of files(); track file.id) {
+            <mat-option [value]="file">{{ file.fileName }} · {{ file.size | bytes }}</mat-option>
+          }
+        </mat-select>
+        @if (config.description) {
+          <mat-hint>{{ config.description }}</mat-hint>
+        }
+      </mat-form-field>
+    } @empty {
+      <lib-hint-card>This tool has no inputs.</lib-hint-card>
+    }
+  </section>
+
+  <section class="single-run__section">
+    <h3>Hyperparameters</h3>
+    <lib-app-run-hyperparameter [app]="data.app"
+                                (hyperParamsChange)="hyperParams.set($event)"
+                                (formsValid)="hyperParamsValid.set($event)"/>
+  </section>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <span [matTooltip]="runHint()">
+    <button mat-flat-button [disabled]="!!runHint()" (click)="start()">
+      {{ starting() ? 'Starting…' : 'Run' }}
+    </button>
+  </span>
+</mat-dialog-actions>
