@@ -50,6 +50,7 @@ export class AppRunHyperparameterComponent {
   hyperParams = model<{ [key: string]: any }>({});
   allowMultiple = input<boolean>(false);
   mode = input<Mode>('LIST');
+  layoutColumns = input<1 | 2 | 3 | 4>(1);
   columns = input<string[] | undefined>(undefined);
 
   multiHyperParamsChanged = output<{ [key: string]: any[] }>();

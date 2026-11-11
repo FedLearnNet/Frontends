@@ -1,14 +1,16 @@
 @if (app() || version()) {
   @if (mode() === 'LIST') {
-    @for (param of getHyperParams(); track param) {
-      <lib-app-hyper-param-input class="full-width"
-                                 [hyperparam]="param"
-                                 [value]="getHyperParamValue(param)"
-                                 [allowMultiple]="allowMultiple()"
-                                 (valuesChanged)="emitMultiHyperParamsChanged(param, $event)"
-                                 (validChanged)="validateForms(param, $event)"
-                                 (valueChanged)="emitHyperParamsChanged(param, $event)"/>
-    }
+    <div class="parameter-grid" [class]="'columns-' + layoutColumns()">
+      @for (param of getHyperParams(); track param) {
+        <lib-app-hyper-param-input class="full-width"
+                                   [hyperparam]="param"
+                                   [value]="getHyperParamValue(param)"
+                                   [allowMultiple]="allowMultiple()"
+                                   (valuesChanged)="emitMultiHyperParamsChanged(param, $event)"
+                                   (validChanged)="validateForms(param, $event)"
+                                   (valueChanged)="emitHyperParamsChanged(param, $event)"/>
+      }
+    </div>
   }
   @if (mode() === 'TABLE') {
     <mat-table [dataSource]="getHyperParams()">

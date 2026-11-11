@@ -182,12 +182,15 @@ export class AppRunInputComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    const data = this.inputs();
-    this.getInputs().forEach(i => {
-      data[this.getInputName(i)] = this.getInputValueWorkflowFiles(i);
-    });
-    this.inputs.set(data);
-    this.inputChanged.emit(data);
+    const data = {...this.inputs()};
+    if (this.workflowFiles()?.length) {
+      this.getInputs().forEach(i => {
+        const key = this.getInputName(i);
+        data[key] ??= this.getInputValueWorkflowFiles(i);
+      });
+      this.inputs.set(data);
+      this.inputChanged.emit(data);
+    }
 
     this.fileValidateTrigger.update(v => v + 1);
   }
@@ -228,9 +231,12 @@ export class AppRunInputComponent implements OnInit, AfterViewInit {
 
   private createDynamicHyperparams() {
     if (this.app() || this.version()) {
-      const data = this.inputs();
+      const data = {...this.inputs()};
       this.getInputs().forEach(inp => {
-        data[this.getInputName(inp)] = undefined;
+        const key = this.getInputName(inp);
+        if (!(key in data)) {
+          data[key] = undefined;
+        }
       });
       this.inputs.set(data);
       this.inputChanged.emit(this.inputs());
@@ -274,7 +280,7 @@ export class AppRunInputComponent implements OnInit, AfterViewInit {
   }
 
   uploadFile(files: Array<any>, input: ToolInputConfigDTO): void {
-    if (!this.directUploadToWorkflow() && files.length === 0) return;
+    if (!this.directUploadToWorkflow() || files.length === 0) return;
 
     const file = files?.[0];
     if (!file) return;
