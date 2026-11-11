@@ -12,6 +12,7 @@ export enum ExecutionPurpose {
   TRAINING = "TRAINING",
   PROCESSING = "PROCESSING",
   TEST = "TEST",
+  TEST_HOSTING = "TEST_HOSTING",
 }
 
 export enum ExecutionMode {
@@ -115,6 +116,8 @@ export interface BaseExecutionAttemptDTO extends BaseDto {
   scoreMetric?: RunMessageMetricDTO | null;
   status: RunStatusTypes;
   containerId?: string | null;
+  // Set once its container exited
+  exitCode?: number | null;
   progress?: number | null;
   startedAt?: Date | null;
   finishedAt?: Date | null;

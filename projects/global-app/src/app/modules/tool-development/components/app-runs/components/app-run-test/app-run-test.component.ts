@@ -18,9 +18,11 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 
+import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine-badge.component";
 @Component({
   selector: 'app-app-run-test',
   imports: [
+    AppRunEngineBadgeComponent,
     CommonModule,
     MatButtonModule,
     MatTableModule,
@@ -43,7 +45,7 @@ export class AppRunTestComponent implements OnInit {
   readonly appRunning = input<boolean>(false);
   readonly datafiles = input<string[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'error', 'startTime', 'appVersion'];
+  displayedColumns: string[] = ['position', 'status', 'engine', 'error', 'startTime', 'appVersion'];
   dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {

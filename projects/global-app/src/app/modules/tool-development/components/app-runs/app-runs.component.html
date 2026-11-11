@@ -1,5 +1,10 @@
 <div class="app-runs">
   <mat-tab-group>
+    @if (app(); as app) {
+      <mat-tab [label]="('MENU.BUILT_IMAGE' | translate)">
+        <app-app-run-engine [app]="app" [appRunning]="appRunning()"/>
+      </mat-tab>
+    }
     @if (supportsTraining() && !app()?.supportsFederatedLearning) {
       <mat-tab [label]="('MENU.LOCAL_EXPERIMENTS' | translate)">
         <app-experiment [app]="app()"

@@ -15,9 +15,11 @@ import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 
 
+import {AppRunEngineBadgeComponent} from "../app-runs/components/app-run-engine-badge/app-run-engine-badge.component";
 @Component({
   selector: 'app-experiment',
   imports: [CommonModule,
+    AppRunEngineBadgeComponent,
     MatTableModule,
     MatProgressSpinnerModule,
     RouterModule, TranslatePipe, StatusBadgeComponent, BtnComponent,
@@ -35,7 +37,7 @@ export class ExperimentComponent implements OnInit {
   readonly appRunning = input<boolean>(false);
   readonly datafiles = input<string[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'name', 'startTime', 'lastUpdate', 'appVersion'];
+  displayedColumns: string[] = ['position', 'status', 'engine', 'name', 'startTime', 'lastUpdate', 'appVersion'];
   dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {
@@ -72,6 +74,10 @@ export class ExperimentComponent implements OnInit {
 
   addNewExperiment(): void {
     const dialogRef = this.dialog.open(ExperimentCreateDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
       data: {
         app: this.app(),
         datafiles: this.datafiles()

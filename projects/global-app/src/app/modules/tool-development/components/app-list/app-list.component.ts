@@ -16,6 +16,7 @@ import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {PublishStatus} from "@shared-lib/modules/store/dto/enum";
+import {PipelineStatus} from "../../../pipeline/dto/pipeline";
 
 @Component({
   selector: 'app-app-list',
@@ -73,6 +74,8 @@ export class AppListComponent implements OnInit, AfterViewInit {
     }
   }
 
+
+  protected readonly PipelineStatus = PipelineStatus;
 
   imageWarning(app: AppDetailDto): string | undefined {
     return app.publishStatus === PublishStatus.PUBLISHED && !app.hasImage ? 'Published, but no image is available' : undefined;

@@ -60,8 +60,8 @@ export class AppAppRunFederatedTestDetailParticipantDialogComponent implements O
         files: [],
       },
       outputData: {
-        data: {},
-        files: [],
+        data: (participant.outputData ?? {}) as { [key: string]: string },
+        files: (participant.outputFiles ?? []).map(output => output.file),
       },
     };
   });

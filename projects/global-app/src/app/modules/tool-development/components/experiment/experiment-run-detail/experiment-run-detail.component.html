@@ -8,6 +8,9 @@
         <lib-run-hyper-params [hyperParams]="$any(run.params ?? {})"></lib-run-hyper-params>
       </mat-tab>
       <mat-tab label="Output">
+        @for (output of run.outputFiles ?? []; track output.id) {
+          <lib-file-detail-card [file]="output.file"/>
+        }
         <lib-app-run-output [appId]="app!.id"
                             [runId]="run.id"
                             [runType]="getRunType()"

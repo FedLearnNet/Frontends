@@ -26,6 +26,8 @@ import {
   ModelVersionSubDetailComponent
 } from "@global-app/model-store/components/model-version-sub-detail/model-version-sub-detail.component";
 
+import {FileDetailCardComponent} from "@shared-lib/modules/files/components/file-detail-card/file-detail-card.component";
+
 @Component({
   selector: 'app-experiment-run-detail',
   imports: [
@@ -35,6 +37,7 @@ import {
     MatTabsModule,
     ExperimentHeaderComponent,
     AppRunOutputComponent,
+    FileDetailCardComponent,
     SkeletonLoaderComponent,
     RunHyperParamsComponent,
     RunPerformanceComponent,

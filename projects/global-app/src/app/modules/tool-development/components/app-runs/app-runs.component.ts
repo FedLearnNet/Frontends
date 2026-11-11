@@ -17,6 +17,7 @@ import {PerformanceDTO} from "../../dto/performance";
 import {MatIcon} from "@angular/material/icon";
 import {StartAppWarningComponent} from "../start-app-warning/start-app-warning.component";
 import {TOOL_TYPE_CONFIG_DEFAULT_OPTIONS, TOOL_TYPE_CONFIG_MAP} from "../../model/tool-config-type";
+import {AppRunEngineComponent} from "./components/app-run-engine/app-run-engine.component";
 
 
 @Component({
@@ -31,7 +32,8 @@ import {TOOL_TYPE_CONFIG_DEFAULT_OPTIONS, TOOL_TYPE_CONFIG_MAP} from "../../mode
     AppDetailMonitorComponent,
     MatIcon,
     MatTabLabel,
-    StartAppWarningComponent
+    StartAppWarningComponent,
+    AppRunEngineComponent
   ],
   templateUrl: './app-runs.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

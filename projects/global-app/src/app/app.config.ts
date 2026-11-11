@@ -18,6 +18,8 @@ import {featureKey as pipelineFeatureKey, pipelineReducer} from "./modules/pipel
 import {featureKey as fileKey, filesReducer} from "@shared-lib/modules/files/store/file.reducer";
 import {FileEffects} from "@shared-lib/modules/files/store/file.effects";
 import {PipelineEffects} from "./modules/pipeline/service/pipeline.effects";
+import {featureKey as testEngineKey, testEngineReducer} from "./modules/tool-development/store/test-engine.reducer";
+import {TestEngineEffects} from "./modules/tool-development/store/test-engine.effects";
 import {WorkflowEffects} from "@shared-lib/modules/workflow/store/workflow.effects";
 import {featureKey as workflowKey, workflowReducer} from "@shared-lib/modules/workflow/store/workflow.reducer";
 import {featureKey as storeKey, storeReducer} from "@shared-lib/modules/store/store/store.reducer";
@@ -70,6 +72,7 @@ export const appConfig: ApplicationConfig = {
       [projectKey]: projectReducer,
       [auditKey]: auditReducer,
       [orchKey]: orchReducer,
+      [testEngineKey]: testEngineReducer,
     }),
     provideState(dataAnalysisFeature),
     provideEffects([
@@ -83,7 +86,8 @@ export const appConfig: ApplicationConfig = {
       WorkflowChatEffects,
       AuditEffects,
       DataAnalysisEffects,
-      OrchEffects]),
+      OrchEffects,
+      TestEngineEffects]),
     provideStoreDevtools({maxAge: 25, logOnly: !isDevMode()}),
     provideRouterStore(),
     provideAnimationsAsync(),

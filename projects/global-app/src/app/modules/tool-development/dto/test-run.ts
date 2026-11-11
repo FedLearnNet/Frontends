@@ -1,3 +1,4 @@
+import {TestEngineMode} from "./test-engine";
 import {BaseDto} from "@shared-lib/base/base-dto";
 import {
   BaseDetailResultDTO,
@@ -68,6 +69,11 @@ export interface TestRunDTO extends ExecutionRunDTO<TestAttemptDTO> {
   federatedAppId: number;
   federatedAppVersionId: number;
   federatedAppVersionName: string;
+  // The test engine container that served the run; none for the developer's local engine
+  testEngineId?: number | null;
+  testEngineMode?: TestEngineMode | null;
+  // What the container of a TEST_HOSTING run is for
+  engineMode?: TestEngineMode | null;
 }
 
 export type TestRunStepDTO = ExecutionRunStepDTO<TestAttemptDTO>;
@@ -77,6 +83,8 @@ export interface TestRunCreateDTO {
   federatedAppVersionId: number;
   hyperParams: { [key: string]: string };
   inputFilePaths?: { [key: string]: string };
+  // Input values, e.g. download links of file store files for a test engine container
+  inputs?: { [key: string]: unknown };
   projectId?: number;
 }
 

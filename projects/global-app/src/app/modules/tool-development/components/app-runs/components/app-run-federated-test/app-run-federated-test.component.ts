@@ -21,9 +21,11 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
+import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine-badge.component";
 @Component({
   selector: 'app-app-run-federated-test',
   imports: [
+    AppRunEngineBadgeComponent,
     CommonModule,
     MatButtonModule,
     MatTableModule,
@@ -48,7 +50,7 @@ export class AppRunFederatedTestComponent implements OnInit {
   readonly appRunning = input<boolean>(false);
   readonly localFiles = input<LocalFiles[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'participants', 'error', 'startTime'];
+  displayedColumns: string[] = ['position', 'status', 'engine', 'participants', 'error', 'startTime'];
   dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {

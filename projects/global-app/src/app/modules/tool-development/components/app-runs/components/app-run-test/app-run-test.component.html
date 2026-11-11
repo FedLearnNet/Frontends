@@ -40,6 +40,13 @@
     </ng-container>
 
 
+    <ng-container matColumnDef="engine">
+      <th mat-header-cell *matHeaderCellDef>Engine</th>
+      <td mat-cell *matCellDef="let element">
+        <app-app-run-engine-badge [run]="element"/>
+      </td>
+    </ng-container>
+
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" (click)="showDetail(row, i)"></tr>
   </table>

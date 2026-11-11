@@ -64,6 +64,7 @@
     "QUERY_BUILDER": "Abfrageeditor",
     "FEDERATED_RUNS": "Föderierte Läufe",
     "TEST_RUNS": "Testläufe",
+    "BUILT_IMAGE": "Gebautes Image",
     "PYDANTIC_CLASS": "Pydantic-Klasse"
   },
   "BUTTON": {

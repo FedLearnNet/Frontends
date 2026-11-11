@@ -401,6 +401,7 @@
     "README": "ReadMe",
     "LOCAL_EXPERIMENTS": "Local Experiments",
     "TEST_RUNS": "Test Runs",
+    "BUILT_IMAGE": "Built Image",
     "FEDERATED_RUNS": "Federated Runs",
     "METRIC": "Metric",
     "INPUT": "Input",

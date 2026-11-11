@@ -63,7 +63,7 @@ export class AppRunTestDetailComponent implements OnInit {
       },
       outputData: {
         data: (attempt?.outputData ?? {}) as { [key: string]: string },
-        files: [],
+        files: (attempt?.outputFiles ?? []).map(output => output.file),
       },
     };
   });

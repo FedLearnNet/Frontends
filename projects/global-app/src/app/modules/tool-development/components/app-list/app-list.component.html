@@ -49,7 +49,7 @@
         <div class="publish-status">
           <lib-publish-badge [type]="row.publishStatus" [warning]="imageWarning(row)"/>
           @if (imageWarning(row) && row.buildStatus) {
-            @if (row.buildStatus === 'RUNNING') {
+            @if (row.buildStatus === PipelineStatus.RUNNING) {
               <lib-badge text="Build running" iconName="autorenew" color="BLUE" animate="PULSE"/>
             } @else {
               <lib-badge text="Build planned" iconName="schedule" color="GRAY"/>
