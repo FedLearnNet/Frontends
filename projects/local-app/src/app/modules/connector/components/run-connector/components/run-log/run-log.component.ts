@@ -40,7 +40,7 @@ import {TitleCasePipe} from '@angular/common';
 import {TranslatePipe} from '@ngx-translate/core';
 import {PaginatorStateService} from '@shared-lib/services/paginator-state.service';
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
-import {MatProgressBar} from '@angular/material/progress-bar';
+import {SkeletonLoaderComponent} from '@shared-lib/components/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-run-error-log',
@@ -48,7 +48,7 @@ import {MatProgressBar} from '@angular/material/progress-bar';
   styleUrl: './run-log.component.scss',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatPaginator, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TitleCasePipe, TranslatePipe, TimeBadgeComponent, MatProgressBar]
+  imports: [MatPaginator, MatFormField, MatLabel, MatInput, MatSelect, MatOption, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatSortHeader, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TitleCasePipe, TranslatePipe, TimeBadgeComponent, SkeletonLoaderComponent]
 })
 export class RunConnectorLogComponent implements OnInit, AfterViewInit {
   readonly levelVariants = [...LEVEL_VARIANTS];

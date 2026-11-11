@@ -1,4 +1,5 @@
 import {BaseEdgeDTO, BaseNodeDTO} from "@global-app/schema/dto/base";
+import {DataTypeNodeDTO} from "@global-app/schema/dto/datatype";
 
 export interface OntologyDTO {
   edges: OntologyEdgeDTO[];
@@ -31,4 +32,11 @@ export interface OntologyEdgeDTO extends BaseEdgeDTO {
 export interface OntologySearchResponseDTO {
   node: OntologyNodeDTO;
   score?: number;
+}
+
+/** An ontology and the datatype used together on the same schema node. */
+export interface OntologyDataTypeDTO {
+  ontology: OntologyNodeDTO;
+  dataType: DataTypeNodeDTO;
+  subscriptionsCount: number;
 }

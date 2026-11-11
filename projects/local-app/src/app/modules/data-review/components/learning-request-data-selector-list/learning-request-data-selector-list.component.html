@@ -25,20 +25,29 @@
                               [text]="patientBadgeText()"
                               [animate]="true"/>
           </lib-info-item>
-          <lib-info-item title="Requested At">
+          <lib-info-item [title]="'GRID.REQUESTED_AT' | translate">
             <lib-time-badge [date]="project.createdAt"/>
           </lib-info-item>
-          <lib-info-item title="Aggregator running on">
-            {{ aggregatorLocation }}
+          <lib-info-item [title]="'GRID.AGGREGATOR_RUNNING_ON' | translate">
+            {{ aggregatorLocationKey | translate }}
           </lib-info-item>
-          <lib-info-item title="Public Model">
-            @if (data.request.modelCanBePublic) {
-              <lib-badge color="GREEN" [text]="'Yes'"/>
+          <lib-info-item [title]="'GRID.MODEL_MUST_BE_PUBLIC' | translate">
+            @if (data.request.modelNeedToBePublic) {
+              <lib-badge color="GREEN" [text]="'YES' | translate"/>
             } @else {
-              <lib-badge color="RED" [text]="'Yes'"/>
+              <lib-badge color="GRAY" [text]="'NO' | translate"/>
             }
           </lib-info-item>
         </lib-info-grid>
+        @if (data.request.status === TrainingStatusPending) {
+          <lib-hint-card>
+            @if (data.request.modelNeedToBePublic) {
+              {{ 'DIALOG.ACCEPT_TRAINING.MODEL_MUST_BE_PUBLIC_HINT' | translate }}
+            } @else {
+              {{ 'DIALOG.ACCEPT_TRAINING.MODEL_VISIBILITY_HINT' | translate }}
+            }
+          </lib-hint-card>
+        }
       </div>
       <div class="filter-wrapper">
 
@@ -126,15 +135,9 @@
 
     <button mat-raised-button color="warn" type="submit" (click)="onReject()">{{ 'BUTTON.REJECT' | translate }}</button>
     <span class="spacer"></span>
-    @if (
-      data.request.modelCanBePublic !== false ||
-      data.request.modelNeedToBePublic !== false
-    ) {
-      <!-- !== as a safety check -->
-      <!-- if either of them isn't set we go with the public option just to be sure -->
-      <!-- e.g. if modelCanBePublic is false, but modelNeedToBePublic is not set -->
-      <!-- we wouldn't know whether maybe the model needs to be public -->
-      <!-- just to be safe we go with the public option -->
+    <!-- The requester decides: a required public model is accepted as public (the backend rejects a
+         private accept), otherwise the model stays private. -->
+    @if (data.request.modelNeedToBePublic) {
       <button mat-raised-button color="primary" type="submit" (click)="onAccept(true)" [disabled]="patientsLoading() || !selectedPatients.hasValue()">
         {{ 'BUTTON.ACCEPT_AND_PUBLIC' | translate }}
       </button>

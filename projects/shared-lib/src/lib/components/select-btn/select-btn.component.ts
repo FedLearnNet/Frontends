@@ -17,6 +17,7 @@ export class SelectBtnComponent {
   title = input.required<string>();
   description = input<string>('');
   icon = input<string>('check_box_outline_blank');
+  iconImage = input<string>('');
   selected = input<boolean>(false);
   disabled = input<boolean>(false);
   size = input<SelectBtnSize>('DEFAULT');

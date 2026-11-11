@@ -57,6 +57,8 @@ export interface ExecutionExperimentDTO extends BaseDto {
   relayServerAddress?: string | null;
   modelCanBePublic?: boolean | null;
   modelNeedToBePublic?: boolean | null;
+  // The platform runs the aggregator instead of a clinic chosen at random.
+  platformIsCoordinator?: boolean | null;
 }
 
 // A test run in the developer's app engine: a run of one step, federated or not. The run of an experiment

@@ -37,6 +37,7 @@ import {
 import {
   EvaluationTabComponent
 } from "@global-app/project/components/runs/detail-federated-experiment/evaluation-tab/evaluation-tab.component";
+import {TranslatePipe} from "@ngx-translate/core";
 
 @Component({
   selector: 'app-detail-federated-experiment',
@@ -54,6 +55,7 @@ import {
     EmptyStateComponent,
     LocalMetricsTabComponent,
     EvaluationTabComponent,
+    TranslatePipe,
   ],
   templateUrl: './detail-federated-experiment.component.html',
   styleUrl: './detail-federated-experiment.component.scss',

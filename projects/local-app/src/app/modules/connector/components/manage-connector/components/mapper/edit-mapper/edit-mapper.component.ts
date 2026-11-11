@@ -58,7 +58,11 @@ import {
   PreviewValidationResponseElementDTO,
   PreviewValidationWarningDTO
 } from '../../../../../dto/connector-validation';
-import {ConnectorMappingMode, ConnectorMappingValidationExample,} from '../../../../../models/connector-value-mapping';
+import {
+  ConnectorMappingMode,
+  ConnectorMappingValidationExample,
+  ConnectorMappingValidationSummary,
+} from '../../../../../models/connector-value-mapping';
 import {BadgeComponent} from '@shared-lib/components/badge/badge.component';
 import {BtnComponent} from '@shared-lib/components/btn/btn.component';
 import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.component";
@@ -67,6 +71,10 @@ import {ConnectorDTO, ConnectorMappingDTO} from '../../../../../dto/connector';
 import {configToConnectorDTO} from '../../../../../models/connector-config';
 
 type RouteData = Data & { breadcrumb: string | any, cohort: CohortDetailDto }
+
+function isPendingResult(result: PreviewValidationResponseDTO): boolean {
+  return result.checks.length === 0 && result.warnings === null;
+}
 
 @Component({
   selector: 'app-edit-mapper',
@@ -94,10 +102,14 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   cachedConfig: ConnectorMappingConfig[] = [];
   private lastInputSignature = '';
   private lastValidationSignature = '';
-  private validationRequestId = 0;
   private validationSubscription?: Subscription;
   private readonly previewValidationResults = signal<PreviewValidationResponseDTO[]>([]);
-  private readonly previewValidationLoadingColumns = signal<ReadonlySet<string>>(new Set());
+  private readonly previewValidationStreaming = signal(false);
+  private readonly previewValidationLoadingColumns = computed<ReadonlySet<string>>(() => new Set(
+    this.previewValidationStreaming()
+      ? this.previewValidationResults().filter(isPendingResult).map(result => result.column)
+      : []
+  ));
   readonly validationLoading = signal(true);
 
   filterMapped = model<string[]>([]);
@@ -233,7 +245,6 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.validationRequestId++;
     this.validationSubscription?.unsubscribe();
   }
 
@@ -273,6 +284,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
 
       this.applyMappingResult(sourceColumn, result);
       this.refreshDataSource();
+      this.validateColumns();
       this.onChangeMapping();
     });
   }
@@ -320,7 +332,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.validateColumns(updatedElements);
+    this.validateColumns();
     this.onChangeMapping();
   }
 
@@ -381,17 +393,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
     });
 
     this.dataSource.set(nextRows);
-
-    if (!preserveMappings) {
-      this.validateColumns(nextRows);
-      return;
-    }
-
-    const mappedElements = nextRows.filter(
-      element => (!!element.mappingConfig?.value || !!element.valueMappingConfig)
-        && !element.validationSummary
-    );
-    this.validateColumns(mappedElements.length ? mappedElements : nextRows);
+    this.validateColumns();
   }
 
   private buildInputSignature(cols: string[], rows: any[]): string {
@@ -403,22 +405,48 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
     return `${cols.join('\0')}\0${sample}`;
   }
 
-  validateColumns(_elements: ConnectorMappingElement[]) {
-    const cohort = this.cohort();
-    const validationConfig = this.validationConfig();
-    if (!cohort || !validationConfig?.inputConfig) {
+  validateColumns(): void {
+    const request = this.buildPreviewValidationRequest();
+    const signature = request ? JSON.stringify(request) : '';
+    if (!request || signature === this.lastValidationSignature) {
       this.validationLoading.set(false);
       return;
     }
+    this.lastValidationSignature = signature;
 
-    const schemaMapping = this.buildCurrentSchemaMapping();
+    this.validationSubscription?.unsubscribe();
+    this.previewValidationResults.set([]);
+    this.previewValidationStreaming.set(true);
+
+    this.validationSubscription = this.connectorPreviewService.validatePreview(request).subscribe({
+      next: result => {
+        this.upsertPreviewValidation(result);
+        this.validationLoading.set(false);
+      },
+      error: () => {
+        this.previewValidationStreaming.set(false);
+        this.clearPendingValidationState('Validation failed');
+        this.validationLoading.set(false);
+      },
+      complete: () => {
+        this.previewValidationStreaming.set(false);
+        this.validationLoading.set(false);
+      },
+    });
+  }
+
+  private buildPreviewValidationRequest(): PreviewValidationRequestDTO | undefined {
+    const cohort = this.cohort();
+    const validationConfig = this.validationConfig();
+    if (!cohort || !validationConfig?.inputConfig) return undefined;
+
     const connector = configToConnectorDTO({
       ...validationConfig,
       cohortId: cohort.id,
-      schemaMapping,
+      schemaMapping: this.buildCurrentSchemaMapping(),
       transformer: this.transformers(),
     });
-    const request: PreviewValidationRequestDTO = {
+    return {
       elements: this.flattenedSchemaFields().map(field => ({
         schemaId: field.schemaId,
         mapping: field.value,
@@ -431,40 +459,6 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       pivotConfig: connector.pivotConfig,
       transformer: connector.transformer,
     };
-
-    const signature = JSON.stringify(request);
-    if (signature === this.lastValidationSignature) {
-      this.validationLoading.set(false);
-      return;
-    }
-    this.lastValidationSignature = signature;
-    const requestId = ++this.validationRequestId;
-    this.validationSubscription?.unsubscribe();
-    this.previewValidationResults.set([]);
-    this.previewValidationLoadingColumns.set(new Set());
-
-    this.validationSubscription = this.connectorPreviewService
-      .validatePreview(request)
-      .subscribe({
-        next: result => {
-          if (requestId !== this.validationRequestId) return;
-          this.upsertPreviewValidation(result);
-          this.validationLoading.set(false);
-        },
-        error: () => {
-          if (requestId === this.validationRequestId) {
-            this.previewValidationLoadingColumns.set(new Set());
-            this.clearPendingValidationState('Validation failed');
-            this.validationLoading.set(false);
-          }
-        },
-        complete: () => {
-          if (requestId !== this.validationRequestId) return;
-          this.previewValidationLoadingColumns.set(new Set());
-          this.applyPreviewValidation(this.previewValidationResults(), true);
-          this.validationLoading.set(false);
-        },
-      });
   }
 
   applyConfig(newConfig: ConnectorMappingConfig[] | undefined) {
@@ -474,7 +468,6 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
     if (JSON.stringify(newConfig) === JSON.stringify(this.cachedConfig)) return;
 
     const ds = this.dataSource();
-    const foundedColumn: ConnectorMappingElement[] = [];
     const timeBasedColumns: string[] = [];
 
     ds.forEach(element => {
@@ -507,8 +500,6 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
         if (config.visitTimestampMapping && !timeBasedColumns.includes(config.visitTimestampMapping)) {
           timeBasedColumns.push(config.visitTimestampMapping);
         }
-
-        foundedColumn.push(element);
       }
     });
     ds.forEach(row => {
@@ -524,7 +515,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       return row;
     })
     this.dataSource.set([...ds]);
-    this.validateColumns(foundedColumn.filter(element => !element.validationSummary));
+    this.validateColumns();
     this.onChangeMapping();
   }
 
@@ -701,75 +692,44 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   }
 
   private upsertPreviewValidation(result: PreviewValidationResponseDTO): void {
-    this.previewValidationResults.update(results => {
-      const existingIndex = results.findIndex(existing => existing.column === result.column);
-      if (existingIndex < 0) {
-        return [...results, result];
-      }
+    this.previewValidationResults.update(results =>
+      results.some(existing => existing.column === result.column)
+        ? results.map(existing => existing.column === result.column ? result : existing)
+        : [...results, result]
+    );
 
-      return results.map((existing, index) => index === existingIndex ? result : existing);
-    });
-
-    this.previewValidationLoadingColumns.update(loadingColumns => {
-      const updated = new Set(loadingColumns);
-      if (result.checks.length === 0 && result.warnings === null) {
-        updated.add(result.column);
-      } else {
-        updated.delete(result.column);
-      }
-      return updated;
-    });
-
-    this.applyPreviewValidation(this.previewValidationResults());
+    const owner = this.getValidationOwner(result.column);
+    if (owner) this.applyOwnerValidation(owner);
   }
 
-  private applyPreviewValidation(results: PreviewValidationResponseDTO[], validationComplete = false): void {
-    const validationResults = Array.isArray(results) ? results : [];
-    this.previewValidationResults.set(validationResults);
-    const examplesByColumn = new Map<string, ConnectorMappingValidationExample[]>();
+  private getValidationOwner(column: string): ConnectorMappingElement | undefined {
+    const element = this.dataSource().find(row => row.column === column);
+    if (!element || element.valueMappingConfig) return element;
+    return this.findValueMappingForValueColumn(column) ?? element;
+  }
 
-    validationResults.forEach(columnResult => {
-      const sourceElement = this.dataSource().find(element => element.column === columnResult.column);
-      if (!sourceElement) return;
-      const owner = sourceElement.valueMappingConfig
-        ? sourceElement
-        : this.findValueMappingForValueColumn(columnResult.column) ?? sourceElement;
-      const checks = Array.isArray(columnResult.checks) ? columnResult.checks : [];
-      const examples = checks.map(check => this.toValidationExample(columnResult.column, owner, check));
-      if (validationComplete && !examplesByColumn.has(owner.column)) {
-        examplesByColumn.set(owner.column, []);
-      }
-      examplesByColumn.set(owner.column, [
-        ...(examplesByColumn.get(owner.column) ?? []),
-        ...examples,
-      ]);
-    });
+  private applyOwnerValidation(owner: ConnectorMappingElement): void {
+    const examples = this.previewValidationResults()
+      .filter(result => this.getValidationOwner(result.column)?.column === owner.column)
+      .flatMap(result => result.checks.map(check => this.toValidationExample(result.column, owner, check)));
+    const validationSummary: ConnectorMappingValidationSummary = {
+      valid: examples.every(example => example.valid),
+      examples,
+    };
 
-    const updated = this.dataSource().map(element => {
-      const examples = examplesByColumn.get(element.column);
-      if (!examples) return element;
-
-      const validationSummary = {
-        valid: examples.every(example => example.valid),
-        examples,
-      };
-      const validation = validationSummary.valid
-        ? 'Valid'
-        : examples.find(example => !example.valid)?.message ?? 'Invalid';
-      const valueMappingConfig = element.valueMappingConfig
-        ? {...element.valueMappingConfig, validationSummary}
-        : element.valueMappingConfig;
-
-      return {
-        ...element,
-        validation,
-        validationSummary,
-        valueMappingConfig,
-      };
-    });
-
-    this.dataSource.set(updated);
+    this.dataSource.update(rows => rows.map(row => row.column !== owner.column ? row : {
+      ...row,
+      validation: this.getSummaryMessage(validationSummary),
+      validationSummary,
+      valueMappingConfig: row.valueMappingConfig && {...row.valueMappingConfig, validationSummary},
+    }));
     this.onChangeMapping();
+  }
+
+  private getSummaryMessage(summary: ConnectorMappingValidationSummary): string {
+    return summary.valid
+      ? 'Valid'
+      : summary.examples.find(example => !example.valid)?.message ?? 'Invalid';
   }
 
   private clearPendingValidationState(message: string): void {
@@ -977,12 +937,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
     sourceElement.mapping = `Routed by ${valueMappingConfig.mappingColumn}`;
   }
 
-  private applyValidationSummary(
-    element: ConnectorMappingElement,
-    summary: NonNullable<ConnectorMappingElement['validationSummary']>
-  ): void {
-    element.validation = summary.valid
-      ? 'Valid'
-      : summary.examples.find(example => !example.valid)?.message ?? 'Invalid';
+  private applyValidationSummary(element: ConnectorMappingElement, summary: ConnectorMappingValidationSummary): void {
+    element.validation = this.getSummaryMessage(summary);
   }
 }

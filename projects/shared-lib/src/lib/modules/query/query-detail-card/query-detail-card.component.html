@@ -16,12 +16,15 @@
     }
     <span class="spacer"></span>
     <div class="right">
-      <span class="caption">Groups are linked with</span>
-      <lib-badge text="AND" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
+    <span class="caption">Groups are linked with</span>
+    <lib-badge [text]="lang2Query()?.connecting_operator === '$or' ? 'OR' : 'AND'" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
     </div>
   </div>
 
   <div class="groups">
+    @if (lang2Query(); as tree) {
+      <ng-container *ngTemplateOutlet="treeGroup; context: { $implicit: tree }"/>
+    } @else {
     @for (group of items(); track $index) {
       <section class="group">
         <header class="group-header">
@@ -74,7 +77,44 @@
         </div>
       }
     }
+    }
   </div>
+
+  <ng-template #treeGroup let-group>
+    <section class="group">
+      <header class="group-header">
+        <lib-badge [text]="group.connecting_operator === '$or' ? 'OR' : 'AND'" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
+      </header>
+      @for (condition of group.conditions; track $index) {
+        @if (isGroup(condition)) {
+          <ng-container *ngTemplateOutlet="treeGroup; context: { $implicit: condition }"/>
+        } @else {
+          <div class="row">
+            <div class="label">{{ condition.ontology_id }} / {{ condition.data_type_id }}</div>
+            <div class="values cond-list">
+              <div class="cond">
+                <lib-badge [text]="prettify(condition.operator)" color="ORANGE" [size]="'SMALL'" [border]="true"/>
+                @if (condition.value !== undefined && condition.value !== '') {
+                  <lib-badge [text]="prettyValue('' + condition.value)" color="GRAY" [size]="'MEDIUM'"/>
+                }
+              </div>
+            </div>
+          </div>
+        }
+        @if (!$last) {
+          <div class="and-connector">
+            <span class="and-pill">{{ group.connecting_operator === '$or' ? 'OR' : 'AND' }}</span>
+          </div>
+        }
+      }
+      @for (relation of group.temporal_relations ?? []; track $index) {
+        <div class="row">
+          <div class="label">{{ relation.source_condition + 1 }} → {{ relation.target_condition + 1 }}</div>
+          <div class="values">{{ relation.relationship }}</div>
+        </div>
+      }
+    </section>
+  </ng-template>
 
   @if (statusMessage(); as statusMessage) {
     <div class="footer">

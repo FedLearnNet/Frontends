@@ -1,91 +1,300 @@
-<div class="query-builder-item">
-  <div class="item">
-    <form [formGroup]="queryBuilderFormGroup">
-      <mat-form-field class="columns">
-        <mat-label>{{ 'OPTIONS' | translate }}</mat-label>
-        <input type="text"
-               [placeholder]="('CHOOSE_AN_OPTION' | translate)"
-               aria-label="Property"
-               matInput
-               [matAutocomplete]="auto"
-               formControlName="name"
-        >
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
-                          [displayWith]="displayColumnName"
-                          (optionSelected)="onColumnSelected()"
-        >
-          @for (column of filteredOptions(); track column) {
-            <mat-option [value]="column.value">{{ column.label }}</mat-option>
-          }
-        </mat-autocomplete>
-        @if (queryBuilderFormGroup.getRawValue().name !== '') {
-          <button matSuffix mat-icon-button aria-label="Clear" (click)="clearSelectedColumn()">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
-      </mat-form-field>
+<article class="leaf-card">
+  <form [formGroup]="form" class="leaf-form">
+    <div class="leaf-row leaf-row--main">
+      <span class="index-badge">{{ badgeLabel() }}</span>
 
-      <mat-form-field class="options">
-        <mat-select [placeholder]="('OPTIONS' | translate)" formControlName="operator">
-          @for (queryOption of queryOptions; track queryOption) {
-            <mat-option [value]="queryOption.value">
-              {{ queryOption.label }}
-            </mat-option>
+      <div class="qb-field">
+        <span class="qb-label" [id]="fieldId() + '-variable'">
+          {{ 'QUERY_BUILDER.VARIABLE' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.CATALOG'}"/>
+        </span>
+        <mat-form-field class="catalog-field" appearance="outline" subscriptSizing="dynamic">
+          <input matInput
+                 style="width: 90%"
+                 [attr.aria-labelledby]="fieldId() + '-variable'"
+                 [placeholder]="'CHOOSE_AN_OPTION' | translate"
+                 [formControl]="catalogControl"
+                 [matAutocomplete]="auto"
+                 (input)="onCatalogInput($any($event.target).value)">
+          <mat-autocomplete #auto="matAutocomplete"
+                            autoActiveFirstOption
+                            [displayWith]="displayColumnName"
+                            (optionSelected)="onCatalogSelected($event.option.value)">
+            @for (column of filteredColumns(); track column.value) {
+              <mat-option [value]="column.value">{{ column.label }}</mat-option>
+            }
+          </mat-autocomplete>
+          @if (catalogControl.value) {
+            <button type="button" class="clear-catalog" (click)="clearCatalog()" [attr.aria-label]="'BUTTON.DELETE' | translate">
+              <mat-icon>close</mat-icon>
+            </button>
           }
-        </mat-select>
-      </mat-form-field>
-      @if (!isValuelessOperator) {
-        @switch ($safeNavigationMigration(selectedQueryConfig?.queryOperatorOption?.type)) {
-          @case (dataType.CATEGORICAL) {
-            <mat-form-field>
-              <mat-select formControlName="value">
-                @for (selectOption of selectedQueryConfig ? selectedQueryConfig.options : []; track selectOption) {
-                  <mat-option [value]="selectOption.value">
-                    {{ selectOption.label }}
-                  </mat-option>
+        </mat-form-field>
+      </div>
+
+      <div class="qb-field">
+        <span class="qb-label" [id]="fieldId() + '-operator'">
+          {{ 'QUERY_BUILDER.OPERATOR' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.OPERATOR'}"/>
+        </span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-select formControlName="operator" [aria-labelledby]="fieldId() + '-operator'"
+                      [placeholder]="'CHOOSE_AN_OPTION' | translate">
+            @for (option of operatorOptions(); track option.value) {
+              <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="qb-field">
+        <span class="qb-label" [id]="fieldId() + '-value'">
+          {{ 'QUERY_BUILDER.VALUE' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.VALUE'}"/>
+        </span>
+        @switch (valueKind()) {
+          @case ('boolean') {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select formControlName="value" [aria-labelledby]="fieldId() + '-value'">
+                <mat-option value="true">{{ 'TRUE' | translate }}</mat-option>
+                <mat-option value="false">{{ 'FALSE' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          }
+          @case ('options') {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select formControlName="value" [aria-labelledby]="fieldId() + '-value'">
+                @for (option of selectedConfig()?.options ?? []; track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
                 }
               </mat-select>
             </mat-form-field>
           }
-          @case (dataType.BOOLEAN) {
-            <section>
-              <mat-radio-group formControlName="value">
-                @for (radioOption of selectedQueryConfig ? selectedQueryConfig.options : []; track radioOption) {
-                  <mat-radio-button
-                    color="primary"
-                    [value]="radioOption.value">
-                    {{ radioOption.label }}
-                  </mat-radio-button>
-                }
-              </mat-radio-group>
-            </section>
+          @case ('list') {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <input matInput formControlName="value" [attr.aria-labelledby]="fieldId() + '-value'"
+                     [placeholder]="'QUERY_BUILDER.COMMA_SEPARATED' | translate">
+            </mat-form-field>
+          }
+          @case ('text') {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <input matInput formControlName="value" [attr.aria-labelledby]="fieldId() + '-value'"
+                     [placeholder]="'QUERY_BUILDER.ENTER_VALUE' | translate">
+            </mat-form-field>
           }
           @default {
-            <mat-form-field>
-              <input
-                matInput
-                [placeholder]="('VALUE' | translate)"
-                formControlName="value">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="readonly-field">
+              <input matInput readonly tabindex="-1" [attr.aria-labelledby]="fieldId() + '-value'"
+                     [placeholder]="'QUERY_BUILDER.NO_VALUE' | translate">
             </mat-form-field>
           }
         }
-      }
+      </div>
 
-      <mat-form-field class="connector" [ngClass]="{ 'hidden': isLastItem() }">
-        <mat-select [placeholder]="('GRID.CONNECTOR' | translate)" formControlName="connector">
-          @for (connectorOption of connectorOptions; track connectorOption) {
-            <mat-option [value]="connectorOption">
-              {{ connectorOption }}
-            </mat-option>
+      <div class="qb-field">
+        <span class="qb-label" [id]="fieldId() + '-type'">{{ 'QUERY_BUILDER.DATA_TYPE' | translate }}</span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="readonly-field">
+          <input matInput readonly tabindex="-1" [value]="dataTypeText()"
+                 [attr.aria-labelledby]="fieldId() + '-type'"
+                 [matTooltip]="selectedConfig() ? ('QUERY_BUILDER.ONTOLOGY' | translate) + ': ' + ontologyLabel() : ''">
+        </mat-form-field>
+      </div>
+
+      <div class="qb-field">
+        <span class="qb-label" [id]="fieldId() + '-hint'">
+          {{ 'QUERY_BUILDER.DATATYPE_HINT' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.DATATYPE'}"/>
+        </span>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-select formControlName="datatypeHint" [aria-labelledby]="fieldId() + '-hint'">
+            <mat-option value="">{{ 'QUERY_BUILDER.UNSET' | translate }}</mat-option>
+            @for (hint of datatypeHints; track hint) {
+              <mat-option [value]="hint">{{ hint }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="leaf-actions">
+        <button mat-icon-button type="button" [disabled]="isFirst()" (click)="moveUp.emit()"
+                [matTooltip]="'QUERY_BUILDER.MOVE_UP' | translate" [attr.aria-label]="'QUERY_BUILDER.MOVE_UP' | translate">
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" [disabled]="isLast()" (click)="moveDown.emit()"
+                [matTooltip]="'QUERY_BUILDER.MOVE_DOWN' | translate" [attr.aria-label]="'QUERY_BUILDER.MOVE_DOWN' | translate">
+          <mat-icon>arrow_downward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" (click)="duplicate.emit()"
+                [matTooltip]="'QUERY_BUILDER.DUPLICATE' | translate" [attr.aria-label]="'QUERY_BUILDER.DUPLICATE' | translate">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <button mat-icon-button type="button" (click)="remove.emit()"
+                [matTooltip]="'BUTTON.DELETE' | translate" [attr.aria-label]="'BUTTON.DELETE' | translate">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="advanced-bar">
+      <button type="button" class="advanced-toggle" (click)="advancedOpen.set(!advancedOpen())"
+              [attr.aria-expanded]="advancedOpen()" [attr.aria-controls]="fieldId() + '-advanced'">
+        <mat-icon>{{ advancedOpen() ? 'expand_less' : 'tune' }}</mat-icon>
+        {{ (advancedOpen() ? 'QUERY_BUILDER.HIDE_ADVANCED' : 'QUERY_BUILDER.SHOW_ADVANCED') | translate }}
+      </button>
+    </div>
+
+    @if (advancedOpen()) {
+    <div class="leaf-row leaf-row--options" [id]="fieldId() + '-advanced'">
+      <div class="qb-field option-block">
+        <span class="qb-label">
+          {{ 'QUERY_BUILDER.VALUE_MODE' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.VALUE_MODE'}"/>
+        </span>
+        <div class="qb-inline">
+          <div class="segmented" role="group" [attr.aria-label]="'QUERY_BUILDER.VALUE_MODE' | translate">
+            @for (choice of valueModeButtons(); track choice) {
+              <button type="button" class="segmented__option" [class.active]="valueModeChoice() === choice"
+                      [attr.aria-pressed]="valueModeChoice() === choice" (click)="setValueMode(choice)">
+                {{ valueModeKey(choice) | translate }}
+              </button>
+            }
+          </div>
+          @if (showDeltaInterval()) {
+            <app-query-interval-field [parts]="leaf().deltaInterval" (partsChange)="onDeltaInterval($event)"/>
           }
-        </mat-select>
-      </mat-form-field>
-    </form>
-  </div>
+          @if (deltaText()) {
+            <code class="result-text">{{ deltaText() }}</code>
+          }
+        </div>
+      </div>
 
-  <div class="item-buttons">
-    <button mat-icon-button (click)="onRemoveQueryItem()">
-      <mat-icon>remove_circle_outline</mat-icon>
-    </button>
-  </div>
-</div>
+      <div class="qb-field option-block">
+        <span class="qb-label">
+          {{ 'QUERY_BUILDER.TIME_FILTER' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.TIME_FILTER'}"/>
+        </span>
+        <div class="qb-inline">
+          <div class="segmented" role="group" [attr.aria-label]="'QUERY_BUILDER.TIME_FILTER' | translate">
+            @for (mode of timeFilterModes; track mode) {
+              <button type="button" class="segmented__option" [class.active]="leaf().timeFilterChoice === mode"
+                      [attr.aria-pressed]="leaf().timeFilterChoice === mode" (click)="setTimeFilter(mode)">
+                {{ ('QUERY_BUILDER.' + mode.toUpperCase()) | translate }}
+              </button>
+            }
+          </div>
+          @if (leaf().timeFilterChoice === 'after' || leaf().timeFilterChoice === 'between') {
+            <mat-form-field class="date-field" appearance="outline" subscriptSizing="dynamic">
+              <input matInput type="date" formControlName="timeAfter"
+                     [attr.aria-label]="'QUERY_BUILDER.AFTER' | translate">
+            </mat-form-field>
+          }
+          @if (leaf().timeFilterChoice === 'between') {
+            <span class="qb-suffix">–</span>
+          }
+          @if (leaf().timeFilterChoice === 'before' || leaf().timeFilterChoice === 'between') {
+            <mat-form-field class="date-field" appearance="outline" subscriptSizing="dynamic">
+              <input matInput type="date" formControlName="timeBefore"
+                     [attr.aria-label]="'QUERY_BUILDER.BEFORE' | translate">
+            </mat-form-field>
+          }
+        </div>
+      </div>
+
+      <div class="qb-field option-block">
+        <span class="qb-label">
+          {{ 'QUERY_BUILDER.TIME_AGGREGATION' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.TIME_AGGREGATION'}"/>
+        </span>
+        <div class="qb-inline">
+          <div class="segmented" role="group" [attr.aria-label]="'QUERY_BUILDER.TIME_AGGREGATION' | translate">
+            @for (method of timeButtons(); track method) {
+              <button type="button" class="segmented__option"
+                      [class.active]="method === 'within' ? showTimeWindow() : leaf().timeAggregation === method"
+                      [attr.aria-pressed]="method === 'within' ? showTimeWindow() : leaf().timeAggregation === method"
+                      (click)="openTimeAggregation(method)">
+                {{ timeButtonKey(method) | translate }}
+              </button>
+            }
+          </div>
+          @if (showTimeWindow()) {
+            <app-query-interval-field [parts]="leaf().timeWindow" (partsChange)="onTimeWindow($event)"/>
+            <div class="segmented" role="group" [attr.aria-label]="'QUERY_BUILDER.OCCURRENCES' | translate">
+              <button type="button" class="segmented__option" [class.active]="leaf().timeAggregation === 'within'"
+                      [attr.aria-pressed]="leaf().timeAggregation === 'within'" (click)="setTimeShape('within')">
+                {{ 'QUERY_BUILDER.FREQUENCY.ANY' | translate }}
+              </button>
+              <button type="button" class="segmented__option" [class.active]="leaf().timeAggregation === 'within_at_least'"
+                      [attr.aria-pressed]="leaf().timeAggregation === 'within_at_least'" (click)="setTimeShape('within_at_least')">
+                {{ 'QUERY_BUILDER.FREQUENCY.AT_LEAST' | translate }}
+              </button>
+              <button type="button" class="segmented__option" [class.active]="leaf().timeAggregation === 'within_at_most'"
+                      [attr.aria-pressed]="leaf().timeAggregation === 'within_at_most'" (click)="setTimeShape('within_at_most')">
+                {{ 'QUERY_BUILDER.FREQUENCY.AT_MOST' | translate }}
+              </button>
+            </div>
+            @if (showTimeCount()) {
+              <mat-form-field class="count-field" appearance="outline" subscriptSizing="dynamic">
+                <input matInput type="number" min="1" formControlName="timeWindowCount"
+                       [attr.aria-label]="'QUERY_BUILDER.TIMES_SUFFIX' | translate">
+                <span matTextSuffix class="input-suffix">{{ 'QUERY_BUILDER.TIMES_SUFFIX' | translate }}</span>
+              </mat-form-field>
+            }
+            <code class="result-text">{{ windowText() }}</code>
+          }
+        </div>
+      </div>
+
+      <div class="qb-field option-block">
+        <span class="qb-label">
+          {{ 'QUERY_BUILDER.VALUE_AGGREGATION' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.VALUE_AGGREGATION'}"/>
+        </span>
+        <div class="qb-inline">
+          <div class="segmented" role="group" [attr.aria-label]="'QUERY_BUILDER.VALUE_AGGREGATION' | translate">
+            @for (method of valueAggregations(); track method) {
+              <button type="button" class="segmented__option" [class.active]="leaf().valueAggregation === method"
+                      [attr.aria-pressed]="leaf().valueAggregation === method" (click)="setValueAggregation(method)">
+                {{ ('QUERY_BUILDER.AGGREGATION.' + method.toUpperCase()) | translate }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="qb-field option-block occurrence occurrence--least">
+        <span class="qb-label" [id]="fieldId() + '-least'">
+          {{ 'QUERY_BUILDER.AT_LEAST' | translate }}
+          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.OCCURRENCE'}"/>
+        </span>
+        <mat-form-field class="count-field" appearance="outline" subscriptSizing="dynamic">
+          <input matInput type="number" min="0" formControlName="atLeast"
+                 [attr.aria-labelledby]="fieldId() + '-least'">
+          <span matTextSuffix class="input-suffix">{{ 'QUERY_BUILDER.TIMES_SUFFIX' | translate }}</span>
+        </mat-form-field>
+      </div>
+
+      <div class="qb-field option-block occurrence occurrence--most">
+        <span class="qb-label" [id]="fieldId() + '-most'">{{ 'QUERY_BUILDER.AT_MOST' | translate }}</span>
+        <mat-form-field class="count-field" appearance="outline" subscriptSizing="dynamic">
+          <input matInput type="number" min="0" formControlName="atMost"
+                 [attr.aria-labelledby]="fieldId() + '-most'">
+          <span matTextSuffix class="input-suffix">{{ 'QUERY_BUILDER.TIMES_SUFFIX' | translate }}</span>
+        </mat-form-field>
+      </div>
+    </div>
+    }
+  </form>
+
+  @if (summary()) {
+    <p class="leaf-summary">{{ summary() }}</p>
+  }
+</article>
+
+<ng-template #help let-key="key">
+  <button type="button" class="info-button"
+          [matTooltip]="key | translate"
+          matTooltipClass="query-help-tooltip"
+          [attr.aria-label]="key | translate">
+    <mat-icon>info</mat-icon>
+  </button>
+</ng-template>

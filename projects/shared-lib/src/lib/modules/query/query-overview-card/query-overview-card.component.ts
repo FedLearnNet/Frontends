@@ -9,6 +9,8 @@ import {
   QueryOperatorDTO,
   QueryOperatorTypes
 } from "@global-app/find-data/dto/query";
+import {isLang2Group} from "@global-app/find-data/dto/lang2-query";
+import {formatLang2Query} from "@global-app/find-data/helpers/query-tree.serializer";
 import {parseValue, prettifyOperator} from "../../../../../../local-app/src/app/modules/logs/helper/query.helper";
 
 type QueryCardDto = LocalQueryDto | QueryDetailDTO;
@@ -31,12 +33,22 @@ export class QueryOverviewCardComponent {
   query = input.required<QueryCardDto>();
   id = input<number>();
 
+  readonly summary = computed(() => {
+    const query = this.query();
+    if (query.enhancedQuery?.length || Array.isArray(query.query) || !isLang2Group(query.query)) {
+      return null;
+    }
+    return formatLang2Query(query.query, leaf =>
+      [leaf.ontology_id, leaf.data_type_id].filter(Boolean).join(' / ')
+    );
+  });
+
   readonly items = computed<QueryCardItem[]>(() => {
     const query = this.query();
     if (query.enhancedQuery?.length) {
       return query.enhancedQuery;
     }
-    return query.query ?? [];
+    return Array.isArray(query.query) ? query.query : [];
   });
 
   readonly groups = computed<QueryGroup[]>(() => this.items().map(g => {

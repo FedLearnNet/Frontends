@@ -73,7 +73,8 @@ import {
   getPatientIdTransformerConflict,
   hydrateFileInfoData,
   isAppBasedUploadSettings,
-  isFileUploadSettings
+  isFileUploadSettings,
+  orderColumnsLikeHeaders
 } from "../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../dto/connector";
 import {
@@ -156,6 +157,8 @@ export class ManageConnectorComponent implements OnInit {
   readonly transformers = signal(new Map<string, FunctionsDetailDTO>());
   readonly transformerList = computed(() => Array.from(this.transformers().values()));
   transformedData = new Map<string, any[]>()
+  /** Each step's column order, which its rows cannot keep for number-like names such as "2019". */
+  transformedColumns = new Map<string, string[]>();
   /** Where each previewed step came from, so the wizard can show which ones were cached. */
   previewStages = new Map<string, PreviewStageDTO>()
   disableAddTransformer = true;
@@ -185,6 +188,7 @@ export class ManageConnectorComponent implements OnInit {
     this.saveConfigToLocalStorage();
     if (outputChanged && this.getTransformCards().length > 0) {
       this.transformedData.clear();
+      this.transformedColumns.clear();
       this.applyTransform();
     }
   }
@@ -441,11 +445,16 @@ export class ManageConnectorComponent implements OnInit {
     if (this.transformedData.size > 0) {
       const latestData = this.getTransformedData();
       if (latestData.length > 0 && latestData[0]) {
-        return Object.keys(latestData[0]);
+        const latestId = this.findLastRunedConnectorCard()?.id;
+        return (latestId && this.transformedColumns.get(latestId)) || Object.keys(latestData[0]);
       }
     }
     const primarySheet = getPrimarySheet(this.config.fileInfo);
     return primarySheet?.renamedColumns || primarySheet?.columns || [];
+  }
+
+  public getMapperColumns(): string[] {
+    return orderColumnsLikeHeaders(this.getLatestColumns(), this.config.fileInfo, this.config.mergeConfig);
   }
 
   public getLatestData(): any[] {
@@ -522,6 +531,7 @@ export class ManageConnectorComponent implements OnInit {
             return remaining;
           });
           this.transformedData.delete(card.id!);
+          this.transformedColumns.delete(card.id!);
         }
         this.reAssignIndex();
         if (this.currentStep?.id === card.id) {
@@ -589,6 +599,7 @@ export class ManageConnectorComponent implements OnInit {
           c.previewRunning = false;
         });
         this.transformedData = data.rows;
+        this.transformedColumns = data.columns;
         this.previewStages = data.stages;
         this.changeDetectorRef.markForCheck();
       },
@@ -754,6 +765,12 @@ export class ManageConnectorComponent implements OnInit {
   public getCurrentStepData(): any[] | undefined {
     const id = this.currentStep?.id;
     return id ? this.transformedData.get(id) : undefined;
+  }
+
+  /** The column order of the selected step's rows, which the rows cannot keep for number-like names. */
+  public getCurrentStepColumns(): string[] | undefined {
+    const id = this.currentStep?.id;
+    return id ? this.transformedColumns.get(id) : undefined;
   }
 
   public getMappingCards(): ConnectorCard[] {
@@ -970,6 +987,7 @@ export class ManageConnectorComponent implements OnInit {
     this.currentStep = this.initialCard;
     this.transformers.set(new Map());
     this.transformedData.clear();
+    this.transformedColumns.clear();
     this.disableAddTransformer = true;
     this.toolbarManagement.showToolbar = true;
     this.syncCardState();
@@ -1034,6 +1052,7 @@ export class ManageConnectorComponent implements OnInit {
 
           this.setFileInfo(fileInfo, false);
           this.transformedData.clear();
+          this.transformedColumns.clear();
           if (this.getTransformCards().length > 0) {
             this.applyTransform();
           }

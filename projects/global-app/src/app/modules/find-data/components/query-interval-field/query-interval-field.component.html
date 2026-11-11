@@ -1,0 +1,24 @@
+<div class="interval">
+  @for (part of parts(); track $index) {
+    <div class="interval__part">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <input matInput type="number" min="1" [value]="part.count ?? ''"
+               (change)="updateCount($index, $any($event.target).value)">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-select [value]="part.unit" (selectionChange)="updateUnit($index, $event.value)">
+          @for (unit of units; track unit) {
+            <mat-option [value]="unit">{{ ('QUERY_BUILDER.UNIT.' + unit.toUpperCase()) | translate }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-icon-button type="button" (click)="remove($index)" [attr.aria-label]="'BUTTON.DELETE' | translate">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+  <button mat-button type="button" class="interval__add" (click)="add()">
+    <mat-icon>add</mat-icon>
+    {{ 'QUERY_BUILDER.ADD_PART' | translate }}
+  </button>
+</div>

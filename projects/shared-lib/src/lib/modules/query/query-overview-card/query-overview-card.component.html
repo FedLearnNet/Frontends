@@ -11,6 +11,9 @@
   </div>
   <div class="meta">
     <p>
+      @if (summary(); as summary) {
+        <span>{{ summary }}</span>
+      } @else {
       @for (group of groups(); track $index) {
         @if (!$first) {<span> {{ 'QUERY_OPERATOR.AND' | translate | uppercase }} </span>}
         <span>(</span>
@@ -28,6 +31,7 @@
         <span>)</span>
       } @empty {
         <span>—</span>
+      }
       }
     </p>
   </div>

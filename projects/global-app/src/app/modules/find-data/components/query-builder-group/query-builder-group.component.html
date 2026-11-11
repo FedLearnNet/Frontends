@@ -1,0 +1,203 @@
+<section class="group-card" [class.or]="group().connectingOperator === '$or'" [class.and]="group().connectingOperator === '$and'"
+         [class.nested]="!isRoot()">
+  <header class="group-card__header">
+    <div class="header-main">
+      <button mat-icon-button type="button" class="collapse-button" (click)="toggleCollapsed()"
+              [attr.aria-expanded]="!group().collapsed"
+              [attr.aria-label]="(group().collapsed ? 'QUERY_BUILDER.EXPAND' : 'QUERY_BUILDER.COLLAPSE') | translate">
+        <mat-icon>{{ group().collapsed ? 'chevron_right' : 'expand_more' }}</mat-icon>
+      </button>
+
+      <div class="op-switch" role="group" [attr.aria-label]="'QUERY_BUILDER.HELP.CONNECTING' | translate">
+        <button type="button" class="op-pill" [class.active]="group().connectingOperator === '$and'"
+                [attr.aria-pressed]="group().connectingOperator === '$and'" (click)="setOperator('$and')">AND</button>
+        <button type="button" class="op-pill" [class.active]="group().connectingOperator === '$or'"
+                [attr.aria-pressed]="group().connectingOperator === '$or'" (click)="setOperator('$or')">OR</button>
+      </div>
+      <button type="button" class="info-button"
+              [matTooltip]="'QUERY_BUILDER.HELP.CONNECTING' | translate"
+              matTooltipClass="query-help-tooltip"
+              [attr.aria-label]="'QUERY_BUILDER.HELP.CONNECTING' | translate">
+        <mat-icon>info</mat-icon>
+      </button>
+
+      <p class="match-summary">
+        {{ (group().connectingOperator === '$or' ? 'QUERY_BUILDER.MATCH_ANY' : 'QUERY_BUILDER.MATCH_ALL') | translate }}
+        · {{ leafCount() }} {{ 'QUERY_BUILDER.CONDITIONS' | translate }}
+        @if (!isRoot()) {
+          · {{ 'QUERY_BUILDER.GROUP_NUMBER' | translate: {number: numberPrefix()} }}
+        }
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button mat-button type="button" class="header-button" (click)="addLeaf()">
+        <mat-icon>library_add</mat-icon>
+        {{ 'QUERY_BUILDER.CONDITION' | translate }}
+      </button>
+      <button mat-button type="button" class="header-button" (click)="addGroup()">
+        <mat-icon>create_new_folder</mat-icon>
+        {{ 'QUERY_BUILDER.GROUP' | translate }}
+      </button>
+      <button mat-button type="button" class="header-button" [disabled]="!allowRelation()" (click)="addRelation()">
+        <mat-icon>more_time</mat-icon>
+        {{ 'QUERY_BUILDER.RELATIONSHIP' | translate }}
+      </button>
+      <button type="button" class="info-button"
+              [matTooltip]="'QUERY_BUILDER.HELP.TEMPORAL' | translate"
+              matTooltipClass="query-help-tooltip"
+              [attr.aria-label]="'QUERY_BUILDER.HELP.TEMPORAL' | translate">
+        <mat-icon>info</mat-icon>
+      </button>
+      @if (!isRoot()) {
+        <span class="header-divider"></span>
+        <button mat-icon-button type="button" class="icon-action" [disabled]="isFirst()" (click)="moveUp.emit()"
+                [matTooltip]="'QUERY_BUILDER.MOVE_UP' | translate" [attr.aria-label]="'QUERY_BUILDER.MOVE_UP' | translate">
+          <mat-icon>arrow_upward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" class="icon-action" [disabled]="isLast()" (click)="moveDown.emit()"
+                [matTooltip]="'QUERY_BUILDER.MOVE_DOWN' | translate" [attr.aria-label]="'QUERY_BUILDER.MOVE_DOWN' | translate">
+          <mat-icon>arrow_downward</mat-icon>
+        </button>
+        <button mat-icon-button type="button" class="icon-action" (click)="duplicate.emit()"
+                [matTooltip]="'QUERY_BUILDER.DUPLICATE' | translate" [attr.aria-label]="'QUERY_BUILDER.DUPLICATE' | translate">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+        <button mat-icon-button type="button" class="icon-action" (click)="remove.emit()"
+                [matTooltip]="'BUTTON.DELETE' | translate" [attr.aria-label]="'BUTTON.DELETE' | translate">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (group().collapsed) {
+    <p class="query-text" role="button" tabindex="0"
+       [attr.aria-label]="'QUERY_BUILDER.EXPAND' | translate"
+       (click)="expand()" (keydown.enter)="expand()" (keydown.space)="expand(); $event.preventDefault()">
+      {{ queryText() }}
+    </p>
+  } @else {
+    <div class="group-card__body">
+      @for (relation of group().relations; track relation.id) {
+        <div class="relation-banner">
+          <div class="relation-title">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ 'QUERY_BUILDER.RELATIONSHIP' | translate }}</span>
+            <button type="button" class="info-button"
+                    [matTooltip]="'QUERY_BUILDER.HELP.TEMPORAL' | translate"
+                    matTooltipClass="query-help-tooltip"
+                    [attr.aria-label]="'QUERY_BUILDER.HELP.TEMPORAL' | translate">
+              <mat-icon>info</mat-icon>
+            </button>
+          </div>
+
+          <div class="qb-field relation-field">
+            <span class="qb-label" [id]="relation.id + '-source'">{{ 'QUERY_BUILDER.SOURCE' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select [value]="relation.source" [aria-labelledby]="relation.id + '-source'"
+                          (selectionChange)="updateRelation($index, {source: $event.value})">
+                @for (choice of leafChoices(); track choice.index) {
+                  <mat-option [value]="choice.index">{{ choice.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="qb-field relation-field">
+            <span class="qb-label" [id]="relation.id + '-kind'">{{ 'QUERY_BUILDER.RELATION_KIND' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select [value]="relation.kind" [aria-labelledby]="relation.id + '-kind'"
+                          (selectionChange)="updateRelation($index, {kind: $event.value})">
+                @for (kind of relationKinds; track kind) {
+                  <mat-option [value]="kind">{{ ('QUERY_BUILDER.RELATION.' + kind.toUpperCase()) | translate }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          @if (needsInterval(relation.kind)) {
+            <div class="qb-field">
+              <span class="qb-label">{{ 'QUERY_BUILDER.INTERVAL' | translate }}</span>
+              <div class="qb-inline">
+                <app-query-interval-field [parts]="relation.interval"
+                                          (partsChange)="updateRelation($index, {interval: $event})"/>
+              </div>
+            </div>
+          }
+
+          <div class="qb-field relation-field">
+            <span class="qb-label" [id]="relation.id + '-target'">{{ 'QUERY_BUILDER.TARGET' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-select [value]="relation.target" [aria-labelledby]="relation.id + '-target'"
+                          (selectionChange)="updateRelation($index, {target: $event.value})">
+                @for (choice of leafChoices(); track choice.index) {
+                  <mat-option [value]="choice.index">{{ choice.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="qb-field count-cell">
+            <span class="qb-label" [id]="relation.id + '-least'">{{ 'QUERY_BUILDER.AT_LEAST' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <input matInput type="number" min="0" [value]="relation.atLeast ?? ''"
+                     [attr.aria-labelledby]="relation.id + '-least'"
+                     (change)="updateRelation($index, {atLeast: optionalCount($any($event.target).value)})">
+            </mat-form-field>
+          </div>
+
+          <div class="qb-field count-cell">
+            <span class="qb-label" [id]="relation.id + '-most'">{{ 'QUERY_BUILDER.AT_MOST' | translate }}</span>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <input matInput type="number" min="0" [value]="relation.atMost ?? ''"
+                     [attr.aria-labelledby]="relation.id + '-most'"
+                     (change)="updateRelation($index, {atMost: optionalCount($any($event.target).value)})">
+            </mat-form-field>
+          </div>
+
+          <button mat-icon-button type="button" class="relation-remove" (click)="removeRelation($index)"
+                  [matTooltip]="'BUTTON.DELETE' | translate" [attr.aria-label]="'BUTTON.DELETE' | translate">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @for (child of group().children; track child.id) {
+        @if (!$first) {
+          <div class="join">
+            <span class="join-pill">{{ group().connectingOperator === '$or' ? 'OR' : 'AND' }}</span>
+          </div>
+        }
+        @if (isGroup(child)) {
+          <app-query-builder-group
+            [group]="child"
+            [queryConfigs]="queryConfigs()"
+            [level]="level() + 1"
+            [numberPrefix]="childLabel($index)"
+            [isRoot]="false"
+            [isFirst]="$first"
+            [isLast]="$last"
+            (groupChange)="onGroupChange($index, $event)"
+            (remove)="removeChildAt($index)"
+            (duplicate)="duplicateChild($index)"
+            (moveUp)="move($index, -1)"
+            (moveDown)="move($index, 1)"/>
+        } @else {
+          <app-query-builder-item
+            [leaf]="asLeaf(child)"
+            [index]="$index"
+            [indexLabel]="childLabel($index)"
+            [queryConfigs]="queryConfigs()"
+            [isFirst]="$first"
+            [isLast]="$last"
+            (leafChange)="onLeafChange($index, $event)"
+            (remove)="removeChildAt($index)"
+            (duplicate)="duplicateChild($index)"
+            (moveUp)="move($index, -1)"
+            (moveDown)="move($index, 1)"/>
+        }
+      }
+    </div>
+  }
+</section>

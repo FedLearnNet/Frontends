@@ -16,6 +16,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  margin-top: 16px;
 
   .full {
     grid-column: 1 / -1;
@@ -78,6 +79,13 @@
 .mb-2 {
   display: block;
   margin-bottom: 20px;
+}
+
+.engine-line {
+  margin: 8px 0 0;
+  font-size: var(--card-desc-font-size, 0.875rem);
+  color: var(--card-desc-color, #5f6368);
+  line-height: 1.5;
 }
 
 ::ng-deep {

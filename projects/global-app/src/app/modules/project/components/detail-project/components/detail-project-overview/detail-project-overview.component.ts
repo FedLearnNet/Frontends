@@ -39,7 +39,7 @@ import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} fro
 export class DetailProjectOverviewComponent {
   private readonly store = inject(Store);
 
-  project = input.required<ProjectDto>();
+  readonly project = input.required<ProjectDto>();
 
   readonly name = new FormControl('', {nonNullable: true, validators: [Validators.required]});
   readonly description = new FormControl('', {nonNullable: true, validators: [Validators.required]});
@@ -74,7 +74,7 @@ export class DetailProjectOverviewComponent {
     if (this.name.invalid) return;
     event.stopPropagation();
     this.editModeName.set(false);
-    this.save();
+    this.updateProject({ name: this.name.value! });
     this.name.disable();
   }
 
@@ -88,7 +88,7 @@ export class DetailProjectOverviewComponent {
     if (this.description.invalid) return;
     event.stopPropagation();
     this.editModeDescription.set(false);
-    this.save();
+    this.updateProject({ description: this.description.value! });
     this.description.disable();
   }
 
@@ -96,15 +96,17 @@ export class DetailProjectOverviewComponent {
     this.queryId.set(queryId);
   }
 
-  save(): void {
-    const current = this.project();
-    const updated: ProjectDto = {
-      ...current,
-      name: this.name.value!,
-      description: this.description.value!,
+  onSaveQuery() {
+    const { exportConfig } = this.project();
+    this.updateProject({
       queryId: this.queryId(),
-    };
+      exportConfig: exportConfig && { ...exportConfig, features: [] },
+    });
+  }
 
-    this.store.dispatch(ProjectActions.update({project: updated}));
+  private updateProject(changes: Partial<ProjectDto>) {
+    this.store.dispatch(
+      ProjectActions.update({ project: { ...this.project(), ...changes } })
+    );
   }
 }

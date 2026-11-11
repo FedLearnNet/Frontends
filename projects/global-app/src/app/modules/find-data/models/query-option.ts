@@ -9,5 +9,5 @@ export interface DataTypeOperatorMap {
   options: Array<SelectOption<QueryOperatorTypes>>;
   // An array of the generic SelectOption objects
   // In this case, this is the mapping of the operator to show to the user (e.g. >)
-  // and the actal value to use (e.g. gt)
+  // and the actual value to use (e.g. gt)
 }

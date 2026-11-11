@@ -12,6 +12,7 @@ export interface ProjectFederatedCreateExperimentDTO {
   name: string;
   description: string;
   modelNeedToBePublic: boolean;
+  platformIsCoordinator: boolean;
 }
 
 export interface CreateProjectLocalExperimentDTO {
