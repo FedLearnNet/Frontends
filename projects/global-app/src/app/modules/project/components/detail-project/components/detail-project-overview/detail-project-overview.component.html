@@ -105,7 +105,7 @@
       <app-select-query
         [queryId]="queryId()"
         (queryIdChange)="setQueryId($event)"
-        (queryIdSave)="save()">
+        (queryIdSave)="onSaveQuery()">
       </app-select-query>
       <p class="edit-hint">
         {{ 'Click the pencil icon to edit' }}
