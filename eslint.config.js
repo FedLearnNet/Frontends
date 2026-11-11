@@ -3,8 +3,9 @@ const eslint = require("@eslint/js");
 const tseslint = require("typescript-eslint");
 const angular = require("angular-eslint");
 const ngrx = require("@ngrx/eslint-plugin");
+const { defineConfig } = require('eslint/config');
 
-module.exports = tseslint.config(
+module.exports = defineConfig([
   {
     ignores: ["node_modules/", "dist/", ".angular/"],
   },
@@ -64,4 +65,4 @@ module.exports = tseslint.config(
       "max-len": ["warn", {code: 200}],
     },
   },
-);
+]);
