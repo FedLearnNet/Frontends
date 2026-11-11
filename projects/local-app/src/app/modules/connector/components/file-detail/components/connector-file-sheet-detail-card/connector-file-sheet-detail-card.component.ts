@@ -1,5 +1,5 @@
 import {DecimalPipe} from '@angular/common';
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {BadgeComponent} from '@shared-lib/components/badge/badge.component';
 import {
@@ -21,6 +21,7 @@ export interface ConnectorFileSheetView {
   selector: 'app-connector-file-sheet-detail-card',
   templateUrl: './connector-file-sheet-detail-card.component.html',
   styleUrl: './connector-file-sheet-detail-card.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     DecimalPipe,
     MatIcon,

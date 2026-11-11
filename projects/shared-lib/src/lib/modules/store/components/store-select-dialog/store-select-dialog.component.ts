@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, DestroyRef, ElementRef, inject, viewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, ElementRef, inject, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatIconButton} from "@angular/material/button";
 import {MatToolbar} from "@angular/material/toolbar";
@@ -27,6 +27,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     CloseableDialogTitleComponent
   ],
   templateUrl: './store-select-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-select-dialog.component.scss'
 })
 export class StoreSelectDialogComponent implements AfterViewInit {

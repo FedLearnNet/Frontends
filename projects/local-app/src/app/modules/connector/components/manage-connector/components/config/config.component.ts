@@ -4,14 +4,14 @@ import {
   ComponentRef,
   inject,
   input,
-  model,
   OnChanges,
   OnInit,
   output,
   signal,
   SimpleChanges,
   ViewChild,
-  ViewContainerRef
+  ViewContainerRef,
+  linkedSignal
 } from '@angular/core';
 
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter,} from "../../../../models/connector-step-config";
@@ -46,7 +46,9 @@ const componentMapper: { [key: string]: any } = {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectorStepConfigComponent implements OnInit, OnChanges, ConnectorStepConfig<ConnectorDTO> {
-  readonly config = model<ConnectorDTO>({} as ConnectorDTO);
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
+  readonly configInput = input<ConnectorDTO>({} as ConnectorDTO, {alias: 'config'});
+  readonly config = linkedSignal(this.configInput);
   readonly componentType = input<string | number>();
   readonly cohortId = input<number | undefined>(undefined);
   private readonly activeComponentType = signal<string | number | undefined>(undefined);

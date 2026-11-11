@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {BadgeColor} from '../badge/badge.component';
 
 type FormatType = 'number' | 'delta';
@@ -8,6 +8,7 @@ type SizeType = 'SMALL' | 'MEDIUM' | 'LARGE';
   selector: 'lib-value-card',
   imports: [],
   templateUrl: './value-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './value-card.component.scss',
 })
 export class ValueCardComponent {

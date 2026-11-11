@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
@@ -59,6 +59,7 @@ interface ExperimentCreateDialogData {
     ErrorCardComponent,
   ],
   templateUrl: './experiment-create-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-create-dialog.component.scss'
 })
 export class ExperimentCreateDialogComponent {

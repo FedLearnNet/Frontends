@@ -16,7 +16,7 @@
         {{ 'GRID.SEVERITY' | translate }}
       </th>
       <td mat-cell *matCellDef="let element">
-        @if (valueNonNull(element?.severity)) {
+        @if (valueNonNull($safeNavigationMigration(element?.severity))) {
           <mat-icon class="icon icon--error">error</mat-icon>
           {{ element?.severity }}
         } @else {
@@ -43,15 +43,15 @@
         {{ 'GRID.SUMMARY' | translate }}
       </th>
       <td mat-cell *matCellDef="let element">
-        @if (valueNonNull(element?.process)) {
+        @if (valueNonNull($safeNavigationMigration(element?.process))) {
           <mat-chip>{{ element.process }}</mat-chip>
         }
 
-        @if (valueNonNull(element?.caller)) {
+        @if (valueNonNull($safeNavigationMigration(element?.caller))) {
           <mat-chip>{{ element.caller }}</mat-chip>
         }
 
-        @if (valueNonNull(element?.group)) {
+        @if (valueNonNull($safeNavigationMigration(element?.group))) {
           <mat-chip>{{ element.group }}</mat-chip>
         }
 

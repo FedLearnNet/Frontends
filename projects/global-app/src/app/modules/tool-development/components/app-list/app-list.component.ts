@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, RouterLink} from "@angular/router";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {MatTableDataSource, MatTableModule} from "@angular/material/table";
@@ -31,6 +31,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
     PageWrapperComponent,
   ],
   templateUrl: './app-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-list.component.scss'
 })
 export class AppListComponent implements OnInit, AfterViewInit {

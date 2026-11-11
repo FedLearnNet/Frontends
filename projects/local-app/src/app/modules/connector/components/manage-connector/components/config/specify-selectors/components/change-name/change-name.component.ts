@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {ConnectorStepSpecifySelectorsComponent} from "../../specify-selectors.component";
 import {UploadInfoDialog} from "../../../../../../../dto/upload-info";
@@ -15,6 +15,7 @@ import {TranslatePipe} from "@ngx-translate/core";
   selector: 'app-change-name',
   templateUrl: './change-name.component.html',
   styleUrl: './change-name.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatCardModule,
     MatIconModule,

@@ -1,4 +1,4 @@
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {FlowActionPanelAction} from "@shared-lib/modules/workflow/models/workflow-actions.model";
 import {MatTooltip} from "@angular/material/tooltip";
 import {MatIcon} from "@angular/material/icon";
@@ -12,6 +12,7 @@ import {MatIconButton} from "@angular/material/button";
     MatIconButton
   ],
   templateUrl: './workflow-action-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-action-panel.component.scss'
 })
 export class WorkflowActionPanelComponent {

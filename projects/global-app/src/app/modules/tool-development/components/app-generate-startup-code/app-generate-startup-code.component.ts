@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -29,6 +29,7 @@ import {FormBuilder, ReactiveFormsModule} from "@angular/forms";
     ReactiveFormsModule
   ],
   templateUrl: './app-generate-startup-code.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-generate-startup-code.component.scss',
 })
 export class AppGenerateStartupCodeComponent {

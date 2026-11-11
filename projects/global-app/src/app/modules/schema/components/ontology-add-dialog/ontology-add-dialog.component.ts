@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -26,6 +26,7 @@ import {JsonPipe} from "@angular/common";
     JsonPipe
   ],
   templateUrl: './ontology-add-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ontology-add-dialog.component.scss',
 })
 export class OntologyAddDialogComponent {

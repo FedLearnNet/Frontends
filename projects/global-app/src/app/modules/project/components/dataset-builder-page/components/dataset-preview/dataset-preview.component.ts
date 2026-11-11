@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatCardModule} from "@angular/material/card";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {
@@ -25,6 +25,7 @@ import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/
     EmptyStateComponent
   ],
   templateUrl: './dataset-preview.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './dataset-preview.component.scss',
 })
 export class DatasetPreviewComponent {

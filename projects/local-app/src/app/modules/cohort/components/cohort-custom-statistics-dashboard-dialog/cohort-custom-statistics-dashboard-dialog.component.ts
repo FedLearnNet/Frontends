@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal} from '@angular/core';
+import {Component, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule} from "@angular/forms";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -29,6 +29,7 @@ export type CohortCustomStatisticsDashboardDialogResult = string | undefined;
     BtnComponent,
   ],
   templateUrl: './cohort-custom-statistics-dashboard-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-custom-statistics-dashboard-dialog.component.scss',
 })
 export class CohortCustomStatisticsDashboardDialogComponent {

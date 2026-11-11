@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, model, OnInit} from '@angular/core';
+import {Component, computed, effect, inject, model, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Location} from "@angular/common";
 import {MatButtonModule} from "@angular/material/button";
 import {MatTabsModule} from "@angular/material/tabs";
@@ -37,6 +37,7 @@ import {loadFiles} from "@shared-lib/modules/files/store/file.actions";
     StoreVersionListComponent,
   ],
   templateUrl: './store-detail-model.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-detail-model.component.scss'
 })
 export class StoreDetailModelComponent implements OnInit {

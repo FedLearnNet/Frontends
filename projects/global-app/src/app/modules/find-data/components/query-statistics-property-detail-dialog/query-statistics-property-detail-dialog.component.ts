@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, inject} from '@angular/core';
+import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
 import * as echarts from "echarts/core";
@@ -48,6 +48,7 @@ interface DeviationRow {
   ],
   templateUrl: './query-statistics-property-detail-dialog.component.html',
   styleUrl: './query-statistics-property-detail-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideEchartsCore({echarts})]
 })
 export class QueryStatisticsPropertyDetailDialogComponent {

@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Data} from "@angular/router";
 import {ConnectorRunDTO} from "../../dto/run";
 import {ConnectorDTO} from "../../dto/connector";
@@ -33,6 +33,7 @@ type RouteData = Data & { breadcrumb: string | any, run: ConnectorRunDTO, connec
   selector: 'app-run-connector',
   templateUrl: './run-connector.component.html',
   styleUrl: './run-connector.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatTabLabel, MatTooltip, MatTabContent, RunConnectorChangeLogComponent, RunConnectorLogComponent, TranslatePipe, KvComponent, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent, MatProgressBar, BadgeComponent]
 })
 export class RunConnectorViewComponent implements OnInit, OnDestroy {
@@ -51,6 +52,7 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly connectorRunService = inject(ConnectorRunService);
   private readonly translate = inject(TranslateService);
+  private readonly cdr = inject(ChangeDetectorRef);
   private refreshSub?: Subscription;
 
   ngOnInit(): void {
@@ -76,6 +78,8 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
     this.connectorRunService.get(this.run.id).subscribe((run) => {
       if (run) {
         this.run = run;
+        // The app is zoneless and `run` is a plain field, so request a re-render explicitly.
+        this.cdr.markForCheck();
       }
 
       this.checkRunningAndStartRefresh();

@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input} from '@angular/core';
+import {Component, computed, effect, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from "@ngrx/store";
 import {listWorkflowForApp, listWorkflows} from "@shared-lib/modules/workflow/store/workflow.actions";
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
@@ -21,6 +21,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
     HeaderComponent
   ],
   templateUrl: './workflow-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-list.component.scss',
 })
 export class WorkflowListComponent {

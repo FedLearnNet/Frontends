@@ -65,7 +65,7 @@
     <h3>{{ 'BUTTON.ADD_A_NEW_ELEMENT' | translate }}</h3>
     <app-patient-data-form-field
       [node]="schemaNode()"
-      [control]="form()?.get(schemaNode().id.toString())"
+      [control]="$safeNavigationMigration(form()?.get(schemaNode().id.toString()))"
     />
 
     <mat-form-field appearance="outline" class="full-width">

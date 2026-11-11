@@ -35,6 +35,23 @@
 
       <div class="summary-item">
         <div class="summary-item__label">
+          <mat-icon class="mi">code</mat-icon>
+          SAST
+        </div>
+        <div class="summary-item__value">
+          @if (!publishInfo().sastScanResult) {
+            <lib-badge color="ORANGE" text="Unknown" [border]="true"/>
+          } @else if (!publishInfo().sastScanResult!.complete) {
+            <lib-badge color="ORANGE" text="Incomplete" [border]="true"/>
+          } @else {
+            <lib-badge [color]="sastTotal() > 0 ? 'ORANGE' : 'GRAY'"
+                       [text]="'Findings ' + sastTotal()" [border]="true"/>
+          }
+        </div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-item__label">
           <mat-icon class="mi">bug_report</mat-icon>
           Malware
         </div>
@@ -114,13 +131,19 @@
           Vulnerability scan
         </div>
 
-        @if (publishInfo().vulnerabilityScanResult; as v) {
-          <div class="chips">
+        <div class="chips">
+          @if (publishInfo().vulnerabilityScanResult; as v) {
             <lib-status-badge [size]="'SMALL'"
                               [type]="v.success ? 'SUCCESS': 'FAILED'"/>
             <lib-badge color="GRAY" [text]="v.tool"></lib-badge>
-          </div>
-        }
+          }
+          @if (canRescan()) {
+            <button mat-stroked-button (click)="rescan()" [disabled]="rescanning()">
+              <mat-icon>refresh</mat-icon>
+              {{ rescanning() ? 'Rescanning…' : 'Rescan vulnerabilities' }}
+            </button>
+          }
+        </div>
       </div>
 
       <mat-divider></mat-divider>
@@ -131,6 +154,16 @@
         } @else {
           @let v = publishInfo().vulnerabilityScanResult!;
           <lib-kv label="Target" [value]="v.target"></lib-kv>
+          @if (v.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="v.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (v.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="v.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
           <div class="chips">
             <lib-badge color="RED" text="Critical" size="LARGE" [border]="true">{{ v.summary.critical }}
             </lib-badge>
@@ -171,6 +204,90 @@
     <mat-card class="panel" appearance="outlined">
       <div class="panel__header">
         <div class="panel__title">
+          <mat-icon>code</mat-icon>
+          Static application security scan
+        </div>
+        @if (publishInfo().sastScanResult; as s) {
+          <div class="chips">
+            <lib-status-badge size="SMALL"
+                              [type]="s.success && s.complete ? 'SUCCESS' : 'WARNING'"
+                              [text]="s.complete ? (s.success ? 'No findings' : 'Findings') : 'Incomplete'"/>
+            <lib-badge color="GRAY" [text]="s.tool"/>
+          </div>
+        }
+      </div>
+
+      <mat-divider/>
+
+      <div class="panel__body">
+        @if (publishInfo().sastScanResult; as s) {
+          <lib-kv label="Target" [value]="s.target"/>
+          <lib-kv label="Scanner version" [value]="s.version"/>
+          <lib-kv label="Scanned files" [value]="s.scannedFiles"/>
+          @if (s.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="s.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (s.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="s.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (!s.complete) {
+            <div class="empty">Scan incomplete. Findings may be partial.</div>
+          }
+          @if (s.summary; as summary) {
+            <div class="chips">
+              <lib-badge color="RED" [text]="'Error ' + summary.error" [border]="true"/>
+              <lib-badge color="ORANGE" [text]="'Warning ' + summary.warning" [border]="true"/>
+              <lib-badge color="BLUE" [text]="'Info ' + summary.info" [border]="true"/>
+              <lib-badge color="GRAY" [text]="'Unknown ' + summary.unknown" [border]="true"/>
+            </div>
+          }
+
+          @for (finding of s.findings; track $index) {
+            <mat-expansion-panel class="exp">
+              <mat-expansion-panel-header>
+                <mat-panel-title>{{ finding.ruleId }}</mat-panel-title>
+                <mat-panel-description>{{ finding.severity }}</mat-panel-description>
+              </mat-expansion-panel-header>
+              <lib-kv label="File" [value]="finding.filePath"/>
+              <lib-kv label="Start line" [value]="finding.startLine"/>
+              <lib-kv label="End line" [value]="finding.endLine"/>
+              <lib-kv label="Message" [value]="finding.message" [multiline]="true"/>
+            </mat-expansion-panel>
+          } @empty {
+            <div class="empty">{{ s.complete ? 'No SAST findings reported.' : 'No findings available.' }}</div>
+          }
+
+          @for (error of s.errors; track $index) {
+            <div class="raw-line">
+              <strong>{{ error.type }}</strong>
+              <div class="raw-line__text">{{ error.message }}</div>
+              @if (error.filePath) {
+                <div class="mono">{{ error.filePath }}</div>
+              }
+            </div>
+          }
+
+          @if (s.rawReport) {
+            <mat-expansion-panel class="exp">
+              <mat-expansion-panel-header>
+                <mat-panel-title>Raw SAST report</mat-panel-title>
+              </mat-expansion-panel-header>
+              <pre class="json">{{ s.rawReport | json }}</pre>
+            </mat-expansion-panel>
+          }
+        } @else {
+          <div class="empty">No SAST scan result present.</div>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="panel" appearance="outlined">
+      <div class="panel__header">
+        <div class="panel__title">
           <mat-icon>bug_report</mat-icon>
           Malware scan
         </div>
@@ -191,6 +308,16 @@
           <div class="empty">No malware scan result present.</div>
         } @else {
           @let m = publishInfo().malwareScanResult!;
+          @if (m.startedAt) {
+            <lib-kv label="Scan started">
+              <lib-time-badge [date]="m.startedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
+          @if (m.finishedAt) {
+            <lib-kv label="Scan finished">
+              <lib-time-badge [date]="m.finishedAt" color="GRAY"></lib-time-badge>
+            </lib-kv>
+          }
           @if ((m.findings.length) === 0) {
             <div class="empty">No infected files reported.</div>
           } @else {

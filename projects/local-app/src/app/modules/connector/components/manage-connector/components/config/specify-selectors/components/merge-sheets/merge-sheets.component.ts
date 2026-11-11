@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { FormsModule } from "@angular/forms";
@@ -22,6 +22,7 @@ export interface SheetMergeDialogData {
   selector: 'app-merge-sheets',
   templateUrl: './merge-sheets.component.html',
   styleUrl: './merge-sheets.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     MatCardModule,

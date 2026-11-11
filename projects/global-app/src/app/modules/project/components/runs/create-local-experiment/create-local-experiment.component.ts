@@ -1,4 +1,4 @@
-import {Component, input, OnDestroy, OnInit, output} from '@angular/core';
+import {Component, input, OnDestroy, OnInit, output, ChangeDetectionStrategy} from '@angular/core';
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {MatInput, MatLabel} from "@angular/material/input";
@@ -18,6 +18,7 @@ import {CreateProjectLocalExperimentDTO} from "@global-app/project/dto/project-e
     TranslatePipe
   ],
   templateUrl: './create-local-experiment.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-local-experiment.component.scss'
 })
 export class CreateLocalExperimentComponent implements OnInit, OnDestroy {

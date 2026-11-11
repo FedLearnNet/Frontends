@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, effect, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -42,6 +42,7 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
   selector: 'app-cohort-overview',
   templateUrl: './cohort-overview.component.html',
   styleUrl: './cohort-overview.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTabsModule,
     TranslatePipe,
@@ -95,7 +96,13 @@ export class CohortOverviewComponent implements OnInit {
   isEditing = signal<boolean>(false);
   selectedTabIndex = signal<number>(0);
   patients = signal<PaginatedResponse<any> | undefined>(undefined);
-  isDeleting = computed(() => isCohortDeleting(this.cohort()));
+  isDeleting = computed(() => {
+    const current = this.cohort();
+    if (!current) {
+      return false;
+    }
+    return isCohortDeleting(current) || this.cohortService.pendingDeletionIds().has(current.id);
+  });
 
   private deletionPollSub?: Subscription;
 
@@ -236,6 +243,10 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   private markCohortDeleting(): void {
+    const currentId = this.cohort()?.id;
+    if (currentId != null) {
+      this.cohortService.beginCohortDeletion(currentId);
+    }
     this.cohort.update(current => current ? {
       ...current,
       deletionInProgress: true,
@@ -278,7 +289,12 @@ export class CohortOverviewComponent implements OnInit {
         verticalPosition: 'top',
       },
     );
-    this.cohortService.notifyCohortsChanged();
+    const cohortId = this.cohort()?.id;
+    if (cohortId != null) {
+      this.cohortService.completeCohortDeletion(cohortId);
+    } else {
+      this.cohortService.notifyCohortsChanged();
+    }
     this.router.navigate(['/cohort']);
   }
 

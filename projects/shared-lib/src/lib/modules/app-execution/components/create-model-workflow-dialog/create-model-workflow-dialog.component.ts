@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from "@ngrx/store";
 import {
   MatDialogActions,
@@ -34,6 +34,7 @@ import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-
     ReactiveFormsModule,
   ],
   templateUrl: './create-model-workflow-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './create-model-workflow-dialog.component.scss'
 })
 export class CreateModelWorkflowDialogComponent {

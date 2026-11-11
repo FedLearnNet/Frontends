@@ -1,3 +1,4 @@
+import {DEFAULT_DATAMODELER_API_PREFIX} from '@shared-lib/constants/datamodeler.constants';
 import {inject, Injectable} from '@angular/core';
 import {environment} from '@global-app/env/environment';
 import {catchError, Observable, throwError} from 'rxjs';
@@ -13,7 +14,8 @@ import {TranslateService} from '@ngx-translate/core';
 export class SchemaService {
   readonly snackBar = inject(MatSnackBar);
   readonly apiService: ApiService = inject(ApiService);
-  private readonly apiUrl = environment.datamodelerApiUrl;
+  private readonly apiUrl = environment.globalLearningApiUrl;
+  private readonly apiPrefix = environment.datamodelerApiPrefix ?? DEFAULT_DATAMODELER_API_PREFIX;
   private readonly path = 'schemas';
   private readonly translate: TranslateService = inject(TranslateService);
 
@@ -69,6 +71,6 @@ export class SchemaService {
 
 
   private getBaseUrl(): string {
-    return `${this.apiUrl}/${this.path}`;
+    return `${this.apiUrl}/${this.apiPrefix}/${this.path}`;
   }
 }

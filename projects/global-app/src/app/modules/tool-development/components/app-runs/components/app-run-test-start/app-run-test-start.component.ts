@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
@@ -52,6 +52,7 @@ interface AppRunTestStartDialogData {
     TranslatePipe, HintCardComponent,
   ],
   templateUrl: './app-run-test-start.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-run-test-start.component.scss'
 })
 export class AppRunTestStartComponent implements OnInit {

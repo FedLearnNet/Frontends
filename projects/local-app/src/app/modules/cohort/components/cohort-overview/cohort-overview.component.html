@@ -1,6 +1,6 @@
 <lib-header
-  [title]="cohort()?.name"
-  [description]="cohort()?.description"
+  [title]="$safeNavigationMigration(cohort()?.name)"
+  [description]="$safeNavigationMigration(cohort()?.description)"
   [enableSkeleton]="!cohort()"
   [enableGoBack]="true"
   [mainGap]="false"

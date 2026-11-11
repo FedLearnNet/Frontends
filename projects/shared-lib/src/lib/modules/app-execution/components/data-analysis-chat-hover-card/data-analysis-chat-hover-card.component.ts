@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {Store} from "@ngrx/store";
 import {
   selectSelectedApp,
@@ -18,6 +18,7 @@ import {MatCard} from "@angular/material/card";
     MatCard
   ],
   templateUrl: './data-analysis-chat-hover-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './data-analysis-chat-hover-card.component.scss',
 })
 export class DataAnalysisChatHoverCardComponent {

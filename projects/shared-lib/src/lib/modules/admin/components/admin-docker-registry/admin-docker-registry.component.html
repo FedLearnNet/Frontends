@@ -1,0 +1,61 @@
+<mat-card>
+  <div class="registry-header">
+    <div>
+      <h2>Registry images</h2>
+      <p>{{ registry()?.registry || 'Configured Docker registry' }}</p>
+      @if (registry(); as data) {
+        <p>{{ data.repositories.length }} repositories</p>
+      }
+    </div>
+    <button mat-stroked-button type="button" (click)="refresh()" [disabled]="loading()">
+      <mat-icon>refresh</mat-icon>
+      Refresh registry
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading registry images"/>
+  } @else if (error(); as err) {
+    <lib-error-card [errorObject]="err" warningButtonText="Retry" (warningClicked)="refresh()"/>
+  } @else {
+    <mat-form-field appearance="outline">
+      <mat-label>Search repositories or tags</mat-label>
+      <input matInput [value]="search()" (input)="search.set($any($event.target).value)">
+    </mat-form-field>
+
+    <div class="table-wrap">
+      <table mat-table [dataSource]="filteredImages()">
+        <ng-container matColumnDef="repository">
+          <th mat-header-cell *matHeaderCellDef>Repository</th>
+          <td mat-cell *matCellDef="let image">{{ image.repository }}</td>
+        </ng-container>
+        <ng-container matColumnDef="tag">
+          <th mat-header-cell *matHeaderCellDef>Tag</th>
+          <td mat-cell *matCellDef="let image">
+            @if (image.tag; as tag) {
+              <code [matTooltip]="tag">{{ shortTag(tag) }}</code>
+            } @else {
+              No tags
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Image reference</th>
+          <td mat-cell *matCellDef="let image">
+            @if (image.reference; as reference) {
+              <button mat-icon-button type="button" (click)="copyReference(reference)"
+                      [matTooltip]="reference" [attr.aria-label]="'Copy ' + reference">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['repository', 'tag', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['repository', 'tag', 'actions']"></tr>
+      </table>
+    </div>
+    @if (!filteredImages().length) {
+      <p role="status">{{ images().length ? 'No images match your search.' : 'The registry has no repositories.' }}</p>
+    }
+  }
+</mat-card>

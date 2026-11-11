@@ -356,7 +356,7 @@
           <span class="step-label">{{ 'DIALOG.MAPPER.STEP_THREE' | translate }}</span>
           <h3 id="mapping-validation-heading">{{ 'DIALOG.MAPPER.VALIDATE_MAPPING' | translate }}</h3>
         </div>
-        @if (hasCompleteMapping() && validationStatus !== 'CHECKING') {
+        @if (hasCompleteMapping() && validationStatus() !== 'CHECKING') {
           <lib-btn
             type="CUSTOM"
             variant="GHOST"
@@ -369,7 +369,7 @@
 
       <p class="validation-intro">{{ 'DIALOG.MAPPER.VALIDATION_SAMPLE_HELP' | translate }}</p>
 
-      @if (validationStatus === 'IDLE') {
+      @if (validationStatus() === 'IDLE') {
         <lib-info-card
           type="INFO"
           variant="BANNER"
@@ -378,7 +378,7 @@
           [border]="true"
           [title]="'DIALOG.MAPPER.VALIDATION_WAITING' | translate"
           [subtitle]="'DIALOG.MAPPER.VALIDATION_WAITING_HELP' | translate"/>
-      } @else if (validationStatus === 'NO_DATA') {
+      } @else if (validationStatus() === 'NO_DATA') {
         <lib-info-card
           type="WARNING"
           variant="BANNER"
@@ -386,7 +386,7 @@
           [border]="true"
           [title]="'DIALOG.MAPPER.VALIDATION_NO_DATA' | translate"
           [subtitle]="'DIALOG.MAPPER.VALIDATION_NO_DATA_HELP' | translate"/>
-      } @else if (validationStatus === 'CHECKING') {
+      } @else if (validationStatus() === 'CHECKING') {
         <div class="validation-loading" aria-live="polite">
           <mat-icon>sync</mat-icon>
           <span>
@@ -394,14 +394,14 @@
             <small>{{ 'DIALOG.MAPPER.VALIDATION_RUNNING_HELP' | translate }}</small>
           </span>
         </div>
-      } @else if (validationSummary; as summary) {
+      } @else if (validationSummary(); as summary) {
         <lib-info-card
           [type]="summary.valid ? 'SUCCESS' : 'ERROR'"
           variant="BANNER"
           size="SMALL"
           [border]="true"
           [title]="(summary.valid ? 'DIALOG.MAPPER.VALIDATION_SUCCESS' : 'DIALOG.MAPPER.VALIDATION_FAILED') | translate"
-          [subtitle]="'DIALOG.MAPPER.VALIDATION_CHECKED_COUNT' | translate:{count: summary.examples.length}"/>
+          [subtitle]="'DIALOG.MAPPER.VALIDATION_CHECKED_COUNT' | translate:{count: summary.examples?.length}"/>
 
         <div class="validation-examples">
           @for (example of summary.examples; track $index) {

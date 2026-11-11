@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 
@@ -6,6 +6,7 @@ import {ProjectDetailDto} from "@global-app/project/dto/project";
   selector: 'app-workflow-app',
   imports: [],
   templateUrl: './workflow-app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-app.component.scss'
 })
 export class WorkflowAppComponent {

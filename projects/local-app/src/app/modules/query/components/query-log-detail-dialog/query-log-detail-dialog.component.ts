@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {LocalQueryDto} from "../../../logs/dto/query";
@@ -18,6 +18,7 @@ import {QueryDetailCardComponent} from "@shared-lib/modules/query/query-detail-c
     QueryDetailCardComponent,
   ],
   templateUrl: './query-log-detail-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './query-log-detail-dialog.component.scss'
 })
 export class QueryLogDetailDialogComponent {

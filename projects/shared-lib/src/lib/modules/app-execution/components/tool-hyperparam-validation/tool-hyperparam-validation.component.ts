@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ToolHyperParamConfigDTO} from "@shared-lib/modules/app-execution/dto/config";
 import {HyperParamValidationService} from "@shared-lib/modules/app-execution/service/hyper-param-validation.service";
 import {FormControl, ReactiveFormsModule} from "@angular/forms";
@@ -25,6 +25,7 @@ import {firstValueFrom} from "rxjs";
     MatButtonModule,
     MatDividerModule, BadgeComponent, ErrorCardComponent, HintCardComponent,],
   templateUrl: './tool-hyperparam-validation.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tool-hyperparam-validation.component.scss',
 })
 export class ToolHyperparamValidationComponent {

@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from "@angular/forms";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
@@ -33,6 +33,7 @@ import {MatOption, MatSelect} from "@angular/material/select";
     MatOption
   ],
   templateUrl: './tool-input-output-validation.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tool-input-output-validation.component.scss',
 })
 export class ToolInputOutputValidationComponent {

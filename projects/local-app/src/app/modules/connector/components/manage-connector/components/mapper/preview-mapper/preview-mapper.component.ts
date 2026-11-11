@@ -1,4 +1,4 @@
-import {Component, computed, input, signal} from '@angular/core';
+import {Component, computed, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ConnectorMappingElement} from '../../../../../models/connector-preview';
 import {CohortDetailDto} from '@local-app/cohort/models';
 import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from '@local-app/cohort/dto/schema';
@@ -38,6 +38,7 @@ export interface MappingPreviewEntry {
   selector: 'app-preview-mapper',
   templateUrl: './preview-mapper.component.html',
   styleUrls: ['./preview-mapper.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatToolbar,
     MatButtonToggleGroup,

@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, input} from '@angular/core';
+import {Component, inject, OnInit, input, ChangeDetectionStrategy} from '@angular/core';
 import {CommonModule} from "@angular/common";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {MatTableDataSource, MatTableModule} from "@angular/material/table";
@@ -24,6 +24,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     RouterModule, TranslatePipe, StatusBadgeComponent, BtnComponent,
   ],
   templateUrl: './experiment.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment.component.scss'
 })
 export class ExperimentComponent implements OnInit {

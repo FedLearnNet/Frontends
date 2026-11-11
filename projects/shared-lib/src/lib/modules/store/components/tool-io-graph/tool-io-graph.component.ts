@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {MatIcon} from "@angular/material/icon";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
@@ -16,6 +16,7 @@ import {
     ToolConfigCardComponent
   ],
   templateUrl: './tool-io-graph.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './tool-io-graph.component.scss',
 })
 export class ToolIoGraphComponent {

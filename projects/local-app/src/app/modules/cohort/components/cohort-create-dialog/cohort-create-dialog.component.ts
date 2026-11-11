@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {catchError, debounceTime, distinctUntilChanged, map, merge, of, startWith, Subscription, take, tap} from 'rxjs';
 import {
@@ -57,6 +57,7 @@ interface CohortCreateDialogData {
     CohortCriteriaEditorComponent
   ],
   templateUrl: './cohort-create-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-create-dialog.component.scss'
 })
 export class CohortCreateDialogComponent implements OnInit {

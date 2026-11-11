@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -19,6 +19,7 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
     MatDialogContent
   ],
   templateUrl: './app-config-remote-config-selection-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-config-remote-config-selection-dialog.component.scss',
 })
 export class AppConfigRemoteConfigSelectionDialogComponent implements OnInit {

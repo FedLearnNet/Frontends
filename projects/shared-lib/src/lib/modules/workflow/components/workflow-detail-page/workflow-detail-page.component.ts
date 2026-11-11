@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {WorkflowViewComponent} from "@shared-lib/modules/workflow/components/workflow-view/workflow-view.component";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ActivatedRoute} from "@angular/router";
@@ -17,6 +17,7 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     SkeletonLoaderComponent
   ],
   templateUrl: './workflow-detail-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-detail-page.component.scss',
 })
 export class WorkflowDetailPageComponent {

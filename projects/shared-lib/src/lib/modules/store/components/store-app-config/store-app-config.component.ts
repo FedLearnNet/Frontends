@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIconModule} from "@angular/material/icon";
 import {MatTabsModule} from "@angular/material/tabs";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -16,6 +16,7 @@ import {
     ToolConfigCardComponent,
   ],
   templateUrl: './store-app-config.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-app-config.component.scss'
 })
 export class StoreAppConfigComponent {

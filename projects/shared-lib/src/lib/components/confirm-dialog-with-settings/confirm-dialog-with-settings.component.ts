@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {ConfirmDialogWithSettings, ConfirmDialogWithSettingsResult} from '../../models';
 import {MatButtonModule} from "@angular/material/button";
@@ -16,6 +16,7 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     MatButtonModule,
     MatCheckboxModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class ConfirmDialogWithSettingsComponent {

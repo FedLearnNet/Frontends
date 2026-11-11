@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, input, output} from '@angular/core';
+import {Component, Input, OnInit, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {MatIconModule} from "@angular/material/icon";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatFormField} from "@angular/material/form-field";
@@ -20,6 +20,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     TranslatePipe
 ],
     templateUrl: './app-detail-config-mode-icon.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app-detail-config-mode-icon.component.scss'
 })
 export class AppDetailConfigModeIconComponent implements OnInit {

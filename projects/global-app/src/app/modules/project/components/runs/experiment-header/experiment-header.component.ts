@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, input, output, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {MatButton} from "@angular/material/button";
 import {Location} from "@angular/common";
@@ -28,6 +28,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
     HeaderComponent,
   ],
   templateUrl: './experiment-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-header.component.scss'
 })
 export class ExperimentHeaderComponent {

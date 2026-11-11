@@ -1,5 +1,5 @@
 import {CommonModule} from '@angular/common';
-import {Component, computed, input, output} from '@angular/core';
+import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {OntologyNodeDTO} from "@global-app/schema/dto/ontology";
 import {DataTypeNodeDTO, DataTypes} from "@global-app/schema/dto/datatype";
 import {MatCard} from "@angular/material/card";
@@ -17,6 +17,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
     BadgeComponent
   ],
   templateUrl: './selectable-data-card.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './selectable-data-card.component.scss',
 })
 export class SelectableDataCardComponent {

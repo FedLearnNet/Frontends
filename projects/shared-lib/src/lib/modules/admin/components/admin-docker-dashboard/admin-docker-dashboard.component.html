@@ -2,7 +2,7 @@
   [enableGoBack]="true"
   [locationBack]="true"
   title="Orchestration dashboard"
-  description="Inspect engine health, running containers, persisted execution runs, attached volumes and live runtime logs
+  description="Inspect engine health, registry images, running containers, persisted execution runs, attached volumes and live runtime logs
         from one workspace.">
   <button suffix mat-raised-button type="button" (click)="refreshAll()">
     <mat-icon>refresh</mat-icon>
@@ -60,6 +60,14 @@
         </mat-card>
       </div>
     </mat-tab>
+
+    @if (supportsRegistry) {
+      <mat-tab label="Registry">
+        <ng-template matTabContent>
+          <lib-admin-docker-registry/>
+        </ng-template>
+      </mat-tab>
+    }
 
     <mat-tab label="Containers">
       <div class="tab-grid">

@@ -15,6 +15,7 @@ import {
 import {MatDialog} from "@angular/material/dialog";
 import {ConnectorSelectMapperComponent, ConnectorSelectMapperResult} from "../select-mapper/select-mapper.component";
 import {ConnectorPreviewService} from "../../../../../services/connector-preview.service";
+import {FunctionsDetailDTO} from "../../../../../dto/function";
 import {ConnectorMappingConfig} from "../../../../../models/connector-model";
 import {ConnectorMappingElement} from "../../../../../models/connector-preview";
 import {getArrayOrString, isArray, ListViewComponentDialogComponent} from "../../table/list-view/list-view.component";
@@ -84,6 +85,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   columns = input<string[]>([]);
   inputData = input<any[]>([]);
   validationConfig = input<ConnectorDTO | undefined>(undefined);
+  transformers = input<FunctionsDetailDTO[]>([]);
   config = model<ConnectorMappingConfig[] | undefined>([]);
 
   patientIdConflictColumn = input<string | undefined>(undefined);
@@ -414,6 +416,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
       ...validationConfig,
       cohortId: cohort.id,
       schemaMapping,
+      transformer: this.transformers(),
     });
     const request: PreviewValidationRequestDTO = {
       elements: this.flattenedSchemaFields().map(field => ({

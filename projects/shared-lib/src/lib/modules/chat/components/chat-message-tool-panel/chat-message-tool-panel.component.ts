@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {ToolDTO} from "@shared-lib/modules/app-execution/dto/chat";
 import {MatList, MatListItem} from "@angular/material/list";
 import {MatIcon} from "@angular/material/icon";
@@ -11,6 +11,7 @@ import {MatIcon} from "@angular/material/icon";
     MatList
   ],
   templateUrl: './chat-message-tool-panel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './chat-message-tool-panel.component.scss',
 })
 export class ChatMessageToolPanelComponent {

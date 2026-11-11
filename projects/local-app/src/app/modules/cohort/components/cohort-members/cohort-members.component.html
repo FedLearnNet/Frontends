@@ -42,8 +42,8 @@
               [placeholder]="('COHORT_MEMBERS.USER_PLACEHOLDER' | translate)"
               [matAutocomplete]="userAutocomplete">
             <mat-autocomplete #userAutocomplete="matAutocomplete">
-              @for (user of filteredUsersAvailableForAdd(); track user.id) {
-                <mat-option [value]="user.id">
+              @for (user of filteredUsersAvailableForAdd(); track user.username) {
+                <mat-option [value]="user.username">
                   {{ getUserDisplayName(user) }}
                   @if (getUserSecondaryText(user) !== getUserDisplayName(user)) {
                     <span class="option-detail">{{ getUserSecondaryText(user) }}</span>

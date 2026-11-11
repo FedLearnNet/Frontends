@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {FileDTO} from "@shared-lib/modules/files/dto/file";
 import {
   FileDetailCardComponent
@@ -16,6 +16,7 @@ import {ToolConfigDTO} from "@shared-lib/modules/app-execution/dto/config";
     AppRunOutputComponent
   ],
   templateUrl: './experiment-step-data.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-step-data.component.scss'
 })
 export class ExperimentStepDataComponent {

@@ -1,4 +1,4 @@
-import {Component, DestroyRef, OnInit, computed, inject, signal} from '@angular/core';
+import {Component, DestroyRef, OnInit, computed, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {FormControl} from '@angular/forms';
@@ -28,6 +28,7 @@ import {
   selector: 'app-connector-file-list',
   templateUrl: './connector-file-list.component.html',
   styleUrl: './connector-file-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterLink,
     MatProgressBar,

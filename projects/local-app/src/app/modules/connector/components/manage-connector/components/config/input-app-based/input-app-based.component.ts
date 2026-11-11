@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, linkedSignal, model, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, output, signal} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {Store} from "@ngrx/store";
 import {
@@ -35,6 +35,7 @@ import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
     TranslatePipe
   ],
   templateUrl: './input-app-based.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './input-app-based.component.scss',
 })
 export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO> {
@@ -43,7 +44,9 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   private readonly translate: TranslateService = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
 
-  config = model.required<ConnectorDTO>();
+  // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
+  configInput = input.required<ConnectorDTO>({alias: 'config'});
+  config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();
   readonly displayMode = input<'PAGE' | 'DIALOG'>('PAGE');

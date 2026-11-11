@@ -1,5 +1,5 @@
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {Component, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {
@@ -44,6 +44,7 @@ import {
 import {TrainingReviewActions} from "@local-app/data-review/store/training-review.actions";
 import {TrainingUsedDataComponent} from "../../../training/components/training-used-data/training-used-data.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {TrainingService} from "@local-app/data-review/services/training.service";
 import {MatProgressBar} from "@angular/material/progress-bar";
 
@@ -66,10 +67,14 @@ interface FilterParams {
   cohorts: string[];
 }
 
-export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
+/**
+ * Returns the i18n key for the aggregator-location label, not the rendered text - the same
+ * keys back the create-federated-experiment toggle in global-app, so wording only lives in one place.
+ */
+export function getAggregatorLocationKey(platformIsCoordinator?: boolean): string {
   return platformIsCoordinator
-    ? 'The FL-Net Platform connected to this clinic'
-    : 'Another participating client (selected randomly)';
+    ? 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_PLATFORM'
+    : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
 @Component({
@@ -99,9 +104,11 @@ export function getAggregatorLocation(platformIsCoordinator?: boolean): string {
     SkeletonLoaderComponent,
     TrainingUsedDataComponent,
     BadgeComponent,
+    HintCardComponent,
     MatProgressBar
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './learning-request-data-selector-list.component.scss'
 })
 export class LearningRequestDataSelectorListComponent implements OnInit {
@@ -115,7 +122,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   readonly data = inject<LearningRequestDataSelectorData>(MAT_DIALOG_DATA);
   readonly project: ProjectDetailDto = this.data.request.project;
-  readonly aggregatorLocation = getAggregatorLocation(this.project.platformIsCoordinator);
+  readonly aggregatorLocationKey = getAggregatorLocationKey(this.data.request.platformIsCoordinator);
 
   protected readonly TrainingStatusPending = FederatedLearningRequestStatus.PENDING;
 
@@ -128,12 +135,15 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   isLargeScreen: boolean = true;
   screenSize: string;
   patients: PatientData[] = [];
-  requestPatients: PatientLearningDto[] = [];
-  cohorts: string[] = [];
+  readonly requestPatients = signal<PatientLearningDto[]>([]);
+  readonly cohorts = signal<string[]>([]);
   selectedPatients: SelectionModel<PatientData> = new SelectionModel<PatientData>(true);
+  private readonly selectionRevision = signal(0);
   dataSource = new MatTableDataSource<PatientData>();
-  patientsLoading = true;
-  patientsLoadError: string | null = null;
+  readonly patientsLoading = signal(true);
+  readonly patientsLoadError = signal<string | null>(null);
+  readonly cohortBadgeText = signal('…');
+  readonly patientBadgeText = signal('…');
 
   selectedFilter: boolean[] = [];
   searchValue: string;
@@ -142,30 +152,40 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
     this.trainingService.getTraining(this.data.request.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (detail) => {
-          this.requestPatients = detail.requestPatients ?? [];
-          this.buildPatientTable(this.requestPatients);
-          this.patientsLoading = false;
-        },
-        error: (err: Error) => {
-          this.patientsLoadError = err?.message ?? String(err);
-          this.patientsLoading = false;
-        }
+        next: (detail) => this.applyAfterRender(() => this.applyTrainingDetail(detail)),
+        error: (err: Error) => this.applyAfterRender(() => {
+          this.patientsLoadError.set(err?.message ?? String(err));
+          this.patientsLoading.set(false);
+        }),
       });
   }
 
-  private buildPatientTable(requestPatients: PatientLearningDto[]): void {
-    this.patients = [];
-    this.cohorts = [];
+  /**
+   * Template bindings are recorded before this subscribe runs. A macrotask keeps
+   * the cohort count from changing between that record and the dev-mode recheck.
+   */
+  private applyAfterRender(apply: () => void): void {
+    setTimeout(() => {
+      if (this.destroyRef.destroyed) {
+        return;
+      }
+      apply();
+    });
+  }
+
+  private applyTrainingDetail(detail: FederatedLearningRequestDto): void {
+    const requestPatients = detail.requestPatients ?? [];
+    const patients: PatientData[] = [];
+    const cohortNames: string[] = [];
     requestPatients.forEach((requestCohort: PatientLearningDto) => {
       const cohortDetail = this.data.cohorts.find((cohort: CohortDto) => cohort.id === requestCohort.internalCohortId);
       if (!cohortDetail) {
         return;
       }
-      if (!this.cohorts.includes(cohortDetail.name)) {
-        this.cohorts.push(cohortDetail.name);
+      if (!cohortNames.includes(cohortDetail.name)) {
+        cohortNames.push(cohortDetail.name);
       }
-      this.patients.push({
+      patients.push({
         id: requestCohort.internalPatientId,
         cohort: cohortDetail.name,
         cohortId: requestCohort.internalCohortId,
@@ -173,9 +193,18 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
         requestPatient: requestCohort,
       });
     });
-    this.dataSource.data = this.patients;
+    this.patients = patients;
+    this.dataSource.data = patients;
     this.dataSource.filterPredicate = this.createFilter();
-    this.onSelectAll();
+    this.selectedPatients.clear();
+    patients.forEach(patient => this.selectedPatients.select(patient));
+    this.selectionRevision.update(revision => revision + 1);
+    this.requestPatients.set(requestPatients);
+    this.cohorts.set(cohortNames);
+    this.cohortBadgeText.set(String(cohortNames.length));
+    this.patientBadgeText.set(String(requestPatients.length));
+    this.selectedFilter = cohortNames.map(() => false);
+    this.patientsLoading.set(false);
   }
 
   onTabChange(evt: MatTabChangeEvent) {
@@ -192,6 +221,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   }
 
   isAllSelected(): boolean {
+    this.selectionRevision();
     const numSelected = this.selectedPatients.selected.length;
     const numVisible = this.dataSource.filteredData.length;
     return numSelected === numVisible;
@@ -200,7 +230,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   getSelectedData(): PatientLearningDto[] {
     const selected = new Set(this.selectedPatients.selected.map(patient => patient.requestPatient));
 
-    return this.requestPatients.filter(requestPatient => selected.has(requestPatient));
+    return this.requestPatients().filter(requestPatient => selected.has(requestPatient));
   }
 
   onAccept(modelCanBePublic: boolean): void {
@@ -225,15 +255,16 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   onToggleSelection(cohort: PatientData): void {
     this.selectedPatients.toggle(cohort);
+    this.selectionRevision.update(revision => revision + 1);
   }
 
   onSelectAll(): void {
     if (this.isAllSelected()) {
       this.selectedPatients.clear();
-      return;
+    } else {
+      this.dataSource.filteredData.forEach(cohort => this.selectedPatients.select(cohort));
     }
-
-    this.dataSource.filteredData.forEach(cohort => this.selectedPatients.select(cohort));
+    this.selectionRevision.update(revision => revision + 1);
   }
 
   applySearch(event: Event) {
@@ -242,7 +273,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   }
 
   clearFilters() {
-    this.selectedFilter = this.cohorts.map(() => false);
+    this.selectedFilter = this.cohorts().map(() => false);
     this.filterTable();
   }
 
@@ -252,7 +283,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   }
 
   filterTable(): void {
-    const filter = this.cohorts.filter((_, index) => this.selectedFilter[index]);
+    const filter = this.cohorts().filter((_, index) => this.selectedFilter[index]);
     this.dataSource.filter = JSON.stringify({
       search: this.searchValue,
       cohorts: filter
@@ -260,6 +291,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   }
 
   getSelectedPatientsPerCoHort(id: string): number {
+    this.selectionRevision();
     return this.selectedPatients.selected.filter(patient => patient.cohort === id).length;
   }
 

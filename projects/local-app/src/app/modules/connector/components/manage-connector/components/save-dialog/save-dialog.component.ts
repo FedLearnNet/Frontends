@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ManageConnectorComponent } from "../../manage-connector.component";
 import { MatSlideToggleModule } from "@angular/material/slide-toggle";
 import { MatCheckboxModule } from "@angular/material/checkbox";
@@ -44,6 +44,7 @@ import { TranslatePipe } from "@ngx-translate/core";
 
     ],
     templateUrl: './save-dialog.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './save-dialog.component.scss'
 })
 export class ManageConnectorSaveDialogComponent implements OnInit {

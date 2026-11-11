@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -52,6 +52,7 @@ export interface TaskExecutionInfoDialogData extends BaseAuthDto {
     RunPerformanceComponent
   ],
   templateUrl: './ai-task-execution-info-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './ai-task-execution-info-dialog.component.scss',
 })
 export class AiTaskExecutionInfoDialogComponent {

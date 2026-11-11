@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -11,6 +11,7 @@ import {MatTooltip} from "@angular/material/tooltip";
     MatTooltip
   ],
   templateUrl: './raw-log-viewer.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './raw-log-viewer.component.scss',
 })
 export class RawLogViewerComponent {

@@ -1,4 +1,4 @@
-import {Component, computed, inject, input} from '@angular/core';
+import {Component, computed, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
 
 import {MatCardModule} from '@angular/material/card';
@@ -24,6 +24,7 @@ import {Location} from "@angular/common";
   standalone: true,
   imports: [MatCardModule, MatChipsModule, RouterLink, ErrorCardComponent, KvComponent, StatusBadgeComponent, StoreCardComponent, PublishBadgeComponent, MatIcon, MatIconButton, MatToolbar],
   templateUrl: './experiment-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-header.component.scss',
 })
 export class ExperimentHeaderComponent {

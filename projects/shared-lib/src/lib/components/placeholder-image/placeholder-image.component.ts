@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {NgStyle} from "@angular/common";
 
 @Component({
@@ -7,6 +7,7 @@ import {NgStyle} from "@angular/common";
     NgStyle
   ],
   templateUrl: './placeholder-image.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './placeholder-image.component.scss'
 })
 export class PlaceholderImageComponent {

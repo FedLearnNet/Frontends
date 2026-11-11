@@ -1,6 +1,6 @@
 <lib-header
   [title]="run ? 'Run ' + run.id : ('BUTTON.LOADING' | translate)"
-  [description]="connector?.name ? 'Connector: ' + connector?.name : 'Review run results, errors and execution logs.'"
+  [description]="connector?.name ? 'Connector: ' + $safeNavigationMigration(connector?.name) : 'Review run results, errors and execution logs.'"
   [enableGoBack]="true"
   [locationBack]="true">
   @if (run && connector && !run.dryRun && !isActive()) {
@@ -48,6 +48,7 @@
                 <lib-time-badge
                   [date]="run.createdAt"
                   [dateTo]="isActive() ? null : run.updatedAt"
+                  [color]="convertStatus(run.status) === 'FAILED' ? 'RED' : 'GREEN'"
                   [calcDuration]="true"></lib-time-badge>
               </lib-kv>
             </div>

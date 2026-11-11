@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -7,6 +7,12 @@ import {
   PipelinePublishInfoDetailComponent
 } from "../pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
+import {AuthorDto} from "@shared-lib/modules/store/dto/app-author";
+
+export interface PipelinePublishInfoDialogData extends AppPublishInfoDTO {
+  appVersionId?: number;
+  authors?: AuthorDto[];
+}
 
 @Component({
   selector: 'app-pipeline-publish-info-dialog',
@@ -15,11 +21,12 @@ import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
     PipelinePublishInfoDetailComponent
   ],
   templateUrl: './pipeline-publish-info-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './pipeline-publish-info-dialog.component.scss',
 })
 export class PipelinePublishInfoDialogComponent {
   private readonly dialogRef: MatDialogRef<PipelinePublishInfoDialogComponent> = inject(MatDialogRef);
-  readonly data = inject<AppPublishInfoDTO>(MAT_DIALOG_DATA);
+  readonly data = inject<PipelinePublishInfoDialogData>(MAT_DIALOG_DATA);
 
   toggleMaximize(isMaximized: boolean): void {
     if (isMaximized) {

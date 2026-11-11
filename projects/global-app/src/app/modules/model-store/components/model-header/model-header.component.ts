@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {ModelDetailDto} from "@shared-lib/modules/app-execution/dto/model";
 import {TranslatePipe} from "@ngx-translate/core";
 import {PlaceholderImageComponent} from "@shared-lib/components/placeholder-image/placeholder-image.component";
@@ -15,6 +15,7 @@ import {DockerImageTagComponent} from "@shared-lib/components/docker-image-tag/d
     DockerImageTagComponent,
   ],
   templateUrl: './model-header.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './model-header.component.scss'
 })
 export class ModelHeaderComponent {

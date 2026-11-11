@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, model, output, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, model, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {ConfigPydanticDTO} from '../../../../dto/config';
@@ -67,6 +67,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
   ],
   providers: [provideMarkdown()],
   templateUrl: './app-detail-config-hyperparam.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-hyperparam.component.scss',
 })
 export class AppDetailConfigHyperparamComponent {

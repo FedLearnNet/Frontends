@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, computed, DestroyRef, inject, OnInit, viewChild} from '@angular/core';
+import {AfterViewInit, Component, computed, DestroyRef, inject, OnInit, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatTable, MatTableModule} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -38,6 +38,7 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
     ErrorCardComponent,
   ],
   templateUrl: './training-grid.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './training-grid.component.scss'
 })
 export class TrainingGridComponent implements OnInit, AfterViewInit {

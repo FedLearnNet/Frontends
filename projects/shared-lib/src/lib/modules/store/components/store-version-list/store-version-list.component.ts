@@ -1,4 +1,4 @@
-import {Component, computed, inject, model, OnInit, output, signal} from '@angular/core';
+import {Component, computed, inject, model, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatTableModule} from "@angular/material/table";
 import {MatIconButton} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
@@ -49,6 +49,7 @@ interface StoreVersion {
     TimeBadgeComponent,
   ],
   templateUrl: './store-version-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-version-list.component.scss'
 })
 export class StoreVersionListComponent implements OnInit {

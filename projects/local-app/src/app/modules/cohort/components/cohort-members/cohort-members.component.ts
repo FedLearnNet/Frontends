@@ -1,4 +1,4 @@
-import {Component, computed, inject, model, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, model, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -38,6 +38,7 @@ import {CohortService} from '@local-app/cohort/services/cohort.service';
     TranslatePipe,
   ],
   templateUrl: './cohort-members.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './cohort-members.component.scss',
 })
 export class CohortMembersComponent implements OnInit {
@@ -70,10 +71,10 @@ export class CohortMembersComponent implements OnInit {
   readonly members = computed(() => this.cohort()?.members ?? []);
   readonly actionsDisabled = computed(() => isCohortDeleting(this.cohort()));
 
-  readonly userById = computed(() => {
+  readonly userByUsername = computed(() => {
     const users = new Map<string, CohortAvailableUserDto>();
     for (const user of this.availableUsers()) {
-      users.set(user.id, user);
+      users.set(user.username, user);
     }
     return users;
   });
@@ -81,7 +82,7 @@ export class CohortMembersComponent implements OnInit {
   readonly usersAvailableForAdd = computed(() => {
     const assignedIds = new Set(this.members().map(member => member.keycloakId));
     return this.availableUsers()
-      .filter(user => !assignedIds.has(user.id))
+      .filter(user => !assignedIds.has(user.username))
       .sort((a, b) => this.getUserDisplayName(a).localeCompare(this.getUserDisplayName(b)));
   });
 
@@ -253,11 +254,11 @@ export class CohortMembersComponent implements OnInit {
   }
 
   getMemberDisplayName(member: CohortMemberDto): string {
-    return this.getUserDisplayName(this.userById().get(member.keycloakId)) || member.keycloakId;
+    return this.getUserDisplayName(this.userByUsername().get(member.keycloakId)) || member.keycloakId;
   }
 
   getMemberEmail(member: CohortMemberDto): string {
-    return this.userById().get(member.keycloakId)?.email || member.keycloakId;
+    return this.userByUsername().get(member.keycloakId)?.email || member.keycloakId;
   }
 
   getUserDisplayName(user: CohortAvailableUserDto | undefined): string {

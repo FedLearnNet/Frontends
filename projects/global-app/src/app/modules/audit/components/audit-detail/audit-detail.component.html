@@ -1,5 +1,5 @@
 <lib-header
-  [title]="appDetail()?.name"
+  [title]="$safeNavigationMigration(appDetail()?.name)"
   [description]="appDetail() ? 'v' + appDetail()!.latestVersion : undefined"
   [enableGoBack]="true"
   [locationBack]="true"

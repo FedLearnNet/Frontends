@@ -19,7 +19,7 @@ export class AdminCenterComponent {
     {
       id: 'docker',
       title: 'Docker & orchestration',
-      description: 'Inspect engine state, running containers, persisted runs, volumes and live runtime logs.',
+      description: 'Inspect registry images, engine state, running containers, persisted runs, volumes and live runtime logs.',
       icon: 'hub',
       routerLink: '/admin/orch',
       badge: 'Live'

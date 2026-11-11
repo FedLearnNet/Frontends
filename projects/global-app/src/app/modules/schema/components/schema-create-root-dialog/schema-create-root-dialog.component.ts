@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {FormsModule} from "@angular/forms";
@@ -22,6 +22,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     TranslatePipe,
   ],
   templateUrl: './schema-create-root-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './schema-create-root-dialog.component.scss'
 })
 export class SchemaCreateRootDialogComponent {

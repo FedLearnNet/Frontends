@@ -36,6 +36,15 @@
     <div class="title-strong">Pipelines</div>
     <span class="spacer"></span>
     @if (canCreate()) {
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Run mode</mat-label>
+        <mat-select [ngModel]="runMode()" (ngModelChange)="runMode.set($event)">
+          <mat-option [value]="PipelineRunMode.ALL">Build and publish</mat-option>
+          @if (modelSubId()) {
+            <mat-option [value]="PipelineRunMode.LOCAL_BUILD">Local build from uploaded files</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
       <lib-btn
         type="START"
         label="Start new pipeline" (clicked)="create()"/>
@@ -55,6 +64,7 @@
           <div class="row-title">
             #{{ filtered().length - $index }}
             <span class="chip">{{ p.pipelineType }}</span>
+            <span class="chip">{{ pipelineRunModeLabels[p.runMode] }}</span>
           </div>
 
           <div class="pipeline-meta">

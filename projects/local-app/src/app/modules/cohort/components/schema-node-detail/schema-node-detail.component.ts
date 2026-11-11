@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {SchemaNodeDto, SchemaNodeTypeEnum, SchemaRootNodeDto} from "@local-app/cohort/dto/schema";
 import {MatIconModule} from "@angular/material/icon";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
@@ -19,6 +19,7 @@ export type SchemaNodeDetailData = SchemaNodeDto | SchemaRootNodeDto;
     InfoGridComponent
   ],
   templateUrl: './schema-node-detail.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './schema-node-detail.component.scss',
 })
 export class SchemaNodeDetailComponent {

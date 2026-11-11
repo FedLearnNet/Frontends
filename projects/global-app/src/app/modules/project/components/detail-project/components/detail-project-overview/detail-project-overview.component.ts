@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, signal} from '@angular/core';
+import {Component, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ProjectDto} from '../../../../dto/project';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -33,6 +33,7 @@ import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} fro
     MatCardContent,
     MatCardAvatar,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class DetailProjectOverviewComponent {

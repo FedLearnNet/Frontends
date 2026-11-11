@@ -1,4 +1,4 @@
-import {Component, effect, input, signal, viewChild} from '@angular/core';
+import {Component, effect, input, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {MatTableDataSource, MatTableModule} from '@angular/material/table';
@@ -25,6 +25,7 @@ import {FormsModule} from "@angular/forms";
     FormsModule,
   ],
   templateUrl: './app-log-table.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-log-table.component.scss',
 })
 export class AppLogTableComponent {

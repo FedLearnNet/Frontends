@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, viewChild} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -42,6 +42,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
   selector: 'app-run-dialog',
   templateUrl: './run-dialog.component.html',
   styleUrl: './run-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatDialogTitle,
     MatDivider,

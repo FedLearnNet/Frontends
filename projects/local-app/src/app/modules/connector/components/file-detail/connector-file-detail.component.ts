@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {DecimalPipe, Location} from '@angular/common';
 import {Actions, ofType} from '@ngrx/effects';
@@ -34,6 +34,7 @@ import {ImportActivityChipComponent} from '../import/import-activity-chip/import
   selector: 'app-connector-file-detail',
   templateUrl: './connector-file-detail.component.html',
   styleUrl: './connector-file-detail.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTooltip,
     MatTabsModule,

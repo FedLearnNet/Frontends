@@ -15,7 +15,7 @@
   <lib-store-list
     #storelist
     [linkToShop]="false"
-    [storeConfig]="data?.storeConfig"
+    [storeConfig]="$safeNavigationMigration(data?.storeConfig)"
     (itemClicked)="itemClick($event)"
   />
 </mat-dialog-content>

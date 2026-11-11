@@ -92,8 +92,17 @@
   .status-dot {
     width: .5rem;
     height: .5rem;
+    flex: 0 0 .5rem;
     border-radius: 50%;
     animation: circlePulse 1.6s infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot,
+    &.pulse,
+    &.fade {
+      animation: none;
+    }
   }
 
   &.green {

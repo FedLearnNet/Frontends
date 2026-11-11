@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 
 @Component({
@@ -7,6 +7,7 @@ import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/statu
     StatusBadgeComponent
   ],
   templateUrl: './status-title.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './status-title.component.scss'
 })
 export class StatusTitleComponent {

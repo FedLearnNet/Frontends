@@ -13,7 +13,7 @@ export class LocalApiHealthService {
   private http: HttpClient = inject(HttpClient);
 
   private readonly apiUrl = environment.localLearningAPIURL;
-  private readonly path = '/q/health/ready'
+  private readonly path = '/health/ready'
 
   streamBoxes(): Observable<ServiceBox[]> {
     return this.http.get<HealthResponseDto>(this.getBaseUrl(), {observe: 'response'}).pipe(

@@ -1,6 +1,6 @@
 <lib-header
-  [title]="project()?.name"
-  [description]="project()?.description"
+  [title]="$safeNavigationMigration(project()?.name)"
+  [description]="$safeNavigationMigration(project()?.description)"
   [enableGoBack]="true"
   [routerOnePathBack]="true"
   [enableSkeleton]="loading()"

@@ -168,12 +168,17 @@ export class AppEditComponent {
   }
 
   showPipelinePublishInfo(): void {
-    const info = this.app().publishInfo;
-    if (!info) {
+    const app = this.app();
+    if (!app.imageName) {
       return;
     }
     this.dialog.open(PipelinePublishInfoDialogComponent, {
-      data: info,
+      data: {
+        ...app.publishInfo,
+        imageName: app.imageName,
+        appVersionId: app.latestVersionId,
+        authors: app.authors,
+      },
       height: '80vh',
       width: '90vw',
       maxWidth: '100vw',

@@ -101,7 +101,7 @@
               @if (stage.appBased || stage.blockedByStep) {
                 <app-app-based-transformer
                   [config]="config"
-                  [transformers]="transformer"
+                  [transformers]="transformers()"
                   [cohortId]="cohortId()"
                   [stepIndex]="stage.stepIndex"
                   [transformer]="getTransformer()"
@@ -135,6 +135,7 @@
             [columns]="getLatestColumns()"
             [inputData]="getLatestData()"
             [validationConfig]="config"
+            [transformers]="transformerList()"
             [patientIdConflictColumn]="patientIdTransformerConflict"
             [(config)]="config.schemaMapping"
             (cardDetail)="onMappingCardContentChange($event)"/>

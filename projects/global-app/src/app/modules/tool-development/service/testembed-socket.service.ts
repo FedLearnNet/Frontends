@@ -1,4 +1,4 @@
-import {inject, Injectable, OnDestroy} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {filter, fromEvent, map, mergeMap, Observable, Subject} from 'rxjs'
 import {tap} from "rxjs/operators";
 import {RunType, TestEmbedEnum, TestEmbedSocketWrapperDTO} from "../dto/socket";
@@ -12,7 +12,6 @@ import {
   FederatedTestRunCreateDTO,
   FederatedTestRunDTO
 } from "../dto/federated-test-run";
-import Keycloak from "keycloak-js";
 import {LocalFiles} from "@shared-lib/modules/files/dto/file";
 import {RunMessageLogDTO} from "@shared-lib/modules/experiments/dto/log";
 
@@ -21,7 +20,6 @@ import {RunMessageLogDTO} from "@shared-lib/modules/experiments/dto/log";
   providedIn: 'root'
 })
 export class ControllerSocketService implements OnDestroy {
-  private readonly keycloak: Keycloak = inject(Keycloak);
   private socket?: WebSocket;
 
   messages$: Observable<TestEmbedSocketWrapperDTO> = new Observable<TestEmbedSocketWrapperDTO>();
@@ -35,9 +33,7 @@ export class ControllerSocketService implements OnDestroy {
 
   connectToWebSocket(url: string) {
     try {
-      const token = this.keycloak.token!;
-      const authorization = encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${token}`);
-      this.socket = new WebSocket(url, ['bearer-token-carrier', authorization]);
+      this.socket = new WebSocket(url);
     } catch (e) {
       console.error('WebSocket connection failed: ', e);
       return;

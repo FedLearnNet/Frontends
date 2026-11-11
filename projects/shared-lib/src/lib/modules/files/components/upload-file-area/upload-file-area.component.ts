@@ -1,4 +1,4 @@
-import {Component, input, output, signal} from '@angular/core';
+import {Component, input, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {TranslatePipe} from '@ngx-translate/core';
 import {UploadProgress} from "@shared-lib/modules/files/model/file-response";
 import {
@@ -9,6 +9,7 @@ import {
   selector: 'lib-upload-file-area',
   imports: [TranslatePipe, UploadProgressComponent],
   templateUrl: './upload-file-area.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './upload-file-area.component.scss'
 })
 export class UploadFileAreaComponent {

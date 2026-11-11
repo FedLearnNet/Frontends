@@ -15,7 +15,7 @@ export interface CohortMemberCreateDto {
 
 export interface CohortAvailableUserDto {
   id: string;
-  username?: string | null;
+  username: string;
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;

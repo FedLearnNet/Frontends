@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {AppDto} from "@shared-lib/modules/store/dto/app";
 import {MatIcon} from "@angular/material/icon";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
@@ -14,6 +14,7 @@ import {MatTooltip} from "@angular/material/tooltip";
     MatTooltip
   ],
   templateUrl: './app-card-cert-badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-card-cert-badge.component.scss'
 })
 export class AppCardCertBadgeComponent {

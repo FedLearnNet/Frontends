@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, output} from '@angular/core';
+import {Component, computed, inject, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {ConnectorCard} from "../../../../models/connector-card";
 import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 
@@ -17,6 +17,7 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
   selector: 'app-connector-cards',
   templateUrl: './cards.component.html',
   styleUrl: './cards.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatIconButton, MatIcon, MatCardContent, ErrorCardComponent, KvComponent, KeyValuePipe, BadgeComponent, StatusBadgeComponent]
 })
 export class ConnectorStepCardsComponent {

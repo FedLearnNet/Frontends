@@ -3,10 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
-  OnInit,
+  linkedSignal,
   output,
   signal,
   ViewChild
@@ -48,10 +47,10 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
   styleUrl: './general-log-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GeneralLogTableComponent implements OnInit, AfterViewInit {
+export class GeneralLogTableComponent implements AfterViewInit {
   tableKey = input<string>();
   allowSearch = input<boolean>(true);
-  loadedData = input.required<LogPage<any>>();
+  loadedData = input<LogPage<any> | undefined>();
   displayedColumns = input<string[]>(["actions", "createdAt"]);
   filters = input<string[]>([]);
 
@@ -60,9 +59,9 @@ export class GeneralLogTableComponent implements OnInit, AfterViewInit {
 
   currentPage = signal<number>(0);
   pageSize = signal<number>(25)
-  resultsLength = signal<number>(0)
-  data = signal<any[]>([]);
-  selectedFilter = signal<boolean[]>([]);
+  readonly data = computed(() => this.loadedData()?.results ?? []);
+  readonly resultsLength = computed(() => this.loadedData()?.totalCount ?? 0);
+  selectedFilter = linkedSignal(() => this.filters().map(() => false));
   searchValue = signal<string>('');
 
   additionalColumns = computed(() =>
@@ -83,32 +82,8 @@ export class GeneralLogTableComponent implements OnInit, AfterViewInit {
   private readonly paginatorStateService = inject(PaginatorStateService);
 
   constructor() {
-    effect(() => {
-      const page = this.loadedData();
-      if (page) {
-        this.data.set(page.results);
-        this.currentPage.set(page.page);
-        this.pageSize.set(page.pageSize);
-        this.resultsLength.set(page.totalCount);
-      }
-    });
-    effect(() => {
-      const f = this.filters();
-      if (f != null) {
-        this.clearFilters();
-      }
-    });
-  }
-
-  ngOnInit() {
     this.loadPaginatorState();
-
-    this.loadData.emit({
-      sort: 'createdAt',
-      order: 'asc',
-      page: this.currentPage(),
-      pageSize: this.pageSize(),
-    });
+    setTimeout(() => this.emitInitialLoad());
   }
 
   ngAfterViewInit() {
@@ -170,6 +145,15 @@ export class GeneralLogTableComponent implements OnInit, AfterViewInit {
       pageSize: event.pageSize,
     });
 
+    this.loadData.emit({
+      sort: 'createdAt',
+      order: 'asc',
+      page: this.currentPage(),
+      pageSize: this.pageSize(),
+    });
+  }
+
+  private emitInitialLoad(): void {
     this.loadData.emit({
       sort: 'createdAt',
       order: 'asc',

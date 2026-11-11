@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {
   MatCell,
   MatCellDef,
@@ -26,6 +26,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
   selector: 'app-list-schema',
   templateUrl: './list-schema.component.html',
   styleUrl: './list-schema.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatButton, RouterLink, MatIcon, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, TranslatePipe, HeaderComponent, PageWrapperComponent]
 })
 export class ListSchemaComponent implements OnInit {

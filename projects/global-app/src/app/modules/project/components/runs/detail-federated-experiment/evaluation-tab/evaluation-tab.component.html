@@ -28,9 +28,9 @@
     </div>
 
     <div class="cards">
-      <lib-value-card label="Federated" [value]="selected()?.federated" format="number" size="LARGE"/>
-      <lib-value-card label="Local mean (lower)" [value]="selected()?.localMean" format="number" size="LARGE"/>
-      <lib-value-card label="Benefit (fed − local)" [value]="selected()?.benefit" format="delta" size="LARGE"/>
+      <lib-value-card label="Federated" [value]="$safeNavigationMigration(selected()?.federated)" format="number" size="LARGE"/>
+      <lib-value-card label="Local mean (lower)" [value]="$safeNavigationMigration(selected()?.localMean)" format="number" size="LARGE"/>
+      <lib-value-card label="Benefit (fed − local)" [value]="$safeNavigationMigration(selected()?.benefit)" format="delta" size="LARGE"/>
       <lib-value-card label="Converged by round" size="LARGE">
         {{ summary()!.convergenceRound ?? '—' }} / {{ summary()!.rounds }}
       </lib-value-card>
@@ -49,9 +49,9 @@
     </lib-info-grid>
     <lib-info-grid title="Cross-site fairness - {{ selectedMetric() }}" [disableFlex]="true">
       <div class="cards">
-        <lib-value-card label="Worst site" [value]="selected()?.federatedMin" format="number"></lib-value-card>
-        <lib-value-card label="Best site" [value]="selected()?.federatedMax" format="number"></lib-value-card>
-        <lib-value-card label="Spread (SD)" [value]="selected()?.federatedSd" format="number"></lib-value-card>
+        <lib-value-card label="Worst site" [value]="$safeNavigationMigration(selected()?.federatedMin)" format="number"></lib-value-card>
+        <lib-value-card label="Best site" [value]="$safeNavigationMigration(selected()?.federatedMax)" format="number"></lib-value-card>
+        <lib-value-card label="Spread (SD)" [value]="$safeNavigationMigration(selected()?.federatedSd)" format="number"></lib-value-card>
       </div>
     </lib-info-grid>
 

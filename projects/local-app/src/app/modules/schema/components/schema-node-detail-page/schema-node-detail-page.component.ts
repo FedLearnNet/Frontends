@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {HeaderComponent} from '@shared-lib/components/header/header.component';
@@ -10,6 +10,7 @@ import {SchemaNodeDto} from '@local-app/cohort/dto/schema';
   selector: 'app-schema-node-detail-page',
   templateUrl: './schema-node-detail-page.component.html',
   styleUrl: './schema-node-detail-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [HeaderComponent, PageWrapperComponent, SchemaNodeDetailComponent],
 })
 export class SchemaNodeDetailPageComponent {

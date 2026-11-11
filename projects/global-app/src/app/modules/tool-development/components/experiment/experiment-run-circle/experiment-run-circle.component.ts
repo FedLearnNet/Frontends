@@ -1,9 +1,10 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 
 @Component({
   selector: 'app-experiment-run-circle',
   imports: [],
   templateUrl: './experiment-run-circle.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './experiment-run-circle.component.scss'
 })
 export class ExperimentRunCircleComponent {

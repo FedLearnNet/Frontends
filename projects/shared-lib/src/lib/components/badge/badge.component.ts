@@ -1,4 +1,4 @@
-import {Component, computed, input} from '@angular/core';
+import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatIcon} from "@angular/material/icon";
 
 export type BadgeSize = 'X-SMALL' | 'SMALL' | 'MEDIUM' | 'LARGE';
@@ -12,6 +12,7 @@ export type BadgeColor = 'GREEN' | 'GRAY' | 'RED' | 'ORANGE' | 'BLUE' | 'WHITE';
     MatIcon
   ],
   templateUrl: './badge.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './badge.component.scss'
 })
 export class BadgeComponent {

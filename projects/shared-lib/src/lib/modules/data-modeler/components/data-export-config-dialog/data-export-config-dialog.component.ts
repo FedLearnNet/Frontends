@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Subscription} from "rxjs";
 import {
@@ -61,6 +61,7 @@ const MAX_LOGS = 500;
     EmptyStateComponent,
   ],
   templateUrl: './data-export-config-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './data-export-config-dialog.component.scss',
 })
 export class DataExportConfigDialogComponent implements OnInit {

@@ -1,4 +1,4 @@
-import {Component, inject, model} from '@angular/core';
+import {Component, inject, model, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -26,6 +26,7 @@ import {MatButton} from "@angular/material/button";
     MatDialogClose
   ],
   templateUrl: './app-detail-config-table-element-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-table-element-dialog.component.scss',
 })
 export class AppDetailConfigTableElementDialogComponent {

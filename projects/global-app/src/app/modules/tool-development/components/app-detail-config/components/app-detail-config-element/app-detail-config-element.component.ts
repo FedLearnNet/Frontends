@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, model, output, signal, untracked} from '@angular/core';
+import {Component, computed, effect, inject, input, model, output, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 
 import {MatInputModule} from "@angular/material/input";
@@ -59,6 +59,7 @@ type FormValue = {
   ],
   providers: [provideMarkdown()],
   templateUrl: './app-detail-config-element.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-detail-config-element.component.scss'
 })
 export class AppDetailConfigElementComponent {

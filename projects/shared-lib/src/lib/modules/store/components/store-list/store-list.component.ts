@@ -1,4 +1,4 @@
-import {Component, computed, HostListener, inject, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, HostListener, inject, input, OnInit, output, signal, ChangeDetectionStrategy} from '@angular/core';
 import {MatButton} from "@angular/material/button";
 import {TranslatePipe} from "@ngx-translate/core";
 import {StoreFilterComponent} from "@shared-lib/modules/store/components/store-filter/store-filter.component";
@@ -22,6 +22,7 @@ import {StoreConfig} from '@shared-lib/models';
     MatProgressSpinner
   ],
   templateUrl: './store-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-list.component.scss'
 })
 export class StoreListComponent implements OnInit {

@@ -1,4 +1,4 @@
-import {Component, computed, inject, model} from '@angular/core';
+import {Component, computed, inject, model, ChangeDetectionStrategy} from '@angular/core';
 import {FFlowModule} from "@foblex/flow";
 import {MatIcon} from "@angular/material/icon";
 import {WorkflowHelperService} from "@shared-lib/modules/workflow/service/workflow.helper";
@@ -18,6 +18,7 @@ import {WorkflowService} from "@shared-lib/modules/workflow/service/workflow.ser
     MatIcon,
   ],
   templateUrl: './workflow-node-connectors.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./workflow-node-connectors.component.scss']
 })
 export class WorkflowNodeConnectorsComponent {

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -7,6 +7,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/
 import {ProjectFederatedCreateExperimentDTO} from "@global-app/project/dto/project-experiments";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatButtonModule} from "@angular/material/button";
+import {MatRadioModule} from "@angular/material/radio";
 import {TranslatePipe} from "@ngx-translate/core";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {Router} from "@angular/router";
@@ -21,6 +22,8 @@ import {
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {ProjectService} from "@global-app/project/services/project-service";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface FederatedExperimentData {
   project: ProjectDetailDto,
@@ -33,6 +36,7 @@ interface FederatedExperimentData {
     MatFormFieldModule,
     MatInputModule,
     MatCheckboxModule,
+    MatRadioModule,
     ReactiveFormsModule,
     MatDialogActions,
     MatButtonModule,
@@ -47,17 +51,31 @@ export class CreateFederatedExperimentComponent {
   private readonly router: Router = inject(Router);
   private readonly store: Store = inject(Store);
   private readonly wths: WorkflowTrainingHelperService = inject(WorkflowTrainingHelperService);
+  private readonly projectService: ProjectService = inject(ProjectService);
+  private readonly destroyRef: DestroyRef = inject(DestroyRef);
 
   readonly data = inject<FederatedExperimentData>(MAT_DIALOG_DATA);
   readonly trainableApps = this.wths.containsTrainableApps(this.data.workflow);
   readonly project = this.data.project;
+
+  readonly platformAggregatorSupported = signal(false);
 
   newExperimentForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),
     description: new FormControl<string>('', [Validators.required]),
     acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue]),
     modelNeedToBePublic: new FormControl<boolean>(false, [Validators.required]),
+    platformIsCoordinator: new FormControl<boolean>(false, {nonNullable: true}),
   });
+
+  constructor() {
+    this.projectService.getPlatformAggregatorSupported()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: supported => this.platformAggregatorSupported.set(supported),
+        error: () => this.platformAggregatorSupported.set(false),
+      });
+  }
 
 
   get hasProject(): boolean {
@@ -94,11 +112,13 @@ export class CreateFederatedExperimentComponent {
 
   onSubmitFederated(): void {
     if (this.newExperimentForm.valid) {
-      console.log(this.newExperimentForm.value);
       const createDto: ProjectFederatedCreateExperimentDTO = {
         name: this.newExperimentForm.value.name || '',
         description: this.newExperimentForm.value.description || '',
         modelNeedToBePublic: this.newExperimentForm.value.modelNeedToBePublic || false,
+        platformIsCoordinator: this.platformAggregatorSupported()
+          ? (this.newExperimentForm.value.platformIsCoordinator ?? false)
+          : false,
       }
       this.store.dispatch(ProjectFederatedExperimentsActions.create({dto: createDto, projectId: this.project.id}));
       this.dialogRef.close();

@@ -1,5 +1,10 @@
 import {BaseDto} from "@shared-lib/base/base-dto";
 
+export interface RegistryImagesDTO {
+  registry: string;
+  repositories: {name: string; tags: string[]}[];
+}
+
 export interface InfoDTO {
   Architecture?: string;
   CPUSet?: boolean;

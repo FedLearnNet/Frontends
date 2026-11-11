@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatExpansionModule} from "@angular/material/expansion";
 import {ClientConfigDTO} from "../../../../dto/config";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -16,6 +16,7 @@ import {
     FileProfileCardComponent,
   ],
   templateUrl: './app-client-config.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './app-client-config.component.scss'
 })
 export class AppClientConfigComponent {

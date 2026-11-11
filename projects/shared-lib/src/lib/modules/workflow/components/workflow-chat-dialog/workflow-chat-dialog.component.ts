@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {WorkflowChatComponent} from "@shared-lib/modules/workflow/components/workflow-chat/workflow-chat.component";
 import {
   CloseableDialogTitleComponent
@@ -16,6 +16,7 @@ import {WorkflowChatActions} from "@shared-lib/modules/workflow/store/workflow-c
     ErrorCardComponent
   ],
   templateUrl: './workflow-chat-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './workflow-chat-dialog.component.scss',
 })
 export class WorkflowChatDialogComponent implements OnInit, OnDestroy {

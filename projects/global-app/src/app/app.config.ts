@@ -1,9 +1,7 @@
-import {ApplicationConfig, isDevMode, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, isDevMode} from '@angular/core';
 import {routes} from './app.routes';
 import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
-import {CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, customBearerTokenInterceptor} from 'keycloak-angular';
-import {bearerTokenCondition} from '@shared-lib/services/keycloak-bearer.config';
-import {provideKeycloakAngular} from '@shared-lib/services/keycloak';
+import {provideBffAuth} from '@shared-lib/services/auth';
 import {provideRouter, withComponentInputBinding, withRouterConfig} from "@angular/router";
 import {provideTranslateService} from "@ngx-translate/core";
 import {provideTranslateHttpLoader} from "@ngx-translate/http-loader";
@@ -14,7 +12,6 @@ import {provideRouterStore} from "@ngrx/router-store";
 import {ModelEffects} from "@shared-lib/modules/app-execution/store/model/model.effects";
 import {featureKey as modelFeatureKey, modelReducer} from "@shared-lib/modules/app-execution/store/model/model.reducer";
 import {authInterceptor} from '@shared-lib/interceptors/auth.interseptor';
-import {sessionInterceptor} from '@shared-lib/interceptors/session.interceptor';
 import {loadingInterceptor} from "@shared-lib/interceptors/loading.interceptor";
 import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
 import {featureKey as pipelineFeatureKey, pipelineReducer} from "./modules/pipeline/service/pipeline.reducer";
@@ -51,25 +48,18 @@ import {OrchEffects} from "@shared-lib/modules/admin/store/orch.effects";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {
-      provide: CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [bearerTokenCondition]
-    },
     provideHttpClient(
       withInterceptors([
         loadingInterceptor,
-        sessionInterceptor,
-        authInterceptor,
-        customBearerTokenInterceptor
+        authInterceptor
       ]),
       withFetch()),
-    provideKeycloakAngular(),
+    provideBffAuth(),
     provideRouter(routes,
       withComponentInputBinding(),
       withRouterConfig({
         paramsInheritanceStrategy: 'always',
       })),
-    provideZoneChangeDetection({eventCoalescing: true}),
     provideTranslateService({
       fallbackLang: 'en',
       loader: provideTranslateHttpLoader({

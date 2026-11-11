@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {ADMIN_REALM_ROLE, AuthGuard} from "@shared-lib/services/keycloak";
+import {AuthGuard} from "@shared-lib/services/auth";
+import {ADMIN_REALM_ROLE} from "@shared-lib/services/auth.helper";
 import {AdminCenterComponent} from "./components/admin-center/admin-center.component";
 import {HealthDashboardComponent} from "./components/health-dashboard/health-dashboard.component";
 import {AdminDockerDashboardComponent} from "./components/admin-docker-dashboard/admin-docker-dashboard.component";

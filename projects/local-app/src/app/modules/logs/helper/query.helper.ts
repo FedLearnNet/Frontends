@@ -29,10 +29,10 @@ export function prettifyOperator(op: QueryOperatorTypes | string): string {
       return '∈';
     case QueryOperatorTypes.EXISTS:
     case 'exists':
-      return 'existiert';
+      return 'QUERY_OPERATOR.EXISTS';
     case QueryOperatorTypes.REGEX:
     case 'regex':
-      return 'regex';
+      return 'QUERY_OPERATOR.REGEX';
     default: return m;
   }
 }

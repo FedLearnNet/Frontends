@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
@@ -16,6 +16,7 @@ import {TranslatePipe} from '@ngx-translate/core';
     TranslatePipe,
   ],
   templateUrl: './skip-transform-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './skip-transform-dialog.component.scss',
 })
 export class SkipTransformDialogComponent {
