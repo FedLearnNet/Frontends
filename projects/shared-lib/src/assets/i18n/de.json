@@ -5,6 +5,9 @@
   "APP_OUTPUT_TO_IMPORT": "Zu importierende Ausgaben",
   "APP_OUTPUT_TO_IMPORT_HINT": "Wähle eine Ausgabe oder mehrere und führe sie zusammen. Transformationen, Mapping und Läufe verwenden diese.",
   "FILE_IS_BEING_ANALYZED": "Die Datei wird analysiert. Dies kann einen Moment dauern.",
+  "FILE_TYPE": "Dateityp",
+  "MAPPER": "Mapper",
+  "MAP_TO_SCHEMA": "Dem Schema zuordnen",
   "SEARCH": {
     "PLACEHOLDER": "Kohorten, Patienten, Schemata durchsuchen…",
     "START_TYPING": "Tippen, um den gesamten Arbeitsbereich zu durchsuchen",

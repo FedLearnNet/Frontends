@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -88,19 +87,28 @@ import {Store} from '@ngrx/store';
 import {selectAllImports} from '../../store/import/import.selectors';
 import {ImportActivityChipComponent} from '../import/import-activity-chip/import-activity-chip.component';
 
-const BASE_MAPPING_CARD: ConnectorCard = {
-  index: 99,
-  title: 'Mapper',
-  content: 'Map to Schema',
-  step: ConnectorStepConfigs.MAPPER,
-  type: 'MAPPING',
-};
+const SOURCE_STEPS: (string | number)[] = [
+  ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG,
+  ConnectorStepConfigs.STEP_SOURCE_APP_BASED,
+  ConnectorStepConfigs.STEP_SOURCE_FTP_CONFIG,
+  ConnectorStepConfigs.STEP_SOURCE_FUNCTION_CONFIG,
+];
 
 type RouteData = Data & {
   breadcrumb: string | any,
   mode: ConnectorManagementMode,
   connector: ConnectorDTO,
   cohort: CohortDetailDto,
+}
+
+function withChanges(card: ConnectorCard, changes: Partial<ConnectorCard>): ConnectorCard {
+  const changed = (Object.keys(changes) as (keyof ConnectorCard)[])
+    .some(key => card[key] !== changes[key]);
+  return changed ? {...card, ...changes} : card;
+}
+
+function isSameStep(a: ConnectorCard, b: ConnectorCard): boolean {
+  return a.type === b.type && (a.type === 'TRANSFORM' ? a.id === b.id : a.step === b.step);
 }
 
 @Component({
@@ -120,7 +128,6 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -139,7 +146,13 @@ export class ManageConnectorComponent implements OnInit {
   hasContinue = signal(false);
   private _configComponent?: ConnectorStepConfigComponent;
 
-  private mappingCard = signal<ConnectorCard>({...BASE_MAPPING_CARD});
+  private readonly mappingCard = signal<ConnectorCard>({
+    index: 99,
+    title: this.translate.instant('MAPPER'),
+    content: this.translate.instant('MAP_TO_SCHEMA'),
+    step: ConnectorStepConfigs.MAPPER,
+    type: 'MAPPING',
+  });
 
   @ViewChild('configComponent')
   set configComponent(ref: ConnectorStepConfigComponent | undefined) {
@@ -156,12 +169,12 @@ export class ManageConnectorComponent implements OnInit {
   functions: FunctionsDetailDTO[] = [TOOLS_TRANSFORMER_MODULE];
   readonly transformers = signal(new Map<string, FunctionsDetailDTO>());
   readonly transformerList = computed(() => Array.from(this.transformers().values()));
-  transformedData = new Map<string, any[]>()
+  readonly transformedData = signal(new Map<string, any[]>());
   /** Each step's column order, which its rows cannot keep for number-like names such as "2019". */
-  transformedColumns = new Map<string, string[]>();
+  readonly transformedColumns = signal(new Map<string, string[]>());
   /** Where each previewed step came from, so the wizard can show which ones were cached. */
-  previewStages = new Map<string, PreviewStageDTO>()
-  disableAddTransformer = true;
+  readonly previewStages = signal(new Map<string, PreviewStageDTO>());
+  readonly disableAddTransformer = signal(true);
 
   toolbarManagement: {
     showToolbar: boolean;
@@ -171,24 +184,37 @@ export class ManageConnectorComponent implements OnInit {
     showSaveButton: false
   }
 
-  cards: ConnectorCard[] = [this.initialCard];
-  currentStep: ConnectorCard = this.initialCard;
-  _config: ConnectorDTO = {} as ConnectorDTO;
+  readonly cards = signal<ConnectorCard[]>([this.initialCard]);
+  readonly currentStep = signal<ConnectorCard>(this.initialCard);
+  readonly config = signal<ConnectorDTO>({} as ConnectorDTO);
+
+  readonly configCards = computed(() => this.cards().filter(card => card.type === 'CONFIG'));
+  readonly transformCards = computed(() => this.cards().filter(card => card.type === 'TRANSFORM'));
+
+  readonly mappingCards = computed<ConnectorCard[]>(() => {
+    const offset = this.transformCards().length === 0 ? 1 : 0;
+    return [{...this.mappingCard(), index: this.cards().length + offset}];
+  });
+
+  readonly transformerPlaceholderCard = computed<ConnectorCard>(() => ({
+    index: this.configCards().length,
+    title: this.translate.instant('TRANSFORMER'),
+    configured: false,
+    optional: true,
+    step: ConnectorStepConfigs.TRANSFORM,
+    type: 'TRANSFORM',
+  }));
 
   resolvedCohort = signal<CohortDetailDto | undefined>(undefined);
 
-  get config(): ConnectorDTO {
-    return this._config;
-  }
-
-  set config(value: ConnectorDTO) {
-    const outputChanged = this.selectedOutputOf(this._config) !== this.selectedOutputOf(value);
-    this._config = value;
+  public updateConfig(value: ConnectorDTO): void {
+    const outputChanged = this.selectedOutputOf(this.config()) !== this.selectedOutputOf(value);
+    this.config.set(value);
     this.syncCardState();
     this.saveConfigToLocalStorage();
-    if (outputChanged && this.getTransformCards().length > 0) {
-      this.transformedData.clear();
-      this.transformedColumns.clear();
+    if (outputChanged && this.transformCards().length > 0) {
+      this.transformedData.set(new Map());
+      this.transformedColumns.set(new Map());
       this.applyTransform();
     }
   }
@@ -242,8 +268,8 @@ export class ManageConnectorComponent implements OnInit {
       }
     });
 
-    if (this.cards.length > 2) {
-      this.disableAddTransformer = false;
+    if (this.cards().length > 2) {
+      this.disableAddTransformer.set(false);
     }
   }
 
@@ -253,7 +279,7 @@ export class ManageConnectorComponent implements OnInit {
 
   private orderedTransformers(): Map<string, FunctionsDetailDTO> {
     const ordered = new Map<string, FunctionsDetailDTO>();
-    this.getTransformCards().forEach(card => {
+    this.transformCards().forEach(card => {
       const transformer = card.id ? this.transformers().get(card.id) : undefined;
       if (transformer) {
         ordered.set(card.id!, transformer);
@@ -263,9 +289,10 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private saveConfigToLocalStorage(): void {
+    const config = this.config();
     const draft = configToConnectorDraft(this.transformers().size > 0
-      ? {...this._config, transformer: this.transformerList()}
-      : this._config);
+      ? {...config, transformer: this.transformerList()}
+      : config);
     try {
       localStorage.setItem(this.getStorageName(), JSON.stringify(draft));
     } catch (error) {
@@ -276,19 +303,23 @@ export class ManageConnectorComponent implements OnInit {
   private loadConfigFromLocalStorage(removeId: boolean = false): void {
     const storedConfig = localStorage.getItem(this.getStorageName());
     if (storedConfig) {
-      this._config = connectorDraftToConfig(JSON.parse(storedConfig));
+      let config = connectorDraftToConfig(JSON.parse(storedConfig));
       if (removeId) {
-        (this._config.id as any) = null;
+        (config.id as any) = null;
         if (this.resolvedCohort()) {
-          this._config = rematchMappingSchemaId(this._config, this.resolvedCohort()!)
+          config = rematchMappingSchemaId(config, this.resolvedCohort()!)
         }
+      }
+      this.config.set(config);
+      if (removeId) {
         this.saveConfigToLocalStorage();
       }
       this.ensureConfigCurrentCohort();
-      this.cards = configToCards(this._config);
+      this.setCards(configToCards(this.config()));
       this.syncCardState();
-      if (this.cards.length > 1) {
-        this.currentStep = this.cards[this.cards.length - 1];
+      const cards = this.cards();
+      if (cards.length > 1) {
+        this.currentStep.set(cards[cards.length - 1]);
         this.toolbarManagement.showToolbar = true;
       }
     }
@@ -306,7 +337,10 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private ensureConfigCurrentCohort(): void {
-    this.config.cohortId = this.cohortId();
+    const cohortId = this.cohortId();
+    if (this.config().cohortId !== cohortId) {
+      this.config.update(config => ({...config, cohortId}));
+    }
   }
 
 
@@ -361,37 +395,39 @@ export class ManageConnectorComponent implements OnInit {
   public configChanged(event: ConnectorStepConfigChangeEmitter) {
     if (event.step === ConnectorStepConfigs.STEP_SOURCE_CONFIG && event.data.inputSource) {
       this.toolbarManagement.showToolbar = true;
-      this.config = event.data;
+      this.updateConfig(event.data);
       this.ensureSourceStepCard();
-      this.currentStep = this.cards[1];
+      this.currentStep.set(this.cards()[1]);
     }
     this.reAssignIndex();
 
-    if (this.cards.length > 2) {
-      this.disableAddTransformer = false;
+    if (this.cards().length > 2) {
+      this.disableAddTransformer.set(false);
     }
     this.saveConfigToLocalStorage();
   }
 
   public onCardClick(card: ConnectorCard) {
-    this.currentStep = {...card};
+    this.currentStep.set({...card});
     this.saveConfigToLocalStorage();
   }
 
   public onContinueClick() {
     if (this.hasContinue() && this.configComponent && this.configComponent.onContinueClick()) {
-      if (this.currentStep.step === ConnectorStepConfigs.STEP_SOURCE_CONFIG) {
+      const step = this.currentStep().step;
+      if (step === ConnectorStepConfigs.STEP_SOURCE_CONFIG) {
         this.ensureSourceStepCard();
-        if (this.cards[1]) {
-          this.currentStep = this.cards[1];
+        const sourceStepCard = this.cards()[1];
+        if (sourceStepCard) {
+          this.currentStep.set(sourceStepCard);
         }
       } else if (
-        this.currentStep.step === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG
-        || this.currentStep.step === ConnectorStepConfigs.STEP_SOURCE_APP_BASED
+        step === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG
+        || step === ConnectorStepConfigs.STEP_SOURCE_APP_BASED
       ) {
         this.ensureSelectorsCard();
-        this.currentStep = this.findCard(this.currentStep.index + 1);
-      } else if (this.currentStep.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG) {
+        this.currentStep.set(this.findCard(this.currentStep().index + 1));
+      } else if (step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG) {
         this.ensureSelectorsCard();
         this.reAssignIndex();
         this.saveConfigToLocalStorage();
@@ -399,10 +435,11 @@ export class ManageConnectorComponent implements OnInit {
           width: '460px',
           autoFocus: false,
         }).afterClosed().subscribe((addTransform: boolean | undefined) => {
-          if (addTransform) {
+          // undefined: dismissed via backdrop or Escape, so the wizard stays on this step.
+          if (addTransform === true) {
             this.addTransform();
-          } else {
-            this.currentStep = {...this.mappingCard()};
+          } else if (addTransform === false) {
+            this.currentStep.set(this.mappingCards()[0]);
             this.reAssignIndex();
             this.saveConfigToLocalStorage();
           }
@@ -415,19 +452,21 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<ConnectorCard[]>) {
-    const currentConfigCount = this.getConfigCards().length;
+    const currentConfigCount = this.configCards().length;
     const prevIndex = event.previousIndex + currentConfigCount;
     const currentIndex = event.currentIndex + currentConfigCount;
+    const cards = [...this.cards()];
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, prevIndex, currentIndex);
+      moveItemInArray(cards, prevIndex, currentIndex);
     } else {
       transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
+        [...event.previousContainer.data],
+        cards,
         prevIndex,
         currentIndex,
       );
     }
+    this.setCards(cards);
     this.reAssignIndex();
     // Everything that sends the steps (preview, "Run step", save, draft) reads the map in its
     // insertion order, so it has to follow the new card order.
@@ -436,32 +475,49 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public reAssignIndex() {
-    this.cards.forEach((card, index) => {
-      card.index = index;
-    });
+    this.setCards(this.cards().map((card, index) => withChanges(card, {index})));
+  }
+
+  private setCards(cards: ConnectorCard[]): void {
+    const current = this.cards();
+    const unchanged = cards.length === current.length && cards.every((card, i) => card === current[i]);
+    if (unchanged) {
+      return;
+    }
+    this.cards.set(cards);
+
+    const selected = this.currentStep();
+    const match = selected ? cards.find(card => isSameStep(card, selected)) : undefined;
+    if (match && match !== selected) {
+      this.currentStep.set(match);
+    }
+  }
+
+  private patchCards(matches: (card: ConnectorCard) => boolean, changes: Partial<ConnectorCard>): void {
+    this.setCards(this.cards().map(card => matches(card) ? withChanges(card, changes) : card));
   }
 
   public getLatestColumns(): string[] {
-    if (this.transformedData.size > 0) {
+    if (this.transformedData().size > 0) {
       const latestData = this.getTransformedData();
       if (latestData.length > 0 && latestData[0]) {
         const latestId = this.findLastRunedConnectorCard()?.id;
-        return (latestId && this.transformedColumns.get(latestId)) || Object.keys(latestData[0]);
+        return (latestId && this.transformedColumns().get(latestId)) || Object.keys(latestData[0]);
       }
     }
-    const primarySheet = getPrimarySheet(this.config.fileInfo);
+    const primarySheet = getPrimarySheet(this.config().fileInfo);
     return primarySheet?.renamedColumns || primarySheet?.columns || [];
   }
 
   public getMapperColumns(): string[] {
-    return orderColumnsLikeHeaders(this.getLatestColumns(), this.config.fileInfo, this.config.mergeConfig);
+    return orderColumnsLikeHeaders(this.getLatestColumns(), this.config().fileInfo, this.config().mergeConfig);
   }
 
   public getLatestData(): any[] {
-    if (this.transformedData.size > 0) {
+    if (this.transformedData().size > 0) {
       return this.getTransformedData();
     }
-    const primarySheet = getPrimarySheet(this.config.fileInfo);
+    const primarySheet = getPrimarySheet(this.config().fileInfo);
     return primarySheet?.data || [];
   }
 
@@ -471,13 +527,13 @@ export class ManageConnectorComponent implements OnInit {
 
   public get patientIdTransformerConflict(): string | undefined {
     return getPatientIdTransformerConflict(
-      this.config.schemaMapping,
+      this.config().schemaMapping,
       this.transformerList()
     );
   }
 
   public openTransformationOverview(): void {
-    const primarySheet = getPrimarySheet(this.config.fileInfo);
+    const primarySheet = getPrimarySheet(this.config().fileInfo);
     const sourceColumns = primarySheet?.renamedColumns?.length
       ? primarySheet.renamedColumns
       : primarySheet?.columns ?? [];
@@ -509,7 +565,7 @@ export class ManageConnectorComponent implements OnInit {
       data: {
         functions: this.functions,
         columns: this.getLatestColumns(),
-        patientIdColumn: getPatientIdMappedColumn(this.config.schemaMapping),
+        patientIdColumn: getPatientIdMappedColumn(this.config().schemaMapping),
         data: currentConfig,
         errorMessage: errorMessage,
       }
@@ -523,22 +579,29 @@ export class ManageConnectorComponent implements OnInit {
 
       if ('delete' in result) {
         const hadTransformer = !!card.id && this.transformers().has(card.id);
-        this.cards = this.cards.filter(c => c.id !== card.id);
+        this.setCards(this.cards().filter(c => c.id !== card.id));
         if (hadTransformer) {
           this.transformers.update(current => {
             const remaining = new Map(current);
             remaining.delete(card.id!);
             return remaining;
           });
-          this.transformedData.delete(card.id!);
-          this.transformedColumns.delete(card.id!);
+          this.transformedData.update(current => {
+            const remaining = new Map(current);
+            remaining.delete(card.id!);
+            return remaining;
+          });
+          this.transformedColumns.update(current => {
+            const remaining = new Map(current);
+            remaining.delete(card.id!);
+            return remaining;
+          });
         }
         this.reAssignIndex();
-        if (this.currentStep?.id === card.id) {
-          this.currentStep = this.getFallbackStepAfterDelete(card.index);
+        if (this.currentStep()?.id === card.id) {
+          this.currentStep.set(this.getFallbackStepAfterDelete(card.index));
         }
         this.syncCardState();
-        this.changeDetectorRef.markForCheck();
         if (hadTransformer) {
           this.applyTransform();
         }
@@ -546,9 +609,8 @@ export class ManageConnectorComponent implements OnInit {
       }
 
       this.transformers.update(current => new Map(current).set(card.id!, result));
-      this.cards[card.index].title = result.methodName;
-      this.disableAddTransformer = false;
-      this.cards[card.index].configured = true;
+      this.patchCards(existing => existing.id === card.id, {title: result.methodName, configured: true});
+      this.disableAddTransformer.set(false);
 
       this.applyTransform();
     });
@@ -559,56 +621,55 @@ export class ManageConnectorComponent implements OnInit {
       return;
     }
 
-    this.cards = this.cards.filter(existing => existing.id !== card.id);
+    this.setCards(this.cards().filter(existing => existing.id !== card.id));
     this.reAssignIndex();
-    if (this.currentStep?.id === card.id) {
-      this.currentStep = this.getFallbackStepAfterDelete(card.index);
+    if (this.currentStep()?.id === card.id) {
+      this.currentStep.set(this.getFallbackStepAfterDelete(card.index));
     }
     this.syncCardState();
-    this.changeDetectorRef.markForCheck();
   }
 
   public addTransform() {
     this.syncCardState();
     const r = random(0, 100000, false)
     const newCard: ConnectorCard = {
-      index: this.cards.length,
+      index: this.cards().length,
       title: this.translate.instant('TRANSFORMER'),
       configured: false,
       optional: true,
       step: ConnectorStepConfigs.TRANSFORM,
       type: 'TRANSFORM', id: r.toString()
     };
-    this.cards.push(newCard);
+    this.setCards([...this.cards(), newCard]);
     this.onEditTransformer(newCard);
-    this.disableAddTransformer = true;
-    this.currentStep = this.findCard(this.cards.length - 1);
+    this.disableAddTransformer.set(true);
+    this.currentStep.set(this.findCard(this.cards().length - 1));
   }
 
   public applyTransform() {
-    const config = cloneDeep(this.config)
-    const transFormerCards = this.getTransformCards();
+    const transFormerCards = this.transformCards();
+    if (transFormerCards.length === 0) {
+      this.transformedData.set(new Map());
+      this.previewStages.set(new Map());
+      this.saveConfigToLocalStorage();
+      return;
+    }
 
-    transFormerCards.forEach(c => {
-      c.previewRunning = true;
-    });
-    this.changeDetectorRef.markForCheck();
+    const config = cloneDeep(this.config())
+    const previewedIds = new Set(transFormerCards.map(card => card.id));
+    const isPreviewed = (card: ConnectorCard) => card.type === 'TRANSFORM' && previewedIds.has(card.id);
+
+    this.patchCards(isPreviewed, {previewRunning: true});
     this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId()).subscribe({
       next: (data) => {
-        transFormerCards.forEach(c => {
-          c.previewRunning = false;
-        });
-        this.transformedData = data.rows;
-        this.transformedColumns = data.columns;
-        this.previewStages = data.stages;
-        this.changeDetectorRef.markForCheck();
+        this.patchCards(isPreviewed, {previewRunning: false});
+        this.transformedData.set(data.rows);
+        this.transformedColumns.set(data.columns);
+        this.previewStages.set(data.stages);
       },
       error: (error) => {
-        transFormerCards.forEach(c => {
-          c.previewRunning = false;
-        });
-        this.changeDetectorRef.markForCheck();
-        const inputConfig = this.config.inputConfig;
+        this.patchCards(isPreviewed, {previewRunning: false});
+        const inputConfig = this.config().inputConfig;
         if (inputConfig && isFileUploadSettings(inputConfig) && !inputConfig.fileExists) {
           return;
         }
@@ -632,7 +693,7 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public openTransformStep(stepIndex: number): void {
-    const card = this.getTransformCards()[stepIndex - 1];
+    const card = this.transformCards()[stepIndex - 1];
     if (card) {
       this.onCardClick(card);
     }
@@ -653,7 +714,8 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public getCurrentStage(): PreviewStageDTO | undefined {
-    return this.currentStep?.id ? this.previewStages.get(this.currentStep.id) : undefined;
+    const id = this.currentStep()?.id;
+    return id ? this.previewStages().get(id) : undefined;
   }
 
   public openPreviewCacheDialog(): void {
@@ -661,13 +723,14 @@ export class ManageConnectorComponent implements OnInit {
     if (!stage) {
       return;
     }
-    const transformCards = this.getTransformCards();
-    const position = transformCards.findIndex(card => card.id === this.currentStep.id);
+    const currentStep = this.currentStep();
+    const transformCards = this.transformCards();
+    const position = transformCards.findIndex(card => card.id === currentStep.id);
     const followingSteps = position < 0 ? 0 : Math.max(0, transformCards.length - position - 1);
 
     this.dialog.open<PreviewCacheDialogComponent, PreviewCacheDialogData, PreviewCacheDialogResult>(
       PreviewCacheDialogComponent,
-      {data: {stage, stepTitle: this.currentStep.title, followingSteps}, width: '32rem'}
+      {data: {stage, stepTitle: currentStep.title, followingSteps}, width: '32rem'}
     ).afterClosed().subscribe(result => {
       if (!result?.invalidated) {
         return;
@@ -677,7 +740,7 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private invalidatePreviewCacheFrom(fromStep: number): void {
-    const connectorId = this.config.id;
+    const connectorId = this.config().id;
     if (!connectorId) {
       // Nothing was cached for an unsaved connector, so recomputing is all that is needed.
       this.applyTransform();
@@ -690,22 +753,15 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public onBackClick() {
-    this.currentStep = this.findCard(this.currentStep.index - 1);
-  }
-
-  public getConfigCards(): ConnectorCard[] {
-    return this.cards.filter(card => card.type === 'CONFIG');
-  }
-
-  public getTransformCards(): ConnectorCard[] {
-    return this.cards.filter(card => card.type === 'TRANSFORM');
+    this.currentStep.set(this.findCard(this.currentStep().index - 1));
   }
 
   public getTransformer(): FunctionsDetailDTO | undefined {
-    if (!this.currentStep.id) {
+    const id = this.currentStep().id;
+    if (!id) {
       return;
     }
-    return this.transformers().get(this.currentStep.id);
+    return this.transformers().get(id);
 
   }
 
@@ -730,7 +786,7 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public findLastRunedConnectorCard(): ConnectorCard | undefined {
-    const cards = this.getTransformCards();
+    const cards = this.transformCards();
     if (cards.length === 0) {
       return undefined;
     }
@@ -748,65 +804,48 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public getTransformedData(): any[] {
-    const primarySheet = getPrimarySheet(this.config.fileInfo);
+    const primarySheet = getPrimarySheet(this.config().fileInfo);
     const columnsLength = primarySheet?.columns?.length || 0;
     const defaultData = Array(columnsLength)
     const latestId = this.findLastRunedConnectorCard()?.id;
     if (!latestId) {
       return defaultData;
     }
-    if (!this.transformedData.has(latestId)) {
+    const transformedData = this.transformedData();
+    if (!transformedData.has(latestId)) {
       return defaultData;
     }
-    return this.transformedData.get(latestId)!;
+    return transformedData.get(latestId)!;
   }
 
   /** The rows the selected transform step produced, which is what its preview table shows. */
   public getCurrentStepData(): any[] | undefined {
-    const id = this.currentStep?.id;
-    return id ? this.transformedData.get(id) : undefined;
+    const id = this.currentStep()?.id;
+    return id ? this.transformedData().get(id) : undefined;
   }
 
-  /** The column order of the selected step's rows, which the rows cannot keep for number-like names. */
   public getCurrentStepColumns(): string[] | undefined {
-    const id = this.currentStep?.id;
-    return id ? this.transformedColumns.get(id) : undefined;
-  }
-
-  public getMappingCards(): ConnectorCard[] {
-    // When there are no transform cards, reserve one slot for the transformer placeholder
-    const offset = this.getTransformCards().length === 0 ? 1 : 0;
-    this.mappingCard().index = this.cards.length + offset;
-
-    return [this.mappingCard()];
-  }
-
-  public get transformerPlaceholderCard(): ConnectorCard {
-    return {
-      index: this.getConfigCards().length,
-      title: this.translate.instant('TRANSFORMER'),
-      configured: false,
-      optional: true,
-      step: ConnectorStepConfigs.TRANSFORM,
-      type: 'TRANSFORM',
-    };
+    const id = this.currentStep()?.id;
+    return id ? this.transformedColumns().get(id) : undefined;
   }
 
   private findCard(index: number): ConnectorCard {
-    return this.cards.find(card => card.index === index)
-      ?? this.cards[this.cards.length - 1]
+    const cards = this.cards();
+    return cards.find(card => card.index === index)
+      ?? cards[cards.length - 1]
       ?? this.initialCard;
   }
 
   private getFallbackStepAfterDelete(deletedIndex: number): ConnectorCard {
-    return this.cards.find(card => card.index >= deletedIndex)
-      ?? this.cards[deletedIndex - 1]
-      ?? this.cards[this.cards.length - 1]
+    const cards = this.cards();
+    return cards.find(card => card.index >= deletedIndex)
+      ?? cards[deletedIndex - 1]
+      ?? cards[cards.length - 1]
       ?? this.initialCard;
   }
 
-  public onMappingChange(config: ConnectorMappingConfig[]) {
-    this.config.schemaMapping = config;
+  public onMappingChange(schemaMapping: ConnectorMappingConfig[] | undefined) {
+    this.config.update(config => ({...config, schemaMapping}));
     this.syncCardState();
   }
 
@@ -815,11 +854,11 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   public onClearClick() {
-    this.config = {} as ConnectorDTO;
+    this.updateConfig({} as ConnectorDTO);
     this.clearConnectorValues();
 
-    this.cards = [this.initialCard];
-    this.currentStep = this.initialCard;
+    this.setCards([this.initialCard]);
+    this.currentStep.set(this.initialCard);
   }
 
   public onCancelClick() {
@@ -831,14 +870,15 @@ export class ManageConnectorComponent implements OnInit {
       return;
     }
 
-    this._config.transformer = this.transformerList();
-    this.config.cohortId = this.cohortId();
+    this.config.update(config => ({
+      ...config,
+      transformer: this.transformerList(),
+      cohortId: this.cohortId(),
+    }));
 
-    if (!this.config.name || !this.config.description) {
-      this.openSaveDialog(navigate, {
-        name: this.config.name,
-        description: this.config.description,
-      });
+    const {name, description} = this.config();
+    if (!name || !description) {
+      this.openSaveDialog(navigate, {name, description});
       return;
     }
 
@@ -851,8 +891,8 @@ export class ManageConnectorComponent implements OnInit {
   ): void {
     const dialogRef = this.dialog.open(ManageConnectorSaveDialogComponent, {
       data: {
-        name: options?.name ?? this.config.name ?? '',
-        description: options?.description ?? this.config.description ?? '',
+        name: options?.name ?? this.config().name ?? '',
+        description: options?.description ?? this.config().description ?? '',
         errorMessage: options?.errorMessage,
       },
       disableClose: false,
@@ -862,17 +902,16 @@ export class ManageConnectorComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.config.name = result.name;
-      this.config.description = result.description;
+      this.config.update(config => ({...config, name: result.name, description: result.description}));
       this.saveConfigToLocalStorage();
       this.persistConnector(navigate);
     });
   }
 
   private persistConnector(navigate: boolean): void {
-    this.connectorService.save(this.config).subscribe({
+    this.connectorService.save(this.config()).subscribe({
       next: data => {
-        this.config.id = data.id;
+        this.config.update(config => ({...config, id: data.id}));
         this.clearConnectorValues();
         if (navigate) {
           this.navigateToView(data.id!);
@@ -881,8 +920,8 @@ export class ManageConnectorComponent implements OnInit {
       error: error => {
         const errorMessage = this.getSaveErrorMessage(error);
         this.openSaveDialog(navigate, {
-          name: this.config.name,
-          description: this.config.description,
+          name: this.config().name,
+          description: this.config().description,
           errorMessage,
         });
       },
@@ -941,15 +980,19 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private applyConnectorConfig(config: ConnectorDTO): void {
-    this._config = config;
+    this.config.set(config);
     this.syncCardState();
 
     this.checkFile();
 
     this.saveConfigToLocalStorage();
     this.loadConfigFromLocalStorage();
-    this.loadTransformers(this._config.transformer);
+    this.loadTransformers(this.config().transformer);
     this.clearConnectorValues();
+
+    if (this.cards().some(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG)) {
+      this.currentStep.set(this.mappingCards()[0]);
+    }
   }
 
   private clearConnectorValues(): void {
@@ -971,7 +1014,7 @@ export class ManageConnectorComponent implements OnInit {
       if (continueDraft) {
         this.resetConnectorEditorState();
         this.loadConfigFromLocalStorage(true);
-        this.loadTransformers(this._config.transformer);
+        this.loadTransformers(this.config().transformer);
         this.checkFile();
         return;
       }
@@ -982,36 +1025,37 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private resetConnectorEditorState(): void {
-    this._config = {} as ConnectorDTO;
-    this.cards = [this.initialCard];
-    this.currentStep = this.initialCard;
+    this.config.set({} as ConnectorDTO);
+    this.setCards([this.initialCard]);
+    this.currentStep.set(this.initialCard);
     this.transformers.set(new Map());
-    this.transformedData.clear();
-    this.transformedColumns.clear();
-    this.disableAddTransformer = true;
+    this.transformedData.set(new Map());
+    this.transformedColumns.set(new Map());
+    this.disableAddTransformer.set(true);
     this.toolbarManagement.showToolbar = true;
     this.syncCardState();
   }
 
   public getPrimarySheetInfo(): UploadInfoDTO | undefined {
-    return getPrimarySheet(this.config.fileInfo);
+    return getPrimarySheet(this.config().fileInfo);
   }
 
   public hasFileInfo(): boolean {
-    return !!(this.config.fileInfo && Object.keys(this.config.fileInfo).length > 0);
+    const fileInfo = this.config().fileInfo;
+    return !!(fileInfo && Object.keys(fileInfo).length > 0);
   }
 
   public canShowDownstreamSteps(): boolean {
-    return this.hasFileInfo() && this.cards.some(
+    return this.hasFileInfo() && this.cards().some(
       card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG
     );
   }
 
   private checkFileExistence(): void {
-    if (!this.config.inputConfig || this.config.inputConfig.mode !== 'FILE') {
+    const inputConfig = this.config().inputConfig;
+    if (!inputConfig || inputConfig.mode !== 'FILE') {
       return;
     }
-    const inputConfig = this.config.inputConfig;
     if (!isFileUploadSettings(inputConfig)) {
       return;
     }
@@ -1035,7 +1079,7 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private reloadInputFileInfo(): void {
-    const inputConfig = this._config.inputConfig;
+    const inputConfig = this.config().inputConfig;
     if (!inputConfig || !isFileUploadSettings(inputConfig) || !inputConfig.fileId) {
       return;
     }
@@ -1051,9 +1095,9 @@ export class ManageConnectorComponent implements OnInit {
           }
 
           this.setFileInfo(fileInfo, false);
-          this.transformedData.clear();
-          this.transformedColumns.clear();
-          if (this.getTransformCards().length > 0) {
+          this.transformedData.set(new Map());
+          this.transformedColumns.set(new Map());
+          if (this.transformCards().length > 0) {
             this.applyTransform();
           }
         },
@@ -1061,99 +1105,106 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private setFileInfo(fileInfo: Record<string, UploadInfoDTO>, merge: boolean): void {
-    const nextFileInfo = merge ? {...this._config.fileInfo, ...fileInfo} : fileInfo;
+    const config = this.config();
+    const nextFileInfo = merge ? {...config.fileInfo, ...fileInfo} : fileInfo;
     hydrateFileInfoData(nextFileInfo);
 
-    this._config = {
-      ...this._config,
+    this.config.set({
+      ...config,
       fileInfo: nextFileInfo,
-    };
+    });
     this.syncCardState();
     this.saveConfigToLocalStorage();
   }
 
   private triggerReuploadFile(): void {
-    this.config = setMissingFileInfo(this.config);
+    this.updateConfig(setMissingFileInfo(this.config()));
 
-    this.onCardClick(this.getConfigCards().find(card => card.step === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG)!);
+    this.onCardClick(this.configCards().find(card => card.step === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG)!);
   }
 
   private handleMappingPreview(): void {
-    this.onCardClick(this.getMappingCards()[0]);
+    this.onCardClick(this.mappingCards()[0]);
   }
 
   private checkFile(): void {
     // Only an uploaded file can go missing. Other sources (an app's stored outputs, FTP, ...) have
     // no FILE step to send the user back to, and doing so left the wizard without a current step.
-    if (!this.config?.inputConfig || !isFileUploadSettings(this.config.inputConfig)) {
+    const inputConfig = this.config()?.inputConfig;
+    if (!inputConfig || !isFileUploadSettings(inputConfig)) {
       return;
     }
 
-    const fileExists = (this.config?.inputConfig as FileUploadSettings)?.fileExists ?? false;
+    const fileExists = (inputConfig as FileUploadSettings)?.fileExists ?? false;
 
     if (!fileExists) {
       setTimeout(() => this.triggerReuploadFile());
       return;
     }
 
-    if (!hasValidFileInfo(this.config?.fileInfo)) {
+    if (!hasValidFileInfo(this.config()?.fileInfo)) {
       this.checkFileExistence();
     }
   }
 
   private syncCardState(): void {
-    const sourceCard = this.cards.find(card => card.step === ConnectorStepConfigs.STEP_SOURCE_CONFIG);
-    if (sourceCard) {
-      sourceCard.content = this.config.inputSource?.title ?? this.translate.instant('SELECT_DATA_SOURCE');
-      sourceCard.configured = !!this.config.inputSource;
-    }
+    const config = this.config();
+    const hasFileInfo = this.hasFileInfo();
 
-    const sourceStepCard = this.cards.find(card =>
-      card.step === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG
-      || card.step === ConnectorStepConfigs.STEP_SOURCE_APP_BASED
-      || card.step === ConnectorStepConfigs.STEP_SOURCE_FTP_CONFIG
-      || card.step === ConnectorStepConfigs.STEP_SOURCE_FUNCTION_CONFIG
-    );
-    if (sourceStepCard) {
-      sourceStepCard.configured = this.isSourceStepConfigured();
-      sourceStepCard.content = this.getSourceStepContent();
-    }
+    this.setCards(this.cards().map(card => {
+      if (card.step === ConnectorStepConfigs.STEP_SOURCE_CONFIG) {
+        return withChanges(card, {
+          content: config.inputSource?.title ?? this.translate.instant('SELECT_DATA_SOURCE'),
+          configured: !!config.inputSource,
+        });
+      }
+      if (SOURCE_STEPS.includes(card.step)) {
+        return withChanges(card, {
+          configured: this.isSourceStepConfigured(),
+          content: this.getSourceStepContent(),
+        });
+      }
+      if (card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG) {
+        return withChanges(card, {configured: hasFileInfo});
+      }
+      if (card.type === 'TRANSFORM') {
+        return withChanges(card, {configured: !!card.id && this.transformers().has(card.id)});
+      }
+      return card;
+    }));
 
-    let selectorsCard = this.cards.find(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
-    if (!selectorsCard && this.hasFileInfo() && sourceStepCard) {
+    const cards = this.cards();
+    const hasSelectorsCard = cards.some(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
+    const hasSourceStepCard = cards.some(card => SOURCE_STEPS.includes(card.step));
+    if (!hasSelectorsCard && hasFileInfo && hasSourceStepCard) {
       this.ensureSelectorsCard();
-      selectorsCard = this.cards.find(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
-    }
-    if (selectorsCard) {
-      selectorsCard.configured = this.hasFileInfo();
     }
 
-    this.getTransformCards().forEach(card => {
-      card.configured = !!card.id && this.transformers().has(card.id);
-    });
-
-    this.disableAddTransformer = !this.hasFileInfo() || this.getTransformCards().some(card => !card.configured);
+    this.disableAddTransformer.set(!hasFileInfo || this.transformCards().some(card => !card.configured));
   }
 
   private ensureSourceStepCard(): void {
-    if (!this.config.inputSource) {
+    const inputSource = this.config().inputSource;
+    if (!inputSource) {
       return;
     }
 
     const stepCard: ConnectorCard = {
       index: 1,
-      title: `${this.config.inputSource.title} ${this.translate.instant('SETTINGS')}`,
+      title: `${inputSource.title} ${this.translate.instant('SETTINGS')}`,
       configured: this.isSourceStepConfigured(),
       content: this.getSourceStepContent(),
-      step: this.config.inputSource.configName,
+      step: inputSource.configName,
       type: 'CONFIG'
     };
 
-    if (this.cards.length > 1) {
-      this.cards[1] = stepCard;
+    const cards = [...this.cards()];
+    if (cards.length > 1) {
+      cards[1] = stepCard;
     } else {
-      this.cards.push(stepCard);
+      cards.push(stepCard);
     }
+    this.setCards(cards);
   }
 
   private ensureSelectorsCard(): void {
@@ -1165,19 +1216,21 @@ export class ManageConnectorComponent implements OnInit {
       type: 'CONFIG'
     };
 
-    const existingIndex = this.cards.findIndex(
+    const cards = [...this.cards()];
+    const existingIndex = cards.findIndex(
       card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG
     );
     if (existingIndex >= 0) {
-      this.cards[existingIndex] = {...newCard, index: existingIndex};
+      cards[existingIndex] = {...newCard, index: existingIndex};
     } else {
-      this.cards.splice(Math.min(2, this.cards.length), 0, newCard);
+      cards.splice(Math.min(2, cards.length), 0, newCard);
     }
+    this.setCards(cards);
     this.reAssignIndex();
   }
 
   private isSourceStepConfigured(): boolean {
-    const inputConfig = this.config.inputConfig;
+    const inputConfig = this.config().inputConfig;
     if (!inputConfig) {
       return false;
     }
@@ -1202,13 +1255,13 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   private getSourceStepContent(): string | undefined {
-    const inputConfig = this.config.inputConfig;
+    const inputConfig = this.config().inputConfig;
     if (!inputConfig) {
       return undefined;
     }
 
     if ('fileType' in inputConfig) {
-      return `FileType: ${fileTypeLabel(inputConfig as FileUploadSettings) ?? this.translate.instant('UNKNOWN')}`;
+      return `${this.translate.instant('FILE_TYPE')}: ${fileTypeLabel(inputConfig as FileUploadSettings) ?? this.translate.instant('UNKNOWN')}`;
     }
 
     if (inputConfig.mode === 'FTP') {
