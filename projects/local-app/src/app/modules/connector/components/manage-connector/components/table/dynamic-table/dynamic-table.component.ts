@@ -28,6 +28,7 @@ export class ConnectorDynamicTableComponent {
   readonly calledColumns = input<string[]>([]);
   readonly headerAction = input<boolean>(true);
   readonly renewColumns = input<boolean>(false);
+  readonly dataColumns = input<string[] | undefined>(undefined);
   readonly loading = input<boolean | undefined>(false);
 
   readonly columns = model<string[]>([]);
@@ -65,7 +66,7 @@ export class ConnectorDynamicTableComponent {
       }
       const firstRow = data[0];
       if (renew && data.length > 0 && this.hasOwnKeys(firstRow)) {
-        const newCols = Object.keys(firstRow);
+        const newCols = this.dataColumns() ?? Object.keys(firstRow);
         const currentCols = this.columns();
 
         if (!this.arraysEqual(currentCols, newCols)) {

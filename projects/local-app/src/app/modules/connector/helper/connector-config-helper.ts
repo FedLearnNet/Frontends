@@ -5,6 +5,7 @@ import {ConnectorMappingConfig} from "../models/connector-model";
 import {FunctionsDetailDTO} from "../dto/function";
 import {UNIQUE_PATIENT_ID_NODE} from "@local-app/utils/constants/unique-patient-id-node";
 import {ColumnProfile} from '@shared-lib/modules/files/dto/file';
+import {getPrimarySheet} from '@shared-lib/utils';
 
 /**
  * Normalizes a sheet name for comparison by converting to lowercase and removing underscores.
@@ -268,6 +269,29 @@ export function isAppBasedUploadSettings(
   cfg: ConnectorInputConfig
 ): cfg is AppBasedUploadSettings {
   return cfg.mode === 'APP';
+}
+
+export function orderColumnsLikeHeaders(
+  columns: string[],
+  fileInfo: Record<string, UploadInfoDTO> | undefined,
+  mergeConfig: SheetMergeResultDTO | undefined,
+): string[] {
+  const sheet = getPrimarySheet(fileInfo);
+  const headers = sheet?.renamedColumns || sheet?.columns || [];
+  const preferred = mergeConfig ? [mergeUidHeader(sheet, mergeConfig), ...headers] : headers;
+  const rank = new Map<string, number>();
+  preferred.forEach((column, index) => {
+    if (!rank.has(column)) {
+      rank.set(column, index);
+    }
+  });
+  const rankOf = (column: string) => rank.get(column) ?? preferred.length;
+  return [...columns].sort((left, right) => rankOf(left) - rankOf(right));
+}
+
+function mergeUidHeader(sheet: UploadInfoDTO | undefined, mergeConfig: SheetMergeResultDTO): string {
+  const index = sheet?.columns?.indexOf(mergeConfig.commonUidColumnName) ?? -1;
+  return sheet?.renamedColumns?.[index] ?? mergeConfig.commonUidColumnName;
 }
 
 export function getBaseColumnName(columnName: string, sheetName: string): string {

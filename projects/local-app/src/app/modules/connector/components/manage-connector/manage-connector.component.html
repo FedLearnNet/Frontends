@@ -116,6 +116,7 @@
                    says so and offers the run rather than showing them under this step's heading. -->
             } @else if (getPrimarySheetInfo() && getCurrentStepData()) {
               <app-dynamic-table [data]="getCurrentStepData()!"
+                                 [dataColumns]="getCurrentStepColumns()"
                                  [renamedColumns]="getPrimarySheetInfo()!.renamedColumns"
                                  [columns]="getPrimarySheetInfo()!.columns"
                                  [deletedColumns]="getPrimarySheetInfo()!.deletedColumns"
@@ -132,7 +133,7 @@
 
         @if (currentStep.type === 'MAPPING') {
           <app-edit-mapper
-            [columns]="getLatestColumns()"
+            [columns]="getMapperColumns()"
             [inputData]="getLatestData()"
             [validationConfig]="config"
             [transformers]="transformerList()"
