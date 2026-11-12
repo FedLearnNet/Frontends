@@ -45,6 +45,8 @@
   "UNKNOWN": "Unknown",
   "CONFIGURED": "Configured",
   "TRANSFORMER": "Transformer",
+  "MAPPER": "Mapper",
+  "MAP_TO_SCHEMA": "Map to Schema",
   "SELECT_A_DATA_SOURCE": "Select a Data Source",
   "SELECT_A_DATA_SOURCE_DESC": "Read the data from a file, or with an extractor app installed for this cohort.",
   "GENERIC_SOURCE": "Generic Source",
