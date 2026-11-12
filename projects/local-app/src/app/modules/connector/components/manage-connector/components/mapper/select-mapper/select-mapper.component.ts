@@ -11,6 +11,12 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 import {CohortDetailDto} from '@local-app/cohort/models';
 import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from '@local-app/cohort/dto/schema';
+import {
+  DataTypeDto,
+  dataTypeAllowedValueLabels,
+  DataTypeValidationDto,
+  dataTypeValidationLabel
+} from '@local-app/cohort/dto/data-type';
 import {DynamicFormService} from '@local-app/cohort/services/dynamic-form.service';
 import {
   ConnectorMappingMode,
@@ -358,6 +364,14 @@ export class ConnectorSelectMapperComponent implements OnInit {
 
   isMappingTarget(node: SchemaNodeNestedDto): boolean {
     return !this.isGroupNode(node);
+  }
+
+  allowedValueLabels(dataType: DataTypeDto): string[] {
+    return dataTypeAllowedValueLabels(dataType);
+  }
+
+  validationLabel(validation: DataTypeValidationDto): string {
+    return dataTypeValidationLabel(validation);
   }
 
   getNodeIcon(node: SchemaNodeNestedDto): string {

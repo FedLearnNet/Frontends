@@ -279,6 +279,8 @@
       "NO_DESCRIPTION": "Keine Beschreibung vorhanden.",
       "NO_ONTOLOGY": "Keine Ontologie verknüpft.",
       "NO_DATATYPE": "Kein Datentyp verknüpft.",
+      "ALLOWED_VALUES": "Erlaubte Werte",
+      "VALIDATION_RULES": "Validierungsregeln",
       "SELECT_CHILD_FIELD": "Dies ist eine Gruppe. Wähle ein untergeordnetes Feld, um das Mapping abzuschließen.",
       "VALIDATE_MAPPING": "Vorschauwerte validieren",
       "RUN_VALIDATION_AGAIN": "Erneut prüfen",

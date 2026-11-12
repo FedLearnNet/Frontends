@@ -661,6 +661,11 @@
   margin-top: 10px;
 }
 
+.node-detail__sublabel {
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
 :host ::ng-deep .mapper-autocomplete-panel {
   .mat-mdc-option.mapper-option {
     height: auto;

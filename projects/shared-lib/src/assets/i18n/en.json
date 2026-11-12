@@ -1096,6 +1096,8 @@
       "NO_DESCRIPTION": "No description provided.",
       "NO_ONTOLOGY": "No ontology connected.",
       "NO_DATATYPE": "No datatype connected.",
+      "ALLOWED_VALUES": "Allowed values",
+      "VALIDATION_RULES": "Validation rules",
       "SELECT_CHILD_FIELD": "This is a group node. Select a child field below to complete the mapping.",
       "VALIDATE_MAPPING": "Validate preview values",
       "RUN_VALIDATION_AGAIN": "Run again",
