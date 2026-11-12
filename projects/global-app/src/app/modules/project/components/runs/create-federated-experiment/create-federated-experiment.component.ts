@@ -56,6 +56,7 @@ export class CreateFederatedExperimentComponent {
 
   readonly data = inject<FederatedExperimentData>(MAT_DIALOG_DATA);
   readonly trainableApps = this.wths.containsTrainableApps(this.data.workflow);
+  readonly hasFlowerApp = this.wths.containsFlowerApp(this.data.workflow) > 0;
   readonly project = this.data.project;
 
   readonly platformAggregatorSupported = signal(false);
@@ -65,7 +66,10 @@ export class CreateFederatedExperimentComponent {
     description: new FormControl<string>('', [Validators.required]),
     acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue]),
     modelNeedToBePublic: new FormControl<boolean>(false, [Validators.required]),
-    platformIsCoordinator: new FormControl<boolean>(false, {nonNullable: true}),
+    // Flower's aggregator (Tool/SuperLink bundle) needs its Fleet API port reachable by clinics'
+    // SuperNodes; only the platform is set up to expose a port like that, so default/lock this
+    // choice to the platform.
+    platformIsCoordinator: new FormControl<boolean>(this.hasFlowerApp, {nonNullable: true}),
   });
 
   constructor() {
@@ -101,6 +105,10 @@ export class CreateFederatedExperimentComponent {
   isValidProject(): boolean {
     return this.hasProject && this.hasProjectName &&
       this.hasProjectDescription && this.hasEnoughSelectedData && this.hasQueryId;
+  }
+
+  get aggregatorChoiceBlocked(): boolean {
+    return this.hasFlowerApp && !this.platformAggregatorSupported();
   }
 
   onSubmit(): void {

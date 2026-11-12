@@ -36,6 +36,13 @@
       You need to select a federated query
     </lib-error-card>
   }
+  @if (aggregatorChoiceBlocked) {
+    <lib-error-card>
+      This workflow contains a Flower-based tool, which requires the platform to act as the
+      aggregator. This platform deployment does not support that, so this workflow cannot be
+      run as a federated experiment here.
+    </lib-error-card>
+  }
 
   <p>
     {{ 'DIALOG.CREATE_EXPERIMENT.MESSAGE_LINE_FEDERATED_1' | translate }}
@@ -58,8 +65,14 @@
     @if (platformAggregatorSupported()) {
       <div class="aggregator-location">
         <p>{{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
+        @if (hasFlowerApp) {
+          <lib-hint-card>
+            This workflow contains a Flower-based tool, so the platform must be the aggregator -
+            a random clinic cannot host it.
+          </lib-hint-card>
+        }
         <mat-radio-group formControlName="platformIsCoordinator">
-          <mat-radio-button [value]="false">
+          <mat-radio-button [value]="false" [disabled]="hasFlowerApp">
             {{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC' | translate }}
           </mat-radio-button>
           <mat-radio-button [value]="true">
@@ -82,6 +95,6 @@
 
 <mat-dialog-actions class="margin-top-auto" align="end">
   <lib-btn type="CREATE"
-           [disabled]="newExperimentForm.invalid || !isValidProject()"
+           [disabled]="newExperimentForm.invalid || !isValidProject() || aggregatorChoiceBlocked"
            (clicked)="onSubmit()"/>
 </mat-dialog-actions>

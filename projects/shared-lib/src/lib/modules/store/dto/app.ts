@@ -1,5 +1,5 @@
 import {BaseDto} from "@shared-lib/base/base-dto";
-import {FederatedAppType, PublishStatus} from "@shared-lib/modules/store/dto/enum";
+import {CommunicationEngine, FederatedAppType, PublishStatus} from "@shared-lib/modules/store/dto/enum";
 import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
 import {ToolAuditDTO} from "../../../../../../global-app/src/app/modules/audit/dto/audit";
 
@@ -13,6 +13,7 @@ export interface AppCreateDTO {
   shortDescription: string;
   type: FederatedAppType;
   supportsFederatedLearning?: boolean;
+  communicationEngine: CommunicationEngine;
 }
 
 export interface AppDto extends BaseDto {
@@ -22,6 +23,7 @@ export interface AppDto extends BaseDto {
 
   type: FederatedAppType;
   supportsFederatedLearning?: boolean;
+  communicationEngine?: CommunicationEngine;
   publishStatus: PublishStatus;
   sourceUrl: string;
 

@@ -16,6 +16,6 @@ export enum FederatedAppType {
 }
 
 export enum CommunicationEngine {
-  FL_NET = 'FL-NET',
+  FL_NET = 'FL_NET',
   FLOWER = 'FLOWER',
 }

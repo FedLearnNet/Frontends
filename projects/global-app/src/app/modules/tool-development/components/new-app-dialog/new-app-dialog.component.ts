@@ -165,6 +165,7 @@ export class NewAppDialogComponent {
       shortDescription: formValue.shortDescription!,
       type: formValue.toolType!,
       supportsFederatedLearning: formValue.supportsFederatedLearning ?? false,
+      communicationEngine: formValue.communicationEngine,
     };
     this.appService.createApp(data).subscribe(
       data => {
