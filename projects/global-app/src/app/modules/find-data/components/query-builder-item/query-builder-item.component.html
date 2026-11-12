@@ -20,8 +20,8 @@
                             autoActiveFirstOption
                             [displayWith]="displayColumnName"
                             (optionSelected)="onCatalogSelected($event.option.value)">
-            @for (column of filteredColumns(); track column.value) {
-              <mat-option [value]="column.value">{{ column.label }}</mat-option>
+            @for (config of filteredColumns(); track config.ontology.id + '::' + config.dataType.id) {
+              <mat-option [value]="config">{{ config.label }}</mat-option>
             }
           </mat-autocomplete>
           @if (catalogControl.value) {
