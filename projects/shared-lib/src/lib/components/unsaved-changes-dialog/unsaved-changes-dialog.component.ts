@@ -10,14 +10,14 @@ export type UnsavedChangesDecision = 'save' | 'keep-editing' | 'discard';
   imports: [MatDialogModule, MatButtonModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <h2 mat-dialog-title>{{ 'UNSAVED_CHANGES.TITLE' | translate }}</h2>
+    <h2 mat-dialog-title>{{ 'DIALOG.UNSAVED_CHANGES.TITLE' | translate }}</h2>
     <div mat-dialog-content>
-      <p>{{ 'UNSAVED_CHANGES.MESSAGE' | translate }}</p>
+      <p>{{ 'DIALOG.UNSAVED_CHANGES.MESSAGE' | translate }}</p>
     </div>
     <div mat-dialog-actions align="end">
-      <button mat-button (click)="close('discard')">{{ 'UNSAVED_CHANGES.DISCARD' | translate }}</button>
-      <button mat-button (click)="close('keep-editing')">{{ 'UNSAVED_CHANGES.KEEP_EDITING' | translate }}</button>
-      <button mat-flat-button color="primary" (click)="close('save')" cdkFocusInitial>{{ 'UNSAVED_CHANGES.SAVE' | translate }}</button>
+      <button mat-button (click)="close('discard')">{{ 'DIALOG.UNSAVED_CHANGES.DISCARD' | translate }}</button>
+      <button mat-button (click)="close('keep-editing')">{{ 'DIALOG.UNSAVED_CHANGES.KEEP_EDITING' | translate }}</button>
+      <button mat-flat-button color="primary" (click)="close('save')" cdkFocusInitial>{{ 'DIALOG.UNSAVED_CHANGES.SAVE' | translate }}</button>
     </div>
   `,
 })

@@ -3,6 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Observable, of, tap} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
 import {Actions} from '@ngrx/effects';
 import {UnsavedChangesService} from '@shared-lib/services/unsaved-changes.service';
 import {dispatchAndAwait} from '@shared-lib/utils/dispatch-and-await';
@@ -89,6 +90,7 @@ import {forkJoin} from "rxjs";
 export class DatasetBuilderPageComponent {
   private readonly store = inject(Store);
   private readonly actions$ = inject(Actions);
+  private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly queryService = inject(QueryService);
   private readonly dataTypeService = inject(DataTypeService);
@@ -532,7 +534,10 @@ export class DatasetBuilderPageComponent {
       [ProjectActions.updateFailure],
     ).pipe(tap(ok => {
       if (ok) {
-        this.snackBar.open('Dataset design saved to the project.', 'Close', {duration: 3500});
+        this.snackBar.open(
+          this.translate.instant('SUCCESS.DATASET_DESIGN_SAVED'),
+          this.translate.instant('BUTTON.CLOSE'),
+          {duration: 3500});
       }
     }));
   }

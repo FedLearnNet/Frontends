@@ -201,6 +201,13 @@
       "LEAD": "Transformationen sind optional und können später hinzugefügt werden.",
       "DESCRIPTION": "Du kannst deine Daten vor dem Mapping transformieren oder diesen Schritt überspringen und direkt zum Mapper gehen."
     },
+    "UNSAVED_CHANGES": {
+      "TITLE": "Ungespeicherte Änderungen",
+      "MESSAGE": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt die Seite verlassen, gehen diese verloren.",
+      "SAVE": "Speichern",
+      "KEEP_EDITING": "Weiter bearbeiten",
+      "DISCARD": "Änderungen verwerfen"
+    },
     "TRANSFORMER_MANAGER": {
       "TRANSFORMATION_SOURCE": "Transformationsquelle",
       "BUILT_IN_TRANSFORMATIONS": "Integriert",
@@ -543,11 +550,7 @@
     "BLOCKED_HINT": "Schritt {{index}} läuft in einer App und wurde noch nicht ausgeführt, daher verwendet dieser Schritt dessen Eingangszeilen. Führe zuerst Schritt {{index}} aus.",
     "OPEN_BLOCKING_STEP": "Zu Schritt {{index}}"
   },
-  "UNSAVED_CHANGES": {
-    "TITLE": "Ungespeicherte Änderungen",
-    "MESSAGE": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt die Seite verlassen, gehen diese verloren.",
-    "SAVE": "Speichern",
-    "KEEP_EDITING": "Weiter bearbeiten",
-    "DISCARD": "Änderungen verwerfen"
+  "SUCCESS": {
+    "DATASET_DESIGN_SAVED": "Dataset-Design wurde im Projekt gespeichert."
   }
 }
