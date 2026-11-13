@@ -25,9 +25,15 @@ import {ConnectorStepSpecifySelectorsComponent} from "./specify-selectors/specif
 import {ActivatedRoute, Router} from '@angular/router';
 import {InputAppBasedComponent} from "./input-app-based/input-app-based.component";
 import {ConnectorDTO, ConnectorInputConfigDTO} from "../../../../dto/connector";
-import {isFileUploadSettings} from "../../../../helper/connector-config-helper";
+import {
+  fileFitsConnector,
+  isFileUploadSettings,
+  mergeConfigFitsTables,
+  mergesTables
+} from "../../../../helper/connector-config-helper";
 import {ConnectorService} from '../../../../services/connector-crud.service';
 import {ConnectorInputConfig, FileUploadSettings} from '../../../../models/input-config';
+import {hasValidFileInfo} from '@shared-lib/utils';
 
 const componentMapper: { [key: string]: any } = {
   source_config: ConnectorStepDataSourceConfigComponent,
@@ -130,14 +136,20 @@ export class ConnectorStepConfigComponent implements OnInit, OnChanges, Connecto
     const prevFileId = isFileUploadSettings(prevConfig) ? (prevConfig.fileId ?? null) : null;
     const nextFileId = isFileUploadSettings(nextConfig) ? (nextConfig.fileId ?? null) : null;
 
-    this.config.set(event);
+    const fileRecovered = !this.fileExists(prevConfig) && this.fileExists(nextConfig);
+    const structureChanged = fileRecovered && !!event.id && this.hasOtherStructure(event);
+
+    this.config.set(structureChanged ? this.withoutStaleMerge(event) : event);
     this.configChange.emit(this.config());
 
     if (prevFileId !== nextFileId && nextFileId != null) {
       this.inputFileChanged.emit();
     }
 
-    const fileRecovered = !this.fileExists(prevConfig) && this.fileExists(nextConfig);
+    if (structureChanged) {
+      this.componentRef?.setInput('config', this.config());
+      return;
+    }
 
     if (this.shouldSaveConnector(prevConfig, nextConfig, prevFileId, nextFileId)) {
       this.connectorService.save(this.config()).subscribe(() => {
@@ -148,6 +160,20 @@ export class ConnectorStepConfigComponent implements OnInit, OnChanges, Connecto
     } else if (fileRecovered) {
       this.reloadWithUploadedFile();
     }
+  }
+
+  private hasOtherStructure(connector: ConnectorDTO): boolean {
+    const tables = connector.fileInfo;
+    return !!tables && hasValidFileInfo(tables) && !fileFitsConnector(connector, tables);
+  }
+
+  private withoutStaleMerge(connector: ConnectorDTO): ConnectorDTO {
+    const tables = connector.fileInfo ?? {};
+    if (!mergesTables(connector.mergeConfig)
+      || mergeConfigFitsTables(connector.mergeConfig, tables, !!connector.pivotConfig)) {
+      return connector;
+    }
+    return {...connector, mergeConfig: undefined, pivotConfig: undefined};
   }
 
   private reloadWithUploadedFile(): void {

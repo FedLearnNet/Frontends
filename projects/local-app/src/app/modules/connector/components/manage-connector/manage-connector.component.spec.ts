@@ -1,6 +1,7 @@
 import {NO_ERRORS_SCHEMA, Pipe, PipeTransform, signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {ActivatedRoute, Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
@@ -32,6 +33,7 @@ describe('ManageConnectorComponent', () => {
   let dialogs: Subject<unknown>[];
   let fileDetailResponse: Subject<ConnectorFilesDetailDTO>;
   let preview: jasmine.Spy;
+  let snackBarOpen: jasmine.Spy;
 
   afterEach(() => localStorage.removeItem(storageKey));
 
@@ -41,6 +43,22 @@ describe('ManageConnectorComponent', () => {
 
       expect(fixture.nativeElement.querySelector('app-edit-mapper')).not.toBeNull();
       expect(component.currentStep().type).toBe('MAPPING');
+    });
+
+    // The connector still points at the file a successful run deleted, which made the file step
+    // look done (a tick and the deleted file's type) although a new file is needed.
+    it('marks the file step as missing its file when the file was deleted', async () => {
+      const connector = fileConnector();
+      await render(ConnectorManagementMode.EDIT, {
+        ...connector,
+        id: 3,
+        transformer: [],
+        inputConfig: {...connector.inputConfig, fileExists: false},
+      } as ConnectorDTO);
+
+      const fileCard = component.configCards()[1];
+      expect(fileCard.configured).toBeFalse();
+      expect(fileCard.content).toBe('CONNECTOR_FILE_MISSING.BADGE');
     });
 
     // The preview returns the source table when there is no step, and it was matched to a
@@ -65,6 +83,38 @@ describe('ManageConnectorComponent', () => {
     });
 
     // The TranslateService stub returns the key, so translated text shows up as its key.
+    // The connector's file was replaced by one with other tables, so the resolver dropped the merge
+    // of the old ones. Mapping needs one table, and the mapper would show only the first.
+    it('opens on Specify Headers when the file has tables nothing merges', async () => {
+      await render(ConnectorManagementMode.EDIT, {
+        ...fileConnector(),
+        id: 3,
+        transformer: [],
+        fileInfo: {
+          patients: {sheet: 'patients', columns: ['PatientID'], json: '[{"PatientID":"1"}]', fileExists: true},
+          prescriptions: {sheet: 'prescriptions', columns: ['PatientID'], json: '[{"PatientID":"1"}]', fileExists: true},
+        },
+      } as unknown as ConnectorDTO);
+
+      expect(component.currentStep().step).toBe(ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
+      expect(contentStep()).toBe(ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
+      expect(fixture.nativeElement.querySelector('app-edit-mapper')).toBeNull();
+      expect(snackBarOpen).toHaveBeenCalledTimes(1);
+      expect(snackBarOpen.calls.mostRecent().args[0]).toBe('CONNECTOR_FILE_STRUCTURE_CHANGED');
+    });
+
+    it('opens on the mapper when the merge joins the tables', async () => {
+      await render(ConnectorManagementMode.EDIT, {
+        ...fileConnector(),
+        id: 3,
+        transformer: [],
+        mergeConfig: {uidColumn: 'PatientID', commonUidColumnName: 'PatientID', sheetUidMapping: {a: 'PatientID', b: 'PatientID'}},
+      } as unknown as ConnectorDTO);
+
+      expect(component.currentStep().type).toBe('MAPPING');
+      expect(snackBarOpen).not.toHaveBeenCalled();
+    });
+
     it('labels the mapper and file steps with translated text', async () => {
       await render(ConnectorManagementMode.EDIT, {...fileConnector(), id: 3, transformer: []});
 
@@ -288,6 +338,7 @@ describe('ManageConnectorComponent', () => {
     dialogs = [];
     fileDetailResponse = new Subject<ConnectorFilesDetailDTO>();
     preview = jasmine.createSpy('preview').and.returnValue(of({rows: new Map(), stages: new Map()}));
+    snackBarOpen = jasmine.createSpy('open');
 
     TestBed.configureTestingModule({
       providers: [
@@ -318,6 +369,7 @@ describe('ManageConnectorComponent', () => {
           },
         },
         {provide: Store, useValue: {selectSignal: () => signal([])}},
+        {provide: MatSnackBar, useValue: {open: snackBarOpen}},
       ],
     });
     TestBed.overrideComponent(ManageConnectorComponent, {

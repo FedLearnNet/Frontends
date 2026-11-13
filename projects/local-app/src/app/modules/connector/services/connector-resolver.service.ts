@@ -10,7 +10,9 @@ import {
   filterSelectedOutputs,
   isAppBasedUploadSettings,
   isFileUploadSettings,
-  mergeFileInfo
+  mergeConfigFitsTables,
+  mergeFileInfo,
+  mergesTables
 } from "../helper/connector-config-helper";
 import {Store} from "@ngrx/store";
 import {StoreActions} from "@shared-lib/modules/store/store/store.actions";
@@ -61,6 +63,11 @@ export const connectorAndFileResolver: ResolveFn<ConnectorDTO | null> =
               }
               const fileInfoMap = connectorFilesDetailToFileInfo(fileInfoDetail);
               keepColumnEdits(fileInfoMap, connector.fileInfo);
+              if (mergesTables(connector.mergeConfig)
+                && !mergeConfigFitsTables(connector.mergeConfig, fileInfoMap, !!connector.pivotConfig)) {
+                connector.mergeConfig = undefined;
+                connector.pivotConfig = undefined;
+              }
               if (connector.mergeConfig
                 && Object.keys(fileInfoMap).length > 1) {
                 connector.fileInfo =

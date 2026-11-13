@@ -23,6 +23,7 @@ import {
 } from "@angular/cdk/drag-drop";
 import {cloneDeep, random} from "lodash";
 import {MatDialog} from "@angular/material/dialog";
+import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ConnectorTransformerFunctionManagerComponent
 } from "./components/function/transformer-manager/transformer-manager.component";
@@ -128,6 +129,7 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
+  private readonly snackBar = inject(MatSnackBar);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -990,9 +992,25 @@ export class ManageConnectorComponent implements OnInit {
     this.loadTransformers(this.config().transformer);
     this.clearConnectorValues();
 
-    if (this.cards().some(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG)) {
+    const selectorsCard = this.cards().find(card => card.step === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
+    if (selectorsCard && this.hasUnmergedTables()) {
+      this.currentStep.set(selectorsCard);
+      this.snackBar.open(
+        this.translate.instant('CONNECTOR_FILE_STRUCTURE_CHANGED'),
+        this.translate.instant('BUTTON.CLOSE'), {
+          duration: 10000,
+          verticalPosition: 'top',
+        });
+    } else if (selectorsCard) {
       this.currentStep.set(this.mappingCards()[0]);
     }
+  }
+
+  private hasUnmergedTables(): boolean {
+    const {inputConfig, fileInfo, mergeConfig} = this.config();
+    return !!inputConfig && isFileUploadSettings(inputConfig)
+      && !mergeConfig
+      && Object.keys(fileInfo ?? {}).length > 1;
   }
 
   private clearConnectorValues(): void {
@@ -1236,7 +1254,7 @@ export class ManageConnectorComponent implements OnInit {
     }
 
     if (isFileUploadSettings(inputConfig)) {
-      return !!inputConfig.fileId;
+      return !!inputConfig.fileId && inputConfig.fileExists !== false;
     }
 
     if (inputConfig.mode === 'APP') {
@@ -1258,6 +1276,10 @@ export class ManageConnectorComponent implements OnInit {
     const inputConfig = this.config().inputConfig;
     if (!inputConfig) {
       return undefined;
+    }
+
+    if (isFileUploadSettings(inputConfig) && inputConfig.fileId && inputConfig.fileExists === false) {
+      return this.translate.instant('CONNECTOR_FILE_MISSING.BADGE');
     }
 
     if ('fileType' in inputConfig) {

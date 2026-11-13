@@ -294,6 +294,63 @@ function mergeUidHeader(sheet: UploadInfoDTO | undefined, mergeConfig: SheetMerg
   return sheet?.renamedColumns?.[index] ?? mergeConfig.commonUidColumnName;
 }
 
+export function mergesTables(mergeConfig?: SheetMergeResultDTO): mergeConfig is SheetMergeResultDTO {
+  return Object.keys(mergeConfig?.sheetUidMapping ?? {}).length > 1;
+}
+
+export function mergeConfigFitsTables(
+  mergeConfig: SheetMergeResultDTO,
+  tables: Record<string, UploadInfoDTO>,
+  pivoted = false,
+): boolean {
+  const tableNames = Object.keys(tables);
+  return tableNames.length === Object.keys(mergeConfig.sheetUidMapping ?? {}).length
+    && tableNames.every(name => {
+      const uidColumn = findNormalizedSheetName(name, mergeConfig.sheetUidMapping);
+      return !!uidColumn && (pivoted || (tables[name].columns ?? []).includes(uidColumn));
+    });
+}
+
+function getMappedColumns(schemaMapping?: ConnectorMappingConfig[]): string[] {
+  return (schemaMapping ?? []).flatMap(mapping => [
+    mapping.column,
+    mapping.visitIdMapping,
+    mapping.visitTimestampMapping,
+    mapping.valueMappingConfig?.mappingColumn,
+    mapping.valueMappingConfig?.valueColumn,
+  ]).filter((column): column is string => !!column);
+}
+
+export function fileFitsConnector(connector: ConnectorDTO, tables: Record<string, UploadInfoDTO>): boolean {
+  const tableCount = Object.keys(tables).length;
+  if (tableCount === 0) {
+    return false;
+  }
+
+  const mergeConfig = connector.mergeConfig;
+  let columns: string[];
+  if (mergesTables(mergeConfig)) {
+    if (!mergeConfigFitsTables(mergeConfig, tables, !!connector.pivotConfig)) {
+      return false;
+    }
+    columns = getPrimarySheet(mergeFileInfo(structuredClone(tables), mergeConfig))?.columns ?? [];
+  } else if (tableCount > 1) {
+    return false;
+  } else {
+    columns = getPrimarySheet(tables)?.columns ?? [];
+  }
+
+  if (connector.pivotConfig) {
+    return true;
+  }
+
+  const available = new Set([
+    ...columns,
+    ...(connector.transformer ?? []).flatMap(getTransformerOutputColumns),
+  ]);
+  return getMappedColumns(connector.schemaMapping).every(column => available.has(column));
+}
+
 export function getBaseColumnName(columnName: string, sheetName: string): string {
   return columnName.replace(`${sheetName}::`, '');
 }
