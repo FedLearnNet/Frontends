@@ -12,6 +12,7 @@ import {DynamicFormService} from '@local-app/cohort/services/dynamic-form.servic
 import {ConnectorPreviewService} from '../../../../../services/connector-preview.service';
 import {ConnectorMappingMode} from '../../../../../models/connector-value-mapping';
 import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from '@local-app/cohort/dto/schema';
+import {DataTypeTypeEnum, DataTypeValidationNameEnum} from '@local-app/cohort/dto/data-type';
 
 describe('ConnectorSelectMapperComponent', () => {
   let component: ConnectorSelectMapperComponent;
@@ -146,6 +147,35 @@ describe('ConnectorSelectMapperComponent', () => {
 
     expect(component.selectedValues).toEqual(['Unique Patient ID']);
     expect(component.getSelectedNode()).toBe(patientId);
+  });
+
+  it('shows the allowed values and validation rules of the selected field', () => {
+    const education = {
+      ...schemaNode(4, 'Education Attainment', SchemaNodeTypeEnum.ATOMIC_ATTRIBUTE),
+      dataType: {
+        name: 'education level',
+        type: DataTypeTypeEnum.CATEGORICAL,
+        options: [
+          {label: 'Illiterate', value: 'Illiterate'},
+          {label: 'Lower education', value: 'Lower education'}
+        ],
+        validations: [{name: DataTypeValidationNameEnum.MAXLENGTH, validator: '50'}]
+      }
+    } as unknown as SchemaNodeNestedDto;
+    component.cohort = {
+      id: 1,
+      schemaRoot: {childNodes: [education]},
+    } as unknown as ConnectorSelectMapperComponentData['cohort'];
+    component.initializeFirstLevelOptions();
+    component.onSelection(component.getOptionSelectionValue(component.filteredOptions[0][0]));
+    fixture.detectChanges();
+
+    const text = (fixture.nativeElement as HTMLElement).textContent!;
+    expect(text).toContain('DIALOG.MAPPER.ALLOWED_VALUES');
+    expect(text).toContain('Illiterate');
+    expect(text).toContain('Lower education');
+    expect(text).toContain('DIALOG.MAPPER.VALIDATION_RULES');
+    expect(text).toContain('MAXLENGTH: 50');
   });
 
   function schemaNode(
