@@ -1122,6 +1122,13 @@
       "OVERVIEW_SINGLE_VALIDATION_TOOLTIP": "Validated preview value: {{value}}",
       "OVERVIEW_INVALIDATION_TOOLTIP": "At least one of {{count}} preview examples failed. Reopen the mapping dialog for details.",
       "VIEW_VALIDATION_DETAILS": "View validation details"
+    },
+    "UNSAVED_CHANGES": {
+      "TITLE": "Unsaved changes",
+      "MESSAGE": "You have unsaved changes. If you leave now, they will be lost.",
+      "SAVE": "Save",
+      "KEEP_EDITING": "Keep editing",
+      "DISCARD": "Discard changes"
     }
   },
   "ERROR": {
@@ -1182,7 +1189,8 @@
     "NOT_GIVEN": "Not Given",
     "NO_SELECTED": "No Selected",
     "NO_VERSION_SELECTED": "No Version Selected",
-    "YOU_NEED_TO_SELECT_A_QUERY": "You need to select a query",
+    "NO_QUERY_FOUND": "No query found",
+    "NO_QUERY_FOUND_SUBTITLE": "You need to select a query first to configure a dataset.",
     "NO_VALID_VERSION": "No valid version found. Please select another one",
     "NO_VALID_PROJECT_TO_CREATE_EXPERIMENT": "You dont have a valid project to create an experiment!",
     "LOADING_OR_NOT_FOUND": "Loading or not found",
@@ -1448,7 +1456,8 @@
   },
   "SUCCESS": {
     "SHEETS_MERGED": "Sheets merged successfully",
-    "CSV_FILES_MERGED": "CSV files merged successfully"
+    "CSV_FILES_MERGED": "CSV files merged successfully",
+    "DATASET_DESIGN_SAVED": "Dataset design saved to the project."
   },
   "TOOLTIP": {
     "ADD_A_CONNECTOR": "Create a new connector manually or import an existing definition",

@@ -2,6 +2,11 @@ import {CdkDragDrop, DragDropModule, moveItemInArray} from "@angular/cdk/drag-dr
 import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {Observable, of, tap} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
+import {Actions} from '@ngrx/effects';
+import {UnsavedChangesService} from '@shared-lib/services/unsaved-changes.service';
+import {dispatchAndAwait} from '@shared-lib/utils/dispatch-and-await';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCardModule} from "@angular/material/card";
 import {MatExpansionModule} from "@angular/material/expansion";
@@ -51,7 +56,6 @@ import {
   normalizeExportFeature,
   toSelectionKey
 } from "@shared-lib/modules/data-modeler/utils/patient-export-config.util";
-import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {OntologyService} from "@global-app/schema/services/ontology.service";
@@ -74,7 +78,6 @@ import {forkJoin} from "rxjs";
     DataExportConfigComponent,
     DatasetFeatureCardComponent,
     DatasetPreviewComponent,
-    HeaderComponent,
     PageWrapperComponent,
     BtnComponent
   ],
@@ -84,6 +87,8 @@ import {forkJoin} from "rxjs";
 })
 export class DatasetBuilderPageComponent {
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
+  private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly queryService = inject(QueryService);
   private readonly dataTypeService = inject(DataTypeService);
@@ -209,6 +214,16 @@ export class DatasetBuilderPageComponent {
     }
 
     return `${query.result} matching patients`;
+  });
+
+  readonly hasUnsavedChanges = computed(() => {
+    const project = this.project();
+    return !!project && JSON.stringify(this.exportConfig()) !== JSON.stringify(project.exportConfig ?? {});
+  });
+
+  private readonly unsavedChanges = inject(UnsavedChangesService).register({
+    hasUnsavedChanges: () => this.hasUnsavedChanges(),
+    save: () => this.saveDesign$(),
   });
 
   private readonly syncProjectConfigEffect = effect(() => {
@@ -490,9 +505,13 @@ export class DatasetBuilderPageComponent {
   }
 
   saveDesign(): void {
+    this.saveDesign$().subscribe();
+  }
+
+  private saveDesign$(): Observable<boolean> {
     const project = this.project();
     if (!project) {
-      return;
+      return of(false);
     }
 
     const exportConfig = {
@@ -505,14 +524,20 @@ export class DatasetBuilderPageComponent {
     this.exportConfig.set(exportConfig);
     this.datasetFeatures.set(exportConfig.features ?? []);
 
-    this.store.dispatch(ProjectActions.update({
-      project: {
-        ...project,
-        exportConfig,
+    return dispatchAndAwait(
+      this.store,
+      this.actions$,
+      ProjectActions.update({project: {...project, exportConfig}}),
+      [ProjectActions.updateSuccess],
+      [ProjectActions.updateFailure],
+    ).pipe(tap(ok => {
+      if (ok) {
+        this.snackBar.open(
+          this.translate.instant('SUCCESS.DATASET_DESIGN_SAVED'),
+          this.translate.instant('BUTTON.CLOSE'),
+          {duration: 3500});
       }
     }));
-
-    this.snackBar.open('Dataset design saved to the project.', 'Close', {duration: 3500});
   }
 
   refreshPreview(): void {

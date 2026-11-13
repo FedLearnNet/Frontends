@@ -1,17 +1,9 @@
-<lib-header
-  [title]="$safeNavigationMigration(project()?.name) +' dataset builder'"
-  description="Plan your dataset"
-  [enableSkeleton]="projectLoading()"
-  [locationBack]="true"
-  [enableGoBack]="true">
-  <div suffix class="builder-hero__chips">
-    <lib-badge [text]="queryResultSummary()" color="WHITE" [border]="true"></lib-badge>
-    <lib-badge [text]="featureCount() + ' features'" color="BLUE"></lib-badge>
-    <lib-badge [text]="selectionOptions().length + ' available selections'" color="GREEN"></lib-badge>
-    <lib-btn type="SAVE" (clicked)="saveDesign()"/>
-  </div>
-</lib-header>
-
+<div class="builder-hero__chips builder-embedded-toolbar">
+  <lib-badge [text]="queryResultSummary()" color="WHITE" [border]="true"></lib-badge>
+  <lib-badge [text]="featureCount() + ' features'" color="BLUE"></lib-badge>
+  <lib-badge [text]="selectionOptions().length + ' available selections'" color="GREEN"></lib-badge>
+  <lib-btn type="SAVE" (clicked)="saveDesign()"/>
+</div>
 
 <lib-page-wrapper
   [isLoading]="projectLoading()"

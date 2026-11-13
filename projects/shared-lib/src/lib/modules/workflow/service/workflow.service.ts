@@ -319,6 +319,14 @@ export class WorkflowService {
           ...workflow.nodes[index],
           position: fNode.position
         };
+        return;
+      }
+      const inputIndex = workflow.inputs?.findIndex(i => i.nodeId === fNode.id) ?? -1;
+      if (inputIndex !== -1) {
+        workflow.inputs[inputIndex] = {
+          ...workflow.inputs[inputIndex],
+          position: fNode.position
+        };
       }
     })
     return workflow;

@@ -19,28 +19,28 @@ export type EmptyStateSize = 'SMALL' | 'MEDIUM' | 'LARGE';
   },
 })
 export class EmptyStateComponent {
-  title = input<string>('This is a blank slate');
-  subtitle = input<string>('Use it to provide information when no dynamic content exists.');
-  icon = input<string>('brightness_empty');
+  readonly title = input.required<string>();
+  readonly subtitle = input<string>('');
+  readonly icon = input<string>('brightness_empty');
 
-  primaryButtonEnabled = input<boolean>(false);
-  primaryButtonLabel = input<string>('Small Button');
+  readonly primaryButtonEnabled = input<boolean>(false);
+  readonly primaryButtonLabel = input<string>('Small Button');
 
-  secondaryActionEnabled = input<boolean>(false);
-  secondaryActionLabel = input<string>('Secondary action link');
+  readonly secondaryActionEnabled = input<boolean>(false);
+  readonly secondaryActionLabel = input<string>('Secondary action link');
 
-  hasBackground = input<boolean>(false);
-  bordered = input<boolean>(false);
-  compact = input<boolean>(false);
+  readonly hasBackground = input<boolean>(false);
+  readonly bordered = input<boolean>(false);
+  readonly compact = input<boolean>(false);
   /** LARGE fills a page section; SMALL fits side panels and lists. */
-  size = input<EmptyStateSize>('LARGE');
-  iconBtn = input<boolean>(false);
+  readonly size = input<EmptyStateSize>('LARGE');
+  readonly iconBtn = input<boolean>(false);
 
-  cta = output<void>();
-  secondaryAction = output<void>();
-  rootClicked = output<MouseEvent>();
+  readonly cta = output<void>();
+  readonly secondaryAction = output<void>();
+  readonly rootClicked = output<MouseEvent>();
 
-  ariaLabel = computed(() => {
+  protected readonly ariaLabel = computed(() => {
     const title = this.title()?.trim() || 'Empty state';
     const subtitle = this.subtitle()?.trim() || '';
     return subtitle ? `${title} – ${subtitle}` : title;
