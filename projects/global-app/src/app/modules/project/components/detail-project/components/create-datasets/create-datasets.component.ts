@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal} from '@angular/core';
 import {DataTypeService} from "@global-app/schema/services/datatype.service";
 import {QueryService} from "@global-app/find-data/services/query.service";
 import {DataTypeSubscriptionDTO} from "@global-app/schema/dto/datatype";
@@ -50,6 +50,7 @@ export class CreateDatasetsComponent {
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
 
   readonly project = input.required<ProjectDto>();
+  readonly addQuery = output<void>();
 
   protected readonly builderOpen = signal<boolean>(false);
   protected readonly query = signal<QueryDTO | undefined>(undefined);
@@ -59,7 +60,7 @@ export class CreateDatasetsComponent {
   protected readonly queryError = signal<string | undefined>(undefined);
   protected readonly dataTypeError = signal<string | undefined>(undefined);
 
-  protected readonly hasQuery = computed(() => this.project()?.queryId !== undefined);
+  protected readonly hasQuery = computed(() => !!this.project()?.queryId);
 
   private projectEffect$ = effect(() => {
     this.exportConfig.set(this.project().exportConfig ?? {} as PatientDataExportConfigDTO);
@@ -67,6 +68,7 @@ export class CreateDatasetsComponent {
 
   private queryEffect$ = effect(() => {
     if (!this.project().queryId) {
+      this.loaded.set(true);
       return;
     }
 
