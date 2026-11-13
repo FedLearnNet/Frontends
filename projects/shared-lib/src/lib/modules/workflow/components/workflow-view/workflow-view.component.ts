@@ -38,6 +38,10 @@ import {FlowActionPanelAction} from "@shared-lib/modules/workflow/models/workflo
 import {toSignal} from "@angular/core/rxjs-interop";
 import {selectSelectedWorkflow, selectWorkflowLoading} from "@shared-lib/modules/workflow/store/workflow.selectors";
 import {Store} from "@ngrx/store";
+import {Actions} from "@ngrx/effects";
+import {Observable} from "rxjs";
+import {UnsavedChangesService} from "@shared-lib/services/unsaved-changes.service";
+import {dispatchAndAwait} from "@shared-lib/utils/dispatch-and-await";
 import * as WorkflowActions from '@shared-lib/modules/workflow/store/workflow.actions';
 import {WorkflowDTO, WorkflowInputDTO, WorkflowNodeDetailDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {
@@ -84,6 +88,7 @@ import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/
 })
 export class WorkflowViewComponent {
   private readonly store: Store = inject(Store);
+  private readonly actions$ = inject(Actions);
   private readonly dialog: MatDialog = inject(MatDialog);
   private readonly _workflowService = inject(WorkflowService);
   private readonly storeService: StoreService = inject(StoreService);
@@ -115,6 +120,18 @@ export class WorkflowViewComponent {
 
   private flowRendered = false;
 
+  /** Serialized workflow as last loaded from / saved to the backend. */
+  private readonly savedSnapshot = signal<string | null>(null);
+  readonly hasUnsavedChanges = computed(() => {
+    const snapshot = this.savedSnapshot();
+    return snapshot !== null && JSON.stringify(this.workflow()) !== snapshot;
+  });
+
+  private readonly unsavedChanges = inject(UnsavedChangesService).register({
+    hasUnsavedChanges: () => this.hasUnsavedChanges(),
+    save: () => this.saveWorkflow(),
+  });
+
   constructor() {
     effect(() => {
       const dto = this.selectedWorkflow();
@@ -124,6 +141,7 @@ export class WorkflowViewComponent {
           this._workflowService.addFederatedInputDataset(mutable);
         }
         this.workflow.set(mutable);
+        this.savedSnapshot.set(JSON.stringify(mutable));
         if (this.flowRendered) {
           this._canvas()?.resetScaleAndCenter();
         }
@@ -157,15 +175,9 @@ export class WorkflowViewComponent {
       case FlowActionPanelAction.CONNECT_SELECTED:
         this.openConnectDialog();
         break;
-      case FlowActionPanelAction.SAVE: {
-        const dto = this.workflow();
-        if (dto.id) {
-          this.store.dispatch(WorkflowActions.updateWorkflow({id: dto.id, updateDTO: dto}));
-        } else {
-          this.store.dispatch(WorkflowActions.createWorkflow({createDTO: dto as any}));
-        }
+      case FlowActionPanelAction.SAVE:
+        this.saveWorkflow().subscribe();
         break;
-      }
       case FlowActionPanelAction.ZOOM_IN:
         this._zoom()?.zoomIn();
         break;
@@ -191,6 +203,17 @@ export class WorkflowViewComponent {
         break;
       }
     }
+  }
+
+  private saveWorkflow(): Observable<boolean> {
+    const dto = this.workflow();
+    return dto.id
+      ? dispatchAndAwait(this.store, this.actions$,
+        WorkflowActions.updateWorkflow({id: dto.id, updateDTO: dto}),
+        [WorkflowActions.updateWorkflowSuccess], [WorkflowActions.updateWorkflowFailure])
+      : dispatchAndAwait(this.store, this.actions$,
+        WorkflowActions.createWorkflow({createDTO: dto as any}),
+        [WorkflowActions.createWorkflowSuccess], [WorkflowActions.createWorkflowFailure]);
   }
 
   public deleteInputNode(node: WorkflowInputDTO) {

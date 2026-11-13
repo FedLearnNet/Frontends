@@ -22,6 +22,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {QueryService} from "@global-app/find-data/services/query.service";
 import {QueryDetailDTO} from "@global-app/find-data/dto/query";
+import {UnsavedChangesService} from "@shared-lib/services/unsaved-changes.service";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 
 @Component({
@@ -46,6 +47,7 @@ export class DetailProjectComponent implements OnInit {
   private readonly store: Store = inject(Store);
   private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private readonly router: Router = inject(Router);
+  private readonly unsavedChanges = inject(UnsavedChangesService);
   private readonly queryService: QueryService = inject(QueryService);
 
   selectedIndex = signal<number>(0);
@@ -86,9 +88,17 @@ export class DetailProjectComponent implements OnInit {
   }
 
   setSelectedIndex(index: number): void {
-    this.selectedIndex.set(index);
-    const fragments = ['overview', 'data', 'workflow', 'run'];
-    this.router.navigate([], {fragment: fragments[index]});
+    if (index === this.selectedIndex()) {
+      return;
+    }
+    this.unsavedChanges.confirmLeave().subscribe(canLeave => {
+      if (!canLeave) {
+        return;
+      }
+      this.selectedIndex.set(index);
+      const fragments = ['overview', 'data', 'workflow', 'run'];
+      this.router.navigate([], {fragment: fragments[index]});
+    });
   }
 
   getTabIndexFromHash(hash: string | null): number {

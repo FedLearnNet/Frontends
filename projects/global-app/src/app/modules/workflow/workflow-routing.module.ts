@@ -6,6 +6,8 @@ import {
   WorkflowDetailPageComponent
 } from "@shared-lib/modules/workflow/components/workflow-detail-page/workflow-detail-page.component";
 
+import {unsavedChangesGuard} from "@shared-lib/services/unsaved-changes.service";
+
 const routes: Routes = [
   {
     path: '',
@@ -18,6 +20,7 @@ const routes: Routes = [
         path: ':workflow-id',
         component: WorkflowDetailPageComponent,
         pathMatch: 'full',
+        canDeactivate: [unsavedChangesGuard],
         resolve: {app: appStoreResolver}
       },
     ],
