@@ -19,8 +19,14 @@ import {
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {ConnectorDTO} from "../dto/connector";
 
+export interface PreviewTable {
+  rows: any[];
+  columns: string[];
+}
+
 export interface PreviewResult {
   rows: Map<string, any[]>;
+  columns: Map<string, string[]>;
   stages: Map<string, PreviewStageDTO>;
 }
 
@@ -64,22 +70,24 @@ export class ConnectorPreviewService {
       }),
       map(response => {
         const transformedData = new Map<string, any[]>();
+        const columns = new Map<string, string[]>();
         const stages = new Map<string, PreviewStageDTO>();
-        this.parsePreviewRows(response).forEach((json, i) => {
+        this.parsePreviewTables(response).forEach((table, i) => {
           const index = transFormerCards[i].id!;
-          transformedData.set(index, json);
+          transformedData.set(index, table.rows);
+          columns.set(index, table.columns);
           const stage = response.stages?.[i];
           if (stage) {
             stages.set(index, stage);
           }
         });
-        return {rows: transformedData, stages} as PreviewResult;
+        return {rows: transformedData, columns, stages} as PreviewResult;
       }),
     );
   }
 
 
-  previewPivot(config: ConnectorConfigDTO): Observable<any[][]> {
+  previewPivot(config: ConnectorConfigDTO): Observable<PreviewTable[]> {
     const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
 
     return this.apiService.post<PreviewResponseDTO>(`${this.getBaseUrl()}/preview/pivot`, config, headers).pipe(
@@ -92,7 +100,7 @@ export class ConnectorPreviewService {
         return this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_CALCULATE_PREVIEW'));
       }),
-      map(response => this.parsePreviewRows(response)),
+      map(response => this.parsePreviewTables(response)),
     );
   }
 
@@ -176,10 +184,13 @@ export class ConnectorPreviewService {
     return `${this.apiUrl}/${this.path}`;
   }
 
-  private parsePreviewRows(response: PreviewResponseDTO): any[][] {
-    return response.jsons.map(jsonString => {
+  private parsePreviewTables(response: PreviewResponseDTO): PreviewTable[] {
+    return response.jsons.map((jsonString, index) => {
       const parsed = JSON.parse(jsonString);
-      return Array.isArray(parsed) ? parsed : [];
+      const rows: any[] = Array.isArray(parsed) ? parsed : [];
+      const columns = response.columns?.[index]
+        ?? [...new Set(rows.flatMap(row => Object.keys(row ?? {})))];
+      return {rows, columns};
     });
   }
 }

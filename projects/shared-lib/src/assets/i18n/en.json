@@ -45,6 +45,8 @@
   "UNKNOWN": "Unknown",
   "CONFIGURED": "Configured",
   "TRANSFORMER": "Transformer",
+  "MAPPER": "Mapper",
+  "MAP_TO_SCHEMA": "Map to Schema",
   "SELECT_A_DATA_SOURCE": "Select a Data Source",
   "SELECT_A_DATA_SOURCE_DESC": "Read the data from a file, or with an extractor app installed for this cohort.",
   "GENERIC_SOURCE": "Generic Source",
@@ -521,7 +523,7 @@
     "OPEN_FILTER": "Open Filter",
     "START_MODEL": "Start {{ name }}",
     "PREDICT_FOR": "Predict for",
-    "MODEL_NEED_TO_BE_PUBLIC": "The result model needs to be public (Accessible be me and third persons)",
+    "MODEL_NEED_TO_BE_PUBLIC": "The result model needs to be public (accessible by me and third parties)",
     "I_ACCEPT_THE_PROCESS": "I accept the process",
     "LINK_QUERY": "Link Query",
     "NO_THANKS": "No Thanks",
@@ -635,6 +637,10 @@
     "UNCHANGED_PATIENTS": "Unchanged Patients",
     "VIEW_DETAILS": "View Details",
     "PROJECT": "Project",
+    "PLATFORM_AGGREGATOR_SUPPORT": "platform aggregator support",
+    "AGGREGATOR_RUNNING_ON": "Aggregator running on",
+    "MODEL_MUST_BE_PUBLIC": "Model must be public",
+    "REQUESTED_AT": "Requested at",
     "SELECTED_DATA": "Selected Data",
     "QUERY": "Query",
     "COHORT_NAME": "Cohort Name",
@@ -932,7 +938,9 @@
     },
     "ACCEPT_TRAINING": {
       "TITLE": "Accept Training",
-      "MESSAGE": "All patients will be accepted"
+      "MESSAGE": "All patients will be accepted",
+      "MODEL_VISIBILITY_HINT": "The requester does not require a public model: the final model is stored on the FL-Net Platform but not published. You can accept with a private model or reject the request.",
+      "MODEL_MUST_BE_PUBLIC_HINT": "The requester requires a public model: the final model is stored on the FL-Net Platform and may be published. You can accept with a public model or reject the request."
     },
     "PUBLISH_NEW_VERSION": {
       "TITLE": "Publish New Version for {{ name }}",
@@ -979,7 +987,10 @@
       "MESSAGE_LINE_FEDERATED_1": "A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version. This copy, along with your query information, will be sent to all relevant hospitals.",
       "MESSAGE_LINE_FEDERATED_2": "The hospitals will review your project and approve patient participation; they may choose to exclude certain individuals. You can monitor the status at any time. If you are satisfied with the number of patients, you may accept and initiate the study at your discretion.",
       "MESSAGE_LINE_LOCAL_1": "A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version. This copy, will be used as a foundation for your local experiment.",
-      "MESSAGE_LINE_LOCAL_2": "You can start your controller at anytime. See bootstrap."
+      "MESSAGE_LINE_LOCAL_2": "You can start your controller at anytime. See bootstrap.",
+      "AGGREGATOR_LOCATION_LABEL": "Where should the aggregator run?",
+      "AGGREGATOR_LOCATION_RANDOM_CLINIC": "A random participating clinic",
+      "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform"
     },
     "START_NEW_SCHEMA": {
       "TITLE": "Start New Schema"
@@ -1087,6 +1098,8 @@
       "NO_DESCRIPTION": "No description provided.",
       "NO_ONTOLOGY": "No ontology connected.",
       "NO_DATATYPE": "No datatype connected.",
+      "ALLOWED_VALUES": "Allowed values",
+      "VALIDATION_RULES": "Validation rules",
       "SELECT_CHILD_FIELD": "This is a group node. Select a child field below to complete the mapping.",
       "VALIDATE_MAPPING": "Validate preview values",
       "RUN_VALIDATION_AGAIN": "Run again",
@@ -1220,7 +1233,12 @@
       "SMALLER": "Less than",
       "SMALLER_EQUAL": "Less than or equal",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "IN": "In",
+      "NOT_IN": "Not in",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     },
     "FLOAT": {
       "DESCRIPTION": "Floating point numeric fields",
@@ -1231,26 +1249,43 @@
       "SMALLER": "Less than",
       "SMALLER_EQUAL": "Less than or equal",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "IN": "In",
+      "NOT_IN": "Not in",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     },
     "STRING": {
       "DESCRIPTION": "String fields",
       "EQUAL": "Equals",
       "NOT_EQUAL": "Not equal",
+      "BIGGER": "Greater than",
+      "BIGGER_EQUAL": "Greater than or equal",
+      "SMALLER": "Less than",
+      "SMALLER_EQUAL": "Less than or equal",
       "CONTAINS": "Contains",
       "NOT_CONTAINS": "Does not contain",
       "START_WIDTH": "Starts with",
       "END_WIDTH": "Ends with",
       "REGEX": "Matches regex",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "IN": "In",
+      "NOT_IN": "Not in",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     },
     "BOOLEAN": {
       "DESCRIPTION": "Boolean fields",
       "EQUAL": "Equals",
       "NOT_EQUAL": "Not equal",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     },
     "DATE": {
       "DESCRIPTION": "Date fields",
@@ -1261,23 +1296,155 @@
       "BIGGER": "After",
       "BIGGER_EQUAL": "On or after",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     },
     "CATEGORICAL": {
       "DESCRIPTION": "Categorical fields",
       "EQUAL": "Equals",
       "NOT_EQUAL": "Not equal",
+      "CONTAINS": "Contains",
+      "START_WIDTH": "Starts with",
+      "END_WIDTH": "Ends with",
+      "REGEX": "Matches regex",
       "IN": "In",
       "NOT_IN": "Not in",
       "EXISTS": "Exists",
-      "NOT_EXISTS": "Does not exist"
+      "NOT_EXISTS": "Does not exist",
+      "HAS_CHANGED": "Has changed",
+      "CHANGED_FROM": "Changed from",
+      "CHANGED_TO": "Changed to"
     }
+  },
+  "QUERY_STATUS": {
+    "DRAFT": "Draft",
+    "PENDING": "Pending",
+    "FINISHED": "Finished",
+    "FAILED": "Failed"
   },
   "QUERY_OPERATOR": {
     "AND": "and",
     "OR": "or",
     "EXISTS": "exists",
     "REGEX": "regex"
+  },
+  "QUERY_BUILDER": {
+    "MATCH_ALL": "Match all",
+    "MATCH_ANY": "Match any",
+    "CONDITIONS": "conditions",
+    "LEVEL": "level",
+    "CONDITION": "Condition",
+    "GROUP": "Group",
+    "RELATIONSHIP": "Temporal relationship",
+    "CATALOG": "Ontology and data type",
+    "VARIABLE": "Variable",
+    "GROUP_NUMBER": "Group {{number}}",
+    "OCCURRENCES": "Occurrences",
+    "TIMES_SUFFIX": "time(s)",
+    "ENTER_VALUE": "Enter value",
+    "NO_VALUE": "No value needed",
+    "INTERVAL": "Interval",
+    "RELATION_KIND": "Relationship",
+    "SHOW_ADVANCED": "Advanced filters",
+    "HIDE_ADVANCED": "Hide advanced filters",
+    "SHOW_JSON": "Show JSON",
+    "HIDE_JSON": "Hide JSON",
+    "JSON_TITLE": "Request sent to the server",
+    "COPY": "Copy",
+    "COPIED": "Copied",
+    "OVERVIEW_TITLE": "Current query",
+    "OVERVIEW_INTRO": "The open query, with each variable shown by its catalog name.",
+    "VERSIONS_TITLE": "Earlier versions",
+    "VERSIONS_INTRO": "Each earlier version keeps its name and the query that produced its result. These versions are read-only.",
+    "VERSION_LABEL": "Version {{number}}",
+    "NO_DESCRIPTION": "No description",
+    "QUERY_TEXT": "Query",
+    "PATIENT_RESULT": "{{count}} patients",
+    "NO_RESULT": "No result yet",
+    "UNKNOWN_VARIABLE": "Unknown variable",
+    "ONTOLOGY": "Ontology",
+    "DATA_TYPE": "Data type",
+    "OPERATOR": "Operator",
+    "VALUE": "Value",
+    "DATATYPE_HINT": "Datatype hint",
+    "UNSET": "Unset",
+    "VALUE_MODE": "Value mode",
+    "TIME_FILTER": "Time filter",
+    "TIME_AGGREGATION": "Time aggregation",
+    "VALUE_AGGREGATION": "Value aggregation",
+    "AT_LEAST": "At least",
+    "AT_MOST": "At most",
+    "ANYTIME": "Anytime",
+    "AFTER": "After",
+    "BEFORE": "Before",
+    "BETWEEN": "Between",
+    "DELTA_INTERVAL": "Delta interval",
+    "WINDOW": "Within",
+    "TIMES": "times",
+    "SOURCE": "Source",
+    "TARGET": "Target",
+    "ADD_PART": "Add part",
+    "INVALID": "Complete the query or remove the invalid combination before saving.",
+    "COMMA_SEPARATED": "Comma-separated values",
+    "MOVE_UP": "Move up",
+    "MOVE_DOWN": "Move down",
+    "DUPLICATE": "Duplicate",
+    "COLLAPSE": "Collapse",
+    "EXPAND": "Expand",
+    "MODE": {
+      "ABSOLUTE": "Absolute",
+      "DELTA": "Delta",
+      "DELTA_WINDOW": "Delta within a time window"
+    },
+    "FREQUENCY": {
+      "ANY": "Any",
+      "AT_LEAST": "At least",
+      "AT_MOST": "At most"
+    },
+    "TIME": {
+      "NONE": "None",
+      "FIRST": "First",
+      "LAST": "Last",
+      "WITHIN": "Within",
+      "WITHIN_WINDOW": "Within a time window",
+      "WITHIN_AT_LEAST": "Within, at least",
+      "WITHIN_AT_MOST": "Within, at most"
+    },
+    "HELP": {
+      "CATALOG": "Pick the ontology and data type. The query only reads schema nodes mapped to that pair.",
+      "OPERATOR": "How the value is compared. exists, !exists, and has_changed need no value. changed_from and changed_to compare a change and require delta.",
+      "VALUE": "The value to compare. For in and !in, separate several values with commas.",
+      "DATATYPE": "Type to convert to when the stored value is string but the comparison should be numeric or boolean.",
+      "VALUE_MODE": "Absolute uses the recorded value. Delta compares the change between consecutive values, no matter how far apart. Delta within a time window only compares values at most that far apart.",
+      "TIME_FILTER": "Only look at events that happened during this time frame. After and before dates are exclusive.",
+      "TIME_AGGREGATION": "Among the matching events, use every event, only the earliest, only the latest, or events inside a sliding window. A plain window uses the average. At least or at most counts how many events fall in that window and cannot use average.",
+      "VALUE_AGGREGATION": "None means any single value can match. Average compares the average of the selected values and requires absolute values.",
+      "OCCURRENCE": "How many times this whole condition must be true. Leave both empty to require at least one match.",
+      "CONNECTING": "Match all means every condition in this group is true. Match any means at least one is true.",
+      "TEMPORAL": "Should these conditions happen close together in time, in a specific order, at the same time, or during the same visit? Both ends must be conditions in this group."
+    },
+    "AGGREGATION": {
+      "NONE": "Any",
+      "AVERAGE": "Average"
+    },
+    "RELATION": {
+      "WITHIN": "Within",
+      "IN_THE_FOLLOWING": "In the following",
+      "SAME_TIME": "Same time",
+      "ANYTIME_AFTER": "Anytime after",
+      "SAME_VISIT": "Same visit",
+      "SAME_GROUP": "Same group"
+    },
+    "UNIT": {
+      "MINUTES": "minutes",
+      "HOURS": "hours",
+      "DAYS": "days",
+      "WEEKS": "weeks",
+      "MONTHS": "months",
+      "YEARS": "years"
+    }
   },
   "SUCCESS": {
     "SHEETS_MERGED": "Sheets merged successfully",

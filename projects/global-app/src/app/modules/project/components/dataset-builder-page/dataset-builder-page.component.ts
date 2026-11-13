@@ -1,6 +1,6 @@
 import {CdkDragDrop, DragDropModule, moveItemInArray} from "@angular/cdk/drag-drop";
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCardModule} from "@angular/material/card";
@@ -8,8 +8,9 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepperModule} from "@angular/material/stepper";
-import {Router} from "@angular/router";
-import {QueryDTO, QueryOperatorDTO} from "@global-app/find-data/dto/query";
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {isLang2Group, Lang2Leaf} from "@global-app/find-data/dto/lang2-query";
+import {collectLeaves} from "@global-app/find-data/helpers/query-tree.serializer";
 import {DataStatisticsResponseDTO, StatisticsColumnProfile} from "@global-app/find-data/dto/query-statistics";
 import {QueryStatisticsResponseService} from "@global-app/find-data/services/query-statistics-response.service";
 import {QueryService} from "@global-app/find-data/services/query.service";
@@ -30,7 +31,7 @@ import {
 } from "@global-app/project/components/dataset-builder-page/components/dataset-preview/dataset-preview.component";
 import {ProjectActions} from "@global-app/project/store/project.actions";
 import {selectLoading, selectSelectedProject} from "@global-app/project/store/project.selectors";
-import {DataTypeDetailFlatten, DataTypeSubscriptionDTO, DummyDataRequestDTO} from "@global-app/schema/dto/datatype";
+import {DummyDataRequestDTO} from "@global-app/schema/dto/datatype";
 import {DataTypeService} from "@global-app/schema/services/datatype.service";
 import {Store} from "@ngrx/store";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
@@ -53,6 +54,9 @@ import {
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {OntologyService} from "@global-app/schema/services/ontology.service";
+import {OntologyDataTypeDTO} from "@global-app/schema/dto/ontology";
+import {forkJoin} from "rxjs";
 
 @Component({
   selector: 'app-dataset-builder-page',
@@ -80,10 +84,10 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 })
 export class DatasetBuilderPageComponent {
   private readonly store = inject(Store);
-  private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly queryService = inject(QueryService);
   private readonly dataTypeService = inject(DataTypeService);
+  private readonly ontologyService = inject(OntologyService);
   private readonly queryStatisticsResponseService = inject(QueryStatisticsResponseService);
 
   readonly project = this.store.selectSignal(selectSelectedProject);
@@ -95,7 +99,7 @@ export class DatasetBuilderPageComponent {
   readonly statisticsLoading = signal<boolean>(false);
   readonly selectionFilter = signal('');
 
-  exportConfig = signal<PatientDataExportConfigDTO>({} as PatientDataExportConfigDTO);
+  readonly exportConfig = signal<PatientDataExportConfigDTO>({} as PatientDataExportConfigDTO);
   readonly datasetFeatures = signal<PatientExportFeatureDTO[]>([]);
   readonly rawSelectionOptions = signal<DatasetSelectionOption[]>([]);
   readonly statisticsResponses = signal<DataStatisticsResponseDTO[]>([]);
@@ -243,39 +247,33 @@ export class DatasetBuilderPageComponent {
 
   private readonly loadSelectionOptionsEffect = effect((onCleanup) => {
     const query = this.query();
-    if (!query?.query?.length) {
+    const leaves = query?.query && isLang2Group(query.query) ? collectLeaves(query.query) : [];
+    if (leaves.length === 0) {
       this.rawSelectionOptions.set([]);
       return;
     }
 
     this.dataSelectionsLoading.set(true);
-    const requestedSelectionKeys = new Map<string, QueryDTO['query'][number]>();
+    const requestedSelectionKeys = new Map<string, Lang2Leaf>();
     const ontologyIds = new Set<string>();
 
-    for (const item of query.query) {
+    for (const item of leaves) {
       requestedSelectionKeys.set(toSelectionKey({
-        globalOntologyId: item.ontologyId,
-        globalDataTypeId: item.dataTypeId,
+        globalOntologyId: item.ontology_id,
+        globalDataTypeId: item.data_type_id,
       }), item);
-      ontologyIds.add(item.ontologyId);
+      if (item.ontology_id) {
+        ontologyIds.add(item.ontology_id);
+      }
     }
 
-    const sub = this.dataTypeService.getAllForQuery(Array.from(ontologyIds)).subscribe({
-      next: subscriptions => {
-        const availableDataTypeIds = Array.from(new Set(subscriptions.map(subscription => subscription.dataTypeId)));
-
-        this.dataTypeService.getAllDetailedFlatten(undefined, availableDataTypeIds).subscribe({
-          next: detailedTypes => {
-            this.rawSelectionOptions.set(this.buildSelectionOptions(detailedTypes, subscriptions, requestedSelectionKeys));
-            this.dataSelectionsLoading.set(false);
-            this.ensureActiveFeature();
-          },
-          error: error => {
-            this.loadError.set(error?.message ?? 'Failed to load available data selections.');
-            this.rawSelectionOptions.set([]);
-            this.dataSelectionsLoading.set(false);
-          }
-        });
+    const sub = forkJoin(
+      Array.from(ontologyIds).map(id => this.ontologyService.getSchemaSiblingsWithDataTypes(id))
+    ).subscribe({
+      next: pairLists => {
+        this.rawSelectionOptions.set(this.buildSelectionOptions(pairLists.flat(), requestedSelectionKeys));
+        this.dataSelectionsLoading.set(false);
+        this.ensureActiveFeature();
       },
       error: error => {
         this.loadError.set(error?.message ?? 'Failed to load available data selections.');
@@ -361,15 +359,6 @@ export class DatasetBuilderPageComponent {
     this.finishSelectionDrag();
   }
 
-  goBackToProject(): void {
-    const project = this.project();
-    if (!project?.id) {
-      return;
-    }
-
-    this.router.navigate(['/project', project.id], {fragment: 'data'});
-  }
-
   addFeature(): void {
     this.updateFeatures(features => {
       const nextOrder = features.length;
@@ -422,16 +411,6 @@ export class DatasetBuilderPageComponent {
       this.activeFeatureOrder.set(nextOrder);
       return [...features, nextFeature];
     });
-  }
-
-  assignSelectionToActiveFeature(selection: DatasetSelectionOption): void {
-    const activeFeature = this.activeFeature();
-    if (!activeFeature) {
-      this.createFeatureFromSelection(selection);
-      return;
-    }
-
-    this.assignSelectionToFeature(activeFeature.order, selection.selection);
   }
 
   assignSelectionToFeature(order: number, selection: SelectedDataIdsDTO): void {
@@ -490,15 +469,6 @@ export class DatasetBuilderPageComponent {
       this.activeFeatureOrder.set(event.currentIndex);
       return reordered;
     });
-  }
-
-  isSelectionInActiveFeature(selectionKey: string): boolean {
-    const activeFeature = this.activeFeature();
-    if (!activeFeature) {
-      return false;
-    }
-
-    return activeFeature.allowedDataIds.some(selection => toSelectionKey(selection) === selectionKey);
   }
 
   assignedFeatureNames(selectionKey: string): string[] {
@@ -683,55 +653,62 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private buildSelectionOptions(
-    details: DataTypeDetailFlatten[],
-    subscriptions: DataTypeSubscriptionDTO[],
-    requestedSelectionKeys: Map<string, QueryDTO['query'][number]>
-  ): DatasetSelectionOption[] {
-    const subscriptionMap = new Map(subscriptions.map(subscription => [subscription.dataTypeId, subscription.subscriptionsCount]));
+  private buildSelectionOptions(pairs: OntologyDataTypeDTO[], requestedSelectionKeys: Map<string, Lang2Leaf>): DatasetSelectionOption[] {
+    const options = new Map<string, DatasetSelectionOption>();
 
-    return details
-      .flatMap(detail => {
-        if (!detail.id || !detail.ontology?.id) {
-          return [];
-        }
+    for (const {ontology, dataType, subscriptionsCount} of pairs) {
+      if (!dataType?.id || !ontology?.id) {
+        continue;
+      }
 
-        const ontologyId = detail.ontology.id;
-        const selection = {
-          globalOntologyId: ontologyId,
-          globalDataTypeId: detail.id,
-        } satisfies SelectedDataIdsDTO;
-        const key = toSelectionKey(selection);
-        const queryItem = requestedSelectionKeys.get(key);
-        const ontologyQueryItem = queryItem ?? Array.from(requestedSelectionKeys.values()).find(
-          item => item.ontologyId === ontologyId
-        );
+      const ontologyId = ontology.id;
+      const dataTypeId = dataType.id;
+      const selection = {
+        globalOntologyId: ontologyId,
+        globalDataTypeId: dataTypeId,
+      } satisfies SelectedDataIdsDTO;
+      const key = toSelectionKey(selection);
+      const clinicCount = subscriptionsCount ?? 0;
 
-        return [{
-          key,
-          selection,
-          dataTypeNode: detail,
-          ontologyNode: detail.ontology,
-          dataTypeName: detail.name,
-          dataTypeDescription: detail.description,
-          dataTypeId: detail.id,
-          dataTypeType: detail.type,
-          ontologyName: detail.ontology.names?.[0] ?? ontologyId,
-          ontologyDescription: detail.ontology.description ?? null,
-          ontologyId: ontologyId,
-          clinicCount: subscriptionMap.get(detail.id) ?? detail.subscriptionsCount ?? 0,
-          querySummary: ontologyQueryItem
-            ? this.formatQuerySummary(ontologyQueryItem.operator)
-            : 'Available through the current project query',
-          queryOperators: ontologyQueryItem
-            ? ontologyQueryItem.operator.map(operator => this.formatQueryOperator(operator))
-            : [],
-          statisticsProfiles: [],
-          statisticsClinicCount: 0,
-          averageMissingRate: null,
-          averageMean: null,
-        } satisfies DatasetSelectionOption];
-      })
+      // The same pair is returned once per query ontology sharing its schema; keep the highest count.
+      const existing = options.get(key);
+      if (existing) {
+        existing.clinicCount = Math.max(existing.clinicCount, clinicCount);
+        continue;
+      }
+
+      const queryItem = requestedSelectionKeys.get(key);
+      const ontologyQueryItem = queryItem ?? Array.from(requestedSelectionKeys.values()).find(
+        item => item.ontology_id === ontologyId
+      );
+
+      options.set(key, {
+        key,
+        selection,
+        dataTypeNode: {...dataType, ontology, subscriptionsCount},
+        ontologyNode: ontology,
+        dataTypeName: dataType.name,
+        dataTypeDescription: dataType.description,
+        dataTypeId,
+        dataTypeType: dataType.type,
+        ontologyName: ontology.names?.[0] ?? ontologyId,
+        ontologyDescription: ontology.description ?? null,
+        ontologyId,
+        clinicCount,
+        querySummary: ontologyQueryItem
+          ? this.formatQuerySummary(ontologyQueryItem)
+          : 'Available through the current project query',
+        queryOperators: ontologyQueryItem
+          ? [this.formatLeafOperator(ontologyQueryItem)]
+          : [],
+        statisticsProfiles: [],
+        statisticsClinicCount: 0,
+        averageMissingRate: null,
+        averageMean: null,
+      });
+    }
+
+    return Array.from(options.values())
       .sort((a, b) => b.clinicCount - a.clinicCount || a.dataTypeName.localeCompare(b.dataTypeName));
   }
 
@@ -864,20 +841,15 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private formatQuerySummary(operators: QueryOperatorDTO[]): string {
-    if (!operators.length) {
-      return 'No additional query filter';
-    }
-
-    return operators.map(operator => this.formatQueryOperator(operator)).join(' | ');
+  private formatQuerySummary(leaf: Lang2Leaf): string {
+    return this.formatLeafOperator(leaf);
   }
 
-  private formatQueryOperator(operator: QueryOperatorDTO): string {
-    const value = Array.isArray(operator.value) ? operator.value.join(', ') : operator.value;
-    if (value == null || value === '') {
-      return operator.operator;
+  private formatLeafOperator(leaf: Lang2Leaf): string {
+    if (leaf.value == null || leaf.value === '') {
+      return leaf.operator;
     }
-    return `${operator.operator}: ${value}`;
+    return `${leaf.operator}: ${leaf.value}`;
   }
 
   private averageMissingRate(profiles: StatisticsColumnProfile[]): number | null {
