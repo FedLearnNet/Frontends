@@ -1592,5 +1592,12 @@
   "LABEL": {
     "FILE": "File",
     "FILES": "Files"
+  },
+  "UNSAVED_CHANGES": {
+    "TITLE": "Unsaved changes",
+    "MESSAGE": "You have unsaved changes. If you leave now, they will be lost.",
+    "SAVE": "Save",
+    "KEEP_EDITING": "Keep editing",
+    "DISCARD": "Discard changes"
   }
 }

@@ -542,5 +542,12 @@
     "STEP_LABEL": "Schritt",
     "BLOCKED_HINT": "Schritt {{index}} läuft in einer App und wurde noch nicht ausgeführt, daher verwendet dieser Schritt dessen Eingangszeilen. Führe zuerst Schritt {{index}} aus.",
     "OPEN_BLOCKING_STEP": "Zu Schritt {{index}}"
+  },
+  "UNSAVED_CHANGES": {
+    "TITLE": "Ungespeicherte Änderungen",
+    "MESSAGE": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt die Seite verlassen, gehen diese verloren.",
+    "SAVE": "Speichern",
+    "KEEP_EDITING": "Weiter bearbeiten",
+    "DISCARD": "Änderungen verwerfen"
   }
 }
