@@ -226,12 +226,18 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
     untracked(() => this.rebuildDataSourceFromInput(cols, rows, preserveMappings));
   });
 
+  private lastAppliedConfig = '';
+
   private configEffect = effect(() => {
     const newConfig = this.config();
     const ds = this.dataSource();
 
     if (!newConfig?.length || !ds.length) return;
     if (JSON.stringify(newConfig) === JSON.stringify(this.cachedConfig)) return;
+
+    const applied = JSON.stringify([newConfig, ds.map(row => row.column)]);
+    if (applied === this.lastAppliedConfig) return;
+    this.lastAppliedConfig = applied;
 
     untracked(() => this.applyConfig(newConfig));
   });

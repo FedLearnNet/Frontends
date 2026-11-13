@@ -8,6 +8,7 @@ import {EMPTY, Observable, of, Subject, throwError} from 'rxjs';
 import {ConnectorMappingMode} from '../../../../../models/connector-value-mapping';
 import {ConnectorMappingElement} from '../../../../../models/connector-preview';
 import {PreviewValidationResponseDTO, PreviewValidationWarningDTO} from '../../../../../dto/connector-validation';
+import {provideTranslateService} from '@ngx-translate/core';
 
 describe('ConnectorEditMapperComponent', () => {
   let component: ConnectorEditMapperComponent;
@@ -514,6 +515,62 @@ describe('ConnectorEditMapperComponent', () => {
       .toEqual([jasmine.objectContaining({column: 'age', mapping: 'Demographics.Age'})]);
     expect(component.getColumnWarnings(component.dataSource()[0])).toEqual(warnings);
     expect(component.getValidValidationIcon(component.dataSource()[0])).toBe('warning');
+  });
+});
+
+describe('ConnectorEditMapperComponent with the mappings of a file that had other columns', () => {
+  let fixture: ComponentFixture<ConnectorEditMapperComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ConnectorEditMapperComponent],
+      providers: [
+        provideTranslateService(),
+        {provide: MatDialog, useValue: {open: jasmine.createSpy('open')}},
+        {provide: ConnectorPreviewService, useValue: {validatePreview: () => EMPTY}},
+        {
+          provide: ActivatedRoute,
+          useValue: {data: of({cohort: {id: 1, schemaRoot: {childNodes: []}}}), fragment: of(null)},
+        },
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(ConnectorEditMapperComponent);
+  });
+
+  async function render(): Promise<void> {
+    fixture.componentRef.setInput('columns', ['PatientID', 'Gender', 'Region']);
+    fixture.componentRef.setInput('inputData', [{PatientID: 'p1', Gender: 'f', Region: 'north'}]);
+    fixture.autoDetectChanges();
+    await fixture.whenStable();
+  }
+
+  // A connector whose source file was replaced by one with other columns: its saved mappings name
+  // columns the mapper no longer lists. This used to re-apply them endlessly and freeze the page.
+  it('settles when none of the mapped columns is in the new file', async () => {
+    const applyConfig = spyOn(fixture.componentInstance, 'applyConfig').and.callThrough();
+    fixture.componentRef.setInput('config', [
+      {column: 'patient_id', mapping: 'Unique Patient ID', schemaId: 1},
+      {column: 'region', mapping: 'Meta.Region', schemaId: 127},
+    ]);
+
+    await render();
+
+    expect(applyConfig).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.dataSource().map(row => row.column)).toEqual(['PatientID', 'Gender', 'Region']);
+    expect(fixture.componentInstance.mappedCount()).toBe(0);
+  });
+
+  it('still applies the mappings of the columns that are in the new file', async () => {
+    fixture.componentRef.setInput('config', [
+      {column: 'patient_id', mapping: 'Unique Patient ID', schemaId: 1},
+      {column: 'Region', mapping: 'Meta.Region', schemaId: 127},
+    ]);
+
+    await render();
+
+    const region = fixture.componentInstance.dataSource().find(row => row.column === 'Region')!;
+    expect(region.mappingConfig).toEqual(jasmine.objectContaining({value: 'Meta.Region', schemaId: 127}));
+    expect(fixture.componentInstance.mappedCount()).toBe(1);
   });
 });
 

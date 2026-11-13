@@ -1,4 +1,15 @@
 {
+  "CONNECTOR_FILE_MISSING": {
+    "BADGE": "Datei fehlt",
+    "TITLE": "Quelldatei fehlt",
+    "MESSAGE": "Die Datei dieses Konnektors wurde nach einem erfolgreichen Lauf gelöscht. Laden Sie eine neue Datei hoch oder wählen Sie eine aus der Dateibibliothek."
+  },
+  "CONNECTOR_FILE_STRUCTURE_CHANGED": "Die Datei hat andere Tabellen oder Spalten, als dieser Konnektor erwartet. Prüfen Sie die Kopfzeilen und führen Sie die Tabellen erneut zusammen, bevor Sie sie zuordnen.",
+  "CONNECTOR_FILE_STRUCTURE_CHANGED_DIALOG": {
+    "TITLE": "Datei hat eine andere Struktur",
+    "MESSAGE": "Diese Datei hat andere Tabellen oder Spalten, als dieser Konnektor erwartet. Wenn Sie sie verwenden, werden die Zuordnung und die zusammengeführten Kopfzeilen entfernt und müssen neu eingerichtet werden.",
+    "CONFIRM": "Datei verwenden und Zuordnung entfernen"
+  },
   "DRY_RUN": "Testlauf",
   "DRY_RUN_RESULTS_HINT": "Testlauf: Es wurde nichts in die Kohorte geschrieben. Die Zahlen oben zeigen, was ein echter Lauf ändern würde.",
   "CHECKING_PATIENT_CHANGES": "Patientenänderungen werden geprüft (Testlauf)",

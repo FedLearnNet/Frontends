@@ -7,12 +7,22 @@
       <p class="file-upload-copy">Upload a file or choose one already uploaded to this cohort.</p>
     </div>
 
-    @if (this.selectedFile()?.id) {
+    @if (fileMissing()) {
+      <lib-badge [text]="'CONNECTOR_FILE_MISSING.BADGE' | translate" color="RED" iconName="error" [border]="true" />
+    } @else if (this.selectedFile()?.id) {
       <lib-badge text="File ready" color="GREEN" iconName="check_circle" [border]="true" />
     } @else {
       <lib-badge text="Waiting for file" color="ORANGE" iconName="schedule" [border]="true" />
     }
   </div>
+
+  @if (fileMissing()) {
+    <lib-info-card
+      type="WARNING"
+      size="SMALL"
+      [title]="'CONNECTOR_FILE_MISSING.TITLE' | translate"
+      [subtitle]="'CONNECTOR_FILE_MISSING.MESSAGE' | translate"/>
+  }
 
   @if (!connectorExist() || hasNoFileUploaded()) {
     <div class="input-row file-upload-actions">
@@ -65,7 +75,7 @@
           <lib-kv label="File" [value]="'WAITING_TO_RECEIVE_FILE' | translate" />
         }
 
-        @if (settings.fileId || settings.file) {
+        @if ((settings.fileId || settings.file) && !fileMissing()) {
           <div class="file-parsing-summary">
             <lib-badge [text]="fileTypeLabel(settings)!" color="BLUE" size="X-SMALL" [border]="true"/>
             @if (settings.fileType === 'CSV') {
