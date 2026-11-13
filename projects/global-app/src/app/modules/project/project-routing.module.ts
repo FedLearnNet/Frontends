@@ -13,9 +13,6 @@ import {
   projectFedExperimentResolver,
   projectLocalExperimentResolver
 } from "@global-app/project/services/project-experiment-resolver";
-import {
-  DatasetBuilderPageComponent
-} from "@global-app/project/components/dataset-builder-page/dataset-builder-page.component";
 
 import {unsavedChangesGuard} from "@shared-lib/services/unsaved-changes.service";
 
@@ -39,11 +36,6 @@ const routes: Routes = [
             component: DetailProjectComponent,
             canDeactivate: [unsavedChangesGuard],
             pathMatch: 'full'
-          },
-          {
-            path: 'dataset-builder',
-            component: DatasetBuilderPageComponent,
-            canDeactivate: [unsavedChangesGuard],
           },
           {
             path: 'experiments',

@@ -11,11 +11,16 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {
   ProjectExperimentDataComponent
 } from "@global-app/project/components/detail-project/components/project-experiment-data/project-experiment-data.component";
-import {Router} from "@angular/router";
+import {MatButtonModule} from "@angular/material/button";
+import {MatIconModule} from "@angular/material/icon";
+import {UnsavedChangesService} from "@shared-lib/services/unsaved-changes.service";
 import {PatientDataExportConfigDTO} from "@shared-lib/modules/data-modeler/dto/data-export.dto";
 import {
   DatasetPreviewCardComponent
 } from "@global-app/project/components/dataset-preview-card/dataset-preview-card.component";
+import {
+  DatasetBuilderPageComponent
+} from "@global-app/project/components/dataset-builder-page/dataset-builder-page.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
@@ -30,19 +35,23 @@ import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.s
     TranslatePipe,
     MatTabsModule,
     ProjectExperimentDataComponent,
+    DatasetBuilderPageComponent,
     DatasetPreviewCardComponent,
+    MatButtonModule,
+    MatIconModule,
     PageWrapperComponent,
     EmptyStateComponent
   ]
 })
 export class CreateDatasetsComponent {
-  private readonly router: Router = inject(Router);
+  private readonly unsavedChanges: UnsavedChangesService = inject(UnsavedChangesService);
   private readonly dataTypeService: DataTypeService = inject(DataTypeService);
   private readonly queryService: QueryService = inject(QueryService);
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
 
   readonly project = input.required<ProjectDto>();
 
+  protected readonly builderOpen = signal<boolean>(false);
   protected readonly query = signal<QueryDTO | undefined>(undefined);
   protected readonly dataTypes = signal<DataTypeSubscriptionDTO[]>([]);
   protected readonly loaded = signal<boolean>(false);
@@ -95,7 +104,14 @@ export class CreateDatasetsComponent {
     if (!this.project()?.id) {
       return;
     }
+    this.builderOpen.set(true);
+  }
 
-    this.router.navigate(['/project', this.project().id, 'dataset-builder']);
+  closeDatasetBuilder(): void {
+    this.unsavedChanges.confirmLeave().subscribe(canLeave => {
+      if (canLeave) {
+        this.builderOpen.set(false);
+      }
+    });
   }
 }

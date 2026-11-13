@@ -56,7 +56,6 @@ import {
   normalizeExportFeature,
   toSelectionKey
 } from "@shared-lib/modules/data-modeler/utils/patient-export-config.util";
-import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {OntologyService} from "@global-app/schema/services/ontology.service";
@@ -79,7 +78,6 @@ import {forkJoin} from "rxjs";
     DataExportConfigComponent,
     DatasetFeatureCardComponent,
     DatasetPreviewComponent,
-    HeaderComponent,
     PageWrapperComponent,
     BtnComponent
   ],
