@@ -119,12 +119,13 @@ export class WorkflowViewComponent {
   public eMarkerType = EFMarkerType;
 
   private flowRendered = false;
+  private lastCenteredWorkflowId: number | undefined;
 
   /** Serialized workflow as last loaded from / saved to the backend. */
   private readonly savedSnapshot = signal<string | null>(null);
   readonly hasUnsavedChanges = computed(() => {
     const snapshot = this.savedSnapshot();
-    return snapshot !== null && JSON.stringify(this.workflow()) !== snapshot;
+    return snapshot !== null && this.signature(this.workflow()) !== snapshot;
   });
 
   private readonly unsavedChanges = inject(UnsavedChangesService).register({
@@ -141,10 +142,11 @@ export class WorkflowViewComponent {
           this._workflowService.addFederatedInputDataset(mutable);
         }
         this.workflow.set(mutable);
-        this.savedSnapshot.set(JSON.stringify(mutable));
-        if (this.flowRendered) {
+        this.savedSnapshot.set(this.signature(mutable));
+        if (this.flowRendered && dto.id !== this.lastCenteredWorkflowId) {
           this._canvas()?.resetScaleAndCenter();
         }
+        this.lastCenteredWorkflowId = dto.id;
       }
     });
     effect(() => {
@@ -203,6 +205,16 @@ export class WorkflowViewComponent {
         break;
       }
     }
+  }
+
+  private signature(workflow: WorkflowDTO): string {
+    const withoutPosition = <T extends { position?: unknown }>(items: T[] | undefined) =>
+      items?.map(({position: _position, ...rest}) => rest);
+    return JSON.stringify({
+      ...workflow,
+      nodes: withoutPosition(workflow.nodes),
+      inputs: withoutPosition(workflow.inputs),
+    });
   }
 
   private saveWorkflow(): Observable<boolean> {
@@ -273,6 +285,7 @@ export class WorkflowViewComponent {
   public onLoaded(): void {
     this._canvas().resetScaleAndCenter(false);
     this.flowRendered = true;
+    this.lastCenteredWorkflowId = this.selectedWorkflow()?.id;
   }
 
   public updateIsValid(isValid: boolean): void {
