@@ -39,7 +39,8 @@
   } @else {
     <lib-empty-state
       empty
-      [title]="'WARNING.YOU_NEED_TO_SELECT_A_QUERY' | translate"
+      [title]="'WARNING.NO_QUERY_FOUND' | translate"
+      [subtitle]=" 'WARNING.NO_QUERY_FOUND_SUBTITLE' | translate"
       [primaryButtonEnabled]="true"
       [primaryButtonLabel]="'BUTTON.LINK_QUERY' | translate"
       (cta)="addQuery.emit()"
