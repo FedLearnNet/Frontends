@@ -1,4 +1,5 @@
-import {Component, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {
@@ -53,7 +54,8 @@ import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 })
 export class ListConnectorComponent implements OnInit {
   readonly cohortId = input<string>();
-  private readonly cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  private readonly cohortStore = inject(CohortStore);
+  private readonly cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
 
   baseRoute = 'connector';
   displayedColumns: string[] = ['name', 'source', 'last', 'actions'];
@@ -72,10 +74,6 @@ export class ListConnectorComponent implements OnInit {
   private connectorService = inject(ConnectorService);
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(data => {
-      this.cohort.set(data['cohort']);
-    })
-
     this.baseRoute = "cohort/" + this.cohortId() + "/connector";
 
     this.loadConnectors();

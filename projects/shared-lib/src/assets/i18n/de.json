@@ -335,9 +335,9 @@
     "TABLE_FAILED": "konnte nicht gelesen werden",
     "STEP": {
       "TRANSFER_TITLE": "Übertragen",
-      "TRANSFER_DETAIL": "{{loaded}} MB von {{total}} MB gesendet",
+      "TRANSFER_DETAIL": "{{loaded}} von {{total}} gesendet",
       "PARSING_TITLE": "Einlesen",
-      "PARSING_DETAIL": "Datei wird gelesen und dabei ausgewertet ({{size}} MB)",
+      "PARSING_DETAIL": "Datei wird gelesen und dabei ausgewertet ({{size}})",
       "SAMPLING_TITLE": "Vorschau",
       "SAMPLING_DETAIL": "Vorschau der {{tables}} Tabellen wird gesichert",
       "COMPARING_TITLE": "Abgleichen",

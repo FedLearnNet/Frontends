@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -38,19 +39,12 @@ export class PatientFormComponent implements OnInit, HasPatientUnsavedChanges {
     {initialValue: undefined},
   );
 
-  readonly cohortId = toSignal(
-    this.activatedRoute.parent!.data.pipe(
-      map(d => (d['cohort']?.id ?? Number(this.activatedRoute.snapshot.paramMap.get('cohortId'))) as number),
-    ),
-    {initialValue: 0},
-  );
+  private readonly cohortStore = inject(CohortStore);
 
-  readonly schema = toSignal(
-    this.activatedRoute.parent!.data.pipe(
-      map(d => d['cohort']?.schemaRoot as SchemaRootNodeDto | undefined),
-    ),
-    {initialValue: undefined},
-  );
+  readonly cohortId = computed(() =>
+    this.cohortStore.cohort()?.id ?? Number(this.activatedRoute.snapshot.paramMap.get('cohortId')));
+
+  readonly schema = computed<SchemaRootNodeDto | undefined>(() => this.cohortStore.cohort()?.schemaRoot);
 
   initialPatient = signal<PatientDto | undefined>(undefined);
   private discardChanges = false;

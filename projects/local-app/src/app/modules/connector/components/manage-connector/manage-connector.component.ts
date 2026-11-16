@@ -1,3 +1,4 @@
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -80,7 +81,6 @@ import {
   ResumeCachedConnectorDialogComponent
 } from './components/resume-cached-connector-dialog/resume-cached-connector-dialog.component';
 import {SkipTransformDialogComponent} from './components/skip-transform-dialog/skip-transform-dialog.component';
-import {CohortDetailDto} from "@local-app/cohort/models";
 import {rematchMappingSchemaId} from "../../helper/connector-config-schema-helper";
 import {FileUploadSettings} from '../../models/input-config';
 import {Store} from '@ngrx/store';
@@ -98,7 +98,6 @@ type RouteData = Data & {
   breadcrumb: string | any,
   mode: ConnectorManagementMode,
   connector: ConnectorDTO,
-  cohort: CohortDetailDto,
 }
 
 function withChanges(card: ConnectorCard, changes: Partial<ConnectorCard>): ConnectorCard {
@@ -205,7 +204,8 @@ export class ManageConnectorComponent implements OnInit {
     type: 'TRANSFORM',
   }));
 
-  resolvedCohort = signal<CohortDetailDto | undefined>(undefined);
+  private readonly cohortStore = inject(CohortStore);
+  resolvedCohort = this.cohortStore.cohort;
 
   public updateConfig(value: ConnectorDTO): void {
     const outputChanged = this.selectedOutputOf(this.config()) !== this.selectedOutputOf(value);
@@ -226,11 +226,6 @@ export class ManageConnectorComponent implements OnInit {
 
   ngOnInit(): void {
     this.baseRoute = "cohort/" + this.cohortId() + "/connector";
-    const resolvedCohort = this.activatedRoute.snapshot.data['cohort'];
-    if (resolvedCohort != null) {
-      this.resolvedCohort.set(resolvedCohort);
-    }
-
     this.functionService.getAllFunctionsDetails().subscribe(data => {
       this.functions.push(...data);
       this.hydrateTransformerDetails();

@@ -109,7 +109,7 @@
         @case (0) {
           <app-cohort-detail
             [isEditing]="isEditing()"
-            [(cohort)]="cohort"
+            [cohort]="cohort()" (cohortChange)="cohortStore.cohort.set($event)"
           />
         }
         @case (1) {
@@ -145,7 +145,7 @@
                                [patients]="patients()!"/>
         }
         @case (6) {
-          <app-cohort-members [(cohort)]="cohort" />
+          <app-cohort-members [cohort]="cohort()" (cohortChange)="cohortStore.cohort.set($event)" />
         }
       }
     }

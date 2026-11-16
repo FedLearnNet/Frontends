@@ -1,4 +1,5 @@
-import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -45,7 +46,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 
-type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, cohort: CohortDetailDto }
+type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO }
 
 @Component({
   selector: 'app-view-connector',
@@ -60,7 +61,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   readonly cohortId = input<string | null>();
 
-  private readonly cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  private readonly cohortStore = inject(CohortStore);
+  private readonly cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
 
   connector?: ConnectorDTO;
   availableTriggerConnectors: ConnectorDTO[] = [];
@@ -98,9 +100,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
       const routeData = data as RouteData;
       this.connector = routeData.connector;
       this.loadRuns();
-      this.loadTriggerConnectors(routeData.cohort?.id);
-
-      this.cohort.set(routeData.cohort);
+      this.loadTriggerConnectors(this.cohortStore.cohort()?.id);
     });
   }
 

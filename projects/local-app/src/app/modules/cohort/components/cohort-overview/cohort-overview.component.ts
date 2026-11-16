@@ -1,4 +1,5 @@
 import {Component, computed, DestroyRef, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -92,7 +93,25 @@ export class CohortOverviewComponent implements OnInit {
     if (c) this.cohortStars.toggle(String(c.id));
   }
 
-  cohort = signal<CohortDetailDto | undefined>(undefined);
+  protected readonly cohortStore = inject(CohortStore);
+
+  /** The store's cohort with its schema nodes sorted by name. Write changes through `cohortStore.cohort`. */
+  readonly cohort = computed<CohortDetailDto | undefined>(() => {
+    const cohort = this.cohortStore.cohort();
+    if (!cohort) {
+      return undefined;
+    }
+    return {
+      ...cohort,
+      schemaRoot: {
+        ...cohort.schemaRoot,
+        childNodes: this.schemaService.sortSchemaNodes(
+          cohort.schemaRoot?.childNodes as SchemaNodeNestedDto[],
+          'name'
+        ),
+      },
+    } as CohortDetailDto;
+  });
   isEditing = signal<boolean>(false);
   selectedTabIndex = signal<number>(0);
   patients = signal<PaginatedResponse<any> | undefined>(undefined);
@@ -140,18 +159,7 @@ export class CohortOverviewComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({cohort, allData}) => {
-      this.cohort.set({
-        ...cohort,
-        schemaRoot: {
-          ...cohort.schemaRoot,
-          childNodes:
-            this.schemaService.sortSchemaNodes(
-              cohort?.schemaRoot.childNodes as SchemaNodeNestedDto[],
-              'name'
-            ),
-        }
-      } as CohortDetailDto);
+    this.activatedRoute.data.subscribe(({allData}) => {
       this.patients.set(allData);
       this.resumeDeletionPollingIfNeeded();
     });
@@ -247,7 +255,7 @@ export class CohortOverviewComponent implements OnInit {
     if (currentId != null) {
       this.cohortService.beginCohortDeletion(currentId);
     }
-    this.cohort.update(current => current ? {
+    this.cohortStore.cohort.update(current => current ? {
       ...current,
       deletionInProgress: true,
     } : current);
@@ -266,7 +274,7 @@ export class CohortOverviewComponent implements OnInit {
           this.onDeletionCompleted();
           return;
         }
-        this.cohort.update(current => current ? {
+        this.cohortStore.cohort.update(current => current ? {
           ...current,
           ...event.cohort,
           schemaRoot: current.schemaRoot ?? event.cohort.schemaRoot,

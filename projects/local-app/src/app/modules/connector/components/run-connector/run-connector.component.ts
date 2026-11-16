@@ -1,4 +1,5 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {ActivatedRoute, Data} from "@angular/router";
 import {ConnectorRunDTO} from "../../dto/run";
 import {ConnectorDTO} from "../../dto/connector";
@@ -42,7 +43,8 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   run?: ConnectorRunDTO = undefined;
   connector?: ConnectorDTO = undefined;
 
-  cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  private readonly cohortStore = inject(CohortStore);
+  cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
 
   get connectorCohortId(): string | undefined {
     return this.connector?.cohortId != null ? String(this.connector.cohortId) : undefined;
@@ -61,7 +63,6 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
       this.run = routeData.run;
       this.connector = routeData.connector;
 
-      this.cohort.set(data['cohort'] ?? {} as CohortDetailDto);
       this.checkRunningAndStartRefresh();
     });
   }

@@ -1,10 +1,14 @@
-import {NgModule} from '@angular/core';
+import {inject, NgModule} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
+import {filter, map, take} from 'rxjs';
 import {RouterModule, Routes} from '@angular/router';
 import {CohortComponent} from './cohort.component';
 import {CohortCreateComponent} from './components/cohort-create/cohort-create.component';
 import {CohortDashboardComponent} from './components/cohort-dashboard/cohort-dashboard.component';
+import {CohortShellComponent} from './components/cohort-shell/cohort-shell.component';
+import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {CohortOverviewComponent} from './components/cohort-overview/cohort-overview.component';
-import {cohortListResolver, cohortResolver} from '@local-app/cohort/services/cohort-resolver.service';
+import {cohortListResolver} from '@local-app/cohort/services/cohort-resolver.service';
 import {schemaHeadListResolver} from '@local-app/cohort/services/schema-resolver.service';
 import {cohortDataListResolver} from '@local-app/cohort/services/cohort-data-resolver.service';
 import {PatientDetailComponent} from "../patient/components/patient-detail/patient-detail.component";
@@ -31,8 +35,18 @@ const routes: Routes = [
       },
       {
         path: ':cohortId',
-        resolve: {cohort: cohortResolver},
-        data: {breadcrumb: (data: any) => data.cohort.name},
+        component: CohortShellComponent,
+        // Runs in an injection context (BreadcrumbService); emits once the shell has loaded the cohort.
+        data: {
+          breadcrumb: () => {
+            const store = inject(CohortStore);
+            return toObservable(store.cohort).pipe(
+              map(cohort => cohort?.name),
+              filter((name): name is string => !!name),
+              take(1),
+            );
+          },
+        },
         children: [
           {
             path: '',

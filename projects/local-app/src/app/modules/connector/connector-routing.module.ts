@@ -8,7 +8,6 @@ import {connectorAndFileResolver, connectorResolver} from "./services/connector-
 import {ConnectorManagementMode} from "./enum/connector-managment-mode";
 import {RunConnectorViewComponent} from "./components/run-connector/run-connector.component";
 import { runResolver } from "./services/run-resolver.service";
-import {cohortResolver} from "@local-app/cohort/services/cohort-resolver.service";
 import {ConnectorFileListComponent} from './components/file-list/connector-file-list.component';
 import {ConnectorFileDetailComponent} from './components/file-detail/connector-file-detail.component';
 import {connectorFileDetailResolver, connectorFilesResolver} from './services/connector-file-resolver.service';
@@ -36,7 +35,6 @@ const routes: Routes = [
         path: 'new/:connector-id',
         component: ManageConnectorComponent,
         resolve: {
-          cohort: cohortResolver,
           connector: connectorAndFileResolver,
         },
         data: {
