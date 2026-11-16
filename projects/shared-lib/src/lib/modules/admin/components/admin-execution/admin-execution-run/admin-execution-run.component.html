@@ -45,7 +45,7 @@
         <lib-badge color="GRAY" [text]="'' + run.steps.length"/>
       </lib-info-item>
       <!-- Clinic -->
-      @if (run.cohortId != null) {
+      @if (run.cohortId !== null && run.cohortId !== undefined) {
         <lib-info-item title="Cohort">
           <lib-badge color="GRAY" [text]="'#' + run.cohortId"/>
         </lib-info-item>
@@ -55,7 +55,7 @@
           <lib-badge color="GRAY" [uppercase]="true" [text]="run.toolType"/>
         </lib-info-item>
       }
-      @if (run.connectorRunId != null) {
+      @if (run.connectorRunId !== null && run.connectorRunId !== undefined) {
         <lib-info-item title="Connector run">
           <lib-badge color="GRAY" [text]="'#' + run.connectorRunId"/>
         </lib-info-item>
@@ -66,18 +66,18 @@
         </lib-info-item>
       }
       <!-- Platform -->
-      @if (run.experimentId != null) {
+      @if (run.experimentId !== null && run.experimentId !== undefined) {
         <lib-info-item title="Experiment">
           <lib-badge color="GRAY" [text]="'#' + run.experimentId"/>
         </lib-info-item>
       }
-      @if (run.federatedAppVersionId != null) {
+      @if (run.federatedAppVersionId !== null && run.federatedAppVersionId !== undefined) {
         <lib-info-item title="App version">
           <lib-badge color="GRAY" [uppercase]="true"
                      [text]="'#' + run.federatedAppVersionId + (run.federatedAppVersionName ? ' · v' + run.federatedAppVersionName : '')"/>
         </lib-info-item>
       }
-      @if (run.testEngineId != null) {
+      @if (run.testEngineId !== null && run.testEngineId !== undefined) {
         <lib-info-item title="Test engine">
           <lib-badge color="GRAY" [uppercase]="true"
                      [text]="'#' + run.testEngineId + (run.testEngineMode ? ' · ' + run.testEngineMode : '')"/>

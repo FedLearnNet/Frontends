@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 import {MatTooltip} from "@angular/material/tooltip";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {TestRunDTO} from "../../../../dto/test-run";
-import {TestEngineMode, testEngineModeLabels} from "../../../../dto/test-engine";
+import {testEngineModeLabels} from "../../../../dto/test-engine";
 
 @Component({
   selector: 'app-app-run-engine-badge',

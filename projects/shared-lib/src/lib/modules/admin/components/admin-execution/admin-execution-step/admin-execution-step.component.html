@@ -33,10 +33,10 @@
         <lib-badge color="GRAY" [text]="'#' + step.runId"/>
       </lib-info-item>
       <lib-info-item title="Workflow node">
-        <lib-badge color="GRAY" [uppercase]="true" [text]="step.workflowNodeId != null ? '#' + step.workflowNodeId : 'N/A'"/>
+        <lib-badge color="GRAY" [uppercase]="true" [text]="step.workflowNodeId !== null && step.workflowNodeId !== undefined ? '#' + step.workflowNodeId : 'N/A'"/>
       </lib-info-item>
       <lib-info-item title="Selected attempt">
-        <lib-badge color="GRAY" [uppercase]="true" [text]="step.selectedAttemptId != null ? '#' + step.selectedAttemptId : 'N/A'"/>
+        <lib-badge color="GRAY" [uppercase]="true" [text]="step.selectedAttemptId !== null && step.selectedAttemptId !== undefined ? '#' + step.selectedAttemptId : 'N/A'"/>
       </lib-info-item>
       <lib-info-item title="Attempts">
         <lib-badge color="GRAY" [text]="'' + attempts().length"/>
@@ -52,31 +52,31 @@
           <lib-docker-image-tag [imageName]="step.appImage" size="SMALL"/>
         </lib-info-item>
       }
-      @if (step.globalAppVersionId != null) {
+      @if (step.globalAppVersionId !== null && step.globalAppVersionId !== undefined) {
         <lib-info-item title="Global app version">
           <lib-badge color="GRAY" [text]="'#' + step.globalAppVersionId"/>
         </lib-info-item>
       }
-      @if (step.globalModelVersionId != null) {
+      @if (step.globalModelVersionId !== null && step.globalModelVersionId !== undefined) {
         <lib-info-item title="Global model version">
           <lib-badge color="GRAY" [text]="'#' + step.globalModelVersionId"/>
         </lib-info-item>
       }
-      @if (step.transformerId != null) {
+      @if (step.transformerId !== null && step.transformerId !== undefined) {
         <lib-info-item title="Transformer">
           <lib-badge color="GRAY" [text]="'#' + step.transformerId"/>
         </lib-info-item>
       }
       <!-- Platform -->
-      @if (step.federatedAppVersionId != null) {
+      @if (step.federatedAppVersionId !== null && step.federatedAppVersionId !== undefined) {
         <lib-info-item title="App version">
           <lib-badge color="GRAY" [text]="'#' + step.federatedAppVersionId"/>
         </lib-info-item>
       }
-      @if (step.modelSubId != null) {
+      @if (step.modelSubId !== null && step.modelSubId !== undefined) {
         <lib-info-item title="Model sub">
           <lib-badge color="GRAY" [uppercase]="true"
-                     [text]="'#' + step.modelSubId + (step.modelId != null ? ' · model #' + step.modelId : '')"/>
+                     [text]="'#' + step.modelSubId + (step.modelId !== null && step.modelId !== undefined ? ' · model #' + step.modelId : '')"/>
         </lib-info-item>
       }
     </lib-info-grid>
@@ -149,7 +149,7 @@
 
           <ng-container matColumnDef="progress">
             <th mat-header-cell *matHeaderCellDef>Progress</th>
-            <td mat-cell *matCellDef="let attempt">{{ attempt.progress != null ? attempt.progress + '%' : '—' }}</td>
+            <td mat-cell *matCellDef="let attempt">{{ attempt.progress !== null && attempt.progress !== undefined ? attempt.progress + '%' : '—' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="started">

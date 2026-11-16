@@ -37,8 +37,8 @@
                    [text]="attempt.containerId ? attempt.containerId.substring(0, 12) : 'N/A'"/>
       </lib-info-item>
       <lib-info-item title="Exit code">
-        <lib-badge [color]="attempt.exitCode == null ? 'GRAY' : attempt.exitCode === 0 ? 'GREEN' : 'RED'"
-                   [uppercase]="true" [text]="attempt.exitCode != null ? '' + attempt.exitCode : 'N/A'"/>
+        <lib-badge [color]="(attempt.exitCode === null || attempt.exitCode === undefined) ? 'GRAY' : attempt.exitCode === 0 ? 'GREEN' : 'RED'"
+                   [uppercase]="true" [text]="attempt.exitCode !== null && attempt.exitCode !== undefined ? '' + attempt.exitCode : 'N/A'"/>
       </lib-info-item>
       <lib-info-item title="Progress">
         <lib-badge color="BLUE" [text]="(attempt.progress ?? 0) + '%'"/>

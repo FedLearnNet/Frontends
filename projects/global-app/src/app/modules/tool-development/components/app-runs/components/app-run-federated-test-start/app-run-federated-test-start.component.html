@@ -4,7 +4,13 @@
     <div><p class="fed-start__eyebrow">{{ data.app.name }}</p><h3>Set up your participants</h3></div>
     <div class="fed-start__mode"><lib-badge [text]="data.builtImage ? 'Start new containers' : 'Use connected engine'" color="BLUE" iconName="hub"/><lib-run-execution-help [federated]="true"/></div>
   </div>
-  <p class="fed-start__explanation">{{ data.builtImage ? 'Each training client runs in its own container. Choose below whether the aggregator needs another container.' : 'All participants run inside the already-connected engine. This test creates no new containers.' }}</p>
+  <p class="fed-start__explanation">
+    @if (data.builtImage) {
+      Each training client runs in its own container. Choose below whether the aggregator needs another container.
+    } @else {
+      All participants run inside the already-connected engine. This test creates no new containers.
+    }
+  </p>
   <div class="fed-start__summary">
     <div><strong>{{ clients().length }}</strong><span>Training clients</span></div>
     <div><strong>{{ data.builtImage ? effectiveParticipants().length : 1 }}</strong><span>{{ data.builtImage ? 'Containers to start' : 'Engine to reuse' }}</span></div>
