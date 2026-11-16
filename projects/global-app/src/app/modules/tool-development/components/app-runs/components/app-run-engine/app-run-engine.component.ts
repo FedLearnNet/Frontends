@@ -1,4 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {MatIcon} from "@angular/material/icon";
 import {MatTableModule} from "@angular/material/table";
@@ -22,24 +23,25 @@ import {
   selectTestEngineStarting
 } from "../../../../store/test-engine.selectors";
 import {
-  AppRunEngineSingleDialogComponent,
-  AppRunEngineSingleDialogData
+  AppRunEngineSingleDialogComponent
 } from "../app-run-engine-single-dialog/app-run-engine-single-dialog.component";
 import {
   AppRunEngineLogsDialogComponent,
   AppRunEngineLogsDialogData
 } from "../app-run-engine-logs-dialog/app-run-engine-logs-dialog.component";
+import {AppRunFederatedTestStartComponent} from "../app-run-federated-test-start/app-run-federated-test-start.component";
 
 const MODE_ICONS: Record<TestEngineMode, string> = {
   [TestEngineMode.ENGINE]: 'deployed_code',
   [TestEngineMode.SELF_TEST]: 'science',
   [TestEngineMode.SINGLE_RUN]: 'upload_file',
+  [TestEngineMode.FEDERATED_RUN]: 'hub',
 };
 
 // Runs of the built image on the platform: the self-test, single runs and the engines started from the header
 @Component({
   selector: 'app-app-run-engine',
-  imports: [
+  imports: [RunExecutionHelpComponent,
     MatButton,
     MatIconButton,
     MatIcon,
@@ -81,7 +83,6 @@ export class AppRunEngineComponent {
   });
   readonly singleRunHint = computed(() => {
     if (!this.hasImage()) return 'This version has no image yet';
-    if (this.appRunning()) return 'An engine is connected; add a test run in the Test Runs tab instead';
     if (this.starting()) return 'Starting…';
     return '';
   });
@@ -112,6 +113,7 @@ export class AppRunEngineComponent {
     const exitCode = engineAttemptOf(engine)?.exitCode;
     const error = errorOf(engine);
     if (error) return error;
+    if (engine.engineMode === TestEngineMode.FEDERATED_RUN) return engine.steps.flatMap(step => step.attempts ?? []).length + ' containers';
     if (exitCode !== null && exitCode !== undefined) return 'Exit code ' + exitCode;
     const connected = engineAttemptOf(engine)?.status === RunStatusTypes.RUNNING;
     return connected && engine.engineMode !== TestEngineMode.SELF_TEST ? 'Connected' : '';
@@ -122,11 +124,11 @@ export class AppRunEngineComponent {
   }
 
   runOnceWithData(): void {
-    this.dialog.open(AppRunEngineSingleDialogComponent, {
+    this.dialog.open<unknown>(this.app().supportsFederatedLearning ? AppRunFederatedTestStartComponent : AppRunEngineSingleDialogComponent, {
       width: '720px',
       maxWidth: '100vw',
       autoFocus: false,
-      data: {app: this.app()} as AppRunEngineSingleDialogData,
+      data: {app: this.app(), builtImage: true, datafiles: []},
     });
   }
 

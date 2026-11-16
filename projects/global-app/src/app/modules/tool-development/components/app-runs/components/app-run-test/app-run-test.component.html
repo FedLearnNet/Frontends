@@ -1,16 +1,24 @@
-<p>{{ 'PERFORM_QUICK_TEST_SAVE_RUNTIME' | translate }}</p>
-<div class="test-table">
-  <div class="test-table--header">
-    <lib-btn
-      class="add-test-btn"
-      appearance="FAB_EXTENDED"
-      colorVariant="PINK"
-      type="CREATE"
-      [disabled]="!appRunning()"
-      [label]="'BUTTON.ADD_NEW_LOCAL_TEST' | translate"
-      (clicked)="addNewTest()"
-    />
+<section class="run-setup" aria-label="Execution options">
+  <div class="run-setup__heading">
+    <div class="run-setup__title"><h3>Choose where to run this test</h3><lib-run-execution-help/></div>
+    <p>Choose an option to open setup. Nothing runs until you click Start run.</p>
   </div>
+  <div class="run-setup__choices">
+    <lib-action-card-button title="Start new container" icon="dns"
+      subtitle="One temporary container using the built image. Removed after the run."
+      [disabled]="!app()?.hasImage" (clicked)="addNewTest(true)"/>
+    <lib-action-card-button title="Use connected engine" icon="computer"
+      [subtitle]="appRunning() ? 'Run inside the already-connected engine. It stays running afterward.' : 'Connect an engine from the tool header to use this option.'"
+      [disabled]="!appRunning()" (clicked)="addNewTest(false)"/>
+  </div>
+  @if (!app()?.hasImage) { <p class="run-setup__notice">Build this tool version to enable new containers.</p> }
+</section>
+<div class="test-table">
+  <h3 class="run-history-title">Recent runs <span>{{ dataSource.data.length }}</span></h3>
+  @if (!dataSource.data.length) {
+    <lib-empty-state title="Your first run starts here" subtitle="Choose an execution option above. Results and run details will appear here."
+                     icon="science" size="SMALL" [bordered]="true"/>
+  } @else {
   <table mat-table [dataSource]="dataSource" class="">
     <ng-container matColumnDef="position">
       <th mat-header-cell *matHeaderCellDef>{{ 'GRID.NO' | translate }}</th>
@@ -50,4 +58,5 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" (click)="showDetail(row, i)"></tr>
   </table>
+  }
 </div>

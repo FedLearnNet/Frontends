@@ -10,6 +10,7 @@
     } @else {
       <lib-badge text="No image yet" iconName="warning" color="ORANGE" size="X-SMALL"/>
     }
+    <lib-run-execution-help [federated]="app().supportsFederatedLearning ?? false"/>
   </div>
   <p class="engine-intro__text">
     Run the image the pipeline built, on the platform instead of your machine.
@@ -34,11 +35,13 @@
   <div class="engine-card">
     <mat-icon class="engine-card__icon">upload_file</mat-icon>
     <div class="engine-card__body">
-      <h4>Run once with data</h4>
-      <p>Pick files from your file store; the container serves this one test run and stops.</p>
+      <h4>{{ app().supportsFederatedLearning ? 'Federated test experiment' : 'Run once with data' }}</h4>
+      <p>{{ app().supportsFederatedLearning
+        ? 'Choose the client count and data. Start creates one container per participant, with a separate or client-hosted aggregator.'
+        : 'Pick files from your file store; the container serves this one test run and stops.' }}</p>
     </div>
     <span [matTooltip]="singleRunHint()">
-      <button mat-stroked-button [disabled]="!!singleRunHint()" (click)="runOnceWithData()">Choose data</button>
+      <button mat-stroked-button [disabled]="!!singleRunHint()" (click)="runOnceWithData()">{{ app().supportsFederatedLearning ? 'Configure clients' : 'Choose data' }}</button>
     </span>
   </div>
 
@@ -46,7 +49,7 @@
     <mat-icon class="engine-card__icon">deployed_code</mat-icon>
     <div class="engine-card__body">
       <h4>Use as engine</h4>
-      <p>Connects like your local engine, so test runs, experiments and federated test runs use the built image.</p>
+      <p>Starts one persistent engine for repeated tests. It stays running after each test; use Stop when you are done.</p>
     </div>
     @if (connectingEngine(); as engine) {
       <button mat-stroked-button (click)="stop(engine)">Stop</button>

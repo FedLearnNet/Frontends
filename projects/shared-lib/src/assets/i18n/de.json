@@ -105,6 +105,7 @@
   "PIVOT_VALUE_FORMAT_YES_NO": "ja / nein",
   "PIVOT_VALUE_FORMAT_ONE_ZERO": "1 / 0",
   "PIVOT_MODE_ONE_HOT_HELP": "Jede Quellzeile und jede nicht pivotierte Spalte bleibt erhalten. Die Position der Quellzeile identifiziert jede Ausgabezeile.",
+  "TRAINING_ACCESS": {"federated": "Föderiertes Lernen", "tre": "TRE (einzelner Client)", "ENABLED": "Aktiviert", "DISABLED": "Deaktiviert"},
   "AUTOMATIC_TRAINING_ACCESS_FOR": "Automatischer Trainings-Zugang für",
   "AUTOMATIC_STATISTICS_ACCESS_FOR": "Automatischer Statistik-Zugang für",
   "AUTOMATIC_METRICS_ACCESS_FOR": "Automatischer Metrik-Zugang für",
@@ -539,5 +540,8 @@
     "STEP_LABEL": "Schritt",
     "BLOCKED_HINT": "Schritt {{index}} läuft in einer App und wurde noch nicht ausgeführt, daher verwendet dieser Schritt dessen Eingangszeilen. Führe zuerst Schritt {{index}} aus.",
     "OPEN_BLOCKING_STEP": "Zu Schritt {{index}}"
-  }
+  },
+  "FOUND_CLIENTS": "Gefundene Clients",
+  "CLIENT_N": "Client {{ n }}",
+  "NO_CLIENT_SYSTEM_INFO": "Die Clients dieser Abfrage haben keine Systeminformationen gemeldet."
 }

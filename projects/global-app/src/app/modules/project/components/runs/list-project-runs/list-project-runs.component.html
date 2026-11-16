@@ -3,7 +3,7 @@
     <span class="spacer"></span>
     <button mat-raised-button (click)="newRun()">
       <mat-icon>add</mat-icon>
-      <span>{{ (kind() === 'federated' ? 'BUTTON.CREATE_EXPERIMENT' : 'BUTTON.CREATE_LOCAL_EXPERIMENT') | translate }}</span>
+      <span>{{ (kind() === 'federated' ? 'BUTTON.CREATE_EXPERIMENT' : kind() === 'tre' ? 'BUTTON.CREATE_TRE_EXPERIMENT' : 'BUTTON.CREATE_LOCAL_EXPERIMENT') | translate }}</span>
     </button>
   </mat-toolbar>
 

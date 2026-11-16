@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from "@angular/material/dialog";
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MatButton} from "@angular/material/button";
 import {MatFormField, MatHint, MatLabel} from "@angular/material/form-field";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -18,6 +19,9 @@ import {TestEngineService} from "../../../../service/test-engine.service";
 import {TestEngineMode} from "../../../../dto/test-engine";
 import * as TestEngineActions from "../../../../store/test-engine.actions";
 import {Store} from "@ngrx/store";
+import {CloseableDialogTitleComponent} from '@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component';
+import {InfoCardComponent} from '@shared-lib/components/info-card/info-card.component';
+import {MatIcon} from '@angular/material/icon';
 
 export interface AppRunEngineSingleDialogData {
   app: AppDetailDto;
@@ -26,8 +30,8 @@ export interface AppRunEngineSingleDialogData {
 // One test run of the built image, its inputs picked from the file store
 @Component({
   selector: 'app-app-run-engine-single-dialog',
-  imports: [
-    MatDialogTitle,
+  imports: [RunExecutionHelpComponent,
+    CloseableDialogTitleComponent, InfoCardComponent, MatIcon,
     MatDialogContent,
     MatDialogActions,
     MatButton,
@@ -85,7 +89,7 @@ export class AppRunEngineSingleDialogComponent implements OnInit {
     const inputs: { [key: string]: unknown } = {};
     Object.entries(this.selected()).forEach(([variable, file]) => {
       // The engine downloads the file through its secret link
-      if (file?.downloadUrl) inputs[variable] = `${file.downloadUrl}/download?secret=${file.secret}`;
+      if (file?.downloadUrl) inputs[variable] = `${file.downloadUrl.replace(/\/$/, '')}/download?secret=${encodeURIComponent(file.secret)}`;
     });
     this.starting.set(true);
     this.engineService.start(this.data.app.id, {

@@ -152,6 +152,7 @@
   "IS_ALLOWED_TO_QUERY": "Are the group or user allowed to query",
   "QUERY_RETRY_TIME": "Query retry time (in seconds)",
   "MINIMUM_SAMPLES_FOR_QUERYING": "Minimum samples for querying",
+  "TRAINING_ACCESS": {"federated": "Federated learning", "tre": "TRE (single client)", "ENABLED": "Enabled", "DISABLED": "Disabled"},
   "AUTOMATIC_TRAINING_ACCESS_FOR": "Automatic training access for",
   "ALL": "All",
   "NONE": "None",
@@ -220,6 +221,7 @@
   "YOU_CAN_LINK_A_QUERY": "You can link a query to this project later",
   "EXPERIMENTS": "Federated Training",
   "TEST_RUNS": "Test Runs",
+  "TRE_EXPERIMENTS": "TRE Training",
   "LOCAL_EXPERIMENTS": "Centralized Training",
   "VIEWING_ONLY": "Viewing Only",
   "PYDANTIC_CLASS_COMPACT_HINT": "Hidden on small screens. Open it in a dialog when needed.",
@@ -337,6 +339,7 @@
     "TRAINING_REVIEW": "Training Requests",
     "STATISTICS_REVIEW": "Statistics Requests",
     "METRICS_REVIEW": "Metrics Requests",
+    "OUTPUT_REVIEW": "Output Requests",
     "STARRED": "Starred",
     "INFORMATION": "Notifications",
     "LOGS": "Logs",
@@ -530,6 +533,7 @@
     "JOIN": "Join",
     "CREATE_PROJECT": "Create Project",
     "CREATE_EXPERIMENT": "Request Training",
+    "CREATE_TRE_EXPERIMENT": "Request TRE Training",
     "CREATE_LOCAL_EXPERIMENT": "Run Centralized Training",
     "ADD_NEW_DATA_TYPE": "Add New Data Type",
     "ADD_VALIDATOR": "Add Validator",
@@ -988,6 +992,8 @@
       "MESSAGE_LINE_FEDERATED_2": "The hospitals will review your project and approve patient participation; they may choose to exclude certain individuals. You can monitor the status at any time. If you are satisfied with the number of patients, you may accept and initiate the study at your discretion.",
       "MESSAGE_LINE_LOCAL_1": "A copy of your current experimental protocol will be saved, and you will no longer be able to edit this version. This copy, will be used as a foundation for your local experiment.",
       "MESSAGE_LINE_LOCAL_2": "You can start your controller at anytime. See bootstrap.",
+      "TRE_CLIENT_LABEL": "On which client should the TRE training run?",
+      "TRE_NO_CLIENT": "No client answered the query",
       "AGGREGATOR_LOCATION_LABEL": "Where should the aggregator run?",
       "AGGREGATOR_LOCATION_RANDOM_CLINIC": "A random participating clinic",
       "AGGREGATOR_LOCATION_PLATFORM": "The FL-Net Platform"
@@ -1590,5 +1596,8 @@
   "LABEL": {
     "FILE": "File",
     "FILES": "Files"
-  }
+  },
+  "FOUND_CLIENTS": "Found clients",
+  "CLIENT_N": "Client {{ n }}",
+  "NO_CLIENT_SYSTEM_INFO": "No system information reported by the clients of this query."
 }

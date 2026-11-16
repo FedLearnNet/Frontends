@@ -5,5 +5,6 @@ export interface UserInformationDTO {
   openTrainingRequests: number;
   openStatisticsRequests: number;
   openMetricsRequests: number;
+  openOutputRequests?: number;
 }
 

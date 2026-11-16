@@ -21,6 +21,7 @@ export interface FederatedTestRunCreateDTO {
   federatedAppVersionId?: number;
   totalRounds?: number;
   startAggregator?: boolean;
+  aggregatorParticipantId?: string;
   config?: FederatedTestRunConfigDTO;
   participants: FederatedParticipantConfigDTO[];
 }

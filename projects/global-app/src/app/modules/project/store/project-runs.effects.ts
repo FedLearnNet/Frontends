@@ -9,9 +9,10 @@ export class ProjectRunsEffects {
   private readonly actions$ = inject(Actions);
   private readonly api = inject(ProjectExperimentService);
 
+  // Merged: the lists of each kind load at once (all tabs initialize together), a switch would drop one.
   loadList$ = createEffect(() => this.actions$.pipe(
     ofType(ProjectRunsActions.loadList),
-    switchMap(({projectId, kind}) => this.api.list(projectId, kind).pipe(
+    mergeMap(({projectId, kind}) => this.api.list(projectId, kind).pipe(
       map(runs => ProjectRunsActions.loadListSuccess({projectId, kind, runs})),
       catchError(error => of(ProjectRunsActions.failure({error})))
     ))

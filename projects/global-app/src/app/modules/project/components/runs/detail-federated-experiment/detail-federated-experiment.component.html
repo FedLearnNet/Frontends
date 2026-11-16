@@ -4,7 +4,7 @@
                          (startExperiment)="start()"
                          (stop)="stop()"
                          (refresh)="reload()"
-                         [isSSEConnected]="false"
+                         [isSSEConnected]="connected()"
                          [loading]="loading()"/>
 
   <lib-page-wrapper
@@ -103,11 +103,16 @@
         }
       }
       @if (isFinished()) {
-        <mat-tab label="Local Metrics">
+        <mat-tab [label]="isTre() ? 'Metrics' : 'Local Metrics'">
           <app-local-metrics-tab
             [projectId]="exp.projectId!"
             [experimentId]="exp.id"
           />
+        </mat-tab>
+      }
+      @if (isFinished() && isTre()) {
+        <mat-tab label="Outputs">
+          <app-outputs-tab [projectId]="exp.projectId!" [experimentId]="exp.id" [outputs]="outputs()"/>
         </mat-tab>
       }
       @if (isFinished()) {
@@ -118,7 +123,7 @@
           />
         </mat-tab>
       }
-      @if (isFinished()) {
+      @if (isFinished() && !(isTre() && trainableApps() === 0)) {
         <mat-tab label="Training Result">
 
           @if (trainableApps() === 0) {

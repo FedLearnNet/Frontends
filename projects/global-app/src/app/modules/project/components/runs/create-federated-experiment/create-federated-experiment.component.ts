@@ -4,7 +4,10 @@ import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {ProjectFederatedCreateExperimentDTO} from "@global-app/project/dto/project-experiments";
+import {ProjectFederatedCreateExperimentDTO, ProjectRunKind} from "@global-app/project/dto/project-experiments";
+import {QueryService} from "@global-app/find-data/services/query.service";
+import {toSignal} from "@angular/core/rxjs-interop";
+import {catchError, of} from "rxjs";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatButtonModule} from "@angular/material/button";
 import {MatRadioModule} from "@angular/material/radio";
@@ -27,7 +30,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface FederatedExperimentData {
   project: ProjectDetailDto,
-  workflow: WorkflowDTO
+  workflow: WorkflowDTO,
+  kind?: ProjectRunKind
 }
 
 @Component({
@@ -59,6 +63,11 @@ export class CreateFederatedExperimentComponent {
   readonly project = this.data.project;
 
   readonly platformAggregatorSupported = signal(false);
+  readonly tre = this.data.kind === 'tre';
+  // clients of the query, numbered as on the query; TRE only on one that allows it
+  readonly treClients = toSignal(this.tre && this.project?.queryId
+    ? inject(QueryService).getSystems(this.project.queryId).pipe(catchError(() => of([])))
+    : of([]), {initialValue: []});
 
   newExperimentForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),
@@ -66,6 +75,7 @@ export class CreateFederatedExperimentComponent {
     acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue]),
     modelNeedToBePublic: new FormControl<boolean>(false, [Validators.required]),
     platformIsCoordinator: new FormControl<boolean>(false, {nonNullable: true}),
+    queryResponseId: new FormControl<number | null>(null, this.tre ? [Validators.required] : []),
   });
 
   constructor() {
@@ -116,11 +126,12 @@ export class CreateFederatedExperimentComponent {
         name: this.newExperimentForm.value.name || '',
         description: this.newExperimentForm.value.description || '',
         modelNeedToBePublic: this.newExperimentForm.value.modelNeedToBePublic || false,
-        platformIsCoordinator: this.platformAggregatorSupported()
+        platformIsCoordinator: this.platformAggregatorSupported() && !this.tre
           ? (this.newExperimentForm.value.platformIsCoordinator ?? false)
           : false,
+        queryResponseId: this.newExperimentForm.value.queryResponseId ?? undefined,
       }
-      this.store.dispatch(ProjectRunsActions.create({dto: createDto, projectId: this.project.id, kind: 'federated'}));
+      this.store.dispatch(ProjectRunsActions.create({dto: createDto, projectId: this.project.id, kind: this.data.kind ?? 'federated'}));
       this.dialogRef.close();
     }
   }

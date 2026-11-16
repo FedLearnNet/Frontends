@@ -14,7 +14,7 @@
     }
     @if (app()?.supportsFederatedLearning) {
       <mat-tab [label]="('MENU.FEDERATED_RUNS' | translate)">
-        <app-app-run-federated-test [app]="app()" [appRunning]="appRunning()" [localFiles]="localFiles()"/>
+        <app-app-run-federated-test [app]="app()" [appRunning]="appRunning()" [datafiles]="datafiles()"/>
       </mat-tab>
     } @else {
       <mat-tab [label]="('MENU.TEST_RUNS' | translate)">

@@ -1,9 +1,10 @@
-<h2 mat-dialog-title>Run v{{ data.app.latestVersion }} once with data</h2>
+<lib-closeable-dialog-title title="Configure central run" [allowMaximize]="false"/>
 <mat-dialog-content class="single-run">
-  <p class="single-run__intro">
-    The platform starts the built image of {{ data.app.name }}, hands it this test run and stops it once the run ended.
-    The run shows up in the Test Runs tab.
-  </p>
+  <div class="single-run__intro-row"><p class="single-run__intro">
+    {{ data.app.name }} · v{{ data.app.latestVersion }}
+  </p><lib-run-execution-help/></div>
+  <lib-info-card title="A fresh container for this run" subtitle="Starts when you confirm and is removed after completion. Any already-connected engine stays running."
+                 type="INFO" variant="BANNER" size="SMALL"/>
 
   <section class="single-run__section">
     <h3>Inputs</h3>
@@ -42,7 +43,7 @@
   <button mat-button (click)="dialogRef.close()">Cancel</button>
   <span [matTooltip]="runHint()">
     <button mat-flat-button [disabled]="!!runHint()" (click)="start()">
-      {{ starting() ? 'Starting…' : 'Run' }}
+      <mat-icon>play_arrow</mat-icon>{{ starting() ? 'Starting…' : 'Start run' }}
     </button>
   </span>
 </mat-dialog-actions>

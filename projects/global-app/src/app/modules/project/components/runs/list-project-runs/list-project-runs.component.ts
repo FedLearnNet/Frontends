@@ -55,7 +55,7 @@ export class ListProjectRunsComponent {
   dispatchRuns$ = effect(() => this.store.dispatch(ProjectRunsActions.loadList({projectId: this.project().id, kind: this.kind()})));
 
   newRun(): void {
-    const dialog: ComponentType<unknown> = this.kind() === 'federated' ? CreateFederatedExperimentComponent : CreateLocalExperimentDialogComponent;
+    const dialog: ComponentType<unknown> = this.kind() === 'local' ? CreateLocalExperimentDialogComponent : CreateFederatedExperimentComponent;
     this.dialog.open(dialog, {
       height: '80vh',
       width: '90vw',
@@ -63,7 +63,8 @@ export class ListProjectRunsComponent {
       autoFocus: false,
       data: {
         project: this.project(),
-        workflow: this.workflow()
+        workflow: this.workflow(),
+        kind: this.kind()
       }
     });
   }

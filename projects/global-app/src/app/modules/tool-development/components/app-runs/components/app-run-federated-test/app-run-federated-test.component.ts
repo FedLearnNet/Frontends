@@ -16,9 +16,10 @@ import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {
   AppRunFederatedTestStartComponent
 } from "../app-run-federated-test-start/app-run-federated-test-start.component";
-import {LocalFiles} from "@shared-lib/modules/files/dto/file";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
-import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {ActionCardButtonComponent} from "@shared-lib/components/action-card-button/action-card-button.component";
+import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
 import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine-badge.component";
@@ -34,7 +35,9 @@ import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine
     TranslatePipe,
     StatusBadgeComponent,
     TimeBadgeComponent,
-    BtnComponent,
+    ActionCardButtonComponent,
+    EmptyStateComponent,
+    RunExecutionHelpComponent,
   ],
   templateUrl: './app-run-federated-test.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -48,7 +51,7 @@ export class AppRunFederatedTestComponent implements OnInit {
 
   readonly app = input<AppDetailDto>();
   readonly appRunning = input<boolean>(false);
-  readonly localFiles = input<LocalFiles[]>([]);
+  readonly datafiles = input<string[]>([]);
 
   displayedColumns: string[] = ['position', 'status', 'engine', 'participants', 'error', 'startTime'];
   dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
@@ -79,17 +82,16 @@ export class AppRunFederatedTestComponent implements OnInit {
     return participantsOf(run).length;
   }
 
-  addNewFederatedTest(): void {
+  addNewFederatedTest(builtImage = true): void {
     const dialogRef = this.dialog.open(AppRunFederatedTestStartComponent, {
-      minHeight: '500px',
-      minWidth: '700px',
-      width: '65vw',
+      width: '960px',
       maxWidth: '95vw',
       maxHeight: '95vh',
       autoFocus: false,
       data: {
         app: this.app(),
-        datafiles: this.localFiles().map(file => file.path),
+        builtImage,
+        datafiles: builtImage ? [] : this.datafiles(),
       },
     });
 

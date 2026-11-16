@@ -1,7 +1,7 @@
 .single-run {
   &__intro {
     margin-top: 0;
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--mat-sys-on-surface-variant, #64748b);
   }
 
   &__section {
@@ -17,3 +17,5 @@
     width: 100%;
   }
 }
+
+.single-run__intro-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; p { margin: 0; } }

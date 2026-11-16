@@ -1,7 +1,6 @@
 import {createReducer, on} from '@ngrx/store';
-import {ProjectRunDTO, projectIdOf} from "@global-app/project/dto/project-experiments";
+import {kindOf, ProjectRunDTO, projectIdOf} from "@global-app/project/dto/project-experiments";
 import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
-import {ExecutionMode} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 export interface ProjectRunsState {
   runs: ProjectRunDTO[];
@@ -53,7 +52,7 @@ export const projectRunsReducer = createReducer(
   on(ProjectRunsActions.loadListSuccess, (state, {projectId, kind, runs}): ProjectRunsState => ({
     ...state,
     runs: [
-      ...state.runs.filter(run => projectIdOf(run) !== projectId || (run.mode === ExecutionMode.FEDERATED) !== (kind === 'federated')),
+      ...state.runs.filter(run => projectIdOf(run) !== projectId || kindOf(run) !== kind),
       ...runs,
     ],
     loading: false,

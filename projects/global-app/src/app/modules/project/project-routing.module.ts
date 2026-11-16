@@ -52,6 +52,14 @@ const routes: Routes = [
                 }
               },
               {
+                path: 'tre/:experiment-id',
+                component: DetailFederatedExperimentComponent,
+                data: {kind: 'tre'},
+                resolve: {
+                  run: projectRunResolver
+                }
+              },
+              {
                 path: 'local/:experiment-id',
                 component: DetailLocalExperimentComponent,
                 data: {kind: 'local'},

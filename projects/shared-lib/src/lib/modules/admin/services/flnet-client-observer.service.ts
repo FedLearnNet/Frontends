@@ -10,6 +10,7 @@ import {ApiService} from '@shared-lib/services/api.service';
 import {SseClient} from 'ngx-sse-client';
 import {SKIP_LOADING} from '@shared-lib/interceptors/loading.interceptor';
 import {FLNetClientObserverEventDTO} from '../dto/observer';
+import {SystemComputingInfoDTO} from '../dto/system-info';
 
 @Injectable({providedIn: 'root'})
 export class FLNetClientObserverService {
@@ -54,6 +55,11 @@ export class FLNetClientObserverService {
           )
         )
       );
+  }
+
+  getSystems(): Observable<Record<string, SystemComputingInfoDTO>> {
+    return this.apiService.get<Record<string, SystemComputingInfoDTO>>(`${this.baseUrl()}/systems`, undefined,
+      new HttpHeaders().set(SKIP_LOADING, 'true'));
   }
 
   removeAllClients(): Observable<void> {

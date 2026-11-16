@@ -1,17 +1,1 @@
-.test-table {
-  margin-right: 55px;
-  margin-bottom: 80px;
-
-  &--header {
-    display: flex;
-
-    .add-test-btn {
-      margin-left: auto;
-    }
-  }
-}
-
-.mat-mdc-row:hover {
-  cursor: pointer;
-  background-color: #d8d8d8;
-}
+@use '../test-run-layout';

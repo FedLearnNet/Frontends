@@ -8,8 +8,10 @@ import {
 } from "@global-app/model-store/components/model-version-detail-view/model-version-detail-view.component";
 import {selectSelectedProject} from "@global-app/project/store/project.selectors";
 import {Action, Store} from "@ngrx/store";
-import {ProjectRunKind} from "@global-app/project/dto/project-experiments";
-import {selectError, selectLoading, selectSelectedRun} from "@global-app/project/store/project-runs.selectors";
+import {kindOf, ProjectRunKind} from "@global-app/project/dto/project-experiments";
+import {displayedAttempt} from "@shared-lib/modules/app-execution/dto/execution-run";
+import {OutputsTabComponent} from "./outputs-tab/outputs-tab.component";
+import {selectConnectedById, selectError, selectLoading, selectSelectedRun} from "@global-app/project/store/project-runs.selectors";
 import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
 import {
   ExperimentHeaderComponent
@@ -56,6 +58,7 @@ import {TranslatePipe} from "@ngx-translate/core";
     LocalMetricsTabComponent,
     EvaluationTabComponent,
     TranslatePipe,
+    OutputsTabComponent,
   ],
   templateUrl: './detail-federated-experiment.component.html',
   styleUrl: './detail-federated-experiment.component.scss',
@@ -72,14 +75,25 @@ export class DetailFederatedExperimentComponent {
   selectedWorkflow = this.store.selectSignal(selectSelectedWorkflow);
   loading = this.store.selectSignal(selectLoading);
 
+  connected = computed(() => {
+    const id = this.run()?.id;
+    return id ? this.store.selectSignal(selectConnectedById(id))() : false;
+  });
+
   showResultModel = signal(false);
   isFinished = computed(() => this.run()?.experiment?.status === ProjectStatus.FINISHED);
 
   trainableApps = computed(() => this.wths.containsTrainableApps(this.selectedWorkflow()));
+  isTre = computed(() => !!this.run() && kindOf(this.run()!) === 'tre');
+  // TRE: what the clinic released on an outputs request, per step.
+  outputs = computed(() => (this.run()?.steps ?? []).flatMap(step => displayedAttempt(step)?.outputFiles ?? []));
 
   // The training runs a copy of the project's workflow, its steps name the nodes of that copy.
+  // Computed so run updates from the stream don't reload the same workflow.
+  private workflowId = computed(() => this.run()?.experiment?.workflowId ?? this.project()?.workflowId);
+
   dispatchWorkflow$ = effect(() => {
-    const workflowId = this.run()?.experiment?.workflowId ?? this.project()?.workflowId;
+    const workflowId = this.workflowId();
     if (workflowId) {
       this.store.dispatch(WorkflowActions.loadWorkflow({id: workflowId}));
     }
@@ -114,7 +128,7 @@ export class DetailFederatedExperimentComponent {
     const runId = this.run()?.id;
     const projectId = this.project()?.id;
     if (runId && projectId) {
-      this.store.dispatch(action({projectId, kind: 'federated', runId}));
+      this.store.dispatch(action({projectId, kind: kindOf(this.run()!), runId}));
     }
   }
 

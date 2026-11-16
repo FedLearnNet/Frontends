@@ -1,9 +1,14 @@
-<h2 mat-dialog-title>Test {{ data.app.name }}</h2>
+<lib-closeable-dialog-title title="Run on connected engine" [allowMaximize]="false"/>
 <mat-dialog-content>
+  <div class="run-intro-row"><p class="run-intro">{{ data.app.name }}</p><lib-run-execution-help/></div>
+  <lib-info-card title="Use your existing connection" subtitle="This run uses the connected engine. It will stay running and available after completion."
+                 type="INFO" variant="BANNER" size="SMALL"/>
+  <section class="run-section"><h3>Hyperparameters</h3>
   <lib-app-run-hyperparameter [app]="data.app"
                               (hyperParamsChange)="onHyperParamsChanged($event)"
                               (formsValid)="hyperParamsValid = $event"
    />
+  </section>
 
   <!-- For not not in use
   <div class="use-local-files-wrapper">
@@ -65,6 +70,6 @@
 
 </mat-dialog-content>
 <mat-dialog-actions class="actions">
-  <button mat-button (click)="onNoClick()">{{ 'BUTTON.NO_THANKS' | translate }}</button>
-  <button mat-button (click)="onRunClick()" [disabled]="!isValid()">{{ 'BUTTON.RUN' | translate }}</button>
+  <button mat-button (click)="onNoClick()">{{ 'BUTTON.CANCEL' | translate }}</button>
+  <button mat-flat-button (click)="onRunClick()" [disabled]="!isValid()">Start run</button>
 </mat-dialog-actions>

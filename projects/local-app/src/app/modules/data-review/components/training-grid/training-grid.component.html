@@ -15,6 +15,7 @@
           <span class="column-name">{{ 'GRID.NAME' | translate }}:</span>
         }
         <span>{{ element.project.name }}</span>
+        <small>&nbsp;({{ 'TRAINING_ACCESS.' + (element.executionMode === 'TRE' ? 'tre' : 'federated') | translate }})</small>
       </mat-cell>
     </ng-container>
 

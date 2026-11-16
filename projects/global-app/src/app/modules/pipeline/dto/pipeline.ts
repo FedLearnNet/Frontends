@@ -22,7 +22,7 @@ export enum PipelineRunMode {
 }
 
 export const pipelineRunModeLabels: Record<PipelineRunMode, string> = {
-  [PipelineRunMode.ALL]: 'Build and publish',
+  [PipelineRunMode.ALL]: 'Build',
   [PipelineRunMode.LOCAL_BUILD]: 'Local build',
   [PipelineRunMode.SCAN_ONLY]: 'Vulnerability rescan',
 };

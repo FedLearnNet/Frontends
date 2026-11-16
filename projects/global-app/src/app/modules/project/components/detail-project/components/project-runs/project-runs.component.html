@@ -3,6 +3,9 @@
     <mat-tab [label]="('EXPERIMENTS' | translate)">
       <app-list-project-runs kind="federated" [project]="project()" [workflow]="workflow()"/>
     </mat-tab>
+    <mat-tab [label]="('TRE_EXPERIMENTS' | translate)">
+      <app-list-project-runs kind="tre" [project]="project()" [workflow]="workflow()"/>
+    </mat-tab>
     <mat-tab [label]="('LOCAL_EXPERIMENTS' | translate)">
       <app-list-project-runs kind="local" [project]="project()" [workflow]="workflow()"/>
     </mat-tab>

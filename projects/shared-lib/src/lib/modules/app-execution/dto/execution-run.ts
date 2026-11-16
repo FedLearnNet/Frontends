@@ -18,6 +18,7 @@ export enum ExecutionPurpose {
 export enum ExecutionMode {
   SINGLE = "SINGLE",
   FEDERATED = "FEDERATED",
+  TRE = "TRE",
 }
 
 export enum ExecutionLocation {
