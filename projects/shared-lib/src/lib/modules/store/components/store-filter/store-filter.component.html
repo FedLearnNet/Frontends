@@ -29,14 +29,14 @@
       </button>
     }
   </mat-form-field>
-  @if (this.needsFilterAppTypes()) {
+  @if (showAppTypeFilter()) {
     <div class="filter-section">
       <h4>{{ 'GRID.APP_TYPE' | translate }}</h4>
-      @for (appType of appTypes(); track appType) {
+      @for (appType of visibleAppTypes(); track appType.id) {
         <mat-checkbox
           [checked]="appType.checked"
           (change)="toggleAppType(appType)"
-          [disabled]="!(storeConfig()?.allowFilterChange?.appType ?? true)"
+          [disabled]="!appTypeFilterChangeable()"
         >
           {{ appType.name }}
         </mat-checkbox>

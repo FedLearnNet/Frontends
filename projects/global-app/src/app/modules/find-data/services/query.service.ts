@@ -6,6 +6,7 @@ import {CreateQueryDTO, QueryDetailDTO, QueryDTO} from "@global-app/find-data/dt
 import {HttpParams} from "@angular/common/http";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from '@ngx-translate/core';
+import {QueryPartnerSystemDTO} from '@shared-lib/modules/admin/dto/system-info';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +76,10 @@ export class QueryService {
       catchError((err) => this.errorSnackbarService.showSnackBar(err,
         this.translate.instant('ERROR.FAILED_TO_GET', {name: this.translate.instant('GRID.QUERY').toLowerCase()}))),
     );
+  }
+
+  getSystems(id: number): Observable<QueryPartnerSystemDTO[]> {
+    return this.apiService.get<QueryPartnerSystemDTO[]>(`${this.getBaseUrl()}/${id}/systems`);
   }
 
   getAllQueries(hasNoProject?: boolean): Observable<QueryDTO[]> {

@@ -43,7 +43,7 @@
     @if (files(); as files) {
       <div class="file-list">
         @for (file of files; track file.id) {
-          @if (!file.predictionId) {
+          @if (!file.attemptId) {
             <div class="file-entry">
               <span class="name" (click)="openDetailDialog(file)">{{ file.file.fileName }}</span>
               <span class="size">{{ file.file.size }} bytes</span>
@@ -58,7 +58,7 @@
       <p>Output</p>
       <div class="file-list">
         @for (file of files; track file.id) {
-          @if (file.predictionId) {
+          @if (file.attemptId) {
             <div class="file-entry">
               <span class="name" (click)="openDetailDialog(file)">{{ file.file.fileName }}</span>
               <span class="size">{{ file.file.size }} bytes</span>

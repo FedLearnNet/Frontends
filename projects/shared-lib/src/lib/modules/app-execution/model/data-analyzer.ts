@@ -1,7 +1,7 @@
 import {ResultAnalyzerResultDTO} from "@shared-lib/modules/app-execution/dto/data-analysis-llm";
 import {FileDTO} from "@shared-lib/modules/files/dto/file";
 import {StoreSelectDialogResult} from "@shared-lib/modules/store/components/model/model-select-dialog";
-import {DataAnalysisWorkflowRunDTO} from "@shared-lib/modules/app-execution/dto/data-analysis-workflow";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ModelWorkflowDetailDTO} from "@shared-lib/modules/app-execution/dto/model-workflow";
 
 export interface DataAnalysisResultAnalyzerDialogData {
@@ -36,7 +36,7 @@ export interface SelectedDataAnalysisState {
   selectedToolHyperParams?: { [key: string]: any } | null;
   activeTool?: StoreSelectDialogResult | null;
   activeToolHyperParams?: { [key: string]: any } | null;
-  selectedWorkflowDetail?: DataAnalysisWorkflowRunDTO | null;
+  selectedWorkflowDetail?: DataAnalysisRunDTO | null;
 
   chatConnected?: boolean;
   chatError?: string;

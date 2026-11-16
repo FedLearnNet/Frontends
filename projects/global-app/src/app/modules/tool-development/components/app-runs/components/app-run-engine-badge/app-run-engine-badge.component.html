@@ -1,0 +1,5 @@
+@if (container()) {
+  <lib-badge text="Container" iconName="deployed_code" color="BLUE" size="X-SMALL" [matTooltip]="tooltip()"/>
+} @else {
+  <lib-badge text="Local" iconName="computer" color="GRAY" size="X-SMALL" [matTooltip]="tooltip()"/>
+}

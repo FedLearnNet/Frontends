@@ -1,12 +1,7 @@
 import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {MatTabsModule} from "@angular/material/tabs";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
-import {
-  ListFederatedExperimentComponent
-} from "@global-app/project/components/runs/list-federated-experiment/list-federated-experiment.component";
-import {
-  ListLocalExperimentComponent
-} from "@global-app/project/components/runs/list-local-experiment/list-local-experiment.component";
+import {ListProjectRunsComponent} from "@global-app/project/components/runs/list-project-runs/list-project-runs.component";
 import {TranslatePipe} from "@ngx-translate/core";
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
 import {
@@ -18,8 +13,7 @@ import {
   selector: 'app-project-runs',
   imports: [
     MatTabsModule,
-    ListFederatedExperimentComponent,
-    ListLocalExperimentComponent,
+    ListProjectRunsComponent,
     TranslatePipe,
     LocalTestExperimentComponent,
   ],

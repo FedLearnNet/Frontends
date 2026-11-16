@@ -2,16 +2,12 @@ import {inject, Injectable} from "@angular/core";
 import {ApiService} from "@shared-lib/services/api.service";
 import {catchError, Observable, of} from "rxjs";
 import {environment} from "@global-app/env/environment";
-import {RunMessageLogDTO, RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
 import {TranslateService} from '@ngx-translate/core';
-import {
-  CreateExperimentDetailDTO,
-  ExperimentDetailDTO,
-  ExperimentDTO,
-  ExperimentRunDTO
-} from "@shared-lib/modules/app-execution/dto/experiment";
+import {CreateExperimentDetailDTO} from "@shared-lib/modules/app-execution/dto/experiment";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
+import {ExecutionExperimentDTO, TestRunDTO} from "../dto/test-run";
 
+// Experiments are test runs whose step searches a grid of hyper parameters, a trial per attempt.
 @Injectable({
   providedIn: 'root'
 })
@@ -24,8 +20,8 @@ export class ExperimentService {
   private readonly path = 'runs/experiment/'
 
 
-  public getExperiments(appId: number): Observable<ExperimentDTO[]> {
-    return this.apiService.get<ExperimentDTO[]>(`${this.getBaseUrl()}${appId}`)
+  public getExperiments(appId: number): Observable<TestRunDTO[]> {
+    return this.apiService.get<TestRunDTO[]>(`${this.getBaseUrl()}${appId}`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(
           err,
@@ -34,8 +30,9 @@ export class ExperimentService {
       );
   }
 
-  public updateExperiment(appId: number, experiment: ExperimentDTO): Observable<ExperimentDTO> {
-    return this.apiService.put<ExperimentDTO>(`${this.getBaseUrl()}${appId}/experiment/${experiment.id}`, experiment)
+  // Takes over the name, description and charts.
+  public updateExperiment(appId: number, experiment: ExecutionExperimentDTO): Observable<ExecutionExperimentDTO> {
+    return this.apiService.put<ExecutionExperimentDTO>(`${this.getBaseUrl()}${appId}/experiment/${experiment.id}`, experiment)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(
           err,
@@ -44,8 +41,8 @@ export class ExperimentService {
       );
   }
 
-  public createExperiment(appId: number, experiment: CreateExperimentDetailDTO): Observable<ExperimentDTO> {
-    return this.apiService.post<ExperimentDTO>(`${this.getBaseUrl()}${appId}/experiment`, experiment)
+  public createExperiment(appId: number, experiment: CreateExperimentDetailDTO): Observable<TestRunDTO> {
+    return this.apiService.post<TestRunDTO>(`${this.getBaseUrl()}${appId}/experiment`, experiment)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(
           err,
@@ -54,57 +51,17 @@ export class ExperimentService {
       );
   }
 
-  public getExperiment(appId: number | string | null, experimentId: number | string | null): Observable<ExperimentDetailDTO> {
+  /** The experiment with the logs and metrics of all its trials. */
+  public getExperiment(appId: number | string | null, experimentId: number | string | null): Observable<TestRunDTO> {
 
     if (!appId || !experimentId) {
-      return of({} as ExperimentDetailDTO);
+      return of({} as TestRunDTO);
     }
-    return this.apiService.get<ExperimentDetailDTO>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}`)
+    return this.apiService.get<TestRunDTO>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(
           err,
           this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.EXPERIMENT_DETAIL_DTO').toLowerCase()})
-        ))
-      );
-  }
-
-  public getRuns(appId: number, experimentId: number): Observable<ExperimentRunDTO[]> {
-    return this.apiService.get<ExperimentRunDTO[]>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}/runs`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(
-          err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.RUNS').toLowerCase()})
-        ))
-      );
-  }
-
-
-  public getLogs(appId: number, experimentId: number, runId: number): Observable<RunMessageLogDTO[]> {
-    return this.apiService.get<RunMessageLogDTO[]>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}/run/${runId}/log`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(
-          err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.LOGS').toLowerCase()})
-        ))
-      );
-  }
-
-  public getMetricsByRun(appId: number, experimentId: number, runId: number): Observable<RunMessageMetricDTO[]> {
-    return this.apiService.get<RunMessageMetricDTO[]>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}/run/${runId}/metric`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(
-          err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.METRICS').toLowerCase()})
-        ))
-      );
-  }
-
-  public getMetrics(appId: number, experimentId: number): Observable<RunMessageMetricDTO[]> {
-    return this.apiService.get<RunMessageMetricDTO[]>(`${this.getBaseUrl()}${appId}/experiment/${experimentId}/metric`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(
-          err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.METRICS').toLowerCase()})
         ))
       );
   }

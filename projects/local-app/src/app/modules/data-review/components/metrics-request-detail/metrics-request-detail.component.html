@@ -1,5 +1,5 @@
 <lib-closeable-dialog-title
-  title="Local Metrics Request"
+  [title]="isOutputs ? 'Output Request' : 'Local Metrics Request'"
   (maximizedChanged)="toggleMaximize($event)"/>
 
 <mat-dialog-content class="content">
@@ -39,15 +39,16 @@
   <mat-divider/>
   @if (data.request.status === FederatedLearningRequestStatus.PENDING) {
     <lib-info-card
-      subtitle=" Only aggregated metric values (e.g., loss and accuracy per epoch) will be transmitted.
-      No individual patient identifiers or raw data are included."
+      [subtitle]="isOutputs
+        ? 'The files the tool of this TRE run wrote will be transmitted. They may hold patient-level results.'
+        : 'Only aggregated metric values (e.g., loss and accuracy per epoch) will be transmitted. No individual patient identifiers or raw data are included.'"
       size="SMALL"
       type="INFO">
     </lib-info-card>
     <lib-info-card
       title="Accept"
       icon="check_circle"
-      subtitle="Your metrics will be sent to the global coordinator and included in the results."
+      [subtitle]="isOutputs ? 'The outputs will be sent to the global coordinator.' : 'Your metrics will be sent to the global coordinator and included in the results.'"
       type="SUCCESS">
     </lib-info-card>
     <lib-info-card
@@ -77,7 +78,7 @@
     <span class="spacer"></span>
     <lib-btn type="SHARE"
              icon="check_circle"
-             label="Accept &amp; Share Metrics"
+             [label]="isOutputs ? 'Accept & Share Outputs' : 'Accept & Share Metrics'"
              [disabled]="isSubmitting()"
              (clicked)="onAccept()"/>
   </mat-dialog-actions>

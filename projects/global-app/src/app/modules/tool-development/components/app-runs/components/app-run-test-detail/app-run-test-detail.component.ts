@@ -1,8 +1,9 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {MatButtonModule} from "@angular/material/button";
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
-import {TestRunDTO} from "../../../../dto/test-run";
+import {testAttemptOf, TestRunDTO, testStepOf} from "../../../../dto/test-run";
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {TestRunService} from "../../../../service/test-run.service";
 import {RunType} from "../../../../dto/socket";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -39,39 +40,36 @@ interface TestDetail {
 export class AppRunTestDetailComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AppRunTestDetailComponent>);
   private readonly testRunService: TestRunService = inject(TestRunService);
-  private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   readonly data = inject<TestDetail>(MAT_DIALOG_DATA);
 
-  experimentData = {
-    logs: [],
-    metric: [],
-    experimentId: this.data.run.id,
-    error: this.data.run.error,
-    stepId: this.data.app.id,
-    status: this.data.run.status,
-    hyperParams: this.data.run.hyperParams,
-    inputData: {
-      data: this.data.run.inputData,
-      files: [],
-    },
-    outputData: {
-      data: this.data.run.outputData,
-      files: [],
-    },
-  } as ExperimentData;
+  // The listed run first, then the detail with the logs and metrics of its attempt.
+  protected readonly run = signal<TestRunDTO>(this.data.run);
+  protected readonly meta = computed(() => testAttemptOf(this.run())?.meta);
+  protected readonly experimentData = computed<ExperimentData>(() => {
+    const run = this.run();
+    const step = testStepOf(run);
+    const attempt = testAttemptOf(run);
+    return {
+      logs: attempt?.logs ?? [],
+      metric: attempt?.metrics ?? [],
+      experimentId: run.id,
+      error: errorOf(run),
+      stepId: this.data.app.id,
+      status: run.status,
+      hyperParams: (attempt?.params ?? {}) as { [key: string]: string },
+      inputData: {
+        data: {...(step?.inputs ?? {}), ...(step?.inputFilePaths ?? {})} as { [key: string]: string },
+        files: [],
+      },
+      outputData: {
+        data: (attempt?.outputData ?? {}) as { [key: string]: string },
+        files: (attempt?.outputFiles ?? []).map(output => output.file),
+      },
+    };
+  });
 
   ngOnInit(): void {
-    this.testRunService.getLogs(this.data.app.id, this.data.run.id).subscribe(logs => {
-      this.experimentData.logs = logs;
-      this.cdr.detectChanges();
-    });
-    this.testRunService.getMetrics(this.data.app.id, this.data.run.id).subscribe(
-      (metrics) => {
-        this.experimentData.metric = metrics;
-        this.cdr.detectChanges();
-      }
-    )
-    this.cdr.detectChanges();
+    this.testRunService.getRun(this.data.app.id, this.data.run.id).subscribe(run => this.run.set(run));
   }
 
   onNoClick(): void {

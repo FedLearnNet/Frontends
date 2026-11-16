@@ -7,7 +7,7 @@ import {ApiService} from '@shared-lib/services/api.service';
 import {ApiErrorSnackbarService} from '@shared-lib/services/api-error-snackbar.service';
 import {environment} from '@local-app/env/environment';
 import {FederatedLearningRequestStatus} from '@local-app/data-review/dto/federated-learning-request';
-import {RequestRunMetricsDto} from '@local-app/data-review/dto/request-run-metrics';
+import {RequestRunMetricsDto, RunMetricsRequestType} from '@local-app/data-review/dto/request-run-metrics';
 
 @Injectable({
   providedIn: 'root'
@@ -22,9 +22,10 @@ export class RunMetricsRequestService {
   getAllRequests(
     page?: number,
     pageSize?: number,
-    status?: FederatedLearningRequestStatus
+    status?: FederatedLearningRequestStatus,
+    type: RunMetricsRequestType = 'METRICS'
   ): Observable<PaginatedResponse<RequestRunMetricsDto>> {
-    let queryParam = new HttpParams();
+    let queryParam = new HttpParams().set('type', type);
     if (page !== undefined) queryParam = queryParam.set('page', page);
     if (pageSize !== undefined) queryParam = queryParam.set('page_size', pageSize);
     if (status) queryParam = queryParam.set('status', status.toUpperCase());

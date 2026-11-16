@@ -1,8 +1,8 @@
 import {inject, Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {endWith, filter, mergeMap, share, switchMap} from 'rxjs/operators';
+import {endWith, filter, mergeMap, switchMap} from 'rxjs/operators';
 import {DataAnalysisActions} from './data-analysis.actions';
-import {catchError, EMPTY, from, map, merge, mergeWith, Observable, of, Subject, takeUntil, tap} from "rxjs";
+import {catchError, EMPTY, from, map, merge, Observable, of, Subject, takeUntil, tap} from "rxjs";
 import {DataAnalysisLlmService} from "@shared-lib/modules/app-execution/service/data-analysis-llm.service";
 import {ModelWorkflowService} from "@shared-lib/modules/app-execution/service/model-workflow.service";
 import {AiActionService} from "@shared-lib/modules/app-execution/service/ai-action.service";
@@ -16,15 +16,15 @@ import {
   ModelWorkflowFileManagementService
 } from "@shared-lib/modules/app-execution/service/model-workflow-file-management.service";
 import {Action} from "@ngrx/store";
-import {RunStatusTypes} from "../../../../../../../global-app/src/app/modules/tool-development/dto/test-run";
-import {DataAnalysisPredictionDTO} from "@shared-lib/modules/app-execution/dto/prediction";
+import {
+  currentStep,
+  DataAnalysisRunDTO,
+  displayedAttempt,
+  isFinalStatus
+} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ModelExecutionService} from "@shared-lib/modules/app-execution/service/model-execution.service";
 import {ModelWorkflowDetailDTO} from "@shared-lib/modules/app-execution/dto/model-workflow";
 import {StoreService} from "@shared-lib/modules/store/store/store.service";
-import {
-  hasMoreSteps,
-  isFinished
-} from "../../../../../../../global-app/src/app/modules/tool-development/helper/run-helper";
 
 @Injectable()
 export class DataAnalysisEffects {
@@ -57,37 +57,19 @@ export class DataAnalysisEffects {
         this.modelWorkflowService.retrieve(id).pipe(
           mergeMap((dataAnalysis: ModelWorkflowDetailDTO) => {
             const msgs = dataAnalysis.messages ?? [];
-            const lastRunning = [...msgs]
-              .reverse()
-              .find(
-                (m) =>
-                  (m.type === ModelWorkflowChatMessageType.PREDICTION ||
-                    m.type === ModelWorkflowChatMessageType.WORKFLOW_PREDICTION) &&
-                  m.message != null &&
-                  (m.message as any).status === 'RUNNING',
-              );
+            // Runs still going leave the timeline, the last of them is followed until it is done.
+            const isRunning = (m: ModelWorkflowChatWrapperDTO) =>
+              m.type === ModelWorkflowChatMessageType.RUN && !isFinalStatus((m.message as DataAnalysisRunDTO).status);
+            const lastRunning = [...msgs].reverse().find(isRunning);
 
             const cleaned: ModelWorkflowDetailDTO = {
               ...dataAnalysis,
-              messages: msgs.filter(
-                (m) =>
-                  !(
-                    (m.type === ModelWorkflowChatMessageType.PREDICTION ||
-                      m.type === ModelWorkflowChatMessageType.WORKFLOW_PREDICTION) &&
-                    m.message != null &&
-                    (m.message as any).status === 'RUNNING'
-                  ),
-              ),
+              messages: msgs.filter((m) => !isRunning(m)),
             };
             const success = DataAnalysisActions.loadDataAnalysisSuccess({id, dataAnalysis: cleaned});
 
             if (!lastRunning) return of(success);
-            return of(
-              success,
-              lastRunning.type === ModelWorkflowChatMessageType.WORKFLOW_PREDICTION
-                ? DataAnalysisActions.startWorkflowRunUpdates({prediction: lastRunning.message as any})
-                : DataAnalysisActions.startRunUpdates({prediction: lastRunning.message as any}),
-            );
+            return of(success, DataAnalysisActions.followRun({run: lastRunning.message as DataAnalysisRunDTO}));
           }),
           catchError((error) => of(DataAnalysisActions.loadDataAnalysisFailure({id, error}))),
         ),
@@ -136,12 +118,9 @@ export class DataAnalysisEffects {
   //Other Data analysis effects
   dataAnalysisRunComplete$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(DataAnalysisActions.addExperimentResults),
-      mergeMap(({prediction}) =>
-        from([
-          DataAnalysisActions.loadFiles({dataAnalysisId: prediction.dataAnalysisId}),
-        ])
-      )
+      ofType(DataAnalysisActions.runResult),
+      filter(({run}) => run.dataAnalysisId != null),
+      map(({run}) => DataAnalysisActions.loadFiles({dataAnalysisId: run.dataAnalysisId!}))
     );
   });
 
@@ -335,78 +314,34 @@ export class DataAnalysisEffects {
   });
 
 
-  runWorkflow$ = createEffect((): Observable<Action> => {
+  startAnalysisRun$ = createEffect((): Observable<Action> => {
     return this.actions$.pipe(
-      ofType(DataAnalysisActions.startWorkflowRun),
-      mergeMap(({workflowId, data}) => {
-        const stream$: Observable<DataAnalysisPredictionDTO> = this.executionService.runWorkflowModel(workflowId, data).pipe(
-          map((prediction: DataAnalysisPredictionDTO) => ({
-            ...(prediction || {}),
-            dataAnalysisId: workflowId,
-          } as DataAnalysisPredictionDTO)),
-          share()
-        );
-        const completedSteps$: Observable<Action> = stream$.pipe(
-          filter((prediction) => isFinished(prediction.status)),
-          map(p => DataAnalysisActions.addExperimentResults({prediction: p}))
-        );
-        const workflowCompleted$: Observable<Action> = stream$.pipe(
-          filter((prediction) => isWorkflowExecutionTerminal(prediction)),
-          map(() => DataAnalysisActions.runComplete())
-        );
-
-        const progress$: Observable<Action> = stream$.pipe(
-          map(p => DataAnalysisActions.runProgress({prediction: p}))
-        );
-
-        return progress$.pipe(
-          mergeWith(completedSteps$, workflowCompleted$),
-          catchError(error => of(DataAnalysisActions.runError({error})))
-        );
-      })
+      ofType(DataAnalysisActions.startAnalysisRun),
+      mergeMap(({dataAnalysisId, data}) => runActions(this.executionService.startAnalysisRun(dataAnalysisId, data)))
     );
   });
 
-  runModel$ = createEffect(() => {
+  startRun$ = createEffect((): Observable<Action> => {
     return this.actions$.pipe(
       ofType(DataAnalysisActions.startRun),
-      mergeMap(({data}) =>
-        this.executionService.runModel(data).pipe(
-          map((prediction: DataAnalysisPredictionDTO) =>
-            prediction.status.toUpperCase() === RunStatusTypes.FINISHED.toUpperCase()
-              ? DataAnalysisActions.runComplete()
-              : DataAnalysisActions.runProgress({prediction})
-          ),
-          catchError(error => of(DataAnalysisActions.runError({error})))
-        )
-      )
-    )
+      mergeMap(({data}) => runActions(this.executionService.startRun(data)))
+    );
   });
 
+  followRun$ = createEffect((): Observable<Action> => {
+    return this.actions$.pipe(
+      ofType(DataAnalysisActions.followRun),
+      mergeMap(({run}) => runActions(this.executionService.followRun(run.id)))
+    );
+  });
 
   stopRun$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(DataAnalysisActions.stopRun),
       mergeMap(({dataAnalysisId, id}) =>
         this.executionService.stopRun(dataAnalysisId, id).pipe(
-          mergeMap(prediction => from([
-            DataAnalysisActions.addExperimentResults({prediction}),
-            DataAnalysisActions.runComplete(),
-          ])),
-          catchError(error => of(DataAnalysisActions.runError({error})))
-        )
-      )
-    )
-  });
-
-
-  stopRunWorkflow$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(DataAnalysisActions.stopWorkflowRun),
-      mergeMap(({dataAnalysisId, id, workflowId}) =>
-        this.executionService.stopRun(dataAnalysisId, id, {workflowId}).pipe(
-          mergeMap(prediction => from([
-            DataAnalysisActions.addExperimentResults({prediction}),
+          mergeMap(run => from([
+            DataAnalysisActions.runResult({run}),
             DataAnalysisActions.runComplete(),
           ])),
           catchError(error => of(DataAnalysisActions.runError({error})))
@@ -429,124 +364,50 @@ export class DataAnalysisEffects {
   });
 
 
-  deleteRunWorkflow$ = createEffect(() => {
+  // What a followed run executes becomes the active tool again.
+  followRunLoadStore$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(DataAnalysisActions.deleteWorkflowRun),
-      mergeMap(({dataAnalysisId, id, workflowId}) =>
-        this.executionService.deleteRun(dataAnalysisId, id, workflowId).pipe(
-          map(_ => DataAnalysisActions.deleteWorkflowRunSuccess({dataAnalysisId, id, workflowId})),
-          catchError(error => of(DataAnalysisActions.deleteWorkflowRunFailure({error, dataAnalysisId, id, workflowId})))
-        )
-      )
-    )
-  });
-
-  getRunModel$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(DataAnalysisActions.startRunUpdates),
-      mergeMap(({prediction}) =>
-        this.executionService.getRunningUpdates(prediction.id).pipe(
-          map((prediction: DataAnalysisPredictionDTO) =>
-            prediction.status.toUpperCase() === RunStatusTypes.FINISHED.toUpperCase()
-              ? DataAnalysisActions.runComplete()
-              : DataAnalysisActions.runProgress({prediction})
-          ),
-          catchError(error => of(DataAnalysisActions.runError({error})))
-        )
-      )
-    )
-  });
-
-  getWorkflowUpdates$ = createEffect((): Observable<Action> => {
-    return this.actions$.pipe(
-      ofType(DataAnalysisActions.startWorkflowRunUpdates),
-      mergeMap(({prediction}) => {
-        const stream$: Observable<DataAnalysisPredictionDTO> = this.executionService.getWorkflowRunning(prediction.dataAnalysisId, prediction.workflowId!).pipe(
-          map((prediction: DataAnalysisPredictionDTO) => ({
-            ...(prediction || {}),
-            dataAnalysisId: prediction.dataAnalysisId,
-          } as DataAnalysisPredictionDTO)),
-          share()
-        );
-        const completedSteps$: Observable<Action> = stream$.pipe(
-          filter((prediction) => isFinished(prediction.status)),
-          map(p => DataAnalysisActions.addExperimentResults({prediction: p}))
-        );
-        const workflowCompleted$: Observable<Action> = stream$.pipe(
-          filter((prediction) => isWorkflowExecutionTerminal(prediction)),
-          map(() => DataAnalysisActions.runComplete())
-        );
-
-        const progress$: Observable<Action> = stream$.pipe(
-          map(p => DataAnalysisActions.runProgress({prediction: p}))
-        );
-
-        return progress$.pipe(
-          mergeWith(completedSteps$, workflowCompleted$),
-          catchError(error => of(DataAnalysisActions.runError({error})))
-        );
-      })
-    );
-  });
-
-
-  startRunUpdatesLoadStore$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(DataAnalysisActions.startRunUpdates),
-      mergeMap(({prediction}) => {
-        if (prediction.appVersionId) {
-          return this.storeService.getAppVersion(prediction.appVersionId).pipe(
-            map(result => DataAnalysisActions.setActiveStoreElement({
-              storeElement: {
-                app: result
-              }, hyperParams: prediction.hyperParams
-            })),
-          )
+      ofType(DataAnalysisActions.followRun),
+      mergeMap(({run}) => {
+        const step = currentStep(run);
+        const hyperParams = (step && displayedAttempt(step)?.params) ?? {};
+        if (run.workflowId != null) {
+          return this.storeService.getWorkflow(run.workflowId).pipe(
+            map(workflow => DataAnalysisActions.setActiveStoreElement({storeElement: {workflow}, hyperParams}))
+          );
         }
-        if (prediction.modelId) {
-          return this.storeService.getModel(prediction.modelId).pipe(
-            map(result => DataAnalysisActions.setActiveStoreElement({
-              storeElement: {
-                model: result
-              }, hyperParams: prediction.hyperParams
-            })),
-          )
+        if (step?.modelId != null) {
+          return this.storeService.getModel(step.modelId).pipe(
+            map(model => DataAnalysisActions.setActiveStoreElement({storeElement: {model}, hyperParams}))
+          );
         }
-        return of();
-      })
-    )
-  });
-
-  startRunUpdatesLoadWorkflowStore$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(DataAnalysisActions.startWorkflowRunUpdates),
-      mergeMap(({prediction}) => {
-        if (prediction.workflowId == null) {
-          return of();
+        if (step?.federatedAppVersionId != null) {
+          return this.storeService.getAppVersion(step.federatedAppVersionId).pipe(
+            map(app => DataAnalysisActions.setActiveStoreElement({storeElement: {app}, hyperParams}))
+          );
         }
-
-        return this.storeService.getWorkflow(prediction.workflowId).pipe(
-          map(result => DataAnalysisActions.setActiveStoreElement({
-            storeElement: {
-              workflow: result
-            },
-            hyperParams: prediction.hyperParams
-          }))
-        )
+        return EMPTY;
       })
     )
   });
 }
 
-function isWorkflowExecutionTerminal(prediction: DataAnalysisPredictionDTO): boolean {
-  if (!isFinished(prediction.status)) {
-    return false;
-  }
-
-  const status = String(prediction.status).toUpperCase();
-  if (status === RunStatusTypes.ERROR || status === RunStatusTypes.STOPPED) {
-    return true;
-  }
-
-  return !hasMoreSteps(prediction);
+// Every event updates the run; a newly finished step adds it to the timeline, the final event ends it.
+function runActions(run$: Observable<DataAnalysisRunDTO>): Observable<Action> {
+  let finishedSteps = 0;
+  return run$.pipe(
+    mergeMap(run => {
+      const actions: Action[] = [DataAnalysisActions.runProgress({run})];
+      const finished = run.steps.filter(step => isFinalStatus(step.status)).length;
+      if (finished > finishedSteps || isFinalStatus(run.status)) {
+        finishedSteps = finished;
+        actions.push(DataAnalysisActions.runResult({run}));
+      }
+      if (isFinalStatus(run.status)) {
+        actions.push(DataAnalysisActions.runComplete());
+      }
+      return from(actions);
+    }),
+    catchError(error => of(DataAnalysisActions.runError({error})))
+  );
 }

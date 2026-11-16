@@ -3,7 +3,6 @@ import {DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
-import {MatChipsModule} from '@angular/material/chips';
 import {MatDialog} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
@@ -22,14 +21,17 @@ import {
 import {StatusBadeType, StatusBadgeComponent} from '@shared-lib/components/status-badge/status-badge.component';
 import {FLNetClientObserverService} from '@shared-lib/modules/admin/services/flnet-client-observer.service';
 import {FLNetClientObserverEventDTO, FLNetClientObserverEventType} from '@shared-lib/modules/admin/dto/observer';
+import {SystemComputingInfoDTO} from '../../dto/system-info';
+import {SystemInfoComponent} from '../system-info/system-info.component';
+import {timer} from 'rxjs';
 
 type FedDBClientTypeEnum =
   'EXISTING_QUERY' | 'LEARNING_QUERY' | 'DATA_STATISTICS' | 'START_LEARNING' |
-  'UPDATE_LEARNING' | 'STOP_LEARNING' | 'CURRENT_LEARNINGS' | 'ERROR' | 'NO_RESPONSE';
+  'UPDATE_LEARNING' | 'STOP_LEARNING' | 'CURRENT_LEARNINGS' | 'SYSTEM_INFO' | 'ERROR' | 'NO_RESPONSE';
 
 const MESSAGE_TYPES: FedDBClientTypeEnum[] = [
   'EXISTING_QUERY', 'LEARNING_QUERY', 'DATA_STATISTICS', 'START_LEARNING',
-  'UPDATE_LEARNING', 'STOP_LEARNING', 'CURRENT_LEARNINGS', 'ERROR', 'NO_RESPONSE',
+  'UPDATE_LEARNING', 'STOP_LEARNING', 'CURRENT_LEARNINGS', 'SYSTEM_INFO', 'ERROR', 'NO_RESPONSE',
 ];
 
 @Component({
@@ -39,7 +41,6 @@ const MESSAGE_TYPES: FedDBClientTypeEnum[] = [
     FormsModule,
     MatButtonModule,
     MatCardModule,
-    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -50,6 +51,7 @@ const MESSAGE_TYPES: FedDBClientTypeEnum[] = [
     PageWrapperComponent,
     HintCardComponent,
     StatusBadgeComponent,
+    SystemInfoComponent,
   ],
   templateUrl: './admin-flnet-client-observer.component.html',
   styleUrl: './admin-flnet-client-observer.component.scss',
@@ -62,6 +64,7 @@ export class AdminFLNetClientObserverComponent implements OnInit {
 
   readonly enabled = signal<boolean | null>(null);
   readonly clients = signal<string[]>([]);
+  readonly systems = signal<Record<string, SystemComputingInfoDTO>>({});
   readonly events = signal<FLNetClientObserverEventDTO[]>([]);
   readonly streaming = signal(false);
   readonly loading = signal(false);
@@ -103,6 +106,9 @@ export class AdminFLNetClientObserverComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadStatus();
+    timer(300_000, 300_000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (this.enabled()) this.refreshClients();
+    });
   }
 
   loadStatus(): void {
@@ -120,6 +126,8 @@ export class AdminFLNetClientObserverComponent implements OnInit {
   }
 
   refreshClients(): void {
+    this.observerService.getSystems().pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(systems => this.systems.set(systems));
     this.observerService.getConnectedClients()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(clients => this.clients.set(clients));
@@ -141,7 +149,7 @@ export class AdminFLNetClientObserverComponent implements OnInit {
       .subscribe({
         next: event => {
           this.events.update(prev => [...prev, event]);
-          if (event.type === 'CONNECTED' || event.type === 'DISCONNECTED') {
+          if (event.type === 'CONNECTED' || event.type === 'DISCONNECTED' || event.messageType === 'SYSTEM_INFO') {
             this.refreshClients();
           }
         },

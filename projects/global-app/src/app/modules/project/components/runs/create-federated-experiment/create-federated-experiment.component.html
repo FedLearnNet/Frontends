@@ -55,7 +55,21 @@
       <textarea matInput [placeholder]="('GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate)"
                 formControlName="description" required rows="5"></textarea>
     </mat-form-field>
-    @if (platformAggregatorSupported()) {
+    @if (tre) {
+      <div class="aggregator-location">
+        <p>{{ 'DIALOG.CREATE_EXPERIMENT.TRE_CLIENT_LABEL' | translate }}</p>
+        <mat-radio-group formControlName="queryResponseId">
+          @for (client of treClients(); track client.id) {
+            <mat-radio-button [value]="client.id" [disabled]="!client.supportedModes?.includes('TRE')">
+              {{ 'CLIENT_N' | translate: { n: $index + 1 } }}
+            </mat-radio-button>
+          } @empty {
+            <p>{{ 'DIALOG.CREATE_EXPERIMENT.TRE_NO_CLIENT' | translate }}</p>
+          }
+        </mat-radio-group>
+      </div>
+      <mat-divider></mat-divider>
+    } @else if (platformAggregatorSupported()) {
       <div class="aggregator-location">
         <p>{{ 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_LABEL' | translate }}</p>
         <mat-radio-group formControlName="platformIsCoordinator">

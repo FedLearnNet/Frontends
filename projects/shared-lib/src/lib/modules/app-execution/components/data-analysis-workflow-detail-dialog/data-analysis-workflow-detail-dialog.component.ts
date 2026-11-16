@@ -14,7 +14,10 @@ import {
   ExperimentWorkflowNodeDetailComponent
 } from "@shared-lib/modules/experiments/components/experiment-workflow-node-detail/experiment-workflow-node-detail.component";
 import {ExperimentData} from "@shared-lib/modules/experiments/models/experiment-data";
-import {DataAnalysisWorkflowRunDTO} from "@shared-lib/modules/app-execution/dto/data-analysis-workflow";
+import {
+  DataAnalysisRunDTO,
+  displayedAttempt
+} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {DataAnalysisFileDTO} from "@shared-lib/modules/app-execution/dto/model-workflow-file";
 import {MatToolbar} from "@angular/material/toolbar";
 import {MatIcon} from "@angular/material/icon";
@@ -80,22 +83,23 @@ export class DataAnalysisWorkflowDetailDialogComponent implements OnInit {
     if (!experiment || !selectedNode || !step) {
       return undefined;
     }
+    const attempt = displayedAttempt(step);
 
     return {
-      logs: step.logs ?? [],
-      metric: step.metrics ?? [],
+      logs: attempt?.logs ?? [],
+      metric: attempt?.metrics ?? [],
       experimentId: experiment.id,
-      error: step.lastError,
+      error: step.failure?.message ?? attempt?.failure?.message,
       stepId: step.id,
-      status: step.stepStatus,
-      hyperParams: selectedNode.hyperParams,
+      status: step.status,
+      hyperParams: attempt?.params ?? selectedNode.hyperParams,
       outputData: {
-        data: step.result,
-        files: this.mapFiles(step.outputFiles),
+        data: attempt?.outputData ?? {},
+        files: this.mapFiles(attempt?.outputFiles),
       },
       inputData: {
         data: {},
-        files: this.mapFiles(step.inputFiles),
+        files: this.mapFiles(attempt?.inputFiles),
       },
     } as ExperimentData;
   })
@@ -107,7 +111,7 @@ export class DataAnalysisWorkflowDetailDialogComponent implements OnInit {
     }));
   }
 
-  findSelectedStep(experiment: DataAnalysisWorkflowRunDTO, node: WorkflowNodeDetailDTO) {
+  findSelectedStep(experiment: DataAnalysisRunDTO, node: WorkflowNodeDetailDTO) {
     if (!experiment.steps) {
       return undefined;
     }

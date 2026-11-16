@@ -95,3 +95,37 @@
 .row--disconnected td { border-left: 3px solid #f44336; }
 .row--received td { border-left: 3px solid #2196f3; }
 .row--sent td { border-left: 3px solid #ff9800; }
+
+.client-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.client + .client {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, #e5e7eb);
+}
+
+.client-header {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .75rem;
+
+  > * {
+    flex-shrink: 0;
+  }
+
+  mat-icon {
+    color: var(--mat-sys-primary, #3b82f6);
+  }
+}
+
+.client-id {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: .875rem;
+  font-weight: 600;
+}

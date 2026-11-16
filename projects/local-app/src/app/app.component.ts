@@ -129,6 +129,10 @@ export class AppComponent implements OnInit {
           label: 'MENU.METRICS_REVIEW', icon: 'monitoring', route: ['/data-review/metrics'],
           ...(reviews.metrics ? {badge: reviews.metrics} : {}),
         },
+        {
+          label: 'MENU.OUTPUT_REVIEW', icon: 'folder_open', route: ['/data-review/outputs'],
+          ...(reviews.outputs ? {badge: reviews.outputs} : {}),
+        },
       ],
     });
 

@@ -1,13 +1,35 @@
-mat-form-field{
+mat-form-field {
   width: 100%;
 }
 
-mat-slide-toggle,
-.use-local-files-wrapper{
-  margin: 20px 0;
+.run-intro {
+  margin-top: 0;
+  color: var(--mat-sys-on-surface-variant, #64748b);
 }
 
-.actions{
+.run-section {
+  margin: 24px 0;
+
+  h3 {
+    font-size: 1rem;
+    margin: 0 0 16px;
+  }
+}
+
+.actions {
   display: flex;
   justify-content: space-between;
+  border-top: 1px solid var(--mat-sys-outline-variant, #e2e8f0);
+  padding: 16px 24px;
+}
+
+.run-intro-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  p {
+    margin: 0;
+  }
 }

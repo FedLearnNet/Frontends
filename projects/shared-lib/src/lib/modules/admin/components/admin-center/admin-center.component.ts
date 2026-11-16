@@ -1,4 +1,8 @@
-import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {catchError, of, switchMap, timer} from 'rxjs';
+import {OrchRelayService} from '../../services/orch.service';
+import {SystemInfoComponent} from '../system-info/system-info.component';
 import {RouterLink} from '@angular/router';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -27,12 +31,16 @@ export interface AdminCenterTile {
     HeaderComponent,
     PageWrapperComponent,
     ActionCardButtonComponent,
+    SystemInfoComponent,
   ],
   templateUrl: './admin-center.component.html',
   styleUrl: './admin-center.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminCenterComponent {
+  private readonly orch = inject(OrchRelayService);
+  readonly system = toSignal(timer(0, 300_000).pipe(
+    switchMap(() => this.orch.getComputingInfo().pipe(catchError(() => of(null))))));
   title = input('Admin Center');
   subtitle = input('Operate platform services, orchestration, and runtime diagnostics from one place.');
   tiles = input.required<AdminCenterTile[]>();

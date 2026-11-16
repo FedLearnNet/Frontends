@@ -3,6 +3,7 @@ import {BaseDto} from "@shared-lib/base/base-dto";
 export enum RunMessageTypes {
   METRIC = "metric",
   LOG = "log",
+  ROUND = "round",
 }
 
 export interface RunMessageDTO extends BaseDto {
@@ -29,4 +30,15 @@ export interface RunMessageMetricDTO extends RunMessageDTO {
   x: string;
   xUnit: string;
 
+}
+
+// A message a participant sent or received in a round of a federated run; its runId is the participant's attempt.
+export interface RunMessageRoundDTO extends RunMessageDTO {
+  direction: 'SEND' | 'RECEIVE' | string;
+  round?: number | null;
+  fromParticipant?: string | null;
+  toParticipant?: string | null;
+  communicationId?: string | null;
+  payloadPreview?: string | null;
+  workerId?: string | null;
 }
