@@ -1,5 +1,5 @@
 <div class="metrics-grid">
-  <h2>{{ 'MENU.METRICS_REVIEW' | translate }}</h2>
+  <h2>{{ (isOutputs ? 'MENU.OUTPUT_REVIEW' : 'MENU.METRICS_REVIEW') | translate }}</h2>
 
   @if (error(); as err) {
     <lib-error-card>{{ err }}</lib-error-card>

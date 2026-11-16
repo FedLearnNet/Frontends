@@ -7,8 +7,7 @@ import {
 import {
   WorkflowReadonlyViewComponent
 } from "@shared-lib/modules/workflow/components/workflow-readonly-view/workflow-readonly-view.component";
-import {selectSelectedWorkflow} from "@shared-lib/modules/workflow/store/workflow.selectors";
-import {selectLoading} from "@global-app/project/store/project-federated-experiments.selectors";
+import {selectSelectedWorkflow, selectWorkflowLoading} from "@shared-lib/modules/workflow/store/workflow.selectors";
 import * as WorkflowActions from "@shared-lib/modules/workflow/store/workflow.actions";
 import {Store} from "@ngrx/store";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
@@ -30,7 +29,7 @@ export class WorkflowReadonlyViewDialogComponent implements OnInit {
   readonly data = inject<WorkflowDTO>(MAT_DIALOG_DATA);
 
   selectedWorkflow = this.store.selectSignal(selectSelectedWorkflow);
-  loading = this.store.selectSignal(selectLoading);
+  loading = this.store.selectSignal(selectWorkflowLoading);
   workflow = computed(() => {
     const w = this.selectedWorkflow();
     if (w) {

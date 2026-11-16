@@ -34,4 +34,10 @@
       </div>
     }
   </section>
+  <mat-card>
+    <mat-card-content>
+      <h3>System information</h3>
+      <lib-system-info [info]="system()" [runtime]="system()" />
+    </mat-card-content>
+  </mat-card>
 </lib-page-wrapper>

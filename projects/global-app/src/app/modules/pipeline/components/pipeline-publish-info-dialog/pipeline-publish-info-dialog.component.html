@@ -1,5 +1,5 @@
 <lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
                             [title]="'Detail run for ' + data.commitHash"/>
-<app-pipeline-publish-info-detail class="detail" [publishInfo]="data"
+<lib-pipeline-publish-info-detail class="detail" [publishInfo]="data"
                                   [appVersionId]="data.appVersionId"
                                   [authors]="data.authors ?? []"/>

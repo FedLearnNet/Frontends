@@ -46,6 +46,19 @@ export class PipelineListComponent implements OnInit {
   typeFilter = signal<'ALL' | PipelineType>('ALL');
   runMode = signal(PipelineRunMode.ALL);
 
+  // A rescan needs an image from an earlier successful build
+  hasImage = computed(() => (this.pipelines() ?? []).some(p =>
+    p.pipelineStatus === PipelineStatus.SUCCESS
+    && p.runMode !== PipelineRunMode.SCAN_ONLY
+    && (this.modelSubId() ? p.modelSubId === this.modelSubId() : p.appVersionId === this.appVersionId())
+  ));
+
+  runModes = computed(() => [
+    PipelineRunMode.ALL,
+    ...(this.modelSubId() ? [PipelineRunMode.LOCAL_BUILD] : []),
+    ...(this.hasImage() ? [PipelineRunMode.SCAN_ONLY] : []),
+  ]);
+
   filtered = computed(() => {
     if (!this.pipelines() || this.pipelines()?.length === 0) {
       return [];
@@ -89,6 +102,9 @@ export class PipelineListComponent implements OnInit {
       console.warn("Both are set, cannot decide on which foundation a pipeline should be created");
     }
     const pipelineType = this.modelSubId() ? PipelineType.MODEL : PipelineType.APP;
+    if (!this.runModes().includes(this.runMode())) {
+      this.runMode.set(PipelineRunMode.ALL);
+    }
     const toCreate: PipelineCreateDTO = {
       pipelineType: pipelineType,
       runMode: this.runMode(),
@@ -125,6 +141,10 @@ export class PipelineListComponent implements OnInit {
   protected readonly PipelineType = PipelineType;
   protected readonly PipelineRunMode = PipelineRunMode;
   protected readonly pipelineRunModeLabels = pipelineRunModeLabels;
+  protected readonly runModeOptionLabels: Record<PipelineRunMode, string> = {
+    ...pipelineRunModeLabels,
+    [PipelineRunMode.LOCAL_BUILD]: 'Local build from uploaded files',
+  };
   protected readonly pipelineStatusToBadgeStatus = pipelineStatusToBadgeStatus;
 }
 

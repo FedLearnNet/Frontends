@@ -10,7 +10,8 @@ import {
   viewChild,
 } from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
+import {auditTime, filter, switchMap} from 'rxjs';
 
 import {MatListModule} from '@angular/material/list';
 import {MatIconModule} from '@angular/material/icon';
@@ -29,15 +30,14 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 import {AppDetailDto} from '@shared-lib/modules/store/dto/app-detail';
 import {ExperimentService} from '../../../service/experiment-run.service';
-import {RunMessageMetricDTO, RunMessageTypes} from '@shared-lib/modules/experiments/dto/log';
 import {ExperimentRunsChartsComponent} from '../experiment-runs-charts/experiment-runs-charts.component';
 import {ExperimentHeaderComponent} from '../experiment-header/experiment-header.component';
 import {ExperimentDiagramConfigDTO} from '../../../dto/config';
 import {ExperimentRunCircleComponent} from '../experiment-run-circle/experiment-run-circle.component';
 import {ModelVersionDto} from '@shared-lib/modules/app-execution/dto/model';
 import {ModelService} from '@global-app/model-store/services/model.service';
-import {ExperimentDetailDTO, ExperimentRunDTO} from '@shared-lib/modules/app-execution/dto/experiment';
-import {RunStatusTypes} from '../../../dto/test-run';
+import {ExecutionExperimentDTO, TestAttemptDTO, TestRunDTO, trialColorOf, trialNameOf, trialsOf} from '../../../dto/test-run';
+import {ControllerSocketService} from '../../../service/testembed-socket.service';
 import {StatusBadgeComponent} from '@shared-lib/components/status-badge/status-badge.component';
 import {runStatusToBadgeStatus} from '@shared-lib/utils/badge-status.helper';
 
@@ -70,42 +70,32 @@ import {runStatusToBadgeStatus} from '@shared-lib/utils/badge-status.helper';
 export class ExperimentDetailComponent implements AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly experimentService = inject(ExperimentService);
+  private readonly socketService = inject(ControllerSocketService);
   private readonly modelService = inject(ModelService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly paginator = viewChild<MatPaginator>('paginator');
 
   readonly displayedColumns: string[] = ['select', 'element', 'actions'];
-  readonly runDataSource = new MatTableDataSource<ExperimentRunDTO>();
-  readonly runSelection = new SelectionModel<ExperimentRunDTO>(true, []);
+  readonly runDataSource = new MatTableDataSource<TestAttemptDTO>();
+  readonly runSelection = new SelectionModel<TestAttemptDTO>(true, []);
 
   private readonly routeData = toSignal(this.route.data, {initialValue: {} as any});
 
   readonly app = computed<AppDetailDto | undefined>(() => this.routeData()?.['app']);
-  readonly experiment = signal<ExperimentDetailDTO | undefined>(undefined);
-
-  readonly experimentRuns = signal<ExperimentRunDTO[]>(
-    Array.from({length: 20}, (_, i) => this.createExperimentRun(i + 1)),
-  );
+  // The experiment with the logs and metrics of its trials.
+  readonly experiment = signal<TestRunDTO | undefined>(undefined);
 
   readonly modelVersion = signal<ModelVersionDto | undefined>(undefined);
-  readonly metrics = signal<RunMessageMetricDTO[]>([]);
 
-  readonly runs = computed<ExperimentRunDTO[]>(() => {
+  readonly runs = computed<TestAttemptDTO[]>(() => {
     const exp = this.experiment();
-    if (!exp) return [];
-    const baseRuns = (exp.runs?.length ? exp.runs : this.experimentRuns()) ?? [];
-    const ms = this.metrics();
-    if (!ms.length) return baseRuns;
-    return baseRuns.map((run) => ({
-      ...run,
-      metrics: ms.filter((m) => m.runId === run.id),
-    }));
+    return exp ? trialsOf(exp) : [];
   });
 
   constructor() {
     effect(() => {
-      const exp = this.routeData()?.['experiment'] as ExperimentDetailDTO | undefined;
+      const exp = this.routeData()?.['experiment'] as TestRunDTO | undefined;
       this.experiment.set(exp);
     });
 
@@ -116,23 +106,20 @@ export class ExperimentDetailComponent implements AfterViewInit {
         return;
       }
       const sub = this.modelService
-        .getModelVersionForExperiment(exp.id)
+        .getModelVersionForExperiment(exp.experimentId!)
         .subscribe((model) => this.modelVersion.set(model));
       this.destroyRef.onDestroy(() => sub.unsubscribe());
     });
 
-    effect(() => {
-      const app = this.app();
-      const exp = this.experiment();
-      if (!app?.id || !exp?.id) {
-        this.metrics.set([]);
-        return;
-      }
-      const sub = this.experimentService
-        .getMetrics(app.id, exp.id)
-        .subscribe((m) => this.metrics.set(m));
-      this.destroyRef.onDestroy(() => sub.unsubscribe());
-    });
+    // Updates leave the messages out, so the detail is read again, at most every few seconds.
+    this.socketService.getExperimentUpdate$()
+      .pipe(
+        filter(update => update.experimentId === this.experiment()?.experimentId),
+        auditTime(3000),
+        switchMap(update => this.experimentService.getExperiment(this.app()?.id ?? null, update.experimentId ?? null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(exp => this.experiment.set(exp));
 
     effect(() => {
       const runs = this.runs();
@@ -166,84 +153,30 @@ export class ExperimentDetailComponent implements AfterViewInit {
     this.runSelection.select(...this.runDataSource.data);
   }
 
-  checkboxLabel(row?: ExperimentRunDTO): string {
+  checkboxLabel(row?: TestAttemptDTO): string {
     if (!row) return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     return `${this.runSelection.isSelected(row) ? 'deselect' : 'select'} row ${row.id}`;
   }
 
-  hyperParamToDataSource(hyperParams: object): { key: string; value: any }[] {
+  hyperParamToDataSource(hyperParams: object | null | undefined): { key: string; value: any }[] {
     return Object.entries(hyperParams || {}).map(([key, value]) => ({key, value}));
   }
 
   diagramsChanged(diagrams: ExperimentDiagramConfigDTO[]): void {
     const exp = this.experiment();
     const app = this.app();
-    if (!exp || !app?.id) {
+    if (!exp?.experiment || !app?.id) {
       console.error('Experiment or app not found');
       return;
     }
-    const updated: ExperimentDetailDTO = {...exp, diagramConfigs: diagrams};
-    this.experiment.set(updated);
+    const updated: ExecutionExperimentDTO = {...exp.experiment, diagramConfigs: diagrams};
+    this.experiment.set({...exp, experiment: updated});
     this.experimentService.updateExperiment(app.id, updated).subscribe({
       error: (e) => console.error(e),
     });
   }
 
-  createRandomMetric(metricName: string, runId: number): RunMessageMetricDTO {
-    return {
-      id: Math.floor(Math.random() * 1000),
-      version: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      process: 'process_name',
-      message: 'Metric generated',
-      type: RunMessageTypes.METRIC,
-      runId,
-      metric: metricName,
-      value: (this.randomIntFromInterval(0, 100) / 100).toFixed(2),
-      x: (Math.random() * 10).toFixed(2),
-      xUnit: 'seconds',
-    };
-  }
-
-  randomIntFromInterval(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  }
-
-  createExperimentRun(id: number): ExperimentRunDTO {
-    const runId = id;
-    return {
-      id: runId,
-      version: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: RunStatusTypes.FINISHED,
-      error: '',
-      name: `Run_${runId}`,
-      color: this.generateRandomColor(),
-      outputData: {
-        output1: 'output1',
-        output2: 'output2',
-        output3: 'output3',
-        output4: 'output4',
-      },
-      hyperParams: {
-        alpha: Math.random().toFixed(2),
-        lambda: Math.random().toFixed(2),
-        max_depth: Math.floor(Math.random() * 10).toString(),
-      },
-      metrics: [
-        ...Array.from({length: 10}, () => this.createRandomMetric('rmse', runId)),
-        ...Array.from({length: 10}, () => this.createRandomMetric('acc', runId)),
-      ],
-      experimentId: Math.floor(Math.random() * 100),
-    };
-  }
-
-  generateRandomColor(): string {
-    const randomInt = Math.floor(Math.random() * 0xffffff);
-    return `#${randomInt.toString(16).padStart(6, '0')}`;
-  }
-
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly trialNameOf = trialNameOf;
+  protected readonly trialColorOf = trialColorOf;
 }

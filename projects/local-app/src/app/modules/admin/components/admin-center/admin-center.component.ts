@@ -115,6 +115,13 @@ export class AdminCenterComponent implements OnInit {
       routerLink: '/admin/orch'
     },
     {
+      id: 'executions',
+      title: 'Executions',
+      description: 'Inspect all execution runs with their steps, attempts, logs, metrics and files.',
+      icon: 'play_circle',
+      routerLink: '/admin/executions'
+    },
+    {
       id: 'health',
       title: 'Health',
       description: 'Service health checks',

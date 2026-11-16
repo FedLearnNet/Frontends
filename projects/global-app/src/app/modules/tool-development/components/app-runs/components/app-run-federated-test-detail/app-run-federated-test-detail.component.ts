@@ -26,11 +26,9 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {StatusBadgeComponent} from '@shared-lib/components/status-badge/status-badge.component';
 import {runStatusToBadgeStatus} from '@shared-lib/utils/badge-status.helper';
 import {Subject, takeUntil} from 'rxjs';
-import {
-  FederatedParticipantDTO,
-  FederatedRoundMessageDTO,
-  FederatedTestRunDTO
-} from '../../../../dto/federated-test-run';
+import {federationOf, participantsOf, testAttemptOf, TestRunDTO} from '../../../../dto/test-run';
+import {RunMessageRoundDTO} from '@shared-lib/modules/experiments/dto/log';
+import {errorOf} from '@shared-lib/modules/app-execution/dto/execution-run';
 import {FederatedRunService} from '../../../../service/federated-run.service';
 import {ControllerSocketService} from '../../../../service/testembed-socket.service';
 import {
@@ -104,23 +102,41 @@ export class AppRunFederatedTestDetailComponent implements OnInit, OnDestroy {
     this.messagesDataSource.sort = sort;
   }
 
-  protected readonly run = signal<FederatedTestRunDTO | null>(null);
+  protected readonly run = signal<TestRunDTO | null>(null);
   protected readonly app = signal<AppDetailDto | null>(null);
-  protected readonly participants = signal<FederatedParticipantDTO[]>([]);
-  protected readonly roundMessages = signal<FederatedRoundMessageDTO[]>([]);
+  // Every run update carries the participants; round messages come once with the detail, then as they are sent.
+  protected readonly participants = computed(() => {
+    const r = this.run();
+    return r ? participantsOf(r) : [];
+  });
+  protected readonly federation = computed(() => {
+    const r = this.run();
+    return r ? federationOf(r) : undefined;
+  });
+  protected readonly error = computed(() => {
+    const r = this.run();
+    return r ? errorOf(r) : undefined;
+  });
+  // The aggregator keeps the output of the run; none until it uploaded some.
+  protected readonly output = computed(() => {
+    const r = this.run();
+    const output = r ? testAttemptOf(r)?.outputData : undefined;
+    return output && Object.keys(output).length > 0 ? output : undefined;
+  });
+  protected readonly roundMessages = signal<RunMessageRoundDTO[]>([]);
   protected readonly searchTerm = signal<string>('');
   protected readonly selectedRound = signal<number | null>(null);
   protected readonly expanded = signal<boolean>(false);
 
   protected readonly selectedDirection = signal<MessageDirectionFilter>('ALL');
 
-  protected readonly messagesDataSource = new MatTableDataSource<FederatedRoundMessageDTO>([]);
+  protected readonly messagesDataSource = new MatTableDataSource<RunMessageRoundDTO>([]);
   protected readonly messageColumns = ['round', 'direction', 'from', 'to', 'communicationId', 'preview', 'time'];
 
   protected readonly progress = computed(() => {
-    const r = this.run();
-    if (!r || !r.totalRounds || r.totalRounds <= 0) return 0;
-    return Math.min(100, ((r.currentRound ?? 0) / r.totalRounds) * 100);
+    const federation = this.federation();
+    if (!federation?.totalRounds || federation.totalRounds <= 0) return 0;
+    return Math.min(100, ((federation.currentRound ?? 0) / federation.totalRounds) * 100);
   });
 
   protected readonly filteredMessages = computed(() => {
@@ -177,68 +193,24 @@ export class AppRunFederatedTestDetailComponent implements OnInit, OnDestroy {
 
     this.federatedRunService.getRun(this.appId, this.runId).subscribe(run => {
       this.run.set(run);
-
-      if (run.participants?.length) {
-        this.participants.set(run.participants);
-      } else {
-        this.federatedRunService.getParticipants(this.appId, this.runId).subscribe(list => {
-          this.participants.set(list);
-        });
-      }
-
-      if (run.roundMessages?.length) {
-        this.roundMessages.set(run.roundMessages);
-      } else {
-        this.federatedRunService.getRoundMessages(this.appId, this.runId).subscribe(list => {
-          this.roundMessages.set(list);
-        });
-      }
+      this.roundMessages.set(participantsOf(run)
+        .flatMap(participant => participant.rounds ?? [])
+        .sort((a, b) => new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()));
     });
 
     this.socketService.getFederatedRunUpdate$()
       .pipe(takeUntil(this.destroy$))
       .subscribe(update => {
         if (update.id !== this.runId) return;
-        this.run.update(current => current ? {...current, ...update} : update);
+        this.run.set(update);
       });
 
-    this.socketService.getFederatedParticipantUpdate$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(update => {
-        if (update.federatedRunId !== this.runId) return;
-
-        this.participants.update(list => {
-          const idx = list.findIndex(p => p.participantId === update.participantId);
-
-          if (idx === -1) {
-            return [...list, update];
-          }
-
-          return list.map((p, i) => i === idx ? {...p, ...update} : p);
-        });
-      });
-
-    this.socketService.getFederatedParticipantLogMessage$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(message => {
-        if (message.runId !== this.runId) return;
-
-        const participantId = message.process;
-
-        this.participants.update(list => list.map(participant => {
-          if (participant.participantId !== participantId) {
-            return participant;
-          }
-
-          return {...participant};
-        }));
-      });
-
+    // A round message belongs to the attempt of the participant that reported it.
     this.socketService.getFederatedRoundMessage$()
       .pipe(takeUntil(this.destroy$))
-      .subscribe(msg => {
-        if (msg.federatedRunId !== this.runId) return;
-        this.roundMessages.update(list => [...list, msg]);
+      .subscribe(message => {
+        if (!this.participants().some(participant => participant.id === message.runId)) return;
+        this.roundMessages.update(list => [...list, message]);
       });
   }
 
@@ -267,7 +239,7 @@ export class AppRunFederatedTestDetailComponent implements OnInit, OnDestroy {
     this.selectedDirection.set(direction);
   }
 
-  protected showPayloadDetail(message: FederatedRoundMessageDTO): void {
+  protected showPayloadDetail(message: RunMessageRoundDTO): void {
     if (message.payloadPreview == null) return;
 
     const markdown = '```json\n' + message.payloadPreview + '\n```';
@@ -308,7 +280,7 @@ export class AppRunFederatedTestDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/app', this.appId], {fragment: 'runs'});
   }
 
-  private messageMatchesSearch(message: FederatedRoundMessageDTO, term: string): boolean {
+  private messageMatchesSearch(message: RunMessageRoundDTO, term: string): boolean {
     return [
       message.round,
       message.direction,

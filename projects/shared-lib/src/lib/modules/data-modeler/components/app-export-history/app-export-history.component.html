@@ -10,22 +10,22 @@
     <div class="history__item">
       <lib-status-badge [type]="badge(run)" size="X-SMALL" [noText]="true" [animate]="false"/>
       <div class="history__main">
-        <div class="history__name">{{ run.appName || 'Export app' }}</div>
+        <div class="history__name">{{ appName(run) }}</div>
         <div class="history__meta">
-          <lib-time-badge [date]="toDate(run.startedAt)" format="SHORT" color="GRAY" size="X-SMALL"/>
-          @if (run.outputSize) {
-            <span>{{ run.outputSize | bytes }}</span>
+          <lib-time-badge [date]="run.startedAt ?? run.createdAt" format="SHORT" color="GRAY" size="X-SMALL"/>
+          @if (outputSize(run)) {
+            <span>{{ outputSize(run) | bytes }}</span>
           }
         </div>
-        @if (run.runStatus === 'ERROR' && run.lastError) {
-          <div class="history__reason" [matTooltip]="run.lastError">{{ run.lastError }}</div>
+        @if (run.status === 'ERROR' && errorOf(run); as reason) {
+          <div class="history__reason" [matTooltip]="reason">{{ reason }}</div>
         }
       </div>
-      @if (run.downloadReady) {
+      @if (hasOutputs(run)) {
         <lib-btn type="DOWNLOAD" variant="GHOST" size="SMALL" [iconOnly]="true"
                  [loading]="downloadingRunId() === run.id"
-                 [ariaLabel]="'Download ' + (run.outputFileName || 'zip')"
-                 [matTooltip]="'Download ' + (run.outputFileName || 'zip')"
+                 ariaLabel="Download zip"
+                 matTooltip="Download zip"
                  (clicked)="download.emit(run.id)"/>
       }
     </div>

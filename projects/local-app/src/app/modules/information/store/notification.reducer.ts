@@ -7,6 +7,7 @@ export interface ReviewCounts {
   training: number;
   statistics: number;
   metrics: number;
+  outputs: number;
 }
 
 export interface NotificationState {
@@ -19,7 +20,7 @@ export interface NotificationState {
 
 export const initialNotificationState: NotificationState = {
   items: [],
-  reviewCounts: {training: 0, statistics: 0, metrics: 0},
+  reviewCounts: {training: 0, statistics: 0, metrics: 0, outputs: 0},
   loading: false,
   error: null,
   errorById: {},
@@ -55,6 +56,7 @@ export const notificationReducer = createReducer(
       training: info.openTrainingRequests ?? 0,
       statistics: info.openStatisticsRequests ?? 0,
       metrics: info.openMetricsRequests ?? 0,
+      outputs: info.openOutputRequests ?? 0,
     },
     loading: false,
     error: null,

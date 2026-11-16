@@ -1,0 +1,70 @@
+<lib-header
+  [title]="transformer()?.name ?? ('CUSTOM_TRANSFORMERS.TITLE' | translate)"
+  [description]="transformer()?.description || ('CUSTOM_TRANSFORMERS.DETAIL_DESCRIPTION' | translate)"
+  [enableGoBack]="true"
+  [locationBack]="true">
+  @if (transformer()) {
+    <div suffix class="header-actions">
+      <lib-btn type="CUSTOM" variant="GHOST" icon="refresh" [iconOnly]="true"
+               [matTooltip]="'CUSTOM_TRANSFORMERS.RELOAD' | translate" (clicked)="refresh()"/>
+      <lib-btn type="CUSTOM" variant="SECONDARY" icon="build" [label]="'CUSTOM_TRANSFORMERS.REBUILD' | translate"
+               (clicked)="rebuild()"/>
+      <lib-btn type="DELETE" variant="GHOST" [iconOnly]="true"
+               [disabled]="!!transformer()?.usages?.length"
+               [matTooltip]="(transformer()?.usages?.length ? 'CUSTOM_TRANSFORMERS.DELETE_USED' : 'CUSTOM_TRANSFORMERS.DELETE_TITLE') | translate"
+               (clicked)="delete()"/>
+    </div>
+  }
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="loading() && !transformer()"
+  [error]="error()"
+  [isEmpty]="!transformer()"
+  [skeletonOnLoading]="true">
+
+  <lib-empty-state empty icon="code" [title]="'CUSTOM_TRANSFORMERS.NOT_FOUND' | translate" subtitle=""/>
+
+  @if (actionError(); as err) {
+    <lib-error-card [errorObject]="err"/>
+  }
+
+  @if (transformer(); as t) {
+    <div class="detail-grid">
+      <section class="summary-card">
+        <div class="summary-card__badges">
+          <lib-status-badge size="SMALL" [type]="badge(t.status)" [text]="('CUSTOM_TRANSFORMERS.STATUS_' + t.status) | translate"/>
+          <lib-badge color="GRAY" [iconName]="modeIcon(t.mode)" [text]="modeLabelKey(t.mode) | translate"/>
+        </div>
+        <lib-kv [label]="'CUSTOM_TRANSFORMERS.IMAGE' | translate" [value]="t.imageName ?? '—'" [mono]="true"/>
+        <lib-kv [label]="'CUSTOM_TRANSFORMERS.GOAL' | translate" [value]="goal()"/>
+        <lib-kv [label]="'CUSTOM_TRANSFORMERS.INPUT_KEYS' | translate" [value]="t.inputKeys.join(', ') || '—'"/>
+        <lib-kv [label]="'CUSTOM_TRANSFORMERS.RETURN_KEYS' | translate" [value]="t.returnKeys.join(', ') || '—'"/>
+        <lib-kv [label]="'CUSTOM_TRANSFORMERS.UPDATED' | translate" [value]="t.updatedAt | date: 'medium'"/>
+        <div class="summary-card__usages">
+          <span class="summary-card__label">{{ 'CUSTOM_TRANSFORMERS.USED_BY' | translate }}</span>
+          @for (usage of t.usages; track usage.connectorId) {
+            <a [routerLink]="['/cohort', usage.cohortId, 'connector', 'edit', usage.connectorId]">{{ usage.connectorName }}</a>
+          } @empty {
+            <span class="summary-card__muted">{{ 'CUSTOM_TRANSFORMERS.NOT_USED' | translate }}</span>
+          }
+        </div>
+      </section>
+
+      <section class="code-card">
+        <mat-button-toggle-group [value]="file()" (change)="file.set($event.value)">
+          @for (name of files(); track name) {
+            <mat-button-toggle [value]="name">{{ name }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+        <div #code class="code-card__editor"></div>
+      </section>
+    </div>
+
+    @if (build(); as b) {
+      <section class="build-card">
+        <lib-pipeline-steps [pipeline]="b"/>
+      </section>
+    }
+  }
+</lib-page-wrapper>

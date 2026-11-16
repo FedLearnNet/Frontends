@@ -11,6 +11,10 @@ import { runResolver } from "./services/run-resolver.service";
 import {ConnectorFileListComponent} from './components/file-list/connector-file-list.component';
 import {ConnectorFileDetailComponent} from './components/file-detail/connector-file-detail.component';
 import {connectorFileDetailResolver, connectorFilesResolver} from './services/connector-file-resolver.service';
+import {CustomTransformerListComponent} from './components/custom-transformer-list/custom-transformer-list.component';
+import {
+  CustomTransformerDetailComponent
+} from './components/custom-transformer-detail/custom-transformer-detail.component';
 
 const routes: Routes = [
   {
@@ -60,6 +64,20 @@ const routes: Routes = [
         },
         data: {
           breadcrumb: (data: any) => data.file?.fileName ?? 'File',
+        },
+      },
+      {
+        path: 'custom',
+        component: CustomTransformerListComponent,
+        data: {
+          breadcrumb: 'Custom transformers',
+        },
+      },
+      {
+        path: 'custom/:customId',
+        component: CustomTransformerDetailComponent,
+        data: {
+          breadcrumb: 'Custom transformer',
         },
       },
       {

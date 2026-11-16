@@ -21,10 +21,22 @@ export interface ToolDTO {
   input: any;
 }
 
+/** How a human-in-the-loop question is answered. */
+export enum HumanInTheLoopType {
+  /** Free text in the chat input. */
+  TEXT = 'TEXT',
+  /** Exactly one of the options, which are column names. */
+  SELECT_COLUMN = 'SELECT_COLUMN',
+  /** One or more of the options, which are column names. */
+  SELECT_COLUMNS = 'SELECT_COLUMNS',
+}
+
 export interface HumanInTheLoopDTO {
   answer?: string | null;
   question: string;
   timestamp: Date;
+  type?: HumanInTheLoopType;
+  options?: string[] | null;
 }
 
 export interface BaseChatMessageDTO extends BaseDto {

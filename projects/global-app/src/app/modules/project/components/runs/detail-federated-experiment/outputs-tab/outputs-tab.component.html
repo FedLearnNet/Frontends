@@ -1,0 +1,34 @@
+<lib-page-wrapper [isLoading]="loading()" [skeletonOnLoading]="true" [isEmpty]="false">
+  @for (output of outputs(); track output.id) {
+    <div class="output">
+      <h4>{{ output.name }}</h4>
+      <lib-file-detail-card [file]="output.file"/>
+    </div>
+  } @empty {
+    @if (request()?.responses?.length) {
+      <lib-empty-state
+        icon="report"
+        title="No outputs arrived"
+        subtitle="The clinic approved the request, but no outputs reached the platform. Its log tells why."
+        [primaryButtonEnabled]="true"
+        primaryButtonLabel="Request again"
+        (cta)="requestOutputs()"
+      />
+    } @else if (request()) {
+      <lib-empty-state
+        icon="hourglass_empty"
+        title="Waiting for the clinic"
+        subtitle="The outputs appear here once the clinic approved the request."
+      />
+    } @else {
+      <lib-empty-state
+        icon="folder_open"
+        title="No outputs requested yet"
+        subtitle="The clinic reviews the request before it releases the outputs of the run."
+        [primaryButtonEnabled]="true"
+        primaryButtonLabel="Request Outputs"
+        (cta)="requestOutputs()"
+      />
+    }
+  }
+</lib-page-wrapper>
