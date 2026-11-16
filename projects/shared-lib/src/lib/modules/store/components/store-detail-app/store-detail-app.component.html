@@ -72,6 +72,9 @@
           <lib-store-reviews [app]="detail"/>
         }
         @case (5) {
+          @if (detail.latestVersionId) {
+            <app-llm-audit-panel class="llm-audit" [appVersionId]="detail.latestVersionId"/>
+          }
           <div class="flex">
             @for (audit of getAudits(detail); track audit.id) {
               <app-audit-card [audit]="audit"/>

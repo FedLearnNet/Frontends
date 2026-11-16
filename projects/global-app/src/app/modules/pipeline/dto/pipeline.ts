@@ -16,13 +16,16 @@ export enum PipelineType {
 }
 
 export enum PipelineRunMode {
+  // builds and publishes, needs the publish settings
   ALL = "ALL",
+  BUILD_ONLY = "BUILD_ONLY",
   LOCAL_BUILD = "LOCAL_BUILD",
   SCAN_ONLY = "SCAN_ONLY",
 }
 
 export const pipelineRunModeLabels: Record<PipelineRunMode, string> = {
-  [PipelineRunMode.ALL]: 'Build',
+  [PipelineRunMode.ALL]: 'Build and publish',
+  [PipelineRunMode.BUILD_ONLY]: 'Build',
   [PipelineRunMode.LOCAL_BUILD]: 'Local build',
   [PipelineRunMode.SCAN_ONLY]: 'Vulnerability rescan',
 };
