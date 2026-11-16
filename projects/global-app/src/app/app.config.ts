@@ -1,4 +1,4 @@
-import {ApplicationConfig, isDevMode} from '@angular/core';
+import {ApplicationConfig, inject, isDevMode} from '@angular/core';
 import {routes} from './app.routes';
 import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
 import {provideBffAuth} from '@shared-lib/services/auth';
@@ -39,9 +39,14 @@ import {auditReducer, featureKey as auditKey} from "./modules/audit/service/audi
 import {AuditEffects} from "./modules/audit/service/audit.effects";
 import {featureKey as orchKey, orchReducer} from "@shared-lib/modules/admin/store/orch.reducer";
 import {OrchEffects} from "@shared-lib/modules/admin/store/orch.effects";
+import {PIPELINE_RESCAN, PipelineRescan} from "@shared-lib/modules/pipeline/pipeline-rescan";
+import {PipelineService} from "./modules/pipeline/service/pipeline.service";
+import {PipelineRunMode, PipelineType} from "./modules/pipeline/dto/pipeline";
+import {startWith, switchMap} from "rxjs";
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    {provide: PIPELINE_RESCAN, useFactory: pipelineRescan},
     provideHttpClient(
       withInterceptors([
         loadingInterceptor,
@@ -92,4 +97,14 @@ export const appConfig: ApplicationConfig = {
     provideRouterStore(),
     provideAnimationsAsync(),
   ],
+}
+
+function pipelineRescan(): PipelineRescan {
+  const pipelines = inject(PipelineService);
+  return appVersionId => pipelines.create({
+    pipelineType: PipelineType.APP,
+    runMode: PipelineRunMode.SCAN_ONLY,
+    appVersionId,
+    autoStart: true,
+  }).pipe(switchMap(pipeline => pipelines.stream(pipeline.id).pipe(startWith(pipeline))));
 }

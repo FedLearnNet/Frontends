@@ -1,7 +1,7 @@
 import {NO_ERRORS_SCHEMA, Pipe, PipeTransform, signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog} from '@angular/material/dialog';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, convertToParamMap} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {TranslateService} from '@ngx-translate/core';
 import {of, Subject} from 'rxjs';
@@ -225,6 +225,12 @@ describe('ManageConnectorComponent', () => {
       expect(contentStep()).toBe(ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG);
     });
 
+    it('shows the steps still to come until the file is set', async () => {
+      await render(ConnectorManagementMode.NEW);
+
+      expect(upcomingSteps()).toEqual(['SETTINGS', 'SPECIFY_HEADER', 'TRANSFORMER', 'MAPPER_STEP']);
+    });
+
     it('shows the downstream steps once file info for the connector arrives', async () => {
       await render(ConnectorManagementMode.EDIT, {...fileConnector(), id: 3, fileInfo: undefined});
       expect(drawerSteps()).toEqual(allDownstreamSteps.slice(0, 3));
@@ -260,7 +266,7 @@ describe('ManageConnectorComponent', () => {
       component.onContinueClick();
       expect(dialogs.length).toBe(1);
 
-      dialogs[0].next(false);
+      dialogs[0].next('SKIP');
       await fixture.whenStable();
 
       expect(fixture.nativeElement.querySelector('app-edit-mapper')).not.toBeNull();
@@ -304,7 +310,7 @@ describe('ManageConnectorComponent', () => {
         {provide: FunctionService, useValue: {getAllFunctionsDetails: () => of([])}},
         {
           provide: ActivatedRoute,
-          useValue: {snapshot: {data: {}}, data: of({mode, connector}), fragment: of(null)},
+          useValue: {snapshot: {data: {}, queryParamMap: convertToParamMap({})}, data: of({mode, connector}), fragment: of(null)},
         },
         {provide: ConnectorPreviewService, useValue: {preview}},
         {provide: ConnectorService, useValue: {}},
@@ -331,11 +337,19 @@ describe('ManageConnectorComponent', () => {
     await fixture.whenStable();
   }
 
-  /** The steps the drawer shows, read from the cards it rendered. */
+  /** The steps the drawer shows, read from the cards it rendered, without the ones still to come. */
   function drawerSteps(): (string | number)[] {
+    return drawerCards().filter(card => !card.upcoming).map(card => card.step);
+  }
+
+  function upcomingSteps(): (string | number)[] {
+    return drawerCards().filter(card => card.upcoming).map(card => card.step);
+  }
+
+  function drawerCards(): ConnectorCard[] {
     const cards: NodeListOf<HTMLElement & { data?: ConnectorCard }> =
       fixture.nativeElement.querySelectorAll('mat-drawer app-connector-cards');
-    return Array.from(cards).map(card => card.data!.step);
+    return Array.from(cards).map(card => card.data!);
   }
 
   /** The step the content area shows, or undefined when it is not a config step. */

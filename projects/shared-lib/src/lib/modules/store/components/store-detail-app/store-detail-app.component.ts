@@ -18,7 +18,7 @@ import {WorkflowListComponent} from "@shared-lib/modules/workflow/components/wor
 import {loadFiles} from "@shared-lib/modules/files/store/file.actions";
 import {
   PipelinePublishInfoDetailComponent
-} from "../../../../../../../global-app/src/app/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {
   AuditCardComponent
 } from "../../../../../../../global-app/src/app/modules/audit/components/audit-card/audit-card.component";

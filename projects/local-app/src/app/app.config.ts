@@ -10,6 +10,8 @@ import {
   importsReducer
 } from './modules/connector/store/import/import.reducer';
 import {ImportEffects} from './modules/connector/store/import/import.effects';
+import {transformerAssistantFeature} from './modules/connector/store/transformer-assistant/transformer-assistant.reducer';
+import {TransformerAssistantEffects} from './modules/connector/store/transformer-assistant/transformer-assistant.effects';
 import {provideEffects} from '@ngrx/effects';
 import {provideStoreDevtools} from '@ngrx/store-devtools';
 import {provideRouterStore} from '@ngrx/router-store';
@@ -76,6 +78,7 @@ export const appConfig: ApplicationConfig = {
       [notificationKey]: notificationReducer,
       [searchKey]: searchReducer,
       [importFeatureKey]: importsReducer,
+      [transformerAssistantFeature.name]: transformerAssistantFeature.reducer,
     }),
     provideEffects([
       FileEffects,
@@ -88,6 +91,7 @@ export const appConfig: ApplicationConfig = {
       NotificationEffects,
       SearchEffects,
       ImportEffects,
+      TransformerAssistantEffects,
     ]),
     provideStoreDevtools({maxAge: 25, logOnly: !isDevMode()}),
     provideRouterStore()

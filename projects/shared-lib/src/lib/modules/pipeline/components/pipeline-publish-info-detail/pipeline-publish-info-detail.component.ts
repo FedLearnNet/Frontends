@@ -12,16 +12,16 @@ import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-b
 import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {AuthStateService} from "@shared-lib/services/auth-state.service";
 import {AuthorDto} from "@shared-lib/modules/store/dto/app-author";
-import {PipelineService} from "../../service/pipeline.service";
-import {PipelineRunMode, PipelineStatus, PipelineType} from "../../dto/pipeline";
-import {finalize, startWith, switchMap, takeWhile} from "rxjs";
+import {PipelineStatus} from "@shared-lib/modules/pipeline/dto/pipeline";
+import {PIPELINE_RESCAN} from "@shared-lib/modules/pipeline/pipeline-rescan";
+import {finalize, takeWhile} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {JsonPipe} from '@angular/common';
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 
 @Component({
-  selector: 'app-pipeline-publish-info-detail',
+  selector: 'lib-pipeline-publish-info-detail',
   imports: [MatCardModule,
     MatIconModule,
     MatTableModule,
@@ -40,7 +40,7 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
 })
 export class PipelinePublishInfoDetailComponent {
   private readonly auth = inject(AuthStateService);
-  private readonly pipelines = inject(PipelineService);
+  private readonly startRescan = inject(PIPELINE_RESCAN, {optional: true});
   private readonly destroyRef = inject(DestroyRef);
 
   publishInfo = model.required<AppPublishInfoDTO>();
@@ -49,20 +49,14 @@ export class PipelinePublishInfoDetailComponent {
   readonly rescanning = signal(false);
   readonly canRescan = computed(() => {
     const username = this.auth.userProfile()?.username;
-    return !!username && !!this.appVersionId() && !!this.publishInfo().imageName
+    return !!this.startRescan && !!username && !!this.appVersionId() && !!this.publishInfo().imageName
       && this.authors().some(author => author.keycloakId === username);
   });
 
   rescan(): void {
     if (!this.canRescan() || this.rescanning()) return;
     this.rescanning.set(true);
-    this.pipelines.create({
-      pipelineType: PipelineType.APP,
-      runMode: PipelineRunMode.SCAN_ONLY,
-      appVersionId: this.appVersionId(),
-      autoStart: true,
-    }).pipe(
-      switchMap(pipeline => this.pipelines.stream(pipeline.id).pipe(startWith(pipeline))),
+    this.startRescan!(this.appVersionId()!).pipe(
       takeWhile(pipeline => pipeline.pipelineStatus === PipelineStatus.PENDING
         || pipeline.pipelineStatus === PipelineStatus.RUNNING, true),
       takeUntilDestroyed(this.destroyRef),
