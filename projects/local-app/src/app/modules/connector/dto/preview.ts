@@ -15,6 +15,10 @@ export interface ConnectorConfigDTO {
   schemaMapping?: ConnectorMappingDTO[];
   mergeConfig?: SheetMergeResultDTO;
   pivotConfig?: PivotConfigDTO;
+  /** Rows the preview shows (display only, never saved). Omitted means 10. */
+  previewRows?: number;
+  /** Prefer rows that fill the most columns (display only, never saved). */
+  previewNonEmpty?: boolean;
 }
 
 export interface PreviewStageDTO {

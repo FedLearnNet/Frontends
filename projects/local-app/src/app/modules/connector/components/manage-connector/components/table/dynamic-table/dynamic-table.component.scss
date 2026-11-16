@@ -1,6 +1,31 @@
 :host {
   display: block;
+}
+
+.table-scroll {
   overflow-x: auto;
+
+  // Up to 100 preview rows: scroll inside the table and keep the header in view.
+  &.limited {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+.preview-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-bottom: 12px;
+
+  .preview-rows {
+    width: 120px;
+  }
+
+  .preview-count {
+    color: rgba(0, 0, 0, 0.6);
+  }
 }
 
 table {
