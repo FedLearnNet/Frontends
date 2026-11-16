@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
   input,
   model,
@@ -35,6 +36,7 @@ import {
 } from "@shared-lib/modules/workflow/components/workflow-action-panel/workflow-action-panel.component";
 import {WorkflowService} from "@shared-lib/modules/workflow/service/workflow.service";
 import {FlowActionPanelAction} from "@shared-lib/modules/workflow/models/workflow-actions.model";
+import {IPoint} from "@foblex/2d";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {selectSelectedWorkflow, selectWorkflowLoading} from "@shared-lib/modules/workflow/store/workflow.selectors";
 import {Store} from "@ngrx/store";
@@ -92,6 +94,7 @@ export class WorkflowViewComponent {
   private readonly dialog: MatDialog = inject(MatDialog);
   private readonly _workflowService = inject(WorkflowService);
   private readonly storeService: StoreService = inject(StoreService);
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
   workflowId = input<number | undefined>();
   projectId = input<number | undefined>();
@@ -245,11 +248,11 @@ export class WorkflowViewComponent {
   }
 
   public addNode(app: StoreSelectDialogResult) {
-    this.updateWorkflow(c => this._workflowService.addStoreResult(c, app));
+    this.updateWorkflow(c => this._workflowService.addStoreResult(c, app, this.newPosition(c)));
   }
 
   public addDataset() {
-    this.updateWorkflow(c => this._workflowService.addInputs(c));
+    this.updateWorkflow(c => this._workflowService.addInputs(c, this.newPosition(c)));
   }
 
   public updateNode(node: WorkflowNodeDetailDTO) {
@@ -266,6 +269,24 @@ export class WorkflowViewComponent {
     } else {
       this.updateWorkflow(c => this._workflowService.reassignConnection(c, event));
     }
+  }
+
+  private newPosition(workflow: WorkflowDTO): IPoint {
+    const view = this.host.nativeElement.getBoundingClientRect();
+    const toFlow = (x: number, y: number) => this._flow().getPositionInFlow({x, y});
+    const min = toFlow(view.left, view.top);
+    const max = toFlow(view.right, view.bottom);
+    let position = {x: Math.round((min.x + max.x) / 2 - 200), y: Math.round((min.y + max.y) / 2 - 100)};
+    const dataset = workflow.nodes.length ? undefined : workflow.inputs?.[0]?.position;
+    if (dataset && dataset.x >= min.x && dataset.x + 400 <= max.x && dataset.y >= min.y && dataset.y + 500 <= max.y) {
+      position = {x: dataset.x, y: dataset.y + 300};
+    }
+    const cards = [...workflow.nodes, ...(workflow.inputs ?? [])];
+    while (cards.some(c => c.position && Math.abs(c.position.x - position.x) < 50 && Math.abs(c.position.y - position.y) < 50)) {
+      position.x += 50;
+      position.y += 50;
+    }
+    return position;
   }
 
   private updateWorkflow(
@@ -320,7 +341,7 @@ export class WorkflowViewComponent {
         neededAppIds.add(edge.toAppId);
       });
       this.storeService.getApps(Array.from(neededAppIds)).subscribe(apps => {
-        this.updateWorkflow(c => this._workflowService.addGraphEdges(c, edges, apps));
+        this.updateWorkflow(c => this._workflowService.addGraphEdges(c, edges, apps, w => this.newPosition(w)));
       })
 
     });

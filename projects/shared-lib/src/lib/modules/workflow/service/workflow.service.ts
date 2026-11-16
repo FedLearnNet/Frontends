@@ -3,6 +3,7 @@ import {WorkflowHelperService} from "@shared-lib/modules/workflow/service/workfl
 import {ConnectorIds} from "@shared-lib/modules/workflow/models/workflow-connectors";
 import {FMoveNodesEvent, FReassignConnectionEvent} from "@foblex/flow";
 import {generateGuid} from "@foblex/utils";
+import {IPoint} from "@foblex/2d";
 import {PublishStatus} from "@shared-lib/modules/store/dto/enum";
 import {
   WorkflowConnectionDTO,
@@ -31,26 +32,14 @@ export class WorkflowService {
     } as any;
   }
 
-  public addStoreResult(workflow: WorkflowDTO, storeResult: StoreSelectDialogResult) {
-    let x = 0;
-    let y = 0;
-    for (const node of workflow.nodes) {
-      if (!node.position) continue;
-      if (y <= node.position.y) {
-        y = node.position.y;
-      }
-      x += node.position.x;
-    }
-    const l = workflow.nodes.length ? workflow.nodes.length : 1;
-    x = x / l;
-    y += 200;
+  public addStoreResult(workflow: WorkflowDTO, storeResult: StoreSelectDialogResult, position: IPoint) {
     let app = storeResult.app;
     if (storeResult.model) {
       app = storeResult.model!.federatedApp;
     }
     const newNode = {
       nodeId: generateGuid(),
-      position: {x: x, y: y},
+      position,
       modelDetail: storeResult.model,
       modelSubId: storeResult.model?.lastVersion?.selectedSubModel?.id,
       appDetail: storeResult.app,
@@ -63,17 +52,9 @@ export class WorkflowService {
     return this.addNode(workflow, newNode);
   }
 
-  public addInputs(workflow: WorkflowDTO) {
-    let x = 0;
-    const y = 0;
-    for (const node of workflow.nodes) {
-      if (!node.position) continue;
-      x += node.position.x;
-    }
-    const l = workflow.nodes.length ? workflow.nodes.length : 1;
-    x = x / l;
+  public addInputs(workflow: WorkflowDTO, position: IPoint) {
     const input = {
-      position: {x: x, y: y},
+      position,
       nodeId: generateGuid(),
       name: '',
       type: ToolConfigDataType.CSV,
@@ -183,7 +164,8 @@ export class WorkflowService {
     return this.pushConnection(workflow, this.createConnectionDTO(event.oldSourceId, event.newTargetId!));
   }
 
-  public addGraphEdges(workflow: WorkflowDTO, edges: ToolGraphEdgeDTO[], apps: AppDetailDto[]): WorkflowDTO {
+  public addGraphEdges(workflow: WorkflowDTO, edges: ToolGraphEdgeDTO[], apps: AppDetailDto[],
+                       nextPosition: (w: WorkflowDTO) => IPoint): WorkflowDTO {
     workflow.nodes = workflow.nodes ?? [];
     workflow.inputs = workflow.inputs ?? [];
     workflow.connections = workflow.connections ?? [];
@@ -197,7 +179,7 @@ export class WorkflowService {
     for (const app of (apps ?? [])) {
       if (!app?.id) continue;
       if (existingAppIds.has(app.id)) continue;
-      workflow = this.addStoreResult(workflow, {app} as StoreSelectDialogResult);
+      workflow = this.addStoreResult(workflow, {app} as StoreSelectDialogResult, nextPosition(workflow));
       existingAppIds.add(app.id);
     }
 
