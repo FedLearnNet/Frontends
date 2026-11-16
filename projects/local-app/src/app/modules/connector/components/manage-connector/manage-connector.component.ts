@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   OnInit,
   signal,
+  untracked,
   ViewChild
 } from '@angular/core';
 import {ConnectorCard} from "../../models/connector-card";
@@ -50,6 +52,7 @@ import {
   PreviewCacheDialogResult
 } from "./components/preview-cache-dialog/preview-cache-dialog.component";
 import {ConnectorPreviewService} from "../../services/connector-preview.service";
+import {ConnectorPreviewSettingsService} from "../../services/connector-preview-settings.service";
 import {ConnectorMappingConfig} from "../../models/connector-model";
 import {ManageConnectorSaveDialogComponent} from "./components/save-dialog/save-dialog.component";
 import {ConnectorService} from "../../services/connector-crud.service";
@@ -137,6 +140,23 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
+  private readonly previewSettings = inject(ConnectorPreviewSettingsService);
+  /** The preview settings the transformation grid was last computed with. */
+  private lastPreviewSettings = '';
+
+  /** Recomputes the transformation preview when the user picks another row count or data preference. */
+  private readonly previewSettingsEffect = effect(() => {
+    const settings = `${this.previewSettings.rows()}|${this.previewSettings.preferNonEmpty()}`;
+    if (settings === this.lastPreviewSettings) {
+      return;
+    }
+    this.lastPreviewSettings = settings;
+    untracked(() => {
+      if (this.transformCards().length > 0) {
+        this.applyTransform();
+      }
+    });
+  });
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -261,6 +281,9 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Every wizard session starts with the default preview (10 rows, file order).
+    this.previewSettings.reset();
+    this.lastPreviewSettings = `${this.previewSettings.rows()}|${this.previewSettings.preferNonEmpty()}`;
     this.baseRoute = "cohort/" + this.cohortId() + "/connector";
     const resolvedCohort = this.activatedRoute.snapshot.data['cohort'];
     if (resolvedCohort != null) {

@@ -8,6 +8,15 @@ import {MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from "@angular/material/button";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
+import {MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatOption, MatSelect} from "@angular/material/select";
+import {MatSlideToggle} from "@angular/material/slide-toggle";
+import {MatTooltip} from "@angular/material/tooltip";
+import {TranslatePipe} from "@ngx-translate/core";
+import {
+  ConnectorPreviewSettingsService,
+  PREVIEW_ROW_OPTIONS
+} from "../../../../../services/connector-preview-settings.service";
 
 @Component({
   selector: 'app-dynamic-table',
@@ -18,11 +27,20 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     MatTableModule,
     MatIcon,
     MatIconButton,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    MatSlideToggle,
+    MatTooltip,
+    TranslatePipe
   ]
 })
 export class ConnectorDynamicTableComponent {
   dialog = inject(MatDialog);
+  readonly previewSettings = inject(ConnectorPreviewSettingsService);
+  readonly previewRowOptions = PREVIEW_ROW_OPTIONS;
 
   readonly data = input<any[]>([]);
   readonly calledColumns = input<string[]>([]);
@@ -30,6 +48,8 @@ export class ConnectorDynamicTableComponent {
   readonly renewColumns = input<boolean>(false);
   readonly dataColumns = input<string[] | undefined>(undefined);
   readonly loading = input<boolean | undefined>(false);
+  /** Shows the preview row-count and "prefer rows with data" controls, and scrolls long previews. */
+  readonly showPreviewControls = input<boolean>(false);
 
   readonly columns = model<string[]>([]);
   readonly renamedColumns = model<string[] | undefined>(undefined);
