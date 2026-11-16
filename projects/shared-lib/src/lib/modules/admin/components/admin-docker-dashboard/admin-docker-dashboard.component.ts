@@ -47,6 +47,7 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
 import {MatTooltip} from "@angular/material/tooltip";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
+import {AdminDockerRegistryComponent} from '../admin-docker-registry/admin-docker-registry.component';
 
 @Component({
   selector: 'lib-admin-docker-dashboard',
@@ -68,6 +69,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
     RouterLink,
     HeaderComponent,
     PageWrapperComponent,
+    AdminDockerRegistryComponent,
   ],
   templateUrl: './admin-docker-dashboard.component.html',
   styleUrl: './admin-docker-dashboard.component.scss',
@@ -82,6 +84,7 @@ export class AdminDockerDashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly containerSearch = signal('');
+  readonly supportsRegistry = this.orchService.supportsRegistry;
   readonly fcHardCleanup = signal(false);
   readonly fcSelection = new SelectionModel<string>(true, []);
 
@@ -140,7 +143,6 @@ export class AdminDockerDashboardComponent implements OnInit {
   refreshAll(): void {
     this.store.dispatch(OrchActions.loadDashboard());
   }
-
 
   openRunDetail(id: number): void {
     this.dialog.open(AdminDockerRunDetailDialogComponent, {

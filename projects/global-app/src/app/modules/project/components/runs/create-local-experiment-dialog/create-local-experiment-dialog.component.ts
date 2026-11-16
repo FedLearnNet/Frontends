@@ -9,7 +9,7 @@ import {
 } from "@global-app/project/components/runs/create-local-experiment/create-local-experiment.component";
 import {CreateProjectLocalExperimentDTO} from "@global-app/project/dto/project-experiments";
 import {Store} from "@ngrx/store";
-import {ProjectLocalExperimentsActions} from "@global-app/project/store/project-local-experiments.actions";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
@@ -47,8 +47,9 @@ export class CreateLocalExperimentDialogComponent {
     if (!this.isValidForm() && createDto) {
       return;
     }
-    this.store.dispatch(ProjectLocalExperimentsActions.create({
+    this.store.dispatch(ProjectRunsActions.create({
       projectId: this.data.project.id,
+      kind: 'local',
       dto: createDto!,
     }));
     this.dialogRef.close();

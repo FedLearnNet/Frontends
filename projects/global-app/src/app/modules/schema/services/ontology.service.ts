@@ -1,9 +1,15 @@
+import {DEFAULT_DATAMODELER_API_PREFIX} from '@shared-lib/constants/datamodeler.constants';
 import {inject, Injectable} from '@angular/core';
 import {ApiService} from '@shared-lib/services/api.service';
 import {environment} from '@global-app/env/environment';
 import {catchError, Observable, throwError} from 'rxjs';
-import {OntologyListQueryability} from '@global-app/find-data/models';
-import {CreateOntologyDTO, OntologyDTO, OntologyNodeDTO, OntologySearchResponseDTO} from "../dto/ontology";
+import {
+  CreateOntologyDTO,
+  OntologyDataTypeDTO,
+  OntologyDTO,
+  OntologyNodeDTO,
+  OntologySearchResponseDTO
+} from "../dto/ontology";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {TranslateService} from '@ngx-translate/core';
 import {PaginatedResponse} from "@shared-lib/models";
@@ -17,7 +23,8 @@ export class OntologyService {
 
   readonly snackBar = inject(MatSnackBar);
   readonly apiService: ApiService = inject(ApiService);
-  private readonly apiUrl = environment.datamodelerApiUrl;
+  private readonly apiUrl = environment.globalLearningApiUrl;
+  private readonly apiPrefix = environment.datamodelerApiPrefix ?? DEFAULT_DATAMODELER_API_PREFIX;
 
   private readonly path = 'ontology';
   private readonly translate: TranslateService = inject(TranslateService);
@@ -91,7 +98,7 @@ export class OntologyService {
   }
 
   put(dto: OntologyNodeDTO): Observable<OntologyNodeDTO> {
-    return this.apiService.post<OntologyNodeDTO>(`${this.getBaseUrl()}/${dto.id}/`, dto).pipe(
+    return this.apiService.put<OntologyNodeDTO>(`${this.getBaseUrl()}/${dto.id}/`, dto).pipe(
       catchError((err) => {
         const errorMessage = JSON.stringify(err.error) || this.translate.instant('ERROR.FAILED_TO_UPDATE', {name: this.translate.instant('GRID.ONTOLOGY').toLowerCase()});
         this.snackBar.open(errorMessage, this.translate.instant('BUTTON.CLOSE'), {duration: 5000});
@@ -103,11 +110,11 @@ export class OntologyService {
     return this.apiService.post<OntologyNodeDTO>(`${this.getBaseUrl()}`, dto);
   }
 
-  getOntologyListQueryability(): Observable<OntologyListQueryability[]> {
-    return this.apiService.get<OntologyListQueryability[]>(`${this.getBaseUrl()}list_queryability/`);
+  getSchemaSiblingsWithDataTypes(id: string): Observable<OntologyDataTypeDTO[]> {
+    return this.apiService.get<OntologyDataTypeDTO[]>(`${this.getBaseUrl()}/${id}/schema-siblings`);
   }
 
   private getBaseUrl(): string {
-    return `${this.apiUrl}/${this.path}`;
+    return `${this.apiUrl}/${this.apiPrefix}/${this.path}`;
   }
 }

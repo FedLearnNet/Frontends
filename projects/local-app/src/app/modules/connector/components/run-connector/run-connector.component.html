@@ -48,6 +48,7 @@
                 <lib-time-badge
                   [date]="run.createdAt"
                   [dateTo]="isActive() ? null : run.updatedAt"
+                  [color]="convertStatus(run.status) === 'FAILED' ? 'RED' : 'GREEN'"
                   [calcDuration]="true"></lib-time-badge>
               </lib-kv>
             </div>

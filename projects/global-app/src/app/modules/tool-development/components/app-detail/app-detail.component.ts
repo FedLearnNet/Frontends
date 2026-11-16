@@ -36,6 +36,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {getConfigWSUrl} from "@global-app/utils/ws-url-helper";
 
 
+import {TestEngineControlComponent} from "../test-engine-control/test-engine-control.component";
 @Component({
   selector: 'app-app-detail',
   imports: [
@@ -55,6 +56,7 @@ import {getConfigWSUrl} from "@global-app/utils/ws-url-helper";
     AppTypeBadgeComponent,
     ErrorCardComponent,
     HeaderComponent,
+    TestEngineControlComponent,
   ],
   templateUrl: './app-detail.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

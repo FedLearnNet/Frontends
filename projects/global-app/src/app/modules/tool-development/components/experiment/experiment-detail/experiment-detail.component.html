@@ -29,11 +29,11 @@
         <td mat-cell *matCellDef="let element" class="experiment--table--tdelement">
 
           <div class="experiment--table--element">
-            <app-experiment-run-circle [color]="element.color" />
-            <div class="experiment--table--element--name">{{ element.name }}</div>
+            <app-experiment-run-circle [color]="trialColorOf(element)" />
+            <div class="experiment--table--element--name">{{ trialNameOf(element) }}</div>
           </div>
           <div>
-            @for (param of hyperParamToDataSource(element.hyperParams); track param.key) {
+            @for (param of hyperParamToDataSource(element.params); track param.key) {
               <span><b>{{ param.key }}</b>: {{ param.value }}</span>
             }
           </div>
@@ -65,7 +65,7 @@
   </div>
   <div class="experiment--results">
     <app-experiment-runs-charts [experimentRuns]="runSelection.selected"
-                                [diagrams]="$safeNavigationMigration(experiment()?.diagramConfigs)"
+                                [diagrams]="experiment()?.experiment?.diagramConfigs ?? []"
                                 (changed)="diagramsChanged($event!)" />
   </div>
 </div>

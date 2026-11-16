@@ -1,0 +1,215 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [title]="title()"
+  description="Step with its attempts. Select an attempt to inspect its logs, metrics and files.">
+  <button suffix mat-raised-button type="button" (click)="step.reload()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="step.isLoading() && !step.hasValue()"
+  [skeletonOnLoading]="true"
+  [error]="step.error()">
+
+  @if (step.value(); as step) {
+    <lib-status-title [type]="runStatusToBadgeStatus(step.status)">
+      Step #{{ step.id }}{{ step.name || step.appName ? ' · ' + (step.name || step.appName) : '' }}
+    </lib-status-title>
+
+    @if (step.failure?.message) {
+      <lib-info-card class="section" type="ERROR" variant="BANNER"
+                     [title]="step.failure?.category + ' · ' + step.failure?.type"
+                     [subtitle]="step.failure?.message ?? undefined"/>
+    }
+
+    <lib-info-grid class="section" title="Meta-Data">
+      <lib-info-item title="Public ID">
+        <lib-badge color="GRAY" [uppercase]="true" [wrap]="true" [text]="step.publicId"/>
+      </lib-info-item>
+      <lib-info-item title="Run">
+        <lib-badge color="GRAY" [text]="'#' + step.runId"/>
+      </lib-info-item>
+      <lib-info-item title="Workflow node">
+        <lib-badge color="GRAY" [uppercase]="true" [text]="step.workflowNodeId !== null && step.workflowNodeId !== undefined ? '#' + step.workflowNodeId : 'N/A'"/>
+      </lib-info-item>
+      <lib-info-item title="Selected attempt">
+        <lib-badge color="GRAY" [uppercase]="true" [text]="step.selectedAttemptId !== null && step.selectedAttemptId !== undefined ? '#' + step.selectedAttemptId : 'N/A'"/>
+      </lib-info-item>
+      <lib-info-item title="Attempts">
+        <lib-badge color="GRAY" [text]="'' + attempts().length"/>
+      </lib-info-item>
+      <!-- Clinic -->
+      @if (step.appName) {
+        <lib-info-item title="App">
+          <lib-badge color="BLUE" [uppercase]="true" [text]="step.appName"/>
+        </lib-info-item>
+      }
+      @if (step.appImage) {
+        <lib-info-item title="Image">
+          <lib-docker-image-tag [imageName]="step.appImage" size="SMALL"/>
+        </lib-info-item>
+      }
+      @if (step.globalAppVersionId !== null && step.globalAppVersionId !== undefined) {
+        <lib-info-item title="Global app version">
+          <lib-badge color="GRAY" [text]="'#' + step.globalAppVersionId"/>
+        </lib-info-item>
+      }
+      @if (step.globalModelVersionId !== null && step.globalModelVersionId !== undefined) {
+        <lib-info-item title="Global model version">
+          <lib-badge color="GRAY" [text]="'#' + step.globalModelVersionId"/>
+        </lib-info-item>
+      }
+      @if (step.transformerId !== null && step.transformerId !== undefined) {
+        <lib-info-item title="Transformer">
+          <lib-badge color="GRAY" [text]="'#' + step.transformerId"/>
+        </lib-info-item>
+      }
+      <!-- Platform -->
+      @if (step.federatedAppVersionId !== null && step.federatedAppVersionId !== undefined) {
+        <lib-info-item title="App version">
+          <lib-badge color="GRAY" [text]="'#' + step.federatedAppVersionId"/>
+        </lib-info-item>
+      }
+      @if (step.modelSubId !== null && step.modelSubId !== undefined) {
+        <lib-info-item title="Model sub">
+          <lib-badge color="GRAY" [uppercase]="true"
+                     [text]="'#' + step.modelSubId + (step.modelId !== null && step.modelId !== undefined ? ' · model #' + step.modelId : '')"/>
+        </lib-info-item>
+      }
+    </lib-info-grid>
+
+    <lib-info-grid class="section" title="Timing">
+      <lib-info-item title="Created">
+        <lib-time-badge [date]="step.createdAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Started">
+        <lib-time-badge [date]="step.startedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Finished">
+        <lib-time-badge [date]="step.finishedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Duration">
+        <lib-time-badge [date]="step.startedAt" [dateTo]="step.finishedAt" [calcDuration]="true" color="GRAY"/>
+      </lib-info-item>
+    </lib-info-grid>
+
+    <lib-info-grid class="section" [title]="'Attempts (' + attempts().length + ')'" [disableFlex]="true">
+      <div class="table-wrap">
+        <table mat-table [dataSource]="attempts()" class="table">
+          <ng-container matColumnDef="trial">
+            <th mat-header-cell *matHeaderCellDef>Trial</th>
+            <td mat-cell *matCellDef="let attempt">
+              #{{ attempt.trialIndex }}
+              @if (attempt.id === shownAttemptId()) {
+                <mat-icon inline matTooltip="Attempt the step stands for">star</mat-icon>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let attempt" [matTooltip]="attempt.publicId">#{{ attempt.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let attempt">
+              <lib-status-badge [text]="attempt.status" [type]="runStatusToBadgeStatus(attempt.status)" size="SMALL"/>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="params">
+            <th mat-header-cell *matHeaderCellDef>Params</th>
+            <td mat-cell *matCellDef="let attempt" class="mono">
+              <div class="truncate" [matTooltip]="paramsOf(attempt)">{{ paramsOf(attempt) }}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="score">
+            <th mat-header-cell *matHeaderCellDef>Score</th>
+            <td mat-cell *matCellDef="let attempt">
+              {{ attempt.scoreMetric ? attempt.scoreMetric.metric + ' = ' + attempt.scoreMetric.value : '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="container">
+            <th mat-header-cell *matHeaderCellDef>Container</th>
+            <td mat-cell *matCellDef="let attempt" class="mono" [matTooltip]="attempt.containerId">
+              {{ attempt.containerId ? attempt.containerId.substring(0, 12) : '—' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="exitCode">
+            <th mat-header-cell *matHeaderCellDef>Exit code</th>
+            <td mat-cell *matCellDef="let attempt">{{ attempt.exitCode ?? '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="progress">
+            <th mat-header-cell *matHeaderCellDef>Progress</th>
+            <td mat-cell *matCellDef="let attempt">{{ attempt.progress !== null && attempt.progress !== undefined ? attempt.progress + '%' : '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="started">
+            <th mat-header-cell *matHeaderCellDef>Started</th>
+            <td mat-cell *matCellDef="let attempt">
+              @if (attempt.startedAt) {
+                <lib-time-badge [date]="attempt.startedAt" format="SHORT" color="GRAY" size="SMALL"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Duration</th>
+            <td mat-cell *matCellDef="let attempt">
+              @if (attempt.startedAt) {
+                <lib-time-badge [date]="attempt.startedAt" [dateTo]="attempt.finishedAt" [calcDuration]="true"
+                                color="GRAY" size="SMALL"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="failure">
+            <th mat-header-cell *matHeaderCellDef>Failure</th>
+            <td mat-cell *matCellDef="let attempt">
+              @if (attempt.failure?.message) {
+                <lib-badge color="RED" iconName="error" [uppercase]="true"
+                           [text]="attempt.failure.category || attempt.failure.type || 'ERROR'"
+                           [matTooltip]="(attempt.failure.type ? attempt.failure.type + ': ' : '') + attempt.failure.message"/>
+              } @else {
+                —
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="attemptColumns"></tr>
+          <tr mat-row class="clickable" *matRowDef="let row; columns: attemptColumns" (click)="open(row)"></tr>
+        </table>
+      </div>
+      @if (!attempts().length) {
+        <div class="empty-state">The step has no attempts yet.</div>
+      }
+    </lib-info-grid>
+
+    <section class="json-grid">
+      @if (step.search) {
+        <lib-json-editor title="Hyper parameter search" [jsonObject]="step.search"/>
+      }
+      @if (step.inputs) {
+        <lib-json-editor title="Inputs" [jsonObject]="step.inputs"/>
+      }
+      @if (step.inputFilePaths) {
+        <lib-json-editor title="Input file paths" [jsonObject]="step.inputFilePaths"/>
+      }
+      @if (step.federation) {
+        <lib-json-editor title="Federation" [jsonObject]="step.federation"/>
+      }
+    </section>
+  }
+</lib-page-wrapper>

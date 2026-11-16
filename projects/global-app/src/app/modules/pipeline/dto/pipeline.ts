@@ -8,8 +8,21 @@ export enum PipelineType {
   APP = "APP",
 }
 
+export enum PipelineRunMode {
+  ALL = "ALL",
+  LOCAL_BUILD = "LOCAL_BUILD",
+  SCAN_ONLY = "SCAN_ONLY",
+}
+
+export const pipelineRunModeLabels: Record<PipelineRunMode, string> = {
+  [PipelineRunMode.ALL]: 'Build',
+  [PipelineRunMode.LOCAL_BUILD]: 'Local build',
+  [PipelineRunMode.SCAN_ONLY]: 'Vulnerability rescan',
+};
+
 export interface PipelineDTO extends BasePipelineDTO {
   pipelineType: PipelineType;
+  runMode: PipelineRunMode;
   secret?: string;
   modelSubId?: number;
   appVersionId?: number;
@@ -17,6 +30,7 @@ export interface PipelineDTO extends BasePipelineDTO {
 
 export interface PipelineCreateDTO {
   pipelineType: PipelineType;
+  runMode?: PipelineRunMode;
   modelSubId?: number;
   appVersionId?: number;
 

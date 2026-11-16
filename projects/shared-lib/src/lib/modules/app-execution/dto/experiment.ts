@@ -46,9 +46,10 @@ export interface ExperimentDetailDTO extends ExperimentDTO {
 export interface CreateExperimentDetailDTO {
   name: string;
   description: string;
-  inputFilePaths?: { [key: string]: string[] };
+  inputData?: string;
+  inputFilePaths?: { [key: string]: string };
 
   federatedAppVersionId: number;
-  hyperParams: { [key: string]: string[] };
+  hyperParams: { [key: string]: unknown[] };
 }
 

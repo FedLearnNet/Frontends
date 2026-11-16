@@ -16,6 +16,9 @@ const OPERATOR_LABELS: Record<QueryOperatorTypes, string> = {
   [QueryOperatorTypes.NOT_CONTAINS]: 'not contains',
   [QueryOperatorTypes.START_WIDTH]: 'starts with',
   [QueryOperatorTypes.END_WIDTH]: 'ends with',
+  [QueryOperatorTypes.HAS_CHANGED]: 'has changed',
+  [QueryOperatorTypes.CHANGED_FROM]: 'changed from',
+  [QueryOperatorTypes.CHANGED_TO]: 'changed to',
 };
 
 export function formatQueryOperator(operator: QueryOperatorTypes | string): string {
@@ -79,6 +82,18 @@ export function formatQueryOperator(operator: QueryOperatorTypes | string): stri
     case 'endsWith':
     case 'endswith':
       return OPERATOR_LABELS[QueryOperatorTypes.END_WIDTH];
+
+    case 'has_changed':
+    case 'haschanged':
+      return OPERATOR_LABELS[QueryOperatorTypes.HAS_CHANGED];
+
+    case 'changed_from':
+    case 'changedfrom':
+      return OPERATOR_LABELS[QueryOperatorTypes.CHANGED_FROM];
+
+    case 'changed_to':
+    case 'changedto':
+      return OPERATOR_LABELS[QueryOperatorTypes.CHANGED_TO];
 
     default:
       return normalizedOperator;

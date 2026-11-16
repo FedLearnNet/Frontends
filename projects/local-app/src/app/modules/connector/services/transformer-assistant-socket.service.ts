@@ -1,21 +1,16 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {from, map, Observable, switchMap} from 'rxjs';
-import Keycloak from 'keycloak-js';
+import {map, Observable, switchMap} from 'rxjs';
 import {SseClient} from 'ngx-sse-client';
 import {SKIP_LOADING} from '@shared-lib/interceptors/loading.interceptor';
-import {KeycloakSessionService} from '@shared-lib/services/keycloak-session.service';
 import {environment} from '@local-app/env/environment';
 import {ConnectorDTO} from '../dto/connector';
 import {TransformerAssistantMessageDTO, TransformerAssistantMessageType} from '../dto/transformer-assistant';
 
-const TOKEN_REFRESH_MS = 60_000;
 const WEBSOCKET_PATH = '/connectors/transformer-assistant';
 
 @Injectable({providedIn: 'root'})
 export class TransformerAssistantSocketService {
-  private readonly keycloak = inject(Keycloak);
-  private readonly sessionService = inject(KeycloakSessionService);
   private readonly http = inject(HttpClient);
   private readonly sseClient = inject(SseClient);
   private socket?: WebSocket;
@@ -27,10 +22,7 @@ export class TransformerAssistantSocketService {
     if (path) {
       return this.follow(`${environment.localLearningAPIURL ?? ''}${path}`);
     }
-    // The WebSocket upgrade passes no HTTP interceptor, so the token is refreshed here before it is sent
-    return from(this.sessionService.ensureValidSession(this.keycloak)).pipe(
-      switchMap(() => this.open(connector)),
-    );
+    return this.open(connector);
   }
 
   private follow(url: string): Observable<TransformerAssistantMessageDTO> {
@@ -47,20 +39,11 @@ export class TransformerAssistantSocketService {
 
   private open(connector: ConnectorDTO): Observable<TransformerAssistantMessageDTO> {
     return new Observable(subscriber => {
-      const authorization = encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${this.keycloak.token}`);
-      const socket = new WebSocket(this.url(WEBSOCKET_PATH), ['bearer-token-carrier', authorization]);
+      // The BFF session cookie authenticates the upgrade
+      const socket = new WebSocket(this.url(WEBSOCKET_PATH));
       this.socket = socket;
 
       let disposed = false;
-      let sentToken = this.keycloak.token;
-      const refresh = setInterval(() => {
-        this.sessionService.ensureValidSession(this.keycloak).then(() => {
-          if (this.keycloak.token && this.keycloak.token !== sentToken) {
-            sentToken = this.keycloak.token;
-            this.send({type: TransformerAssistantMessageType.TOKEN, message: sentToken});
-          }
-        }).catch(() => undefined);
-      }, TOKEN_REFRESH_MS);
 
       socket.onopen = () => this.send({type: TransformerAssistantMessageType.START, connector});
       socket.onmessage = event => subscriber.next(JSON.parse(event.data));
@@ -72,7 +55,6 @@ export class TransformerAssistantSocketService {
 
       return () => {
         disposed = true;
-        clearInterval(refresh);
         if (socket.readyState <= WebSocket.OPEN) {
           socket.close(1000, 'client_dispose');
         }

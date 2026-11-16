@@ -1,16 +1,15 @@
-import {DataAnalysisPredictionDTO, DataAnalysisResultDTO} from "@shared-lib/modules/app-execution/dto/prediction";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {BaseChatMessageDTO} from "@shared-lib/modules/app-execution/dto/chat";
 
 export enum ModelWorkflowChatMessageType {
   CHAT_MESSAGE = "CHAT_MESSAGE",
-  PREDICTION = "PREDICTION",
-  WORKFLOW_PREDICTION = "WORKFLOW_PREDICTION",
+  RUN = "RUN",
 }
 
 
 export interface ModelWorkflowChatWrapperDTO {
   type: ModelWorkflowChatMessageType;
-  message: ModelWorkflowMessageDto | DataAnalysisPredictionDTO | DataAnalysisResultDTO;
+  message: ModelWorkflowMessageDto | DataAnalysisRunDTO;
 }
 
 export interface ModelWorkflowMessageDto extends BaseChatMessageDTO {

@@ -30,10 +30,15 @@ export class DockerImageTagComponent {
     const img = this.imageName();
     if (!img) return 'No image';
     const lastColon = img.lastIndexOf(':');
-    return lastColon === -1 ? img : img.slice(lastColon + 1);
+    const tag = lastColon > img.lastIndexOf('/') ? img.slice(lastColon + 1) : img;
+    return /^[a-f0-9]{40,64}$/i.test(tag) ? tag.slice(0, 8) : tag;
   });
 
-  onClicked(): void {
-    if (this.clickable() && this.hasImage()) this.clicked.emit();
+  onClicked(event?: Event): void {
+    if (this.clickable() && this.hasImage()) {
+      event?.preventDefault();
+      event?.stopPropagation();
+      this.clicked.emit();
+    }
   }
 }

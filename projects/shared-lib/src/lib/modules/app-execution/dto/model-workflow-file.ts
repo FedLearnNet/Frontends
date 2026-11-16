@@ -5,8 +5,8 @@ export interface DataAnalysisFileDTO extends BaseDto {
   dataAnalysisId: number;
   file: FileDTO;
 
-  // Optional association to a prediction
+  // Optional association to the execution attempt that read or wrote the file
   outputName?: string;
   inputName?: string;
-  predictionId?: number;
+  attemptId?: number;
 }

@@ -36,6 +36,16 @@
     <div class="title-strong">Pipelines</div>
     <span class="spacer"></span>
     @if (canCreate()) {
+      @if (runModes().length > 1) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Run mode</mat-label>
+          <mat-select [ngModel]="runMode()" (ngModelChange)="runMode.set($event)">
+            @for (mode of runModes(); track mode) {
+              <mat-option [value]="mode">{{ runModeOptionLabels[mode] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
       <lib-btn
         type="START"
         label="Start new pipeline" (clicked)="create()"/>
@@ -55,6 +65,7 @@
           <div class="row-title">
             #{{ filtered().length - $index }}
             <span class="chip">{{ p.pipelineType }}</span>
+            <span class="chip">{{ pipelineRunModeLabels[p.runMode] }}</span>
           </div>
 
           <div class="pipeline-meta">

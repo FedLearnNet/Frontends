@@ -1,18 +1,16 @@
 import {inject, Injectable} from '@angular/core';
 import {catchError, map, Observable, takeWhile} from 'rxjs';
 import {ApiService} from '@shared-lib/services/api.service';
-
 import {environment} from '@local-app/env/environment';
 import {PaginatedResponse} from "@shared-lib/models";
 import {HttpHeaders, HttpParams} from "@angular/common/http";
 import {FederatedLearningProjectDto} from "../dto/federated-learning-project";
+import {ExecutionRunDetailDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from "@ngx-translate/core";
 import {SseClient} from "ngx-sse-client";
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
-import {ProjectStatus} from "@global-app/project/dto/project";
-import {RunMessageLogDTO} from "@shared-lib/modules/experiments/dto/log";
-import {FederatedLearningExperimentStepDetailDTO} from "../dto/federated-learming-steps";
+import {isFinalStatus} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 @Injectable({
   providedIn: 'root'
@@ -50,7 +48,6 @@ export class FederatedLearningProjectService {
     if (pageSize) {
       queryParam = queryParam.set('page_size', pageSize);
     }
-
     return this.apiService.get<PaginatedResponse<FederatedLearningProjectDto>>(`${this.getBaseUrl()}`, queryParam)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
@@ -58,87 +55,29 @@ export class FederatedLearningProjectService {
       );
   }
 
-  streamFederatedLearningProjectDetail(projectId: number): Observable<FederatedLearningProjectDto> {
-    const url = `${this.getBaseUrl()}/${projectId}/stream`;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-
-    return this.sseClient.stream(
-      url,
-      {keepAlive: true, responseType: 'event'},
-      {headers},
-      'GET'
-    ).pipe(
-      map((event: Event) => {
-        if ((event as any).type === 'error') {
-          const err = event as ErrorEvent;
-          console.error(err.error, err.message);
-          throw new Error('SSE connection error');
-        }
-        const me = event as MessageEvent;
-        return JSON.parse(me.data) as FederatedLearningProjectDto;
-      }),
-      takeWhile((p) => {
-        const status = (p as any).status ?? (p as any).experimentStatus;
-        return String(status).toUpperCase() !== ProjectStatus.FINISHED;
-      }, true)
-    );
-  }
-
-  streamAllStartedFederatedLearningProjects(page?: number, pageSize?: number): Observable<FederatedLearningProjectDto> {
-    const base = this.getBaseUrl();
-    const urlObj = new URL(`${base}/stream`, window.location.origin);
-
-    if (page) urlObj.searchParams.set('page', String(page));
-    if (pageSize) urlObj.searchParams.set('page_size', String(pageSize));
-
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-
-    return this.sseClient.stream(
-      urlObj.toString(),
-      {keepAlive: true, responseType: 'event'},
-      {headers},
-      'GET'
-    ).pipe(
-      map((event: Event) => {
-        if ((event as any).type === 'error') {
-          const err = event as ErrorEvent;
-          console.error(err.error, err.message);
-          throw new Error('SSE connection error');
-        }
-        const me = event as MessageEvent;
-        return JSON.parse(me.data) as FederatedLearningProjectDto;
-      }));
-  }
-
-  public streamLogMessages(experimentId: number, stepId: number): Observable<RunMessageLogDTO> {
-    const base = this.getBaseUrl();
-
-    const url = `${base}/${experimentId}/step/${stepId}/messages`;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-    return this.sseClient.stream(
-      url,
-      {keepAlive: true, responseType: 'event'},
-      {headers},
-      'GET'
-    ).pipe(
-      map(event => {
-        if (event.type === 'error') {
-          const errorEvent = event as ErrorEvent;
-          console.error(errorEvent.error, errorEvent.message);
-          throw new Error('SSE connection error');
-        }
-        const messageEvent = event as MessageEvent;
-        return JSON.parse(messageEvent.data) as RunMessageLogDTO;
-      })
-    );
-  }
-
-  public getStepDetailUpdates(experimentId: number, stepId: number): Observable<FederatedLearningExperimentStepDetailDTO> {
-    const base = this.getBaseUrl();
-    return this.apiService.get<FederatedLearningExperimentStepDetailDTO>(`${base}/${experimentId}/step/${stepId}`)
+  /** This clinic's run of the training with the logs and metrics of its steps. */
+  getRun(projectId: number): Observable<ExecutionRunDetailDTO> {
+    return this.apiService.get<ExecutionRunDetailDTO>(`${this.getBaseUrl()}/${projectId}/run`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.LOCAL_STEP_DETAIL_UPDATES').toLowerCase()}))),
+      );
+  }
+
+  /** This clinic's run of the training now and on every change after, until it ended. */
+  followRun(projectId: number): Observable<ExecutionRunDetailDTO> {
+    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
+    return this.sseClient.stream(`${this.getBaseUrl()}/${projectId}/run/stream`, {keepAlive: true, responseType: 'event'}, {headers}, 'GET')
+      .pipe(
+        map((event: Event) => {
+          if (event.type === 'error') {
+            const err = event as ErrorEvent;
+            console.error(err.error, err.message);
+            throw new Error('SSE connection error');
+          }
+          return JSON.parse((event as MessageEvent).data) as ExecutionRunDetailDTO;
+        }),
+        takeWhile(run => !isFinalStatus(run.status), true)
       );
   }
 

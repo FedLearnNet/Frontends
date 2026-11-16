@@ -33,7 +33,6 @@ export interface ProjectDto extends BaseDto {
   exportConfig?: PatientDataExportConfigDTO;
   status: ProjectStatus;
   coordinatorHasData?: boolean;
-  platformIsCoordinator?: boolean;
   role?: ProjectRole;
   file?: FileDTO;
 }

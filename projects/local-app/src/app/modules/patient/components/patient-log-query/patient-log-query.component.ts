@@ -7,9 +7,6 @@ import {MatDialog} from "@angular/material/dialog";
 import {PatientQueryLogDto} from "../../../logs/dto/logs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {PatientDto} from "../../dto/patient";
-import {LocalQueryDto} from "../../../logs/dto/query";
-import {parseValue, prettifyOperator} from "../../../logs/helper/query.helper";
-import {QueryOperatorDTO, QueryOperatorTypes} from "@global-app/find-data/dto/query";
 import {
   QueryLogDetailDialogComponent
 } from "../../../query/components/query-log-detail-dialog/query-log-detail-dialog.component";
@@ -71,43 +68,12 @@ export class PatientLogQueryComponent implements OnInit {
     return "";
   }
 
-  public formatCondition(op: QueryOperatorDTO): string {
-    const norm = op.operator as QueryOperatorTypes | string;
-    if (norm === QueryOperatorTypes.EXISTS || norm === 'exists') {
-      return prettifyOperator(norm);
-    }
-    return `${prettifyOperator(norm)} ${parseValue(op.value)}`.trim();
-  }
-
-  public fullQueryString(query: LocalQueryDto) {
-    const groups = query.enhancedQuery ?? [];
-    if (!groups.length) return '—';
-    const groupStrings = groups.map(g => {
-      const nodes = g.schemaNodes ?? [];
-      const ops = (g.operator ?? []).map(this.formatCondition);
-
-      if (!nodes.length) return ops.length ? `(${ops.join(' AND ')})` : '(—)';
-
-      const perNode = nodes.map(n => {
-        const body = ops.length ? ops.join(' AND ') : '—';
-        return `${n.name}: ${body}`;
-      });
-      return '(' + perNode.join(' OR ') + ')';
-    });
-
-    return groupStrings.join(' AND ');
-  }
-
-
   getQueryDetail(log: PatientQueryLogDto) {
     const queries = this.queries();
     if (!queries) {
       return;
     }
     return queries.find(q => q.globalQueryId === log?.queryId);
-  }
-
-  loadMore(): void {
   }
 
   openDetail(log: PatientQueryLogDto) {

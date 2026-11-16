@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.json-preview {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.json-preview__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px 4px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.json-preview__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.json-preview__copy {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+.json-preview__code {
+  max-height: 360px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  color: #0f172a;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre;
+  text-align: justify;
+
+  &:focus-visible {
+    outline: 2px solid #0f766e;
+    outline-offset: -2px;
+  }
+}

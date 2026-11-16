@@ -10,13 +10,14 @@ import {
 } from '../../../../../logs/components/patient-update-log-detail/patient-update-log-detail.component';
 import { MatDialog } from '@angular/material/dialog';
 import { GeneralLogTableComponent } from '../../../../../logs/components/general-log-table/general-log-table.component';
+import { SkeletonLoaderComponent } from '@shared-lib/components/skeleton-loader/skeleton-loader.component';
 
 @Component({
     selector: 'app-run-change-log',
     templateUrl: './run-change-log.component.html',
     styleUrl: './run-change-log.component.scss',
     changeDetection: ChangeDetectionStrategy.Eager,
-    imports: [GeneralLogTableComponent]
+    imports: [GeneralLogTableComponent, SkeletonLoaderComponent]
 })
 export class RunConnectorChangeLogComponent {
   pageSize = signal<number>(25);
@@ -82,6 +83,8 @@ export class RunConnectorChangeLogComponent {
         params.filter
     ).subscribe({
       next: (response) => this.data.set(response),
+      // The service already shows a snackbar; fall back to an empty page so the skeleton clears.
+      error: () => this.data.set({page: params.page, pageSize: params.size, totalCount: 0, results: []}),
     });
   }
 }

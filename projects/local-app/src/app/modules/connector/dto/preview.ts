@@ -32,5 +32,6 @@ export interface PreviewStageDTO {
 
 export interface PreviewResponseDTO {
   jsons: string[]
+  columns?: string[][]
   stages?: PreviewStageDTO[]
 }

@@ -16,6 +16,8 @@ export enum StepName {
   BUILD_IMAGE = "BUILD_IMAGE",
   FETCH_CONFIG = "FETCH_CONFIG",
   FETCH_FILES = "FETCH_FILES",
+  SAST = "SAST",
+  PULL_IMAGE = "PULL_IMAGE",
   PUSH_IMAGE = "PUSH_IMAGE",
   SCAN_IMAGE = "SCAN_IMAGE",
   MALWARE_CHECK = "MALWARE_CHECK",
@@ -25,8 +27,10 @@ export enum StepName {
 
 export const STEP_ORDER: StepName[] = [
   StepName.FETCH_CONFIG,
+  StepName.PULL_IMAGE,
   StepName.CLONE_REPO,
   StepName.FETCH_FILES,
+  StepName.SAST,
   StepName.BUILD_IMAGE,
   StepName.SCAN_IMAGE,
   StepName.MALWARE_CHECK,

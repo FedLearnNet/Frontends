@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {Store} from "@ngrx/store";
 import {selectById, selectStreaming} from "../../service/pipeline.selectors";
-import {PipelineDTO, PipelineStatus} from "../../dto/pipeline";
+import {PipelineDTO, pipelineRunModeLabels, PipelineStatus} from "../../dto/pipeline";
 import {getPipeline, startPipelineStream, stopPipeline, stopPipelineStream} from "../../service/pipeline.actions";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
@@ -76,4 +76,5 @@ export class PipelineDetailComponent implements OnInit, OnDestroy {
   }
 
   protected readonly PipelineStatus = PipelineStatus;
+  protected readonly pipelineRunModeLabels = pipelineRunModeLabels;
 }

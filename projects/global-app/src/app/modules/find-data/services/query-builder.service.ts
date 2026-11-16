@@ -1,3 +1,4 @@
+import {DEFAULT_DATAMODELER_API_PREFIX} from '@shared-lib/constants/datamodeler.constants';
 import {inject, Injectable} from '@angular/core';
 import {SelectOption} from '@shared-lib/models';
 import {DataTypeOperatorMap, QueryConfig} from '@global-app/find-data/models';
@@ -5,13 +6,14 @@ import {QUERY_OPERATOR_OPTIONS_CONFIG} from '@global-app/find-data/configs';
 import {isNotEmpty} from '@shared-lib/utils';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
-import {QueryDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
+import {QueryDTO} from "@global-app/find-data/dto/query";
+import {isLang2Group} from "@global-app/find-data/dto/lang2-query";
+import {formatLang2Query} from "@global-app/find-data/helpers/query-tree.serializer";
 import {TranslateService} from '@ngx-translate/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {ApiService} from "@shared-lib/services/api.service";
 import {environment} from "@global-app/env/environment";
 import {DataTypes} from "@global-app/schema/dto/datatype";
-import {formatQueryOperator} from "@global-app/find-data/helpers/query-operator.helper";
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +22,8 @@ export class QueryBuilderService {
   private readonly translate: TranslateService = inject(TranslateService);
   readonly snackBar = inject(MatSnackBar);
   readonly apiService: ApiService = inject(ApiService);
-  private readonly apiUrl = environment.datamodelerApiUrl;
+  private readonly apiUrl = environment.globalLearningApiUrl;
+  private readonly apiPrefix = environment.datamodelerApiPrefix ?? DEFAULT_DATAMODELER_API_PREFIX;
   private readonly path = 'query';
 
   private queryOperatorOptionsMap = new Map<DataTypes, DataTypeOperatorMap>();
@@ -70,18 +73,15 @@ export class QueryBuilderService {
   }
 
   getFormattedQueryString(queryDTO: QueryDTO, queryConfigs: QueryConfig[]): string {
-    let formattedQueryString = '';
+    if (!isLang2Group(queryDTO?.query)) {
+      return '';
+    }
 
-    queryDTO.query.forEach((query: QueryItemDTO, index: number) => {
-      const columnName = queryConfigs.find(queryConfig => queryConfig.ontology.id === query.ontologyId
-        && queryConfig.dataType.id === query.dataTypeId)?.name ?? '';
-      const queryOperator = query.operator[0];
-
-      formattedQueryString +=
-        `${columnName} ${formatQueryOperator(queryOperator.operator)} ${queryOperator.value} ${queryDTO.query.length !== index + 1 ? '\nAND\n' : ''}`;
+    return formatLang2Query(queryDTO.query, leaf => {
+      const columnName = queryConfigs.find(queryConfig => queryConfig.ontology.id === leaf.ontology_id
+        && queryConfig.dataType.id === leaf.data_type_id)?.name;
+      return columnName || leaf.ontology_id;
     });
-
-    return formattedQueryString;
   }
 
   private initializeQueryOperatorOptionsMap() {
@@ -116,6 +116,6 @@ export class QueryBuilderService {
 
 
   private getBaseUrl(): string {
-    return `${this.apiUrl}/${this.path}`;
+    return `${this.apiUrl}/${this.apiPrefix}/${this.path}`;
   }
 }

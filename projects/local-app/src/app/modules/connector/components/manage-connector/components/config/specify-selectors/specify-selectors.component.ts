@@ -1,4 +1,15 @@
-import {ChangeDetectorRef, Component, computed, inject, input, OnInit, output, signal, ChangeDetectionStrategy, linkedSignal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  input,
+  linkedSignal,
+  OnInit,
+  output,
+  signal
+} from '@angular/core';
 import {ConnectorStepConfig, ConnectorStepConfigChangeEmitter} from "../../../../../models/connector-step-config";
 import {
   appOutputsToFileInfo,
@@ -31,7 +42,7 @@ import {ConnectorDTO, PivotConfigDTO, SheetMergeResultDTO} from "../../../../../
 import {MatIcon} from "@angular/material/icon";
 import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorFileInfoDialogComponent} from "./components/file-info-dialog/file-info-dialog.component";
-import {ConnectorPreviewService} from "../../../../../services/connector-preview.service";
+import {ConnectorPreviewService, PreviewTable} from "../../../../../services/connector-preview.service";
 import {configToConnectorConfigDTO} from "../../../../../models/connector-config";
 import {PivotTableDialogComponent, PivotTableDialogResult} from "../pivot-table-dialog/pivot-table-dialog.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
@@ -550,13 +561,13 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     }
     const config = {...this.config(), fileInfo: undefined, uploadInfo: undefined};
     this.connectorPreviewService.previewPivot(configToConnectorConfigDTO(config)).subscribe({
-      next: ([rows]) => {
-        if (!rows?.length || this.sheets.length !== 1) {
+      next: ([table]) => {
+        if (!table?.rows.length || this.sheets.length !== 1) {
           return;
         }
+        const {rows, columns} = table;
         const sheet = this.sheets[0];
         const previous = sheet.info;
-        const columns = [...new Set(rows.flatMap(row => Object.keys(row)))];
         const indexOf = (column: string) => previous.columns.indexOf(column);
         sheet.info = {
           ...previous,
@@ -601,26 +612,29 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     this.connectorPreviewService.previewPivot(configToConnectorConfigDTO(this.config())).pipe(
       finalize(() => this.pivotPreviewRunning.set(false))
     ).subscribe({
-      next: rowsByTable => this.applyPivotPreview(rowsByTable),
+      next: tables => this.applyPivotPreview(tables),
       error: () => {
         // The service displays backend validation and generic preview errors.
       }
     });
   }
 
-  private applyPivotPreview(rowsByTable: any[][]): void {
-    const responseContainsAllTables = rowsByTable.length === this.sourceTables.length;
+  private applyPivotPreview(tables: PreviewTable[]): void {
+    const responseContainsAllTables = tables.length === this.sourceTables.length;
     let enabledResponseIndex = 0;
 
-    const previewSheets = this.sourceTables.map((table, tableIndex) => {
-      let rows = table.info.json;
+    this.pivotTables = this.sourceTables.map((table, tableIndex) => {
+      let preview: PreviewTable = {
+        rows: table.info.json,
+        columns: table.info.json.length > 0 ? table.info.columns : []
+      };
       if (responseContainsAllTables) {
-        rows = rowsByTable[tableIndex] ?? [];
+        preview = tables[tableIndex] ?? {rows: [], columns: []};
       } else if (this.config().pivotConfig?.valueColumnIndex[table.name] !== undefined) {
-        rows = rowsByTable[enabledResponseIndex++] ?? [];
+        preview = tables[enabledResponseIndex++] ?? {rows: [], columns: []};
       }
 
-      const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+      const {rows, columns} = preview;
       return {
         name: table.name,
         info: {
@@ -632,8 +646,6 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
         }
       };
     });
-
-    this.pivotTables = previewSheets;
     this.refreshMergeAfterPivotPreview();
   }
 

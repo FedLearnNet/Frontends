@@ -37,47 +37,58 @@
       @if (form.get('role')?.value === FLNetParticipantRole.CLIENT) {
 
 
-        <div class="hyperparams-card">
-          <div class="hyperparams-card__title">Hyperparameters</div>
-          <div class="hyperparams-card__subtitle">
-            Configure participant-specific hyperparameters for this federated node.
-          </div>
-
-          <lib-app-run-hyperparameter
-            [app]="app"
-            [hyperParams]="dynamicHyperparams"
-            (hyperParamsChange)="onHyperParamsChanged($event)"
-            (formsValid)="hyperParamsValid = $event"/>
-        </div>
-
         @if (dataInputKeys().length > 0) {
           <div class="hyperparams-card">
             <div class="hyperparams-card__title">Input files</div>
             <div class="hyperparams-card__subtitle">
-              Choose local files from the shared data directory for this participant.
+              Choose from My Files or upload data for this client.@if (!builtImage) { You can also enter a path from the engine's shared data directory. }
             </div>
 
             <div class="form-grid">
               @for (key of dataInputKeys(); track key) {
+                @if (builtImage) {
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>{{ key }}</mat-label>
+                    <mat-select [formControl]="getDataControl(key)">
+                      <mat-option value="">None</mat-option>
+                      @for (file of files(); track file.id) {
+                        <mat-option [value]="fileUrl(file)" [disabled]="!file.downloadUrl || !file.secret">{{ file.fileName }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                } @else {
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>{{ key }}</mat-label>
                   <input
                     matInput
                     [formControl]="getDataControl(key)"
                     [matAutocomplete]="auto"
-                    placeholder="e.g. iris.csv or nested/folder/file.csv"
+                    placeholder="Select a file or enter a local path"
                     autocomplete="off"
                   />
-                  <mat-autocomplete #auto="matAutocomplete">
+                  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFile">
+                    @for (file of files(); track file.id) {
+                      <mat-option [value]="fileUrl(file)" [disabled]="!file.downloadUrl || !file.secret">{{ file.fileName }}</mat-option>
+                    }
                     @for (option of (filteredOptions[key] | async) ?? []; track option) {
                       <mat-option [value]="option">{{ option }}</mat-option>
                     }
                   </mat-autocomplete>
                 </mat-form-field>
+                }
+                <input #upload type="file" hidden (change)="uploadFile(key, $event)"/>
+                <button mat-stroked-button type="button" [disabled]="uploading()" (click)="upload.click()"><mat-icon>upload_file</mat-icon>Upload file</button>
+                @if (uploads()[key]; as progress) { <lib-upload-progress [progress]="progress"/> }
+                @if (filesFailed()) { <p>Could not load My Files. You can still upload a file.</p> }
               }
             </div>
           </div>
         }
+        <mat-expansion-panel class="hyperparams-card hyperparams-card--advanced">
+          <mat-expansion-panel-header><mat-panel-title>Hyperparameters</mat-panel-title><mat-panel-description>Tool defaults are prefilled</mat-panel-description></mat-expansion-panel-header>
+          <lib-app-run-hyperparameter [app]="app" [hyperParams]="dynamicHyperparams"
+            (hyperParamsChange)="onHyperParamsChanged($event)" (formsValid)="hyperParamsValid = $event"/>
+        </mat-expansion-panel>
       }
     </form>
   </mat-dialog-content>
@@ -91,7 +102,7 @@
       mat-flat-button
       type="button"
       class="primary-btn"
-      [disabled]="form.invalid || !hyperParamsValid"
+      [disabled]="form.invalid || uploading() || (form.controls.role.value === FLNetParticipantRole.CLIENT && (!hyperParamsValid || !inputsValid()))"
       (click)="save()"
     >
       {{ saveLabel() }}

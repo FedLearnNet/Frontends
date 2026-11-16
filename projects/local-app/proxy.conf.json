@@ -1,0 +1,9 @@
+{
+  "/local-learning-api": {
+    "target": "http://localhost:8081",
+    "pathRewrite": {
+      "^/local-learning-api": ""
+    },
+    "ws": true
+  }
+}

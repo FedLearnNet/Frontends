@@ -1,9 +1,7 @@
-import {ApplicationConfig, isDevMode} from '@angular/core';
+import {ApplicationConfig, inject, isDevMode} from '@angular/core';
 import {routes} from './app.routes';
 import {provideHttpClient, withFetch, withInterceptors} from '@angular/common/http';
-import {CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, customBearerTokenInterceptor} from 'keycloak-angular';
-import {bearerTokenCondition} from '@shared-lib/services/keycloak-bearer.config';
-import {provideKeycloakAngular} from '@shared-lib/services/keycloak';
+import {provideBffAuth} from '@shared-lib/services/auth';
 import {provideRouter, withComponentInputBinding, withRouterConfig} from "@angular/router";
 import {provideTranslateService} from "@ngx-translate/core";
 import {provideTranslateHttpLoader} from "@ngx-translate/http-loader";
@@ -14,29 +12,22 @@ import {provideRouterStore} from "@ngrx/router-store";
 import {ModelEffects} from "@shared-lib/modules/app-execution/store/model/model.effects";
 import {featureKey as modelFeatureKey, modelReducer} from "@shared-lib/modules/app-execution/store/model/model.reducer";
 import {authInterceptor} from '@shared-lib/interceptors/auth.interseptor';
-import {sessionInterceptor} from '@shared-lib/interceptors/session.interceptor';
 import {loadingInterceptor} from "@shared-lib/interceptors/loading.interceptor";
 import {provideAnimationsAsync} from "@angular/platform-browser/animations/async";
 import {featureKey as pipelineFeatureKey, pipelineReducer} from "./modules/pipeline/service/pipeline.reducer";
 import {featureKey as fileKey, filesReducer} from "@shared-lib/modules/files/store/file.reducer";
 import {FileEffects} from "@shared-lib/modules/files/store/file.effects";
 import {PipelineEffects} from "./modules/pipeline/service/pipeline.effects";
+import {featureKey as testEngineKey, testEngineReducer} from "./modules/tool-development/store/test-engine.reducer";
+import {TestEngineEffects} from "./modules/tool-development/store/test-engine.effects";
 import {WorkflowEffects} from "@shared-lib/modules/workflow/store/workflow.effects";
 import {featureKey as workflowKey, workflowReducer} from "@shared-lib/modules/workflow/store/workflow.reducer";
 import {featureKey as storeKey, storeReducer} from "@shared-lib/modules/store/store/store.reducer";
 import {StoreEffects} from "@shared-lib/modules/store/store/store.effects";
-import {ProjectLocalExperimentsEffects} from "@global-app/project/store/project-local-experiments.effects";
-import {
-  featureKey as localExperimentKey,
-  projectLocalExperimentReducer
-} from "@global-app/project/store/project-local-experiments.reducer";
+import {ProjectRunsEffects} from "@global-app/project/store/project-runs.effects";
+import {featureKey as projectRunsKey, projectRunsReducer} from "@global-app/project/store/project-runs.reducer";
 import {ProjectEffects} from "@global-app/project/store/project.effects";
 import {featureKey as projectKey, projectReducer} from "@global-app/project/store/project.reducer";
-import {
-  featureKey as fedExperimentKey,
-  projectFederatedExperimentReducer
-} from "@global-app/project/store/project-federated-experiments.reducer";
-import {ProjectFederatedExperimentsEffects} from "@global-app/project/store/project-federated-experiments.effects";
 import {WorkflowChatEffects} from "@shared-lib/modules/workflow/store/workflow-chat.effects";
 import {
   featureKey as workflowChatKey,
@@ -48,22 +39,21 @@ import {auditReducer, featureKey as auditKey} from "./modules/audit/service/audi
 import {AuditEffects} from "./modules/audit/service/audit.effects";
 import {featureKey as orchKey, orchReducer} from "@shared-lib/modules/admin/store/orch.reducer";
 import {OrchEffects} from "@shared-lib/modules/admin/store/orch.effects";
+import {PIPELINE_RESCAN, PipelineRescan} from "@shared-lib/modules/pipeline/pipeline-rescan";
+import {PipelineService} from "./modules/pipeline/service/pipeline.service";
+import {PipelineRunMode, PipelineType} from "./modules/pipeline/dto/pipeline";
+import {startWith, switchMap} from "rxjs";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    {
-      provide: CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [bearerTokenCondition]
-    },
+    {provide: PIPELINE_RESCAN, useFactory: pipelineRescan},
     provideHttpClient(
       withInterceptors([
         loadingInterceptor,
-        sessionInterceptor,
-        authInterceptor,
-        customBearerTokenInterceptor
+        authInterceptor
       ]),
       withFetch()),
-    provideKeycloakAngular(),
+    provideBffAuth(),
     provideRouter(routes,
       withComponentInputBinding(),
       withRouterConfig({
@@ -83,11 +73,11 @@ export const appConfig: ApplicationConfig = {
       [workflowKey]: workflowReducer,
       [workflowChatKey]: workflowChatReducer,
       [storeKey]: storeReducer,
-      [localExperimentKey]: projectLocalExperimentReducer,
-      [fedExperimentKey]: projectFederatedExperimentReducer,
+      [projectRunsKey]: projectRunsReducer,
       [projectKey]: projectReducer,
       [auditKey]: auditReducer,
       [orchKey]: orchReducer,
+      [testEngineKey]: testEngineReducer,
     }),
     provideState(dataAnalysisFeature),
     provideEffects([
@@ -96,15 +86,25 @@ export const appConfig: ApplicationConfig = {
       FileEffects,
       PipelineEffects,
       StoreEffects,
-      ProjectLocalExperimentsEffects,
-      ProjectFederatedExperimentsEffects,
+      ProjectRunsEffects,
       ProjectEffects,
       WorkflowChatEffects,
       AuditEffects,
       DataAnalysisEffects,
-      OrchEffects]),
+      OrchEffects,
+      TestEngineEffects]),
     provideStoreDevtools({maxAge: 25, logOnly: !isDevMode()}),
     provideRouterStore(),
     provideAnimationsAsync(),
   ],
+}
+
+function pipelineRescan(): PipelineRescan {
+  const pipelines = inject(PipelineService);
+  return appVersionId => pipelines.create({
+    pipelineType: PipelineType.APP,
+    runMode: PipelineRunMode.SCAN_ONLY,
+    appVersionId,
+    autoStart: true,
+  }).pipe(switchMap(pipeline => pipelines.stream(pipeline.id).pipe(startWith(pipeline))));
 }

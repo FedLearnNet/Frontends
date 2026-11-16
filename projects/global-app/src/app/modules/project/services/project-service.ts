@@ -1,6 +1,6 @@
 import {inject, Injectable} from "@angular/core";
 import {ApiService} from "@shared-lib/services/api.service";
-import {catchError, map, Observable, throwError} from "rxjs";
+import {catchError, map, Observable, shareReplay, throwError} from "rxjs";
 import {ProjectCreateDto, ProjectDetailDto, ProjectDto} from "../dto/project";
 import {environment} from "@global-app/env/environment";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
@@ -20,6 +20,10 @@ export class ProjectService {
   private readonly apiUrl = environment.globalLearningApiUrl;
   private readonly path = 'project'
 
+  // Deployment-wide and effectively static for the app's lifetime - cache it so every
+  // create-project dialog open doesn't re-fetch it.
+  private platformAggregatorSupported$?: Observable<boolean>;
+
   //start
   public getProjects(): Observable<ProjectDto[]> {
     return this.apiService.get<ProjectDto[]>(this.getBaseUrl())
@@ -38,6 +42,23 @@ export class ProjectService {
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PROJECT_WITH_ID', {id: id}).toLowerCase()}))),
       );
+  }
+
+  public getPlatformAggregatorSupported(): Observable<boolean> {
+    if (!this.platformAggregatorSupported$) {
+      this.platformAggregatorSupported$ = this.apiService.get<boolean>(`${this.getBaseUrl()}/platform-aggregator-supported`)
+        .pipe(
+          catchError((err) => {
+            // Don't cache failures - let the next call retry instead of permanently replaying
+            // this error for the rest of the app session.
+            this.platformAggregatorSupported$ = undefined;
+            return this.errorSnackbarService.showSnackBar(err,
+              this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.PLATFORM_AGGREGATOR_SUPPORT')}));
+          }),
+          shareReplay(1),
+        );
+    }
+    return this.platformAggregatorSupported$;
   }
 
   public createProject(project: ProjectCreateDto): Observable<ProjectDetailDto> {

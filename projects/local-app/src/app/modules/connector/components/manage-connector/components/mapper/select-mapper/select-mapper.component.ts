@@ -1,4 +1,4 @@
-import {Component, effect, inject, OnInit, Signal, ChangeDetectionStrategy} from '@angular/core';
+import {Component, effect, inject, OnInit, Signal, ChangeDetectionStrategy, signal} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatButtonModule} from '@angular/material/button';
@@ -11,6 +11,12 @@ import {TranslatePipe} from '@ngx-translate/core';
 
 import {CohortDetailDto} from '@local-app/cohort/models';
 import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from '@local-app/cohort/dto/schema';
+import {
+  DataTypeDto,
+  dataTypeAllowedValueLabels,
+  DataTypeValidationDto,
+  dataTypeValidationLabel
+} from '@local-app/cohort/dto/data-type';
 import {DynamicFormService} from '@local-app/cohort/services/dynamic-form.service';
 import {
   ConnectorMappingMode,
@@ -129,8 +135,8 @@ export class ConnectorSelectMapperComponent implements OnInit {
   customValueInput = '';
   valueSearch = '';
   unmappedOnly = false;
-  validationStatus: ValidationStatus = 'IDLE';
-  validationSummary?: ConnectorMappingValidationSummary;
+  readonly validationStatus = signal<ValidationStatus>('IDLE');
+  readonly validationSummary = signal<ConnectorMappingValidationSummary | undefined>(undefined);
   private validationRequestId = 0;
 
   private readonly previewValidationEffect = effect(() => {
@@ -147,7 +153,7 @@ export class ConnectorSelectMapperComponent implements OnInit {
     const existingValueMapping = this.data.valueMappingConfig;
     this.column = existingValueMapping?.valueColumn ?? this.data.column;
     this.cohort = this.data.cohort;
-    this.validationSummary = existingValueMapping?.validationSummary ?? this.data.validationSummary;
+    this.validationSummary.set(existingValueMapping?.validationSummary ?? this.data.validationSummary);
     this.syncValidationStatus();
     if (this.data.removeFieldsPath) {
       this.cohort = this.removeFields(this.cohort, this.data.removeFieldsPath);
@@ -360,6 +366,14 @@ export class ConnectorSelectMapperComponent implements OnInit {
     return !this.isGroupNode(node);
   }
 
+  allowedValueLabels(dataType: DataTypeDto): string[] {
+    return dataTypeAllowedValueLabels(dataType);
+  }
+
+  validationLabel(validation: DataTypeValidationDto): string {
+    return dataTypeValidationLabel(validation);
+  }
+
   getNodeIcon(node: SchemaNodeNestedDto): string {
     if (this.isGroupNode(node)) return 'folder';
     if (node.nodeType === SchemaNodeTypeEnum.LIST_ATTRIBUTE) return 'format_list_bulleted';
@@ -409,10 +423,10 @@ export class ConnectorSelectMapperComponent implements OnInit {
     if (this.mode === ConnectorMappingMode.DIRECT) {
       if (this.selectedValues.every(value => !value)) return true;
       const node = this.getSelectedNode();
-      return !!node && this.isMappingTarget(node) && this.validationStatus !== 'CHECKING';
+      return !!node && this.isMappingTarget(node) && this.validationStatus() !== 'CHECKING';
     }
     const mappingColumnSelected = this.mode === ConnectorMappingMode.ONE_HOT || !!this.mappingColumn;
-    return mappingColumnSelected && this.valueMappings.length > 0 && this.validationStatus !== 'CHECKING';
+    return mappingColumnSelected && this.valueMappings.length > 0 && this.validationStatus() !== 'CHECKING';
   }
 
   clear(): void {
@@ -478,7 +492,7 @@ export class ConnectorSelectMapperComponent implements OnInit {
         displayValue: this.selectedValues.join(' > '),
         value: this.selectedValues.join('.'),
         schemaId: this.getLatestSelectedSchemaId(),
-        validationSummary: this.validationSummary,
+        validationSummary: this.validationSummary(),
       } satisfies ConnectorSelectMapperResult);
       return;
     }
@@ -490,7 +504,7 @@ export class ConnectorSelectMapperComponent implements OnInit {
       valueMappings: this.sourceValueOptions
         .map(option => this.getValueTarget(option.value))
         .filter((mapping): mapping is ConnectorValueTarget => !!mapping),
-      validationSummary: this.validationSummary,
+      validationSummary: this.validationSummary(),
     };
     this.dialogRef.close({
       mode: this.mode,
@@ -498,7 +512,7 @@ export class ConnectorSelectMapperComponent implements OnInit {
       value: '',
       schemaId: 0,
       valueMappingConfig,
-      validationSummary: this.validationSummary,
+      validationSummary: this.validationSummary(),
     } satisfies ConnectorSelectMapperResult);
   }
 
@@ -511,14 +525,14 @@ export class ConnectorSelectMapperComponent implements OnInit {
     const candidates = this.buildValidationCandidates();
     if (!candidates.length) {
       this.validationRequestId++;
-      this.validationSummary = undefined;
-      this.validationStatus = 'NO_DATA';
+      this.validationSummary.set(undefined);
+      this.validationStatus.set('NO_DATA');
       return;
     }
 
     const requestId = ++this.validationRequestId;
-    this.validationStatus = 'CHECKING';
-    this.validationSummary = undefined;
+    this.validationStatus.set('CHECKING');
+    this.validationSummary.set(undefined);
     const candidateGroups = new Map<string, ValidationCandidate[]>();
     candidates.forEach(candidate => {
       const groupKey = `${candidate.schemaId ?? 'external'}:${candidate.targetPath}`;
@@ -548,8 +562,8 @@ export class ConnectorSelectMapperComponent implements OnInit {
         };
       });
       const valid = examples.every(example => example.valid);
-      this.validationSummary = {valid, examples};
-      this.validationStatus = valid ? 'VALID' : 'INVALID';
+      this.validationSummary.set({valid, examples});
+      this.validationStatus.set(valid ? 'VALID' : 'INVALID');
     });
   }
 
@@ -661,8 +675,8 @@ export class ConnectorSelectMapperComponent implements OnInit {
 
   private resetValidation(): void {
     this.validationRequestId++;
-    this.validationSummary = undefined;
-    this.validationStatus = 'IDLE';
+    this.validationSummary.set(undefined);
+    this.validationStatus.set('IDLE');
   }
 
   private clearMappingColumnSelection(): void {
@@ -674,11 +688,11 @@ export class ConnectorSelectMapperComponent implements OnInit {
   }
 
   private syncValidationStatus(): void {
-    if (!this.validationSummary) {
-      this.validationStatus = 'IDLE';
+    if (!this.validationSummary()) {
+      this.validationStatus.set('IDLE');
       return;
     }
-    this.validationStatus = this.validationSummary.valid ? 'VALID' : 'INVALID';
+    this.validationStatus.set(this.validationSummary()?.valid ? 'VALID' : 'INVALID');
   }
 
   private rebuildSourceValueOptions(): void {

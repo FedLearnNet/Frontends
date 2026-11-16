@@ -1,0 +1,111 @@
+<lib-header
+  [enableGoBack]="true"
+  [locationBack]="true"
+  [title]="title()"
+  description="Attempt with its params, logs, metrics, files and runtime.">
+  <button suffix mat-raised-button type="button" (click)="attempt.reload()">
+    <mat-icon>refresh</mat-icon>
+    Refresh
+  </button>
+</lib-header>
+
+<lib-page-wrapper
+  [isLoading]="attempt.isLoading() && !attempt.hasValue()"
+  [skeletonOnLoading]="true"
+  [error]="attempt.error()">
+
+  @if (attempt.value(); as attempt) {
+    <lib-status-title [type]="runStatusToBadgeStatus(attempt.status)">
+      Attempt #{{ attempt.id }} · trial {{ attempt.trialIndex }}
+    </lib-status-title>
+
+    @if (attempt.failure?.message) {
+      <lib-info-card class="section" type="ERROR" variant="BANNER"
+                     [title]="attempt.failure?.category + ' · ' + attempt.failure?.type"
+                     [subtitle]="attempt.failure?.message ?? undefined"/>
+    }
+
+    <lib-info-grid class="section" title="Meta-Data">
+      <lib-info-item title="Public ID">
+        <lib-badge color="GRAY" [uppercase]="true" [wrap]="true" [text]="attempt.publicId"/>
+      </lib-info-item>
+      <lib-info-item title="Step / Run">
+        <lib-badge color="GRAY" [text]="'#' + attempt.stepId + ' / #' + attempt.runId"/>
+      </lib-info-item>
+      <lib-info-item title="Container">
+        <lib-badge color="GRAY" [uppercase]="true" [wrap]="true"
+                   [text]="attempt.containerId ? attempt.containerId.substring(0, 12) : 'N/A'"/>
+      </lib-info-item>
+      <lib-info-item title="Exit code">
+        <lib-badge [color]="(attempt.exitCode === null || attempt.exitCode === undefined) ? 'GRAY' : attempt.exitCode === 0 ? 'GREEN' : 'RED'"
+                   [uppercase]="true" [text]="attempt.exitCode !== null && attempt.exitCode !== undefined ? '' + attempt.exitCode : 'N/A'"/>
+      </lib-info-item>
+      <lib-info-item title="Progress">
+        <lib-badge color="BLUE" [text]="(attempt.progress ?? 0) + '%'"/>
+      </lib-info-item>
+      @if (attempt.scoreMetric) {
+        <lib-info-item title="Score">
+          <lib-value-card [label]="attempt.scoreMetric.metric" [value]="attempt.scoreMetric.value" size="SMALL"/>
+        </lib-info-item>
+      }
+    </lib-info-grid>
+
+    <lib-info-grid class="section" title="Timing">
+      <lib-info-item title="Created">
+        <lib-time-badge [date]="attempt.createdAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Started">
+        <lib-time-badge [date]="attempt.startedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Finished">
+        <lib-time-badge [date]="attempt.finishedAt" color="GRAY"/>
+      </lib-info-item>
+      <lib-info-item title="Duration">
+        <lib-time-badge [date]="attempt.startedAt" [dateTo]="attempt.finishedAt" [calcDuration]="true" color="GRAY"/>
+      </lib-info-item>
+    </lib-info-grid>
+
+    @if (attempt.participantId) {
+      <lib-info-grid class="section" title="Federation">
+        <lib-info-item title="Participant">
+          <lib-federated-client-type-badge [clientType]="$any('CLIENT')" [clientName]="attempt.participantId"/>
+        </lib-info-item>
+        <lib-info-item title="Round">
+          <lib-badge color="BLUE" [text]="'' + (attempt.currentRound ?? 0)"/>
+        </lib-info-item>
+        <lib-info-item title="Messages sent">
+          <lib-badge color="GRAY" iconName="arrow_upward" [text]="'' + (attempt.messagesSent ?? 0)"/>
+        </lib-info-item>
+        <lib-info-item title="Messages received">
+          <lib-badge color="GRAY" iconName="arrow_downward" [text]="'' + (attempt.messagesReceived ?? 0)"/>
+        </lib-info-item>
+        @if (attempt.waitingFor?.length) {
+          <lib-info-item title="Waiting for">
+            @for (participant of attempt.waitingFor!; track participant) {
+              <lib-badge color="ORANGE" [uppercase]="true" [text]="participant"/>
+            }
+          </lib-info-item>
+        }
+      </lib-info-grid>
+    }
+
+    @if (attempt.meta) {
+      <section class="section">
+        <lib-run-performance [meta]="attempt.meta"/>
+      </section>
+    }
+
+    @if (experimentData(); as data) {
+      <section class="section">
+        <lib-experiment-workflow-node-detail [experimentData]="data" [hideController]="false"/>
+      </section>
+    }
+
+    <section class="json-grid">
+      @if (attempt.rounds?.length) {
+        <lib-json-editor title="Rounds" [jsonObject]="attempt.rounds"/>
+      }
+      <lib-json-editor title="Attempt" [jsonObject]="raw()"/>
+    </section>
+  }
+</lib-page-wrapper>

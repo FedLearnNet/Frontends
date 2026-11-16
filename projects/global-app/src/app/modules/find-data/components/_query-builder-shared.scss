@@ -1,0 +1,127 @@
+$qb-text: #334155;
+$qb-muted: #64748b;
+$qb-label: #475569;
+$qb-border: #d6dbe1;
+$qb-teal: #0f766e;
+$qb-teal-soft: #e7f6f3;
+$qb-field-height: 40px;
+
+@mixin compact-fields {
+  --mat-form-field-container-height: #{$qb-field-height};
+  --mat-form-field-container-vertical-padding: 8px;
+  --mat-form-field-container-text-size: 14px;
+}
+
+@mixin field {
+  .qb-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .qb-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 20px;
+    color: $qb-label;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .qb-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    min-height: $qb-field-height;
+  }
+
+  .qb-suffix {
+    color: $qb-muted;
+    font-size: 12px;
+  }
+}
+
+@mixin info-button {
+  .info-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #94a3b8;
+    cursor: help;
+    flex: 0 0 auto;
+
+    &:hover,
+    &:focus-visible {
+      color: $qb-label;
+    }
+
+    mat-icon {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  ::ng-deep .query-help-tooltip,
+  ::ng-deep .query-help-tooltip .mdc-tooltip__surface {
+    max-width: 280px;
+    white-space: normal;
+    line-height: 1.4;
+  }
+}
+
+@mixin segmented {
+  .segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    border: 1px solid $qb-border;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .segmented__option {
+    min-height: $qb-field-height - 2px;
+    padding: 0 12px;
+    border: 0;
+    border-left: 1px solid $qb-border;
+    background: transparent;
+    color: $qb-text;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:first-child {
+      border-left: 0;
+    }
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $qb-teal;
+      outline-offset: -2px;
+    }
+
+    &.active {
+      background: $qb-teal-soft;
+      color: $qb-teal;
+      font-weight: 600;
+    }
+  }
+}

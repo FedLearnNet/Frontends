@@ -1,5 +1,6 @@
 import {Routes} from '@angular/router';
-import {ADMIN_REALM_ROLE, AuthGuard} from "@shared-lib/services/keycloak";
+import {AuthGuard} from "@shared-lib/services/auth";
+import {ADMIN_REALM_ROLE} from "@shared-lib/services/auth.helper";
 import {DashboardComponent} from "@local-app/utils/components/dashboard/dashboard.component";
 
 export const routes: Routes = [

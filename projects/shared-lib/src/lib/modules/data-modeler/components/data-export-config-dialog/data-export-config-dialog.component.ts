@@ -26,10 +26,15 @@ import {
 } from "../../../../../../../local-app/src/app/modules/patient/service/patient-export.service";
 import {
   isTerminalRunStatus,
-  PatientToolRunOutputDTO,
-  PatientToolRunStatus,
-  PatientToolRunSummaryDTO
+  PatientToolRunStatus
 } from "../../../../../../../local-app/src/app/modules/patient/dto/patient-tool-run";
+import {
+  errorOf,
+  ExecutionFileDTO,
+  ExecutionRunDetailDTO,
+  outputsOf,
+  singleAttemptOf
+} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {PatientDataExportConfigDTO} from "@shared-lib/modules/data-modeler/dto/data-export.dto";
 
 interface DataExportConfig {
@@ -79,7 +84,7 @@ export class DataExportConfigDialogComponent implements OnInit {
   runId = signal<number | null>(null);
   runStatus = signal<PatientToolRunStatus | null>(null);
   runProgress = signal<number | null>(null);
-  runOutputs = signal<PatientToolRunOutputDTO[]>([]);
+  runOutputs = signal<ExecutionFileDTO[]>([]);
   runError = signal<string | null>(null);
   runLogs = signal<RunMessageLogDTO[]>([]);
   runStartedAt = signal<Date | null>(null);
@@ -88,7 +93,7 @@ export class DataExportConfigDialogComponent implements OnInit {
   streaming = signal<boolean>(false);
 
   // Earlier app-based exports of the cohort
-  history = signal<PatientToolRunSummaryDTO[]>([]);
+  history = signal<ExecutionRunDetailDTO[]>([]);
   historyLoading = signal<boolean>(false);
   historyError = signal<string | null>(null);
   downloadingRunId = signal<number | null>(null);
@@ -218,27 +223,33 @@ export class DataExportConfigDialogComponent implements OnInit {
     this.runSubscription = this.exportService.streamAppExport(cohortId, config).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
-      next: event => {
-        if (event.runId !== undefined && event.runId !== null) {
-          this.runId.set(event.runId);
+      next: run => {
+        // Before the run exists the server says what it prepares.
+        if (run.id === undefined || run.id === null) {
+          this.addLocalLog(run.name ?? 'Preparing the export');
+        } else {
+          this.runId.set(run.id);
         }
-        const status = event.status;
-        if (status?.runStatus) {
-          this.runStatus.set(status.runStatus);
-          this.runProgress.set(status.progress ?? null);
+        const status = run.status as PatientToolRunStatus;
+        const attempt = singleAttemptOf(run);
+        this.runStatus.set(status);
+        // An app reports its progress in percent.
+        this.runProgress.set(attempt?.progress != null ? attempt.progress / 100 : null);
+        if (attempt?.lastLog) {
+          this.addLocalLog(attempt.lastLog, 'app');
         }
-        this.addLogs(event.logs ?? []);
-        if (status?.runStatus === 'ERROR') {
-          this.runError.set(status.lastError || 'The export app failed');
+        if (status === 'ERROR') {
+          this.runError.set(errorOf(run) || 'The export app failed');
         }
-        if (status?.runStatus === 'FINISHED') {
-          this.runOutputs.set(event.outputs ?? []);
-          this.downloadReady.set(event.downloadReady);
-          if (event.downloadReady) {
+        if (status === 'FINISHED') {
+          const outputs = outputsOf(run);
+          this.runOutputs.set(outputs);
+          this.downloadReady.set(outputs.length > 0);
+          if (outputs.length > 0) {
             this.downloadRun(this.runId());
           }
         }
-        if (isTerminalRunStatus(status?.runStatus)) {
+        if (isTerminalRunStatus(status)) {
           this.runEndedAt.set(new Date());
           this.loadHistory();
         }
@@ -265,11 +276,15 @@ export class DataExportConfigDialogComponent implements OnInit {
     });
   }
 
-  private addLocalLog(message: string): void {
+  // A line repeated by the next change of the run is shown once.
+  private addLocalLog(message: string, process = 'browser'): void {
+    if (this.runLogs().at(-1)?.message === message) {
+      return;
+    }
     this.addLogs([{
       message,
       severity: 'INFO',
-      process: 'browser',
+      process,
       createdAt: new Date().toISOString(),
     } as unknown as RunMessageLogDTO]);
   }

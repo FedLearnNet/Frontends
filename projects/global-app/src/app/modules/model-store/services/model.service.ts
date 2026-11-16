@@ -80,7 +80,10 @@ export class ModelService {
       .pipe(
         catchError((err) => {
           const errorMessage = JSON.stringify(err.error) || this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('GRID.SUB_MODELS').toLowerCase()});
-          this.snackBar.open(errorMessage, this.translate.instant('BUTTON.CLOSE'), {duration: 5000});
+          // none released yet is no error
+          if (err.status !== 404) {
+            this.snackBar.open(errorMessage, this.translate.instant('BUTTON.CLOSE'), {duration: 5000});
+          }
           return throwError(() => err);
         })
       );

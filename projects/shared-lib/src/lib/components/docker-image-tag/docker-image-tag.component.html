@@ -2,7 +2,7 @@
      [class.clickable]="clickable() && hasImage()"
      [matTooltip]="imageName() ?? ''"
      [matTooltipDisabled]="!imageName()"
-     (click)="onClicked()">
+     (click)="onClicked($event)">
   <lib-badge
     [text]="displayTag()"
     [color]="resolvedColor()"

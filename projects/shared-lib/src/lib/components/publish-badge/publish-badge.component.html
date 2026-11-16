@@ -1,4 +1,4 @@
-<div [class]="className()">
+<div [class]="className()" [matTooltip]="warning() ?? ''" [matTooltipDisabled]="!warning()">
   @if (iconName()) {
     <mat-icon>{{ iconName() }}</mat-icon>
   }

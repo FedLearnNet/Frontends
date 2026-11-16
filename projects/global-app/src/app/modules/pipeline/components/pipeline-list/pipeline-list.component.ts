@@ -2,12 +2,13 @@ import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, sig
 import {selectAllPipelines, selectLoading} from "../../service/pipeline.selectors";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {createPipeline, loadPipelines} from "../../service/pipeline.actions";
-import {PipelineCreateDTO, PipelineDTO, PipelineStatus, PipelineType} from "../../dto/pipeline";
+import {PipelineCreateDTO, PipelineDTO, PipelineRunMode, pipelineRunModeLabels, PipelineStatus, PipelineType} from "../../dto/pipeline";
 import {MatDialog, MatDialogModule} from "@angular/material/dialog";
 import {Store} from "@ngrx/store";
 import {MatChipsModule} from "@angular/material/chips";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
+import {MatSelectModule} from "@angular/material/select";
 import {MatButtonModule} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
 import {FormsModule} from "@angular/forms";
@@ -24,7 +25,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
   selector: 'app-pipeline-list',
   imports: [MatButtonModule,
     MatChipsModule, MatFormFieldModule,
-    MatInputModule, MatMenuModule, MatDialogModule, FormsModule, DatePipe, StatusBadgeComponent, SseRefreshBtnComponent, BtnComponent],
+    MatInputModule, MatSelectModule, MatMenuModule, MatDialogModule, FormsModule, DatePipe, StatusBadgeComponent, SseRefreshBtnComponent, BtnComponent],
   templateUrl: './pipeline-list.component.html',
   styleUrl: './pipeline-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,20 @@ export class PipelineListComponent implements OnInit {
 
   statusFilter = signal<'ALL' | PipelineStatus>('ALL');
   typeFilter = signal<'ALL' | PipelineType>('ALL');
+  runMode = signal(PipelineRunMode.ALL);
+
+  // A rescan needs an image from an earlier successful build
+  hasImage = computed(() => (this.pipelines() ?? []).some(p =>
+    p.pipelineStatus === PipelineStatus.SUCCESS
+    && p.runMode !== PipelineRunMode.SCAN_ONLY
+    && (this.modelSubId() ? p.modelSubId === this.modelSubId() : p.appVersionId === this.appVersionId())
+  ));
+
+  runModes = computed(() => [
+    PipelineRunMode.ALL,
+    ...(this.modelSubId() ? [PipelineRunMode.LOCAL_BUILD] : []),
+    ...(this.hasImage() ? [PipelineRunMode.SCAN_ONLY] : []),
+  ]);
 
   filtered = computed(() => {
     if (!this.pipelines() || this.pipelines()?.length === 0) {
@@ -87,8 +102,12 @@ export class PipelineListComponent implements OnInit {
       console.warn("Both are set, cannot decide on which foundation a pipeline should be created");
     }
     const pipelineType = this.modelSubId() ? PipelineType.MODEL : PipelineType.APP;
+    if (!this.runModes().includes(this.runMode())) {
+      this.runMode.set(PipelineRunMode.ALL);
+    }
     const toCreate: PipelineCreateDTO = {
       pipelineType: pipelineType,
+      runMode: this.runMode(),
       modelSubId: this.modelSubId(),
       appVersionId: this.appVersionId(),
       autoStart: true
@@ -96,7 +115,7 @@ export class PipelineListComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
         title: this.translate.instant('DIALOG.CREATE_PIPELINE.TITLE'),
-        message: this.translate.instant('DIALOG.CREATE_PIPELINE.MESSAGE'),
+        message: `${this.translate.instant('DIALOG.CREATE_PIPELINE.MESSAGE')} Mode: ${pipelineRunModeLabels[this.runMode()]}.`,
         dismissButtonText: this.translate.instant('BUTTON.CANCEL'),
         confirmButtonText: this.translate.instant('BUTTON.CREATE'),
       },
@@ -120,6 +139,12 @@ export class PipelineListComponent implements OnInit {
 
   protected readonly PipelineStatus = PipelineStatus;
   protected readonly PipelineType = PipelineType;
+  protected readonly PipelineRunMode = PipelineRunMode;
+  protected readonly pipelineRunModeLabels = pipelineRunModeLabels;
+  protected readonly runModeOptionLabels: Record<PipelineRunMode, string> = {
+    ...pipelineRunModeLabels,
+    [PipelineRunMode.LOCAL_BUILD]: 'Local build from uploaded files',
+  };
   protected readonly pipelineStatusToBadgeStatus = pipelineStatusToBadgeStatus;
 }
 

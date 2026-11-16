@@ -2,7 +2,7 @@
   <section class="schema-node-detail__hero">
     <div class="schema-node-detail__icon">
       <mat-icon fontSet="material-symbols-outlined">
-        {{ data.nodeType === SchemaNodeTypeEnum.ATTRIBUTE ? 'tag' : data.nodeType === SchemaNodeTypeEnum.ROOT ? 'home' : 'folder' }}
+        {{ isAttribute() ? 'tag' : data.nodeType === SchemaNodeTypeEnum.ROOT ? 'home' : 'folder' }}
       </mat-icon>
     </div>
 
@@ -155,16 +155,6 @@
         </lib-info-grid>
       </section>
 
-      @if (hasMapping(dt.mapping)) {
-        <lib-info-grid title="Value mapping">
-          @for (mapping of dt.mapping | keyvalue; track mapping.key) {
-            <div class="schema-node-detail__grid-item">
-              <span>{{ mapping.key }}</span>
-              <lib-badge [text]="mapping.value" color="GRAY" [border]="true" [wrap]="true" [uppercase]="true"></lib-badge>
-            </div>
-          }
-        </lib-info-grid>
-      }
     }
   } @else {
     <section class="schema-node-detail__structural-grid">

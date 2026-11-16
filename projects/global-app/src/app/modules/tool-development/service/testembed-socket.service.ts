@@ -1,4 +1,4 @@
-import {inject, Injectable, OnDestroy} from '@angular/core';
+import {Injectable, OnDestroy} from '@angular/core';
 import {filter, fromEvent, map, mergeMap, Observable, Subject} from 'rxjs'
 import {tap} from "rxjs/operators";
 import {RunType, TestEmbedEnum, TestEmbedSocketWrapperDTO} from "../dto/socket";
@@ -6,22 +6,15 @@ import {ClientConfigDTO, ConfigPydanticDTO} from "../dto/config";
 import {ConsoleStdOutDTO, PerformanceDTO} from "../dto/performance";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {TestRunCreateDTO, TestRunDTO} from "../dto/test-run";
-import {
-  FederatedParticipantDTO,
-  FederatedRoundMessageDTO,
-  FederatedTestRunCreateDTO,
-  FederatedTestRunDTO
-} from "../dto/federated-test-run";
-import Keycloak from "keycloak-js";
+import {FederatedTestRunCreateDTO} from "../dto/federated-test-run";
 import {LocalFiles} from "@shared-lib/modules/files/dto/file";
-import {RunMessageLogDTO} from "@shared-lib/modules/experiments/dto/log";
+import {RunMessageLogDTO, RunMessageRoundDTO} from "@shared-lib/modules/experiments/dto/log";
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class ControllerSocketService implements OnDestroy {
-  private readonly keycloak: Keycloak = inject(Keycloak);
   private socket?: WebSocket;
 
   messages$: Observable<TestEmbedSocketWrapperDTO> = new Observable<TestEmbedSocketWrapperDTO>();
@@ -35,9 +28,7 @@ export class ControllerSocketService implements OnDestroy {
 
   connectToWebSocket(url: string) {
     try {
-      const token = this.keycloak.token!;
-      const authorization = encodeURIComponent(`quarkus-http-upgrade#Authorization#Bearer ${token}`);
-      this.socket = new WebSocket(url, ['bearer-token-carrier', authorization]);
+      this.socket = new WebSocket(url);
     } catch (e) {
       console.error('WebSocket connection failed: ', e);
       return;
@@ -133,18 +124,19 @@ export class ControllerSocketService implements OnDestroy {
   }
 
 
-  public getRunCreated$(): Observable<TestRunDTO> {
+  // A test run once it is created and on every change after, as the server reads it.
+  public getRunUpdate$(): Observable<TestRunDTO> {
     return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.START_RUN),
-      tap(data => console.log('Received TestRunDTO create: ', data)),
+      filter(data => data.type === TestEmbedEnum.UPDATE_RUN && data.runType === RunType.TEST_RUN),
+      tap(data => console.log('Received TestRunDTO update: ', data)),
       map(data => data.message as TestRunDTO),
     );
   }
 
-  public getRunUpdate$(): Observable<TestRunDTO> {
+  // An experiment once it is created and on every change after, without the messages of its trials.
+  public getExperimentUpdate$(): Observable<TestRunDTO> {
     return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.UPDATE_RUN),
-      tap(data => console.log('Received TestRunDTO update: ', data)),
+      filter(data => data.type === TestEmbedEnum.UPDATE_RUN && data.runType === RunType.EXPERIMENT_RUN),
       map(data => data.message as TestRunDTO),
     );
   }
@@ -164,42 +156,28 @@ export class ControllerSocketService implements OnDestroy {
 
   // ----- federated run observables ---------------------------------------
 
-  public getFederatedRunCreated$(): Observable<FederatedTestRunDTO> {
+  // A federated test run once it is created and on every change after, participants included.
+  public getFederatedRunUpdate$(): Observable<TestRunDTO> {
     return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.START_FEDERATED_RUN),
-      tap(data => console.log('Received FederatedTestRunDTO create: ', data)),
-      map(data => data.message as FederatedTestRunDTO),
+      filter(data => data.type === TestEmbedEnum.UPDATE_FEDERATED_RUN),
+      tap(data => console.log('Received federated TestRunDTO update: ', data)),
+      map(data => data.message as TestRunDTO),
     );
   }
 
-  public getFederatedRunUpdate$(): Observable<FederatedTestRunDTO> {
-    return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.UPDATE_FEDERATED_RUN
-        || data.type === TestEmbedEnum.FINISH_FEDERATED_RUN),
-      tap(data => console.log('Received FederatedTestRunDTO update: ', data)),
-      map(data => data.message as FederatedTestRunDTO),
-    );
-  }
-
-  public getFederatedParticipantUpdate$(): Observable<FederatedParticipantDTO> {
-    return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.FEDERATED_PARTICIPANT_UPDATE),
-      tap(data => console.log('Received FederatedParticipantUpdateDTO: ', data)),
-      map(data => data.message as FederatedParticipantDTO),
-    );
-  }
-
-  public getFederatedRoundMessage$(): Observable<FederatedRoundMessageDTO> {
+  // Sent as it comes, the run updates leave round messages out.
+  public getFederatedRoundMessage$(): Observable<RunMessageRoundDTO> {
     return this.messages$.pipe(
       filter(data => data.type === TestEmbedEnum.FEDERATED_ROUND_MESSAGE),
-      tap(data => console.log('Received FederatedRoundMessageDTO: ', data)),
-      map(data => data.message as FederatedRoundMessageDTO),
+      tap(data => console.log('Received RunMessageRoundDTO: ', data)),
+      map(data => data.message as RunMessageRoundDTO),
     );
   }
 
   public getFederatedParticipantLogMessage$(): Observable<RunMessageLogDTO> {
     return this.messages$.pipe(
-      filter(data => data.type === TestEmbedEnum.LOG_MESSAGE && data.runType === RunType.FEDERATED_RUN),
+      filter(data => data.type === TestEmbedEnum.LOG_MESSAGE
+        && (data.runType === RunType.FEDERATED_RUN || data.runType === RunType.FEDERATED_TEST_RUN)),
       tap(data => console.log('Received federated log message: ', data)),
       map(data => data.message as RunMessageLogDTO),
     );

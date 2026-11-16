@@ -51,6 +51,7 @@ export class MetricsRequestDetailComponent {
   private readonly metricsRequestService = inject(RunMetricsRequestService);
 
   readonly data = inject<MetricsRequestDetailData>(MAT_DIALOG_DATA);
+  readonly isOutputs = this.data.request.type === 'OUTPUTS';
 
   readonly isSubmitting = signal(false);
 

@@ -53,7 +53,7 @@
     </div>
   } @else if (viewState() === 1) {
     <div class="status-container" [@containerAnim]>
-      @if (modelPrediction(); as pred) {
+      @if (run(); as pred) {
         <div class="status-item"
              [ngClass]="pred.status.toLowerCase()"
              [@statusAnim]="pred.status">
@@ -71,9 +71,9 @@
                 color="GRAY"
                 [border]="true"
               ></lib-badge>
-            } @else if (pred.currentWorkflowStep && pred.maxWorkflowSteps) {
+            } @else if (pred.steps.length > 1) {
               <lib-badge
-                [text]="'Node ' + pred.currentWorkflowStep + '/' + pred.maxWorkflowSteps"
+                [text]="'Node ' + stepPosition() + '/' + pred.steps.length"
                 color="GRAY"
                 [border]="true"
               ></lib-badge>
@@ -105,18 +105,18 @@
               <mat-icon>stop_circle</mat-icon>
             </button>
           </div>
-          @if (pred.lastError) {
+          @if (error(); as error) {
             <lib-error-card>
-              {{ pred.lastError }}
+              {{ error }}
             </lib-error-card>
           } @else if (waitingForNextWorkflowStep()) {
             <lib-hint-card>
               The previous workflow step finished. The next step is queued and will start automatically.
             </lib-hint-card>
           } @else {
-            @if (pred.lastLog) {
+            @if (lastLog(); as lastLog) {
               <lib-hint-card>
-                {{ pred.lastLog }}
+                {{ lastLog }}
               </lib-hint-card>
             } @else {
               <lib-skeleton-loader [showHeader]="false" [variant]="'list'" [showActions]="false"
@@ -135,10 +135,10 @@
       }
     </div>
   } @else if (viewState() === 2) {
-    <lib-app-run-output [appId]="modelPrediction()!.modelId!"
-                        [runId]="modelPrediction()!.id"
+    <lib-app-run-output [appId]="appId()"
+                        [runId]="run()!.id"
                         [runType]="runType"
-                        [outputData]="modelPrediction()!.result"
+                        [outputData]="$any(outputData())"
     />
   }
 

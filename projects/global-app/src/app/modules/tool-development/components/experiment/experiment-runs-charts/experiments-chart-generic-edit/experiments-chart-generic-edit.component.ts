@@ -14,12 +14,12 @@ import {MatButtonModule} from "@angular/material/button";
 import {getHyperParams, groupRunsByMetric} from "../experiment-runs-charts-helper";
 import {MatSelectModule} from "@angular/material/select";
 import {cloneDeep} from "lodash";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO} from "../../../../dto/test-run";
 
 
 export interface ExperimentDiagramConfig {
   config?: ExperimentDiagramConfigDTO;
-  experimentRuns: ExperimentRunDTO[];
+  experimentRuns: TestAttemptDTO[];
 }
 
 interface DiagramDetailConfig {
@@ -57,8 +57,8 @@ export class ExperimentsChartGenericEditComponent implements OnInit {
   config: ExperimentDiagramConfigDTO;
   editMode: boolean = false;
 
-  experimentRuns: ExperimentRunDTO[] = [];
-  metricGroupedRuns = new Map<string, ExperimentRunDTO[]>();
+  experimentRuns: TestAttemptDTO[] = [];
+  metricGroupedRuns = new Map<string, TestAttemptDTO[]>();
   hyperParamKeys: string[] = [];
   dataAggregatorTypes: string[] = ['max', 'min', 'avg', 'all'];
 
