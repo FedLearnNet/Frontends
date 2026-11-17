@@ -50,8 +50,7 @@
                       <mat-icon class="file-tab-icon">mark_chat_read</mat-icon>
                       <span class="file-tab-label">Result</span>
                     </ng-template>
-                    <markdown class="msg__text" [data]="msg.message"
-                              [disableSanitizer]="true"/>
+                    <markdown class="msg__text" [data]="msg.message"/>
                   } @else {
                     <ng-template mat-tab-label>
                       <mat-icon class="file-tab-icon">psychology</mat-icon>
@@ -105,8 +104,7 @@
               }
             </mat-tab-group>
           } @else if (msg.message) {
-            <markdown class="msg__text" [data]="msg.message"
-                      [disableSanitizer]="true"/>
+            <markdown class="msg__text" [data]="msg.message"/>
           }
 
           @if (!msg.done && !msg.errorMessage && !waitingForHumanInTheLoop()) {

@@ -21,9 +21,10 @@ import {AuditActions} from "../../service/audit.actions";
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {
   PipelinePublishInfoDetailComponent
-} from "../../../pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
+import {LlmAuditPanelComponent} from "../llm-audit-panel/llm-audit-panel.component";
 
 
 type Decision = 'ACCEPT' | 'REJECT';
@@ -47,6 +48,7 @@ type Decision = 'ACCEPT' | 'REJECT';
     PipelinePublishInfoDetailComponent,
     KvComponent,
     BadgeComponent,
+    LlmAuditPanelComponent,
     RouterLink,
   ],
   templateUrl: './audit-detail.component.html',

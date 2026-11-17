@@ -2,8 +2,8 @@
           (click)="showDetail()">
   <mat-card-header>
 
-    <lib-federated-client-type-badge [clientType]="participant().role"
-                                     [clientName]="participant().participantId"></lib-federated-client-type-badge>
+    <lib-federated-client-type-badge [clientType]="$any(state()?.role ?? 'CLIENT')"
+                                     [clientName]="participant().participantId ?? ''"></lib-federated-client-type-badge>
     <span class="spacer"></span>
     <lib-status-badge size="SMALL" [type]="participantBadge()" [text]="participant().status ?? ''"/>
   </mat-card-header>
@@ -29,11 +29,11 @@
     <!--@if (participant().config) {
 
     }-->
-    @if (participant().waitingFor && participant().waitingFor!.length > 0) {
+    @if (participant().waitingFor?.length) {
       <div class="fed-detail__card-row fed-detail__card-row--stack">
         <span class="fed-detail__label">{{ 'FEDERATED.WAITING_FOR' | translate }}</span>
         <mat-chip-set>
-          @for (w of participant().waitingFor; track w) {
+          @for (w of participant().waitingFor ?? []; track w) {
             <mat-chip>{{ w }}</mat-chip>
           }
         </mat-chip-set>

@@ -18,6 +18,7 @@ import {environment} from "@global-app/env/environment";
 import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorDTO} from "../../../../../../../dto/connector";
 import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
+import {lastLogOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 @Component({
   selector: 'app-app-based-extractor',
@@ -40,6 +41,8 @@ import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
   styleUrl: './app-based-extractor.component.scss',
 })
 export class AppBasedExtractorComponent implements OnInit, OnDestroy {
+  protected readonly lastLogOf = lastLogOf;
+
   readonly connectorAppBasedExtractorService = inject(ConnectorAppBasedExtractorService);
 
   readonly isProduction = environment.production;

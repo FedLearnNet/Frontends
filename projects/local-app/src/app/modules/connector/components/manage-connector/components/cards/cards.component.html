@@ -1,5 +1,6 @@
 @if (data(); as data) {
-  <mat-card class="side-card" [class.selected]="selected()">
+  <mat-card class="side-card" [class.selected]="selected()" [class.side-card--upcoming]="data.upcoming"
+            [attr.aria-disabled]="data.upcoming || null">
     <mat-card-header>
       <div mat-card-avatar class="side-card-index"> {{ data.index + 1 }}.</div>
       @if (data.title) {
@@ -21,9 +22,14 @@
           }
         </mat-card-title>
       }
+      @if (data.aiSuggested) {
+        <span class="side-card-ai" [matTooltip]="'AI_SUGGESTED_TOOLTIP' | translate">
+          <mat-icon>auto_awesome</mat-icon>AI
+        </span>
+      }
       <div class="side-card-config">
         @if (editable()) {
-          <button mat-icon-button class="side-card-edit" (click)="onEditClick()">
+          <button mat-icon-button class="side-card-edit" [attr.aria-label]="'BUTTON.EDIT' | translate" (click)="onEditClick()">
             <mat-icon class="side-card-edit-hover">border_color</mat-icon>
             <mat-icon class="side-card-edit-default">edit</mat-icon>
           </button>
@@ -38,13 +44,15 @@
       @if (data.content) {
         <div [innerHTML]="data.content"></div>
       }
-      @if (data.configured !== undefined) {
+      @if (data.upcoming) {
+        <span class="side-card-upcoming">{{ 'UPCOMING_STEP' | translate }}</span>
+      } @else if (data.configured !== undefined) {
         @if (data.configured) {
-          <lib-badge text="Configured"></lib-badge>
+          <lib-badge [text]="'CONFIGURED' | translate"></lib-badge>
         } @else if (data.optional) {
-          <lib-badge color="GRAY" text="Optional"></lib-badge>
+          <lib-badge color="GRAY" [text]="'OPTIONAL' | translate"></lib-badge>
         } @else {
-          <lib-badge color="ORANGE" text="Need to be configured"></lib-badge>
+          <lib-badge color="ORANGE" [text]="'NEED_TO_BE_CONFIGURED' | translate"></lib-badge>
         }
       }
       @if (function(); as f) {
@@ -61,9 +69,23 @@
           <lib-kv label="App" [value]="appName()" [mono]="true"></lib-kv>
         }
         @if (isCellMode()) {
-          <div class="detail-grid">
-            <lib-kv label="Column" [value]="f.column"></lib-kv>
-          </div>
+          @if (columns().length > 1) {
+            <div class="detail-section">
+              <div class="detail-head">
+                <div class="detail-title">{{ 'COLUMNS' | translate }}</div>
+                <div class="detail-meta">{{ columns().length }}</div>
+              </div>
+              <div class="detail-columns">
+                @for (column of columns(); track column) {
+                  <span class="detail-column">{{ column }}</span>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="detail-grid">
+              <lib-kv label="Column" [value]="f.column"></lib-kv>
+            </div>
+          }
         } @else {
           <div class="detail-section">
             <div class="detail-head">

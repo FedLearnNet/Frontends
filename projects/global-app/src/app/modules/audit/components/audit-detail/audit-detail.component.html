@@ -71,13 +71,19 @@
 
       <div class="card__body">
         @if (publishInfo(); as publishInfo) {
-          <app-pipeline-publish-info-detail [publishInfo]="publishInfo"></app-pipeline-publish-info-detail>
+          <lib-pipeline-publish-info-detail [publishInfo]="publishInfo"></lib-pipeline-publish-info-detail>
         } @else {
           <div class="muted small">No scans available.</div>
         }
       </div>
     </mat-card>
   </div>
+
+  @if (activeAppVersionId(); as versionId) {
+    <div class="llm-grid">
+      <app-llm-audit-panel [appVersionId]="versionId"/>
+    </div>
+  }
 
   <div class="grid">
     <div class="panel">

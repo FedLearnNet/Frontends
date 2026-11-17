@@ -28,8 +28,7 @@
         }
 
         @if (message()) {
-          <markdown class="msg__text" [data]="message()"
-                    [disableSanitizer]="true" />
+          <markdown class="msg__text" [data]="message()"/>
         }
 
         <span class="msg__meta">{{ createdAt() | date:'shortTime' }}</span>

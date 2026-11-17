@@ -1,3 +1,4 @@
+import {isFinalStatus} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {createSelector} from '@ngrx/store';
 import {dataAnalysisFeature, dataAnalysisKeyOf} from './data-analysis.reducer';
 
@@ -150,49 +151,26 @@ export const selectExecutionExecutionState = createSelector(
 );
 
 
-export const selectExecutionRunPredictions = createSelector(
+export const selectExecutionRuns = createSelector(
   selectExecutionExecutionState,
-  execution => execution.predictions
+  execution => execution.runs
 );
 
-export const selectExecutionLastRunPrediction = createSelector(
+export const selectExecutionLastRun = createSelector(
   selectExecutionExecutionState,
-  execution => execution.lastPrediction
+  execution => execution.lastRun
 );
 
-export const selectExecutionLastRunPredictionForWorkflow = (workflowId?: number) =>
+/** The run shown for a data analysis: the last one streamed, else its latest running or newest run. */
+export const selectExecutionLastRunForAnalysis = (dataAnalysisId?: number) =>
   createSelector(
     selectExecutionExecutionState,
     execution => {
-      if (!workflowId) {
-        return execution.lastPrediction;
+      if (!dataAnalysisId || execution.lastRun?.dataAnalysisId === dataAnalysisId) {
+        return execution.lastRun;
       }
-
-      if (
-        execution.lastPrediction &&
-        execution.lastPrediction.dataAnalysisId === workflowId
-      ) {
-        return execution.lastPrediction;
-      }
-
-      const matchingPredictions = execution.predictions.filter(
-        (prediction) => prediction.dataAnalysisId === workflowId
-      );
-
-      if (!matchingPredictions.length) {
-        return null;
-      }
-
-      const runningPrediction = [...matchingPredictions].reverse().find((prediction) => {
-        const status = String(prediction.status ?? '').toUpperCase();
-        return status !== 'FINISHED' && status !== 'STOPPED' && status !== 'ERROR';
-      });
-
-      if (runningPrediction) {
-        return runningPrediction;
-      }
-
-      return [...matchingPredictions].reverse()[0] ?? null;
+      const runs = execution.runs.filter((run) => run.dataAnalysisId === dataAnalysisId).reverse();
+      return runs.find((run) => !isFinalStatus(run.status)) ?? runs[0] ?? null;
     }
   );
 

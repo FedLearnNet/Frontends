@@ -1,13 +1,13 @@
-<lib-status-title [type]="runStatusToBadgeStatus(data.run.status ?? RunStatusTypes.PENDING )">
-  {{ data.participant.participantId }}
+<lib-status-title [type]="runStatusToBadgeStatus(participant().status ?? RunStatusTypes.PENDING)">
+  {{ participant().participantId }}
 </lib-status-title>
 <mat-dialog-content>
   <lib-experiment-workflow-node-detail
     [hideOutput]="true"
     [config]="data.app.appConfig"
-    [experimentData]="experimentData"
+    [experimentData]="experimentData()"
   />
-  @if (data.participant.role === FLNetParticipantRole.AGGREGATOR) {
+  @if ($any(info()?.role) === FLNetParticipantRole.AGGREGATOR) {
     <lib-info-card
       class="mt-2"
       subtitle="Results are shown in the results tab"

@@ -35,3 +35,25 @@
     </button>
   }
 </mat-form-field>
+@if (queryId()) {
+  <section class="clients">
+    <h4 class="clients-title">
+      {{ 'FOUND_CLIENTS' | translate }}
+      <span class="clients-count">{{ systems().length }}</span>
+    </h4>
+    @for (partner of systems(); track $index) {
+      <div class="client">
+        <div class="client-label">
+          <mat-icon fontSet="material-symbols-outlined">dns</mat-icon>
+          {{ 'CLIENT_N' | translate: { n: $index + 1 } }}
+          @for (mode of partner.supportedModes ?? []; track mode) {
+            <span class="client-mode">{{ mode === 'TRE' ? 'TRE' : 'FL' }}</span>
+          }
+        </div>
+        <lib-system-info [info]="partner.system" compact />
+      </div>
+    } @empty {
+      <p class="clients-empty">{{ 'NO_CLIENT_SYSTEM_INFO' | translate }}</p>
+    }
+  </section>
+}

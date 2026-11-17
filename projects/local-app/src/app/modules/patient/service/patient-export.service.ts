@@ -7,7 +7,8 @@ import {SseClient} from 'ngx-sse-client';
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {PatientDataExportConfigDTO} from "@shared-lib/modules/data-modeler/dto/data-export.dto";
 import {PatientReferenceDto} from "../dto/patient";
-import {isTerminalRunStatus, PatientToolRunProgressDTO, PatientToolRunSummaryDTO} from "../dto/patient-tool-run";
+import {isTerminalRunStatus} from "../dto/patient-tool-run";
+import {ExecutionRunDetailDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 
 @Injectable({
@@ -40,10 +41,10 @@ export class PatientDataExportService {
 
 
   /**
-   * Runs the export app of an app-based export and streams its progress. Completes after the
-   * terminal event; once that reports the run as finished its outputs can be downloaded.
+   * Runs the export app of an app-based export and streams its run. Completes once it ended; when it
+   * finished its outputs can be downloaded.
    */
-  streamAppExport(cohortId: number, config: PatientDataExportConfigDTO): Observable<PatientToolRunProgressDTO> {
+  streamAppExport(cohortId: number, config: PatientDataExportConfigDTO): Observable<ExecutionRunDetailDTO> {
     const url = `${this.getBaseUrl(cohortId)}/app/stream`;
     const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
     return this.sseClient
@@ -55,15 +56,15 @@ export class PatientDataExportService {
             throw new Error(message);
           }
           const data = (evt as MessageEvent).data;
-          return (typeof data === 'string' ? JSON.parse(data) : data) as PatientToolRunProgressDTO;
+          return (typeof data === 'string' ? JSON.parse(data) : data) as ExecutionRunDetailDTO;
         }),
-        takeWhile(msg => !isTerminalRunStatus(msg.status?.runStatus), true),
+        takeWhile(run => !isTerminalRunStatus(run.status), true),
       );
   }
 
   /** The latest app-based exports of a cohort, newest first. */
-  listAppExports(cohortId: number): Observable<PatientToolRunSummaryDTO[]> {
-    return this.apiService.get<PatientToolRunSummaryDTO[]>(`${this.getBaseUrl(cohortId)}/app`);
+  listAppExports(cohortId: number): Observable<ExecutionRunDetailDTO[]> {
+    return this.apiService.get<ExecutionRunDetailDTO[]>(`${this.getBaseUrl(cohortId)}/app`);
   }
 
   /** The outputs of a finished app-based export as zip. */

@@ -8,7 +8,7 @@ import {
   ExperimentRunDetailComponent
 } from "./components/experiment/experiment-run-detail/experiment-run-detail.component";
 import {AppListComponent} from "./components/app-list/app-list.component";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestRunDTO, trialNameOf, trialsOf} from "./dto/test-run";
 import {
   AppRunFederatedTestDetailComponent
 } from "./components/app-runs/components/app-run-federated-test-detail/app-run-federated-test-detail.component";
@@ -59,7 +59,12 @@ const routes: Routes = [
             resolve: {
               runId: runIdResolver
             },
-            data: {breadcrumb: (_data: any) => _data.experiment.runs.find((run: ExperimentRunDTO) => run.id === +_data.runId).name},
+            data: {
+              breadcrumb: (_data: any) => {
+                const trial = trialsOf(_data.experiment as TestRunDTO).find(attempt => attempt.id === +_data.runId);
+                return trial ? trialNameOf(trial) : '';
+              }
+            },
           }
         ]
       },

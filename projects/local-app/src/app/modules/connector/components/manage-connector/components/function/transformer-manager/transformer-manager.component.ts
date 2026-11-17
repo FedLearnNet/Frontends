@@ -27,12 +27,20 @@ import {StoreDTO} from '@shared-lib/modules/store/dto/store';
 import {StoreActions} from '@shared-lib/modules/store/store/store.actions';
 import {
   selectSelectedApp,
+  selectStoreError,
   selectStoreList,
   selectStoreLoading
 } from '@shared-lib/modules/store/store/store.selectors';
 import {ErrorCardComponent} from '@shared-lib/components/error-card/error-card.component';
 
 import {TOOLS_TRANSFORMER_MODULE} from '../../../../../constansts/tools-transformer-module.constants';
+import {
+  CODE_TRANSFORMER_MODULE,
+  codeTransformerFunction,
+  CodeTransformerDTO
+} from '../../../../../dto/code-transformer';
+import {ConnectorCodeTransformerService} from '../../../../../services/connector-code-transformer.service';
+import {Router} from '@angular/router';
 import {
   AppRunTransformerRowMappingComponent
 } from "@shared-lib/modules/app-execution/components/app-run-transformer-row-mapping/app-run-transformer-row-mapping.component";
@@ -46,16 +54,24 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {SelectBtnComponent} from '@shared-lib/components/select-btn/select-btn.component';
 import {KvComponent} from '@shared-lib/components/kv/kv.component';
+import {CodeTransformerComponent} from '../code-transformer/code-transformer.component';
+import {SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
 
 export interface TransformerDialogData {
   functions: FunctionsDetailDTO[];
   columns: string[];
+  rows?: Record<string, unknown>[];
+  schema?: SchemaNodeNestedDto[];
   patientIdColumn?: string;
   data?: FunctionsDetailDTO;
   errorMessage?: string;
 }
 
-type TransformerSource = 'builtin' | 'tools';
+type TransformerSource = 'builtin' | 'tools' | 'code';
+
+function isCodeTransformer(transformer: FunctionsDetailDTO): boolean {
+  return transformer.moduleName === CODE_TRANSFORMER_MODULE;
+}
 
 function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
   return transformer.moduleName === TOOLS_TRANSFORMER_MODULE.moduleName
@@ -86,6 +102,7 @@ function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
     BtnComponent,
     SelectBtnComponent,
     KvComponent,
+    CodeTransformerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideMarkdown()],
@@ -96,10 +113,14 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
   private readonly dialogRef = inject<MatDialogRef<ManageConnectorComponent>>(MatDialogRef);
   private readonly translate: TranslateService = inject(TranslateService);
   private readonly cfg: TransformerDialogData = inject<TransformerDialogData>(MAT_DIALOG_DATA);
+  private readonly codeService = inject(ConnectorCodeTransformerService);
+  private readonly router = inject(Router);
 
   private readonly mapper = viewChild<AppRunTransformerRowMappingComponent>('mapper');
 
   readonly columns = signal<string[]>(this.cfg.columns ?? []);
+  readonly rows = (this.cfg.rows ?? []).filter(row => !!row);
+  readonly schema = this.cfg.schema ?? [];
   readonly functions = signal<FunctionsDetailDTO[]>(this.cfg.functions ?? []);
 
   readonly source = signal<TransformerSource>('builtin');
@@ -108,9 +129,21 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
 
   readonly selectedFunction = signal<FunctionsDetailDTO | null>(null);
 
+  readonly customs = signal<CodeTransformerDTO[]>([]);
+  readonly customFunctions = computed(() => this.customs().map(codeTransformerFunction));
+  readonly readyCustomFunctions = computed(() => this.customFunctions().filter(fn => !!fn.appImage));
+  readonly editing = signal(false);
+  readonly editingTransformer = signal<CodeTransformerDTO | null>(null);
+  readonly selectedCustom = computed(() => {
+    const fn = this.selectedFunction();
+    return fn && isCodeTransformer(fn) ? this.customs().find(t => t.imageName === fn.appImage) ?? null : null;
+  });
+  private readonly pendingCustomImage = signal<string | null>(null);
+
   private readonly storeItem = toSignal(this.store.select(selectSelectedApp));
   private readonly storeList = toSignal(this.store.select(selectStoreList), {initialValue: [] as StoreDTO[]});
   readonly storeLoading = toSignal(this.store.select(selectStoreLoading), {initialValue: false});
+  readonly storeUnavailable = toSignal(this.store.select(selectStoreError), {initialValue: null});
 
   readonly selectedTool = signal<AppDetailDto | null>(null);
 
@@ -128,7 +161,7 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
 
   mapping = signal<AppTransformerMappings>({} as AppTransformerMappings);
 
-  readonly builtInFunctions = computed(() => this.functions()
+  readonly builtInFunctions = computed(() => [...this.functions(), ...this.readyCustomFunctions()]
     .filter(fn => fn.moduleName !== TOOLS_TRANSFORMER_MODULE.moduleName));
 
   readonly hasMultipleModules = computed(() =>
@@ -155,7 +188,7 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
   readonly hasSelection = computed(() =>
     this.isToolsTransformer()
       ? !!this.selectedTool() || !!this.configuredApp()
-      : !!this.selectedFunction());
+      : !!this.selectedFunction() && !this.editing());
 
   readonly showsUnresolvedApp = computed(() =>
     this.isToolsTransformer() && !this.selectedTool() && !!this.configuredApp());
@@ -213,8 +246,12 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
 
   ngOnInit(): void {
     const d = this.cfg.data;
+    this.loadCustoms();
     if (d) {
-      if (isAppTransformer(d)) {
+      if (isCodeTransformer(d)) {
+        this.source.set('code');
+        this.pendingCustomImage.set(d.appImage ?? null);
+      } else if (isAppTransformer(d)) {
         this.source.set('tools');
         this.configuredApp.set({
           appImage: d.appImage ?? null,
@@ -242,9 +279,54 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
     }));
   }
 
+  loadCustoms(select?: CodeTransformerDTO): void {
+    this.codeService.list().subscribe(customs => {
+      this.customs.set(customs);
+      const image = select?.imageName ?? this.pendingCustomImage();
+      const fn = this.customFunctions().find(f => !!image && f.appImage === image);
+      if (fn) {
+        // a configured step or a rebuilt transformer keeps its column mapping
+        this.pendingCustomImage.set(null);
+        this.selectedFunction.set(fn);
+      }
+      if (this.source() === 'code' && !customs.length) {
+        this.editing.set(true);
+      }
+    });
+  }
+
+  newCustom(): void {
+    this.selectedFunction.set(null);
+    this.editingTransformer.set(null);
+    this.editing.set(true);
+  }
+
+  editCustom(transformer: CodeTransformerDTO): void {
+    this.editingTransformer.set(transformer);
+    this.editing.set(true);
+  }
+
+  openDetails(transformer: CodeTransformerDTO): void {
+    const connectorUrl = this.router.url.split('/connector/')[0];
+    window.open(`${connectorUrl}/connector/custom/${transformer.id}`, '_blank');
+  }
+
+  onCustomSaved(transformer: CodeTransformerDTO): void {
+    if (transformer.imageName) {
+      this.editing.set(false);
+    }
+    this.loadCustoms(transformer);
+  }
+
+  selectCustomTool(fn: FunctionsDetailDTO): void {
+    this.onSourceChange('code');
+    this.selectFunction(fn);
+  }
+
   onSourceChange(source: TransformerSource): void {
     if (source === this.source()) return;
     this.source.set(source);
+    this.editing.set(source === 'code' && !this.customs().length);
     this.selectedFunction.set(null);
     this.selectedTool.set(null);
     this.configuredApp.set(null);
@@ -366,9 +448,11 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
       return;
     }
 
+    const patient = !!fn?.appImage && fn.mode === FunctionExecutionMode.PATIENT;
     this.dialogRef.close({
       ...fn,
       ...dto,
+      ...(patient ? {hyperparams: {...dto.hyperparams, patient_id_column: this.patientIdColumn()}} : {}),
     });
   }
 

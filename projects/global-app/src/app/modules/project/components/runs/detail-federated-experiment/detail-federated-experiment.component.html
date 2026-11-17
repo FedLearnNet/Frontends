@@ -1,12 +1,11 @@
-@if (experiment(); as exp) {
-  <app-experiment-header [description]="exp.description"
-                         [experiment]="exp"
+@if (run(); as run) {
+  @let exp = run.experiment!;
+  <app-experiment-header [run]="run"
                          (startExperiment)="start()"
                          (stop)="stop()"
                          (refresh)="reload()"
-                         [isSSEConnected]="false"
-                         [loading]="loading()"
-                         [name]="exp.name"/>
+                         [isSSEConnected]="connected()"
+                         [loading]="loading()"/>
 
   <lib-page-wrapper
     [error]="error()"
@@ -21,7 +20,7 @@
               <lib-badge color="GRAY" [text]="''+exp.acceptanceCount"/>
             </lib-info-item>
             <lib-info-item title="Clinics">
-              <lib-badge color="GRAY" [text]="''+(exp?.participants?.length ?? 0)"/>
+              <lib-badge color="GRAY" [text]="''+(run.participants?.length ?? 0)"/>
             </lib-info-item>
             <lib-info-item title="public model">
               @if (exp.modelNeedToBePublic) {
@@ -55,31 +54,31 @@
 
 
           <lib-info-grid
-            title="Participants{{ (exp?.participants?.length ?? 0) > 0 ? ' (' + exp.participants.length + ')' : '' }}">
-            @for (p of exp?.participants ?? []; track p.id) {
+            title="Participants{{ (run.participants?.length ?? 0) > 0 ? ' (' + run.participants!.length + ')' : '' }}">
+            @for (p of run.participants ?? []; track p.id) {
               <div class="participant-item">
                 <div>
                   <span class="label">Clinic ID:</span>
-                  <span class="value">{{ p.uniqueRandomClinicId }}</span>
+                  <span class="value">{{ p.participantId }}</span>
                 </div>
                 <div>
                   <span class="label">Project Status:</span>
                   <span class="value">
-                <lib-status-badge [type]="runStatusToBadgeStatus(p.projectStatus)" size="SMALL"
+                <lib-status-badge [type]="runStatusToBadgeStatus(p.status!)" size="SMALL"
                                   [animate]="true"/>
               </span>
                 </div>
-                @if (p.currentStep) {
+                @if (p.currentNodeId) {
                   <div>
                     <span class="label">Current Step:</span>
-                    <span class="value">{{ p.currentStep }}</span>
+                    <span class="value">{{ p.currentNodeId }}</span>
                   </div>
                 }
                 @if (p.stepStatus) {
                   <div>
                     <span class="label">Step Status:</span>
                     <span class="value">
-                          <lib-status-badge [type]="projectStatusToBadgeStatus(p.stepStatus)" size="SMALL"
+                          <lib-status-badge [type]="projectStatusToBadgeStatus($any(p.stepStatus))" size="SMALL"
                                             [animate]="true"/>
                 </span>
                   </div>
@@ -91,36 +90,40 @@
           </lib-info-grid>
         </div>
       </mat-tab>
-      @if (exp!.steps && exp!.steps.length > 0) {
+      @if (run.steps.length > 0) {
         @if (selectedWorkflow(); as wf) {
           <mat-tab label="Workflow">
             <lib-workflow-readonly-view
               class="detail"
               [workflow]="wf!"
-              [experiment]="exp!"
+              [run]="run"
               (selectNode)="showDetail($event)"
             ></lib-workflow-readonly-view>
           </mat-tab>
         }
       }
       @if (isFinished()) {
-        <mat-tab label="Local Metrics">
+        <mat-tab [label]="isTre() ? 'Metrics' : 'Local Metrics'">
           <app-local-metrics-tab
-            [projectId]="exp.projectId"
+            [projectId]="exp.projectId!"
             [experimentId]="exp.id"
           />
+        </mat-tab>
+      }
+      @if (isFinished() && isTre()) {
+        <mat-tab label="Outputs">
+          <app-outputs-tab [projectId]="exp.projectId!" [experimentId]="exp.id" [outputs]="outputs()"/>
         </mat-tab>
       }
       @if (isFinished()) {
         <mat-tab label="Evaluation">
           <app-evaluation-tab
-            [projectId]="exp.projectId"
+            [projectId]="exp.projectId!"
             [experimentId]="exp.id"
-            [experiment]="exp"
           />
         </mat-tab>
       }
-      @if (isFinished()) {
+      @if (isFinished() && !(isTre() && trainableApps() === 0)) {
         <mat-tab label="Training Result">
 
           @if (trainableApps() === 0) {

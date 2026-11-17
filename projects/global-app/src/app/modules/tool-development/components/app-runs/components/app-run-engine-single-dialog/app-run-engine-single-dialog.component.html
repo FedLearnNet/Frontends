@@ -1,0 +1,49 @@
+<lib-closeable-dialog-title title="Configure central run" [allowMaximize]="false"/>
+<mat-dialog-content class="single-run">
+  <div class="single-run__intro-row"><p class="single-run__intro">
+    {{ data.app.name }} · v{{ data.app.latestVersion }}
+  </p><lib-run-execution-help/></div>
+  <lib-info-card title="A fresh container for this run" subtitle="Starts when you confirm and is removed after completion. Any already-connected engine stays running."
+                 type="INFO" variant="BANNER" size="SMALL"/>
+
+  <section class="single-run__section">
+    <h3>Inputs</h3>
+    @if (!files().length && inputConfigs.length) {
+      <lib-hint-card>Your file store is empty. Upload files there first.</lib-hint-card>
+    }
+    @for (config of inputConfigs; track config.name) {
+      <mat-form-field class="single-run__field">
+        <mat-label>{{ config.name }}</mat-label>
+        <mat-select [value]="selected()[variableOf(config)]" (valueChange)="select(config, $event)"
+                    [required]="config.required">
+          @if (!config.required) {
+            <mat-option [value]="undefined">None</mat-option>
+          }
+          @for (file of files(); track file.id) {
+            <mat-option [value]="file">{{ file.fileName }} · {{ file.size | bytes }}</mat-option>
+          }
+        </mat-select>
+        @if (config.description) {
+          <mat-hint>{{ config.description }}</mat-hint>
+        }
+      </mat-form-field>
+    } @empty {
+      <lib-hint-card>This tool has no inputs.</lib-hint-card>
+    }
+  </section>
+
+  <section class="single-run__section">
+    <h3>Hyperparameters</h3>
+    <lib-app-run-hyperparameter [app]="data.app"
+                                (hyperParamsChange)="hyperParams.set($event)"
+                                (formsValid)="hyperParamsValid.set($event)"/>
+  </section>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Cancel</button>
+  <span [matTooltip]="runHint()">
+    <button mat-flat-button [disabled]="!!runHint()" (click)="start()">
+      <mat-icon>play_arrow</mat-icon>{{ starting() ? 'Starting…' : 'Start run' }}
+    </button>
+  </span>
+</mat-dialog-actions>

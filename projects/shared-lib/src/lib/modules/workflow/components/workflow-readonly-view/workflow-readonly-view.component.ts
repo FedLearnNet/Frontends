@@ -29,7 +29,7 @@ import {WorkflowDTO, WorkflowNodeDetailDTO, WorkflowNodeDTO} from "@shared-lib/m
 import {
   ExperimentWorkflowNodeCardComponent
 } from "@shared-lib/modules/experiments/components/experiment-workflow-node-card/experiment-workflow-node-card.component";
-import {BaseWorkflowExperimentDTO, BaseWorkflowStepDTO} from "@shared-lib/modules/experiments/dto/experiments";
+import {BaseExecutionAttemptDTO, ExecutionRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {WorkflowService} from "@shared-lib/modules/workflow/service/workflow.service";
 import {
   WorkflowInputCardComponent
@@ -64,7 +64,8 @@ export class WorkflowReadonlyViewComponent {
   workflow = input.required<WorkflowDTO>();
   updatePosition = input<boolean>(false);
   selectNode = output<WorkflowNodeDetailDTO>();
-  experiment = input<BaseWorkflowExperimentDTO>();
+  // The run of the workflow, whose steps show their status on their nodes.
+  run = input<ExecutionRunDTO<BaseExecutionAttemptDTO>>();
   private readonly _canvas = viewChild.required(FCanvasComponent);
   public eMarkerType = EFMarkerType;
 
@@ -96,17 +97,11 @@ export class WorkflowReadonlyViewComponent {
   }
 
   public getStepForNode(node: WorkflowNodeDTO) {
-    if (!this.experiment()) {
-      return undefined;
-    }
-    return this.experiment()!.steps.find((step: BaseWorkflowStepDTO) => step.workflowNodeId === node.id);
+    return this.run()?.steps.find(step => step.workflowNodeId === node.id);
   }
 
   public hasStepNode(node: WorkflowNodeDTO) {
-    if (!this.experiment()) {
-      return true;
-    }
-    return !!this.experiment()!.steps.find((step: BaseWorkflowStepDTO) => step.workflowNodeId === node.id);
+    return !this.run() || !!this.getStepForNode(node);
   }
 
   toggleSelectedNode(node: WorkflowNodeDetailDTO): void {

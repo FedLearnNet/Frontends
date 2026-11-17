@@ -1,6 +1,7 @@
 import {BaseDto} from "@shared-lib/base/base-dto";
 import {FederatedAppType, PublishStatus} from "@shared-lib/modules/store/dto/enum";
 import {AppPublishInfoDTO} from "@shared-lib/modules/store/dto/publish-info";
+import {PipelineStatus} from "../../../../../../global-app/src/app/modules/pipeline/dto/pipeline";
 import {ToolAuditDTO} from "../../../../../../global-app/src/app/modules/audit/dto/audit";
 
 export interface UrlDTO {
@@ -37,6 +38,8 @@ export interface AppDto extends BaseDto {
   longDescription: string;
   certificationLevel: number;
   hasImage?: boolean;
+  // build of a published version that has no image yet
+  buildStatus?: PipelineStatus.PENDING | PipelineStatus.RUNNING;
   needsInternetAccess: boolean;
   needsHostAccess: boolean;
   //version

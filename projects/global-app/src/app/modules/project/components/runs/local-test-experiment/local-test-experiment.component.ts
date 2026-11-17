@@ -2,12 +2,8 @@ import {ChangeDetectionStrategy, Component, effect, inject, input} from '@angula
 import {Store} from "@ngrx/store";
 import {ProjectDetailDto} from "@global-app/project/dto/project";
 import {WorkflowDTO, WorkflowNodeDetailDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
-import {
-  selectConnectedTestExperiment,
-  selectLoading,
-  selectTestExperiment
-} from "@global-app/project/store/project-local-experiments.selectors";
-import {ProjectLocalExperimentsActions} from "@global-app/project/store/project-local-experiments.actions";
+import {selectLoading, selectTestConnected, selectTestRun} from "@global-app/project/store/project-runs.selectors";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
 import {TranslatePipe} from "@ngx-translate/core";
 import {
   WorkflowReadonlyViewComponent
@@ -42,20 +38,18 @@ export class LocalTestExperimentComponent {
   project = input.required<ProjectDetailDto>();
   workflow = input.required<WorkflowDTO>();
 
-  public experiment = this.store.selectSignal(selectTestExperiment);
+  run = this.store.selectSignal(selectTestRun);
   loading = this.store.selectSignal(selectLoading);
-  connected = this.store.selectSignal(selectConnectedTestExperiment);
+  connected = this.store.selectSignal(selectTestConnected);
 
   dispatchExperiment$ = effect(() => this.reload());
 
   reload(): void {
-    this.store.dispatch(ProjectLocalExperimentsActions.loadExperimentTest({projectId: this.project().id}));
+    this.store.dispatch(ProjectRunsActions.followTest({projectId: this.project().id}));
   }
 
   newExperiment(): void {
-    this.store.dispatch(ProjectLocalExperimentsActions.createTest({
-      projectId: this.project().id
-    }));
+    this.store.dispatch(ProjectRunsActions.createTest({projectId: this.project().id}));
   }
 
   showDetail(node: WorkflowNodeDetailDTO): void {

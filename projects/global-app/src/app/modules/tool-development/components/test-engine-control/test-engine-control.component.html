@@ -1,0 +1,22 @@
+@if (engine(); as engine) {
+  <div class="engine-control">
+    @if (running()) {
+      <lib-badge [text]="'Built v' + engine.federatedAppVersionName + ' connected'" color="GREEN" [pulseCircle]="true" [uppercase]="true"
+                 matTooltip="Test runs, experiments and federated test runs use this container"/>
+    } @else {
+      <lib-badge [text]="'Starting v' + engine.federatedAppVersionName" iconName="hourglass_top" color="BLUE" animate="PULSE" [uppercase]="true"
+                 matTooltip="Waiting for the container to connect"/>
+    }
+    <button mat-icon-button [disabled]="busy()" (click)="stop()" matTooltip="Stop and remove the container"
+            aria-label="Stop the built version">
+      <mat-icon>stop_circle</mat-icon>
+    </button>
+  </div>
+} @else {
+  <span [matTooltip]="startHint()">
+    <button mat-stroked-button [disabled]="!canStart()" (click)="start()">
+      <mat-icon>deployed_code</mat-icon>
+      Run built v{{ app().latestVersion }}
+    </button>
+  </span>
+}
