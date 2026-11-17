@@ -10,6 +10,10 @@ import {MatIcon} from '@angular/material/icon';
 import {MatDivider} from '@angular/material/divider';
 import {SelectQueryComponent} from '@global-app/find-data/components/select-query/select-query.component';
 import {Store} from '@ngrx/store';
+import {Actions} from '@ngrx/effects';
+import {Observable, of} from 'rxjs';
+import {UnsavedChangesService} from '@shared-lib/services/unsaved-changes.service';
+import {dispatchAndAwait} from '@shared-lib/utils/dispatch-and-await';
 import {ProjectActions} from '@global-app/project/store/project.actions';
 import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
 
@@ -38,6 +42,7 @@ import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} fro
 })
 export class DetailProjectOverviewComponent {
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
 
   readonly project = input.required<ProjectDto>();
 
@@ -47,6 +52,35 @@ export class DetailProjectOverviewComponent {
   readonly queryId = signal<number | undefined>(undefined);
   readonly editModeName = signal(false);
   readonly editModeDescription = signal(false);
+
+  readonly hasUnsavedChanges = (): boolean => {
+    const p = this.project();
+    return this.name.value !== (p.name ?? '')
+      || this.description.value !== (p.description ?? '')
+      || this.queryId() !== p.queryId;
+  };
+
+  private readonly unsavedChanges = inject(UnsavedChangesService).register({
+    hasUnsavedChanges: this.hasUnsavedChanges,
+    save: () => this.saveAll(),
+  });
+
+  private saveAll(): Observable<boolean> {
+    if (this.name.invalid || this.description.invalid) {
+      return of(false);
+    }
+    const p = this.project();
+    const changes: Partial<ProjectDto> = {name: this.name.value, description: this.description.value};
+    if (this.queryId() !== p.queryId) {
+      changes.queryId = this.queryId();
+      changes.exportConfig = p.exportConfig && {...p.exportConfig, features: []};
+    }
+    return dispatchAndAwait(
+      this.store, this.actions$,
+      ProjectActions.update({project: {...p, ...changes}}),
+      [ProjectActions.updateSuccess], [ProjectActions.updateFailure],
+    );
+  }
 
   private formEffect$ = effect(() => {
     const p = this.project();
