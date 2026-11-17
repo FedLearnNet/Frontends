@@ -1,0 +1,136 @@
+@let stats = progress();
+<section class="card">
+  <button type="button" class="card__header" [attr.aria-expanded]="detailsOpen()" (click)="toggleDetails()">
+    <span class="card__percent">{{ percent() }}%</span>
+    <span class="card__title">
+      @if (waiting()) {
+        {{ 'DIALOG.TRANSFORMER_ASSISTANT.WAITING_FOR_INPUT' | translate }}
+      } @else if (stats.total === 0) {
+        {{ 'DIALOG.TRANSFORMER_ASSISTANT.WAITING' | translate }}
+      } @else {
+        {{ 'DIALOG.TRANSFORMER_ASSISTANT.PROGRESS' | translate: {done: stats.done, total: stats.total} }}
+      }
+    </span>
+    <mat-icon class="card__chevron">{{ detailsOpen() ? 'expand_less' : 'expand_more' }}</mat-icon>
+  </button>
+
+  <mat-progress-bar class="card__bar"
+                    [mode]="stats.total === 0 && status() === 'RUNNING' && !waiting() ? 'indeterminate' : 'determinate'"
+                    [value]="percent()"/>
+
+  <div class="card__current">
+    @if (waiting()) {
+      <mat-icon class="state state--waiting">contact_support</mat-icon>
+      <span>{{ 'DIALOG.TRANSFORMER_ASSISTANT.ANSWER_BELOW' | translate }}</span>
+    } @else if (current()) {
+      <mat-progress-spinner mode="indeterminate" diameter="16"/>
+      <span>{{ 'DIALOG.TRANSFORMER_ASSISTANT.CURRENT' | translate }}</span>
+      <strong>{{ current()?.mappingPath }}</strong>
+    } @else if (status() === 'DONE') {
+      <mat-icon class="state state--direct">task_alt</mat-icon>
+      <span>{{ 'DIALOG.TRANSFORMER_ASSISTANT.FINISHED' | translate }}</span>
+    } @else if (status() === 'STOPPED') {
+      <mat-icon class="state state--none">stop_circle</mat-icon>
+      <span>{{ 'DIALOG.TRANSFORMER_ASSISTANT.STOPPED' | translate }}</span>
+    }
+  </div>
+
+  <div class="card__chips">
+    @if (patientIdColumn(); as patientId) {
+      <span class="chip chip--patient"><mat-icon>badge</mat-icon>{{ 'DIALOG.TRANSFORMER_ASSISTANT.PATIENT_ID' | translate }}: {{ patientId }}</span>
+    }
+    <span class="chip chip--direct"><mat-icon>check_circle</mat-icon>{{ stats.direct }} {{ 'DIALOG.TRANSFORMER_ASSISTANT.DIRECT' | translate }}</span>
+    <span class="chip chip--transformed"><mat-icon>transform</mat-icon>{{ stats.transformed }} {{ 'DIALOG.TRANSFORMER_ASSISTANT.TRANSFORMED' | translate }}</span>
+    <span class="chip chip--none"><mat-icon>help_outline</mat-icon>{{ stats.notFound }} {{ 'DIALOG.TRANSFORMER_ASSISTANT.NO_MATCH' | translate }}</span>
+  </div>
+
+  @if (detailsOpen()) {
+    <div class="nodes">
+      @for (node of nodes(); track node.schemaId) {
+        @let selected = node.selectedTransformer;
+        @let found = node.status === 'DONE' && !!selected?.foundTransformer;
+        <div class="node" [class.node--open]="openNode() === node.schemaId" [class.node--excluded]="isExcluded(node)">
+          @if (found) {
+            <button type="button" class="node__include" role="checkbox" [attr.aria-checked]="!isExcluded(node)"
+                    [attr.aria-label]="'DIALOG.TRANSFORMER_ASSISTANT.INCLUDE' | translate: {node: node.mappingPath}"
+                    (click)="toggled.emit(node.schemaId)">
+              <mat-icon>{{ isExcluded(node) ? 'check_box_outline_blank' : 'check_box' }}</mat-icon>
+            </button>
+          } @else {
+            <span class="node__include node__include--empty"></span>
+          }
+          <button type="button" class="node__toggle" [disabled]="node.status !== 'DONE'"
+                  [attr.aria-expanded]="openNode() === node.schemaId" (click)="toggleNode(node)">
+            @if (node.status === 'RUNNING') {
+              <mat-progress-spinner mode="indeterminate" diameter="18"/>
+            } @else {
+              <mat-icon class="state"
+                        [class.state--direct]="selected?.foundTransformer && !selected?.selectedTransformers?.length"
+                        [class.state--transformed]="!!selected?.selectedTransformers?.length"
+                        [class.state--none]="node.status === 'DONE' && !selected?.foundTransformer">{{ icon(node) }}</mat-icon>
+            }
+            <span class="node__text">
+              <span class="node__path">{{ node.mappingPath }}</span>
+              <span class="node__meta">
+                @if (found) {
+                  @for (kind of kinds(node); track kind) {
+                    <span [class]="'kind kind--' + kind">{{ 'DIALOG.TRANSFORMER_ASSISTANT.KIND_' + kind | translate }}</span>
+                  } @empty {
+                    <span class="kind kind--DIRECT">{{ 'DIALOG.TRANSFORMER_ASSISTANT.KIND_DIRECT' | translate }}</span>
+                  }
+                  @if (node.visitMapping?.visitIdMapping || node.visitMapping?.visitTimestampMapping) {
+                    <span class="visit"><mat-icon>event_repeat</mat-icon>{{ visit(node) }}</span>
+                  }
+                } @else if (node.status === 'DONE') {
+                  <span class="reason">{{ selected?.neededTransformerFunction }}</span>
+                }
+              </span>
+            </span>
+            <span class="node__target">
+              @if (selected?.foundTransformer) {
+                <mat-icon>arrow_right_alt</mat-icon>{{ selected?.mappedColumn }}
+              } @else if (node.status === 'PENDING') {
+                {{ 'DIALOG.TRANSFORMER_ASSISTANT.PENDING' | translate }}
+              }
+            </span>
+            @if (node.status === 'DONE') {
+              <mat-icon class="node__chevron">{{ openNode() === node.schemaId ? 'expand_less' : 'expand_more' }}</mat-icon>
+            }
+          </button>
+        </div>
+
+        @if (openNode() === node.schemaId) {
+          <div class="chain">
+            @if (selected?.foundTransformer) {
+              @for (transformer of selected?.selectedTransformers ?? []; track $index) {
+                <div class="chain__step">
+                  <span class="chain__dot">{{ $index + 1 }}</span>
+                  <div class="chain__body">
+                    <strong>{{ transformer.methodName }}</strong>
+                    @if (transformer.column) {
+                      <span class="muted">{{ transformer.column }}</span>
+                    }
+                    @if (parameters(transformer)) {
+                      <code>{{ parameters(transformer) }}</code>
+                    }
+                  </div>
+                </div>
+              } @empty {
+                <div class="chain__step">
+                  <span class="chain__dot"><mat-icon>check</mat-icon></span>
+                  <div class="chain__body">{{ 'DIALOG.TRANSFORMER_ASSISTANT.DIRECT_MAPPING' | translate }}</div>
+                </div>
+              }
+              <div class="chain__step chain__step--result">
+                <span class="chain__dot"><mat-icon>flag</mat-icon></span>
+                <div class="chain__body"><strong>{{ selected?.mappedColumn }}</strong></div>
+              </div>
+            } @else {
+              <div class="muted">{{ selected?.neededTransformerFunction }}</div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</section>

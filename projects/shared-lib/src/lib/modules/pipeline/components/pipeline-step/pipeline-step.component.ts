@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
-import {PipelineStepDTO} from "../../dto/pipeline";
+import {PipelineStepDTO, stepLabel} from "../../dto/pipeline";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatToolbar} from "@angular/material/toolbar";
@@ -9,7 +9,7 @@ import {pipelineStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper
 import {RawLogViewerComponent} from "@shared-lib/components/raw-log-viewer/raw-log-viewer.component";
 
 @Component({
-  selector: 'app-pipeline-step',
+  selector: 'lib-pipeline-step',
   imports: [
     MatIcon,
     MatIconButton,
@@ -35,14 +35,7 @@ export class PipelineStepComponent {
     return [];
   });
 
-  name = computed(() => {
-    const name = this.step().name;
-    return name
-      .toLowerCase()
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  });
+  name = computed(() => stepLabel(this.step()));
 
   goBack() {
     this.backClicked.emit();

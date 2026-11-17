@@ -1,10 +1,27 @@
 .dynamic-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  height: 20px;
-  z-index: 90;
+  overflow: hidden;
+
+  lib-console-output {
+    display: block;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &--docked {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+  }
+}
+
+.console-title {
+  margin: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .resize-handle {

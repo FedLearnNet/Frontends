@@ -2,6 +2,11 @@
   display: block;
 }
 
+// Also drops the margins hosts put on the element
+:host(.hidden) {
+  display: none !important;
+}
+
 .llm-audit {
   display: grid;
   gap: 14px;

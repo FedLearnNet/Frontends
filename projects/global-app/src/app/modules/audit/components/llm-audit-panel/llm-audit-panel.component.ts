@@ -64,6 +64,7 @@ const POLL_MS = 5000;
   templateUrl: './llm-audit-panel.component.html',
   styleUrl: './llm-audit-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {'[class.hidden]': '!enabled()'},
 })
 export class LlmAuditPanelComponent {
   private readonly service = inject(LlmAuditService);
@@ -78,6 +79,8 @@ export class LlmAuditPanelComponent {
   requesting = signal<boolean>(false);
 
   isAdmin = this.authState.isAdmin;
+
+  enabled = computed(() => this.quota()?.enabled === true);
 
   report = computed(() => this.audit()?.report ?? null);
   active = computed(() => ['PENDING', 'RUNNING'].includes(this.audit()?.status ?? ''));
@@ -95,7 +98,6 @@ export class LlmAuditPanelComponent {
   quotaHint = computed(() => {
     const quota = this.quota();
     if (!quota) return '';
-    if (!quota.enabled) return 'AI audits are disabled on this platform.';
     if (quota.unlimited) return 'No request limit for admins.';
     if (quota.remaining > 0) return `${quota.remaining} of ${quota.limit} AI audit requests left in the last 24 hours.`;
     return 'Request limit reached for the last 24 hours.';
@@ -144,10 +146,30 @@ export class LlmAuditPanelComponent {
     return line ? `${filePath}:${line}` : filePath;
   }
 
+  // Disabled on the platform: nothing is loaded or shown
   private load(id: number): void {
     this.poll?.unsubscribe();
     this.loading.set(true);
     this.audit.set(null);
+    this.service.quota()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: quota => {
+          this.quota.set(quota);
+          if (quota.enabled) {
+            this.loadLatest(id);
+          } else {
+            this.loading.set(false);
+          }
+        },
+        error: () => {
+          this.quota.set(null);
+          this.loading.set(false);
+        },
+      });
+  }
+
+  private loadLatest(id: number): void {
     this.service.latest(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -158,7 +180,6 @@ export class LlmAuditPanelComponent {
         },
         error: () => this.loading.set(false),
       });
-    this.loadQuota();
   }
 
   private loadQuota(): void {
