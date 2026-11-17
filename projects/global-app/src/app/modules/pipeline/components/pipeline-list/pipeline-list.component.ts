@@ -44,7 +44,7 @@ export class PipelineListComponent implements OnInit {
 
   statusFilter = signal<'ALL' | PipelineStatus>('ALL');
   typeFilter = signal<'ALL' | PipelineType>('ALL');
-  runMode = signal(PipelineRunMode.ALL);
+  runMode = signal(PipelineRunMode.BUILD_ONLY);
 
   // A rescan needs an image from an earlier successful build
   hasImage = computed(() => (this.pipelines() ?? []).some(p =>
@@ -54,7 +54,7 @@ export class PipelineListComponent implements OnInit {
   ));
 
   runModes = computed(() => [
-    PipelineRunMode.ALL,
+    PipelineRunMode.BUILD_ONLY,
     ...(this.modelSubId() ? [PipelineRunMode.LOCAL_BUILD] : []),
     ...(this.hasImage() ? [PipelineRunMode.SCAN_ONLY] : []),
   ]);
@@ -103,7 +103,7 @@ export class PipelineListComponent implements OnInit {
     }
     const pipelineType = this.modelSubId() ? PipelineType.MODEL : PipelineType.APP;
     if (!this.runModes().includes(this.runMode())) {
-      this.runMode.set(PipelineRunMode.ALL);
+      this.runMode.set(PipelineRunMode.BUILD_ONLY);
     }
     const toCreate: PipelineCreateDTO = {
       pipelineType: pipelineType,

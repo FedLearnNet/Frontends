@@ -46,7 +46,7 @@ export class TransformerAssistantComponent implements OnInit, OnDestroy {
   private readonly stream = viewChild<ElementRef<HTMLElement>>('stream');
 
   connector = input.required<ConnectorDTO>();
-  /** REST path of an assistant that runs in the background, e.g. of a harmonization, instead of the websocket of connectors. */
+  /** REST path of a run to follow, e.g. of a harmonization; without it a run of the connector is started. */
   path = input<string>();
   /** Rows of the file, for example values next to the columns of a question. */
   sampleRows = input<Record<string, unknown>[]>([]);

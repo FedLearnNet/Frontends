@@ -2,11 +2,8 @@ import {BaseChatMessageDTO} from "@shared-lib/modules/app-execution/dto/chat";
 import {ConnectorDTO, ConnectorTransformerDTO} from "./connector";
 
 export enum TransformerAssistantMessageType {
-  START = 'START',
   USER_MESSAGE = 'USER_MESSAGE',
   STOP = 'STOP',
-  /** A refreshed access token in message; the server closes the connection when the old one expires. */
-  TOKEN = 'TOKEN',
   APPLY = 'APPLY',
   APPLIED = 'APPLIED',
   CHAT_MESSAGE = 'CHAT_MESSAGE',

@@ -1,7 +1,8 @@
 import {Component, computed, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {BaseChatMessageDTO} from "@shared-lib/modules/app-execution/dto/chat";
 import {DatePipe} from "@angular/common";
-import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
+import {MarkdownComponent} from "ngx-markdown";
+import {provideChatMarkdown} from "@shared-lib/modules/chat/markdown/chat-markdown-sanitizer";
 import {MatTab, MatTabGroup, MatTabLabel} from "@angular/material/tabs";
 import {MatIcon} from "@angular/material/icon";
 import {
@@ -37,7 +38,7 @@ import {MatButton} from "@angular/material/button";
     MatButton
   ],
   providers: [
-    provideMarkdown(),
+    provideChatMarkdown(),
   ],
   templateUrl: './chat-message-bubble.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
