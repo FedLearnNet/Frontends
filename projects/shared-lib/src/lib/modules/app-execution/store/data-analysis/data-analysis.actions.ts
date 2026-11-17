@@ -5,10 +5,9 @@ import {
   ModelWorkflowDetailDTO,
   ModelWorkflowDTO
 } from "@shared-lib/modules/app-execution/dto/model-workflow";
-import {DataAnalysisWorkflowRunDTO} from "@shared-lib/modules/app-execution/dto/data-analysis-workflow";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {
   DataAnalysisCreatePredictionDTO,
-  DataAnalysisPredictionDTO,
   DataAnalysisRunModesEnum
 } from "@shared-lib/modules/app-execution/dto/prediction";
 import {ModelWorkflowChatWrapperDTO} from "@shared-lib/modules/app-execution/dto/model-workflow-chat";
@@ -31,7 +30,7 @@ export const DataAnalysisActions = createActionGroup({
     'Load Data Analysis Failure': props<{ id: number; error: string }>(),
 
     'Load Data Analysis Workflow Run': props<{ id: number; experimentId: number }>(),
-    'Load Data Analysis Workflow Run Success': props<{ id: number; workflow: DataAnalysisWorkflowRunDTO }>(),
+    'Load Data Analysis Workflow Run Success': props<{ id: number; workflow: DataAnalysisRunDTO }>(),
     'Load Data Analysis Workflow Run Failure': props<{ id: number; error: string }>(),
 
     'Delete Data Analysis': props<{ id: number }>(),
@@ -49,7 +48,8 @@ export const DataAnalysisActions = createActionGroup({
     'Select Store Element': props<{ storeElement: StoreSelectDialogResult, hyperParams?: { [key: string]: any }; }>(),
     'Set Active Store Element': props<{ storeElement: StoreSelectDialogResult, hyperParams?: { [key: string]: any }; }>(),
     'Unselect Store Element': emptyProps(),
-    'Add Experiment Results': props<{ prediction: DataAnalysisPredictionDTO }>(),
+    // A run with a finished step, it joins the timeline.
+    'Run Result': props<{ run: DataAnalysisRunDTO }>(),
     'Add Data Analysis Message': props<{ wrapper: ModelWorkflowChatWrapperDTO }>(),
 
     //Analyze result file
@@ -98,27 +98,23 @@ export const DataAnalysisActions = createActionGroup({
     'Delete File Failure': props<{ error: any }>(),
 
     //Running
-    'Start Workflow Run': props<{ workflowId: number; data: DataAnalysisCreatePredictionDTO }>(),
+    'Start Analysis Run': props<{ dataAnalysisId: number; data: DataAnalysisCreatePredictionDTO }>(),
     'Start Run': props<{ data: DataAnalysisCreatePredictionDTO }>(),
 
     //Stopping
-    'Stop Workflow Run': props<{ dataAnalysisId: number, workflowId: number; id: number }>(),
     'Stop Run': props<{ dataAnalysisId: number, id: number }>(),
 
     //delete Run
-    'Delete Workflow Run': props<{ dataAnalysisId: number, workflowId: number; id: number }>(),
-    'Delete Workflow Run Success': props<{ dataAnalysisId: number, workflowId: number; id: number }>(),
-    'Delete Workflow Run Failure': props<{ dataAnalysisId: number, workflowId: number; id: number, error: any }>(),
     'Delete Run': props<{ dataAnalysisId: number, id: number }>(),
     'Delete Run Success': props<{ dataAnalysisId: number, id: number }>(),
     'Delete Run Failure': props<{ dataAnalysisId: number, id: number, error: any }>(),
 
-    'Run Progress': props<{ prediction: DataAnalysisPredictionDTO }>(),
+    'Run Progress': props<{ run: DataAnalysisRunDTO }>(),
     'Run Error': props<{ error: any }>(),
     'Run Complete': emptyProps(),
 
 
-    'Start Run Updates': props<{ prediction: DataAnalysisPredictionDTO }>(),
-    'Start Workflow Run Updates': props<{ prediction: DataAnalysisPredictionDTO }>(),
+    // Follows a run that is still going, e.g. after a reload.
+    'Follow Run': props<{ run: DataAnalysisRunDTO }>(),
   }
 });

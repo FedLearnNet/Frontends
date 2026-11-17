@@ -1,32 +1,37 @@
 <div class="connector-container-wrapper">
   <mat-drawer-container class="connector-container">
     <mat-drawer mode="side" opened>
-      @for (card of getConfigCards(); track card.index) {
+      @for (card of configCards(); track card.index) {
         <app-connector-cards (click)="onCardClick(card)"
                              [data]="card"
-                             [selected]="card.index === currentStep.index"/>
+                             [selected]="card.index === currentStep().index"/>
+      }
+      @if (!canShowDownstreamSteps()) {
+        @for (card of upcomingCards(); track card.step) {
+          <app-connector-cards [data]="card" [selected]="false"/>
+        }
       }
       <mat-divider class="divider-mb"/>
 
       <div class="drop-list">
-        @if (canShowDownstreamSteps() && getTransformCards().length === 0) {
-          <app-connector-cards [data]="transformerPlaceholderCard"
+        @if (canShowDownstreamSteps() && transformCards().length === 0 && !aiMode()) {
+          <app-connector-cards [data]="transformerPlaceholderCard()"
                                [selected]="false"/>
         }
 
         <div cdkDropListGroup>
           <div
             cdkDropList
-            [cdkDropListData]="cards"
+            [cdkDropListData]="cards()"
             class="example-list"
             (cdkDropListDropped)="drop($event)">
 
-            @for (card of getTransformCards(); track card.id ?? card.index) {
+            @for (card of transformCards(); track card.id ?? card.index) {
               <app-connector-cards cdkDrag
                                    (click)="onCardClick(card)"
                                    [data]="card"
                                    [function]="getTransformerForCard(card)"
-                                   [selected]="card.index === currentStep.index"
+                                   [selected]="card.index === currentStep().index"
                                    [draggable]="true"
                                    [editable]="true"
                                    (edit)="onEditTransformer(card)"/>
@@ -34,14 +39,15 @@
           </div>
         </div>
 
-        @if (canShowDownstreamSteps()) {
+        <!-- In AI mode the assistant does this step; the banner at the top starts it -->
+        @if (canShowDownstreamSteps() && !aiMode()) {
           <div class="drop-list-add">
             <lib-btn
               type="CUSTOM"
               variant="PRIMARY"
               icon="transform"
               [label]="'BUTTON.ADD_TRANSFORM' | translate"
-              [disabled]="disableAddTransformer"
+              [disabled]="disableAddTransformer()"
               [fullWidth]="true"
               (clicked)="addTransform()"/>
           </div>
@@ -50,10 +56,10 @@
 
       @if (canShowDownstreamSteps()) {
         <mat-divider class="divider-mb divider-mt"/>
-        @for (card of getMappingCards(); track card.id ?? card.index) {
+        @for (card of mappingCards(); track card.id ?? card.index) {
           <app-connector-cards (click)="onCardClick(card)"
                                [data]="card"
-                               [selected]="card.index === currentStep.index"/>
+                               [selected]="card.index === currentStep().index"/>
         }
       }
     </mat-drawer>
@@ -67,17 +73,38 @@
         </div>
       }
 
-      @if (currentStep) {
-        @if (currentStep.type === 'CONFIG') {
+      @if (aiMode() && !assistantConnector()) {
+        <div class="ai-mode-banner">
+          <span class="ai-mode-banner__icon"><mat-icon>auto_awesome</mat-icon></span>
+          <div class="ai-mode-banner__text">
+            <strong>{{ 'AI_MODE.TITLE' | translate }}</strong>
+            <span>{{ (isFileReady() ? 'AI_MODE.READY' : 'AI_MODE.CHOOSE_FILE') | translate }}</span>
+          </div>
+          @if (isFileReady()) {
+            <lib-btn type="CUSTOM" variant="PRIMARY" icon="auto_awesome"
+                     [label]="'BUTTON.LET_AI_SUGGEST' | translate"
+                     (clicked)="openTransformerAssistant()"/>
+          }
+        </div>
+      }
+
+      @if (assistantConnector(); as connector) {
+        <app-transformer-assistant [connector]="connector"
+                                   [sampleRows]="getLatestData()"
+                                   (applied)="onAssistantApplied($event)"
+                                   (cancelled)="onAssistantCancelled()"/>
+      } @else if (currentStep(); as step) {
+        @if (step.type === 'CONFIG') {
           <app-connector-step-config #configComponent
                                      [cohortId]="cohortId()"
                                      (save)="configChanged($event)"
                                      (inputFileChanged)="onInputFileChanged()"
-                                     [componentType]="currentStep.step"
-                                     [(config)]="config"/>
+                                     [componentType]="step.step"
+                                     [config]="config()"
+                                     (configChange)="updateConfig($event)"/>
         }
 
-        @if (currentStep.type === 'TRANSFORM') {
+        @if (step.type === 'TRANSFORM') {
           <div class="connector-step-config-wrapper">
             <div class="step-heading">
               @if (getTransformer()) {
@@ -100,7 +127,7 @@
             @if (getCurrentStage(); as stage) {
               @if (stage.appBased || stage.blockedByStep) {
                 <app-app-based-transformer
-                  [config]="config"
+                  [config]="config()"
                   [transformers]="transformers()"
                   [cohortId]="cohortId()"
                   [stepIndex]="stage.stepIndex"
@@ -121,7 +148,7 @@
                                  [columns]="getPrimarySheetInfo()!.columns"
                                  [deletedColumns]="getPrimarySheetInfo()!.deletedColumns"
                                  [hideDeleted]="true"
-                                 [loading]="currentStep.previewRunning ?? false"
+                                 [loading]="step.previewRunning ?? false"
                                  [headerAction]="false"
                                  [renewColumns]="true"
                                  [calledColumns]="getTransformedColumns()"/>
@@ -131,23 +158,24 @@
           </div>
         }
 
-        @if (currentStep.type === 'MAPPING') {
+        @if (step.type === 'MAPPING') {
           <app-edit-mapper
             [columns]="getMapperColumns()"
             [inputData]="getLatestData()"
-            [validationConfig]="config"
+            [validationConfig]="config()"
             [transformers]="transformerList()"
             [patientIdConflictColumn]="patientIdTransformerConflict"
-            [(config)]="config.schemaMapping"
+            [config]="config().schemaMapping"
+            (configChange)="onMappingChange($event)"
             (cardDetail)="onMappingCardContentChange($event)"/>
         }
       }
     </mat-drawer-content>
   </mat-drawer-container>
 
-  @if (toolbarManagement.showToolbar) {
+  @if (toolbarManagement.showToolbar && !assistantConnector()) {
     <mat-toolbar class="connector-toolbar">
-      @if (!this.config.id) {
+      @if (!config().id) {
         <lib-btn
           type="CUSTOM"
           variant="GHOST"
@@ -158,7 +186,7 @@
 
       <lib-btn type="CANCEL" variant="GHOST" (clicked)="onCancelClick()"/>
 
-      @if (getTransformCards().length > 0) {
+      @if (transformCards().length > 0) {
         <lib-btn
           type="CUSTOM"
           variant="GHOST"
@@ -169,17 +197,21 @@
 
       <span class="spacer"></span>
 
-      @if (currentStep && currentStep.index > 0) {
+      @if (currentStep().index > 0) {
         <lib-btn type="BACK" variant="GHOST" (clicked)="onBackClick()"/>
       }
-      @if (currentStep && currentStep.index > 1) {
+      @if (currentStep().index > 1) {
         <lib-btn
           type="SAVE"
           variant="SECONDARY"
           [disabled]="!!patientIdTransformerConflict"
           (clicked)="saveConfig()"/>
       }
-      @if (hasContinue()) {
+      @if (hasContinue() && aiMode() && isHeaderStep()) {
+        <lib-btn type="CUSTOM" variant="PRIMARY" icon="auto_awesome"
+                 [label]="'BUTTON.CONTINUE_WITH_AI' | translate"
+                 (clicked)="onContinueClick()"/>
+      } @else if (hasContinue()) {
         <lib-btn type="CONTINUE" variant="PRIMARY" (clicked)="onContinueClick()"/>
       } @else {
         <lib-btn

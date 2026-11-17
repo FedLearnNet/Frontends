@@ -50,7 +50,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
 import {ConnectorPreviewMapperComponent} from '../preview-mapper/preview-mapper.component';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MAPPING_PREVIEW_FRAGMENT} from '../../../../../constansts/mapping.constants';
 import {
   PreviewValidationRequestDTO,
@@ -85,6 +85,7 @@ function isPendingResult(result: PreviewValidationResponseDTO): boolean {
 })
 export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly translate: TranslateService = inject(TranslateService);
   private readonly connectorPreviewService: ConnectorPreviewService = inject(ConnectorPreviewService);
   private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
@@ -875,6 +876,17 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   getValidationSummary(element: ConnectorMappingElement) {
     return element.validationSummary
       ?? this.findValueMappingForValueColumn(element.column)?.validationSummary;
+  }
+
+  /** Why a column is flagged, e.g. its first rejected value, for the tooltip of its warning icon. */
+  getValidationTooltip(element: ConnectorMappingElement): string {
+    if (!this.isElementMapped(element)) {
+      return this.translate.instant('DIALOG.MAPPER.NOT_MAPPED');
+    }
+    const message = this.getValidationMessage(element);
+    return message && message !== 'Invalid'
+      ? message
+      : this.translate.instant('DIALOG.MAPPER.VIEW_VALIDATION_DETAILS');
   }
 
   getValidationMessage(element: ConnectorMappingElement): string {

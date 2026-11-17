@@ -4,8 +4,7 @@ import {catchError, Observable} from "rxjs";
 import {environment} from "@global-app/env/environment";
 import {TranslateService} from '@ngx-translate/core';
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
-import {FederatedParticipantDTO, FederatedRoundMessageDTO, FederatedTestRunDTO,} from "../dto/federated-test-run";
-import {RunMessageLogDTO, RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
+import {TestRunDTO} from "../dto/test-run";
 
 @Injectable({
   providedIn: 'root'
@@ -18,51 +17,20 @@ export class FederatedRunService {
   private readonly apiUrl = environment.globalLearningApiUrl;
   private readonly path = 'runs/federated/';
 
-  public getRuns(appId: number): Observable<FederatedTestRunDTO[]> {
-    return this.apiService.get<FederatedTestRunDTO[]>(`${this.getBaseUrl()}${appId}`)
+  public getRuns(appId: number): Observable<TestRunDTO[]> {
+    return this.apiService.get<TestRunDTO[]>(`${this.getBaseUrl()}${appId}`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.RUNS').toLowerCase()})))
       );
   }
 
-  public getRun(appId: number, runId: number): Observable<FederatedTestRunDTO> {
-    return this.apiService.get<FederatedTestRunDTO>(`${this.getBaseUrl()}${appId}/run/${runId}`)
+  /** The federated test run with the logs, metrics and round messages of its participants. */
+  public getRun(appId: number, runId: number): Observable<TestRunDTO> {
+    return this.apiService.get<TestRunDTO>(`${this.getBaseUrl()}${appId}/run/${runId}`)
       .pipe(
         catchError((err) => this.errorSnackbarService.showSnackBar(err,
           this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.RUNS').toLowerCase()})))
-      );
-  }
-
-  public getParticipants(appId: number, runId: number): Observable<FederatedParticipantDTO[]> {
-    return this.apiService.get<FederatedParticipantDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/participants`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.RUNS').toLowerCase()})))
-      );
-  }
-
-  public getRoundMessages(appId: number, runId: number): Observable<FederatedRoundMessageDTO[]> {
-    return this.apiService.get<FederatedRoundMessageDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/messages`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.RUNS').toLowerCase()})))
-      );
-  }
-
-  public getLogs(appId: number, runId: number, participantId: number): Observable<RunMessageLogDTO[]> {
-    return this.apiService.get<RunMessageLogDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/participant/${participantId}/log`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.LOG_MESSAGES').toLowerCase()})))
-      );
-  }
-
-  public getMetrics(appId: number, runId: number, participantId: number): Observable<RunMessageMetricDTO[]> {
-    return this.apiService.get<RunMessageMetricDTO[]>(`${this.getBaseUrl()}${appId}/run/${runId}/participant/${participantId}/metric`)
-      .pipe(
-        catchError((err) => this.errorSnackbarService.showSnackBar(err,
-          this.translate.instant('ERROR.FAILED_TO_FETCH', {name: this.translate.instant('ERROR.METRIC_MESSAGES').toLowerCase()})))
       );
   }
 

@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Test {{ data.app.name }}</h2>
+<h2 mat-dialog-title>New experiment · {{ data.app.name }}</h2>
 <mat-dialog-content>
   <h3>Config</h3>
 
@@ -27,39 +27,90 @@
       </mat-icon>
     </mat-form-field>
 
-    <!-- <mat-form-field appearance="fill">
-       <mat-label>Hyperparameter-Tuning-Methode (NOT USED)</mat-label>
-       <mat-select [formControl]="experimentRunControl.controls.tuningMethod">
-         <mat-option value="gridSearch" disabled>Grid Search</mat-option>
-         <mat-option value="randomSearch" disabled>Random Search</mat-option>
-         <mat-option value="bayesianOptimization" disabled>Bayesian Optimization</mat-option>
-       </mat-select>
-     </mat-form-field> -->
     <mat-divider/>
     <h3>Input data</h3>
-    @for (input of inputs(); track input) {
-      <mat-form-field class="example-full-width">
-        <mat-label>{{ input }}</mat-label>
-
-        <input
-          type="text"
-          placeholder="Select your experiment file"
-          matInput
-          [formControl]="getFormControl(input)"
-          [matAutocomplete]="auto"/>
-
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-          @for (option of getFilteredOptionsSignal(input)(); track option) {
-            <mat-option [value]="option">{{ option }}</mat-option>
+    <p class="input-intro">Choose an uploaded file, upload a new one, or use a path on the connected engine.
+      Each trial uses the same input files. New uploads are also saved in My Files.</p>
+    @if (fileListError()) {
+      <lib-error-card>
+        Could not load My Files.
+        <button mat-button type="button" (click)="loadFiles()">Retry</button>
+      </lib-error-card>
+    }
+    @for (config of inputConfigs; track variableOf(config)) {
+      @let key = variableOf(config);
+      <section class="experiment-input" [attr.aria-label]="config.name">
+        <h4>{{ config.name }} @if (!config.required) { <span class="optional">(optional)</span> }</h4>
+        @if (config.description) { <p>{{ config.description }}</p> }
+        <mat-form-field>
+          <mat-label>File source for {{ config.name }}</mat-label>
+          <mat-select [value]="inputSources[key]" (valueChange)="setSource(key, $event)"
+                      [disabled]="!!uploads()[key]?.inProgress || starting()">
+            <mat-option value="stored">My Files</mat-option>
+            <mat-option value="upload">Upload new file</mat-option>
+            <mat-option value="engine">File on connected engine</mat-option>
+          </mat-select>
+        </mat-form-field>
+        @switch (inputSources[key]) {
+          @case ('stored') {
+            <mat-form-field>
+              <mat-label>Choose a file for {{ config.name }}</mat-label>
+              <mat-select [formControl]="getFormControl(key)" [required]="config.required">
+                @if (!config.required) { <mat-option [value]="null">None</mat-option> }
+                @for (file of files(); track file.id) {
+                  <mat-option [value]="file" [disabled]="!file.downloadUrl || !file.secret">
+                    {{ file.fileName }} · {{ file.size | bytes }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (getFormControl(key).hasError('required')) {
+                <mat-error>A file is required for {{ config.name }}</mat-error>
+              }
+              @if (loadingFiles()) { <mat-hint>Loading My Files…</mat-hint> }
+            </mat-form-field>
+            @if (!loadingFiles() && !fileListError() && !files().length) {
+              <lib-hint-card>No files in My Files yet. Select “Upload new file” to add one.</lib-hint-card>
+            }
           }
-        </mat-autocomplete>
-
-        @if (getFormControl(input).hasError('required')) {
-          <mat-error>File for {{ input }} is <strong>required</strong></mat-error>
+          @case ('upload') {
+            <div class="upload-actions">
+              <input #fileUpload type="file" hidden (change)="uploadFile(key, $event)"
+                     [disabled]="!!uploads()[key]?.inProgress || starting()"
+                     [attr.aria-label]="'Upload file for ' + config.name"/>
+              <button mat-stroked-button type="button" (click)="fileUpload.click()"
+                      [disabled]="!!uploads()[key]?.inProgress || starting()">
+                <mat-icon>upload_file</mat-icon>
+                {{ selectedFile(key) ? 'Replace file' : 'Choose file to upload' }}
+              </button>
+              @if (selectedFile(key); as file) {
+                <span>{{ file.fileName }} · {{ file.size | bytes }}</span>
+                @if (!config.required) {
+                  <button mat-button type="button" (click)="setSource(key, 'upload')">Clear</button>
+                }
+              }
+            </div>
+            @if (uploads()[key]; as progress) { <lib-upload-progress [progress]="progress"/> }
+          }
+          @case ('engine') {
+            <mat-form-field>
+              <mat-label>File path for {{ config.name }}</mat-label>
+              <input matInput type="text" placeholder="Select or enter a file path"
+                     [formControl]="getFormControl(key)" [matAutocomplete]="auto" [required]="config.required"/>
+              <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+                @for (path of filteredPaths(key); track path) {
+                  <mat-option [value]="path">{{ path }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-hint>The path must exist in the connected engine’s data directory.</mat-hint>
+              @if (getFormControl(key).hasError('required')) {
+                <mat-error>A file path is required for {{ config.name }}</mat-error>
+              }
+            </mat-form-field>
+          }
         }
-      </mat-form-field>
+      </section>
     } @empty {
-      <lib-hint-card>No Inputs</lib-hint-card>
+      <lib-hint-card>This tool has no inputs.</lib-hint-card>
     }
   </form>
   <mat-divider/>
@@ -74,7 +125,7 @@
   } @else {
     <lib-hint-card>There are no HyperParams</lib-hint-card>
   }
-  @if (formErrors.length > 0; ) {
+  @if (formErrors.length > 0) {
     <lib-error-card>
       @for (err of formErrors; track $index) {
         <p>{{ err }}</p>
@@ -82,8 +133,8 @@
     </lib-error-card>
   }
 </mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-button (click)="onNoClick()">No Thanks</button>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Cancel</button>
   <span class="spacer"></span>
-  <button mat-button (click)="onRunClick()" [disabled]="!isValid()">Run</button>
+  <button mat-flat-button (click)="onRunClick()" [disabled]="!isValid()">{{ starting() ? 'Starting…' : 'Run experiment' }}</button>
 </mat-dialog-actions>

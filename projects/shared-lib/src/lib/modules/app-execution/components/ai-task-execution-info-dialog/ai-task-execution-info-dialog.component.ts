@@ -20,6 +20,12 @@ import {Store} from "@ngrx/store";
 import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-analysis/data-analysis.actions";
 import {RunMeta} from "@shared-lib/modules/app-execution/dto/run-meta";
 import {
+  currentStep,
+  DataAnalysisRunDTO,
+  displayedAttempt,
+  errorOf
+} from "@shared-lib/modules/app-execution/dto/execution-run";
+import {
   RunPerformanceComponent
 } from "@shared-lib/components/run-performance/run-performance.component";
 
@@ -31,9 +37,26 @@ export interface TaskExecutionInfoDialogData extends BaseAuthDto {
   rawLog?: string
   containerId?: string;
   dataAnalysisId?: number;
-  workflowId?: number;
-  workflowRunId?: number;
   meta?: RunMeta | null;
+}
+
+/** A run as the dialog shows it, by the attempt of its current step. */
+export function taskExecutionInfoOf(run: DataAnalysisRunDTO): TaskExecutionInfoDialogData {
+  const step = currentStep(run);
+  const attempt = step ? displayedAttempt(step) : undefined;
+  return {
+    id: run.id,
+    version: run.version,
+    createdAt: run.createdAt,
+    updatedAt: run.updatedAt,
+    keycloakId: run.keycloakId,
+    status: run.status,
+    lastLog: attempt?.lastLog ?? undefined,
+    lastError: errorOf(run),
+    containerId: attempt?.containerId ?? undefined,
+    dataAnalysisId: run.dataAnalysisId ?? undefined,
+    meta: attempt?.meta,
+  };
 }
 
 @Component({
@@ -83,20 +106,11 @@ export class AiTaskExecutionInfoDialogComponent {
     if (!this.hasNeededInfoForDelete) {
       return;
     }
-    if (this.data.workflowId && this.data.workflowRunId) {
-      this.store.dispatch(
-        DataAnalysisActions.deleteWorkflowRun({
-          dataAnalysisId: this.data.dataAnalysisId!,
-          id: this.data.id,
-          workflowId: this.data.workflowRunId,
-        }));
-    } else {
-      this.store.dispatch(
-        DataAnalysisActions.deleteRun({
-          dataAnalysisId: this.data.dataAnalysisId!,
-          id: this.data.id,
-        }));
-    }
+    this.store.dispatch(
+      DataAnalysisActions.deleteRun({
+        dataAnalysisId: this.data.dataAnalysisId!,
+        id: this.data.id,
+      }));
     this.dialogRef.close();
   }
 

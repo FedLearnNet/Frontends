@@ -4,11 +4,11 @@
       <button mat-icon-button (click)="onGoBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <h1>Experiment #{{ experiment!.id }} - {{ experiment!.name }}</h1>
+      <h1>Experiment #{{ experiment!.experimentId }} - {{ experiment!.experiment?.name ?? experiment!.name }}</h1>
       <span class="spacer"></span>
       @if (run(); as run) {
 
-        <span> Run #{{ run.id }}</span>
+        <span>{{ trialNameOf(run) }}</span>
 
       }
     </mat-toolbar>
@@ -28,7 +28,7 @@
           <lib-kv label="Runs">
             {{ passedRuns() }} / {{ totalRuns() }} ({{ failedRuns() }} failed)
           </lib-kv>
-          <lib-kv label="Runs" [value]="experiment.description"></lib-kv>
+          <lib-kv label="Runs" [value]="experiment.experiment?.description ?? ''"></lib-kv>
         </div>
         @if (getInputNames() && getInputNames().length > 0) {
           <div>
@@ -42,14 +42,14 @@
 
         @if (run(); as run) {
           <div>
-            <lib-kv label="Run" [value]="run.name"></lib-kv>
+            <lib-kv label="Run" [value]="trialNameOf(run)"></lib-kv>
             <lib-kv label="Staus">
               <lib-status-badge
                 size="SMALL"
                 [type]="runStatusToBadgeStatus(run.status)"></lib-status-badge>
             </lib-kv>
-            @if (run.error) {
-              <lib-kv label="Error" [value]="run.error"></lib-kv>
+            @if (run.failure?.message; as error) {
+              <lib-kv label="Error" [value]="error"></lib-kv>
             }
           </div>
         }

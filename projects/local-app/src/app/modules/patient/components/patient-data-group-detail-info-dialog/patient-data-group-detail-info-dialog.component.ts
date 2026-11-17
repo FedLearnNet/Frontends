@@ -54,8 +54,6 @@ export class PatientDataGroupDetailInfoDialogComponent implements OnInit {
     this.dialogRef.close();
   }
 
-  objectKeys = (o?: Record<string, string>) => (o ? Object.keys(o) : []);
-
   dataTypeLabel(dt?: DataTypeDto): string {
     if (!dt) return '-';
     const t = dt.type;

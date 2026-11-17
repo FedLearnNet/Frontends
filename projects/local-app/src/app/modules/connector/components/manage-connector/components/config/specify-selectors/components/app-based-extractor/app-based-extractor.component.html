@@ -81,8 +81,8 @@
 
               <div class="runtime">
                 <lib-kv label="Status" [value]="l.status"></lib-kv>
-                @if (l.lastLog) {
-                  <lib-kv label="Message" [value]="l.lastLog"></lib-kv>
+                @if (lastLogOf(l); as message) {
+                  <lib-kv label="Message" [value]="message"></lib-kv>
                 }
               </div>
             } @else if (hasStoredOutputs()) {

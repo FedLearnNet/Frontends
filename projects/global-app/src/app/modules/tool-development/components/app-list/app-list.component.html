@@ -46,7 +46,16 @@
     <ng-container matColumnDef="publishStatus">
       <th mat-header-cell *matHeaderCellDef>{{ 'GRID.PUBLISH_STATUS' | translate }}</th>
       <td mat-cell *matCellDef="let row">
-        <lib-publish-badge [type]="row.publishStatus"/>
+        <div class="publish-status">
+          <lib-publish-badge [type]="row.publishStatus" [warning]="imageWarning(row)"/>
+          @if (imageWarning(row) && row.buildStatus) {
+            @if (row.buildStatus === PipelineStatus.RUNNING) {
+              <lib-badge text="Build running" iconName="autorenew" color="BLUE" animate="PULSE"/>
+            } @else {
+              <lib-badge text="Build planned" iconName="schedule" color="GRAY"/>
+            }
+          }
+        </div>
       </td>
     </ng-container>
 

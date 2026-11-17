@@ -13,11 +13,9 @@ export function loadingInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
     const headers = req.headers.delete(SKIP_LOADING);
     return next(req.clone({headers}));
   }
-  spinnerService.set(true);
+  spinnerService.start();
 
   return next(req).pipe(
-    finalize(() => {
-      spinnerService.set(false);
-    })
+    finalize(() => spinnerService.end())
   );
 }

@@ -6,7 +6,9 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
 import {MatButtonModule} from "@angular/material/button";
 import {TranslatePipe} from "@ngx-translate/core";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {toObservable, toSignal} from "@angular/core/rxjs-interop";
+import {catchError, of, switchMap} from 'rxjs';
+import {SystemInfoComponent} from '@shared-lib/modules/admin/components/system-info/system-info.component';
 
 @Component({
   selector: 'app-select-query',
@@ -17,6 +19,7 @@ import {toSignal} from "@angular/core/rxjs-interop";
     MatIconModule,
     MatButtonModule,
     TranslatePipe,
+    SystemInfoComponent,
   ],
   templateUrl: './select-query.component.html',
   styleUrl: './select-query.component.scss',
@@ -26,6 +29,8 @@ export class SelectQueryComponent {
   private readonly queryService: QueryService = inject(QueryService);
 
   queryId = model<number | undefined>(undefined);
+  readonly systems = toSignal(toObservable(this.queryId).pipe(
+    switchMap(id => id ? this.queryService.getSystems(id).pipe(catchError(() => of([]))) : of([]))), {initialValue: []});
   queryIdSave = output();
 
   queryList = toSignal(this.queryService.getAllQueries());

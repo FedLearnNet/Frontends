@@ -68,3 +68,24 @@ export enum DatatypeFormTypeEnum {
   DATE_TIME = "DATE_TIME",
   TEXT = "TEXT"
 }
+
+export function dataTypeOptionLabel(option: DataTypeOptionsDto | string | boolean | number): string {
+  if (typeof option === 'object' && option !== null && 'label' in option) {
+    return option.label;
+  }
+
+  return `${option}`;
+}
+
+export function dataTypeAllowedValueLabels(dataType?: DataTypeDto): string[] {
+  const values = dataType?.options?.length ? dataType.options : dataType?.allowedValues ?? [];
+  return values.map(option => dataTypeOptionLabel(option));
+}
+
+export function dataTypeValidationLabel(validation: DataTypeValidationDto): string {
+  return [
+    validation.name,
+    validation.validator ? `: ${validation.validator}` : '',
+    validation.message ? ` - ${validation.message}` : ''
+  ].join('');
+}

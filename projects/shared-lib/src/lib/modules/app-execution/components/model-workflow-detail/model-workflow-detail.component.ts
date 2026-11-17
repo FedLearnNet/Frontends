@@ -101,6 +101,7 @@ export class ModelWorkflowDetailComponent {
         storeConfig: {
           hideWorkflow: false,
           onlyTrainedAnalysis: true,
+          onlyWithImage: true,
           prefilter: {
             appType: [
               FederatedAppType.SELF_LEARNED,
@@ -110,8 +111,17 @@ export class ModelWorkflowDetailComponent {
               FederatedAppType.EXTRACTOR,
               FederatedAppType.EVALUATION,
               FederatedAppType.DATA_TRANSFORMATION],
-          }
+          },
+          allowFilterChange: {
+            appType: true,
+          },
+          filterAppTypes: [
+            FederatedAppType.SELF_LEARNED,
+            FederatedAppType.EXTRACTOR,
+            FederatedAppType.EVALUATION,
+            FederatedAppType.DATA_TRANSFORMATION],
         },
+        title: 'MENU.SELECT_TOOL',
         allowMaximize: true
       } as StoreSelectDialogData,
     });

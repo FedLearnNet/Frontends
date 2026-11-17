@@ -55,7 +55,7 @@ describe('QueryBuilderItemComponent', () => {
       value: '70',
       operator: QueryOperatorTypes.EQUAL,
     }));
-    expect(component.catalogControl.value).toBe('weight');
+    expect(component.catalogControl.value).toBe(queryConfig);
     expect(component.operatorOptions()).toEqual([
       {label: 'Equals (=)', value: QueryOperatorTypes.EQUAL},
     ]);
@@ -136,8 +136,8 @@ describe('QueryBuilderItemComponent', () => {
     expect(component.form.controls.timeWindowCount.value).toBe(1);
   });
 
-  it('should display the selected column with its datatype label', () => {
-    expect(component.displayColumnName('weight')).toBe('weight (Weight)');
+  it('should display the selected column with its label', () => {
+    expect(component.displayColumnName(queryConfig)).toBe('Weight');
   });
 
   it('shows the hierarchical index and a summary of the condition', () => {

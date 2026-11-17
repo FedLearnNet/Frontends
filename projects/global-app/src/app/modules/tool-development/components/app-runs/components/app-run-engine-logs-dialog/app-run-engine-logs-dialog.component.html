@@ -1,0 +1,21 @@
+<lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)" [title]="title"/>
+<mat-dialog-content class="engine-logs-dialog">
+  <div class="engine-logs-dialog__status">
+    <lib-status-badge size="SMALL" [type]="runStatusToBadgeStatus(data.engine.status)"/>
+    @if (exitCode !== null && exitCode !== undefined) {
+      <span>Exit code {{ exitCode }}</span>
+    }
+    @if (error) {
+      <span class="engine-logs-dialog__error">{{ error }}</span>
+    }
+    <span class="spacer"></span>
+    <button mat-icon-button [disabled]="!text()" (click)="copy()" matTooltip="Copy the output">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+  </div>
+  @if (logs() === undefined) {
+    <p>Loading…</p>
+  } @else {
+    <lib-console-output [consoleRawMsg]="text()"/>
+  }
+</mat-dialog-content>

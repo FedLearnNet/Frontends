@@ -4,7 +4,7 @@ import {MatChip, MatChipSet} from "@angular/material/chips";
 import {MatIcon} from "@angular/material/icon";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TranslatePipe} from "@ngx-translate/core";
-import {FederatedParticipantDTO, FederatedTestRunDTO} from "../../../../dto/federated-test-run";
+import {participantOf, TestAttemptDTO, TestRunDTO} from "../../../../dto/test-run";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {RunStatusTypes} from "../../../../dto/test-run";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
@@ -36,11 +36,14 @@ import {
 export class AppRunFederatedTestDetailParticipantCardComponent {
   private readonly dialog = inject(MatDialog);
 
-  participant = input.required<FederatedParticipantDTO>();
-  run = input.required<FederatedTestRunDTO>();
+  // The attempt of the participant; what it is and how far it got is in its participant.
+  participant = input.required<TestAttemptDTO>();
+  run = input.required<TestRunDTO>();
   app = input.required<AppDetailDto>();
 
   participantBadge = computed(() => runStatusToBadgeStatus(this.participant().status ?? RunStatusTypes.PENDING));
+  // Who the attempt stands for; how far it got is on the attempt itself.
+  state = computed(() => participantOf(this.run(), this.participant()));
 
 
   showDetail(): void {

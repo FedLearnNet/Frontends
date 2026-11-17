@@ -20,7 +20,7 @@ import {
 import {
   ModelResultCardComponent
 } from "@shared-lib/modules/app-execution/components/model-result-card/model-result-card.component";
-import {DataAnalysisResultDTO, DataAnalysisRunModesEnum} from "@shared-lib/modules/app-execution/dto/prediction";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {AiActionService} from "@shared-lib/modules/app-execution/service/ai-action.service";
 import {
   selectSelectedDataAnalysis
@@ -87,22 +87,12 @@ export class ModelWorkflowChatThreadComponent implements OnInit {
     return m.message as ModelWorkflowMessageDto
   }
 
-  isPrediction(m: ModelWorkflowChatWrapperDTO) {
-    return m.type === ModelWorkflowChatMessageType.PREDICTION ||
-      m.type === ModelWorkflowChatMessageType.WORKFLOW_PREDICTION;
+  isRun(m: ModelWorkflowChatWrapperDTO) {
+    return m.type === ModelWorkflowChatMessageType.RUN;
   }
 
-  getAsPrediction(m: ModelWorkflowChatWrapperDTO): DataAnalysisResultDTO {
-    if (m.type === ModelWorkflowChatMessageType.PREDICTION) {
-      return {
-        ...m.message,
-        runMode: DataAnalysisRunModesEnum.PREDICTION
-      } as DataAnalysisResultDTO;
-    }
-    return {
-      ...(m.message as DataAnalysisResultDTO),
-      runMode: DataAnalysisRunModesEnum.WORKFLOW
-    };
+  getAsRun(m: ModelWorkflowChatWrapperDTO): DataAnalysisRunDTO {
+    return m.message as DataAnalysisRunDTO;
   }
 
   onBubbleClick(evt: MouseEvent) {

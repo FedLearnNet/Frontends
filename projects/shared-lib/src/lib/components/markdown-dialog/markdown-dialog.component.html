@@ -2,5 +2,7 @@
                             [title]="title"/>
 
 @if (data.markdown; as md) {
-  <markdown [clipboard]="data.copyToClipboard ?? false" class="markdown" [data]="md"/>
+  <mat-dialog-content>
+    <markdown [clipboard]="data.copyToClipboard ?? false" class="markdown" [data]="md"/>
+  </mat-dialog-content>
 }

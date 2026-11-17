@@ -4,7 +4,7 @@ import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
 import * as echarts from 'echarts/core';
 import {EChartsOption} from "echarts";
 import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO} from "../../../../dto/test-run";
 
 @Component({
   selector: 'app-experiments-metric-parameter-parallel',
@@ -19,7 +19,7 @@ import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment
 export class ExperimentsMetricParameterParallelComponent implements OnInit {
   private readonly changeDetectorRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  readonly experimentRuns = input<ExperimentRunDTO[]>([]);
+  readonly experimentRuns = input<TestAttemptDTO[]>([]);
   readonly metricName = input<string>('');
   readonly hyperParams = input<string[]>([]);
   readonly mode = input<string>('max');
@@ -63,11 +63,11 @@ export class ExperimentsMetricParameterParallelComponent implements OnInit {
     return data;
   }
 
-  getData(run: ExperimentRunDTO): (number | string)[] {
+  getData(run: TestAttemptDTO): (number | string)[] {
     const data: (number | string)[] = [];
     const metrics: number[] = run.metrics.map((m: RunMessageMetricDTO) => +m.value);
     for (const param of this.hyperParams()) {
-      const value = run.hyperParams[param];
+      const value = (run.params ?? {})[param] as string | number;
       if (value) {
         data.push(value);
       } else {

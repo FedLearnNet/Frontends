@@ -5,6 +5,4 @@ export interface PerformanceDTO {
   timestamp: number;
 }
 
-export interface ConsoleStdOutDTO{
-  msg: string;
-}
+export type {ConsoleStdOutDTO} from '@shared-lib/modules/app-execution/dto/console';

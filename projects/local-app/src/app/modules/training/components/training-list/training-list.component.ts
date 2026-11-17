@@ -11,7 +11,7 @@ import {FederatedLearningProjectActions} from "../../store/federated-learning-pr
 import {selectItems, selectTotal} from "../../store/federated-learning-project.selectors";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
-import {projectStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
+import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 
 @Component({
@@ -55,5 +55,5 @@ export class TrainingListComponent implements OnInit {
     }));
   }
 
-  protected readonly projectStatusToBadgeStatus = projectStatusToBadgeStatus;
+  protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
 }

@@ -6,6 +6,7 @@ export interface StoreFilterParams {
   showUncertified?: boolean;
   hideWorkflow?: boolean;
   onlyTrainedAnalysis?: boolean;
+  onlyWithImage?: boolean;
   sort?: string;
   page?: number;
   size?: number;
