@@ -7,3 +7,13 @@ export interface FederatedLearningProjectDto {
   run?: ExecutionRunDetailDTO | null;
   workflowId?: number | null;
 }
+
+// A training run waiting for a free slot of this client.
+export interface QueuedRunDto {
+  runId: number;
+  name?: string;
+  mode?: 'SINGLE' | 'TRE' | 'FEDERATED';
+  // 1 starts next
+  position: number;
+  queuedAt?: string;
+}

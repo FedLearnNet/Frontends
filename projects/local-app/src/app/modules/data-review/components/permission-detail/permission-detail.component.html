@@ -109,6 +109,12 @@
             </mat-select>
           </mat-form-field>
         }
+        @if (permissionForm.getRawValue().permissions.treTrainingAccess === TrainingAccess.ENABLED) {
+          <mat-slide-toggle formControlName="treShareName" color="primary" class="full-width"
+                            matTooltip="Researchers see the name of this client's platform account instead of 'Client N'">
+            Show the name of this client for TRE
+          </mat-slide-toggle>
+        }
         <!-- Automatic Statistics Access For -->
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>{{ 'AUTOMATIC_STATISTICS_ACCESS_FOR' | translate }}</mat-label>

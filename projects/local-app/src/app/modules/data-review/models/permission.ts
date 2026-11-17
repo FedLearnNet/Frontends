@@ -30,6 +30,8 @@ export interface CreatePermissionDTO {
   federatedAutoTrainingAccess: AutoTrainingAccess | null;
   treTrainingAccess: TrainingAccess | null;
   treAutoTrainingAccess: AutoTrainingAccess | null;
+  // the platform shows the Keycloak name of this client instead of a generic one
+  treShareName?: boolean | null;
   autoStatisticsAccess: AutoStatisticsAccess | null;
   autoMetricsAccess: AutoMetricsAccess | null;
   querySampleThreshold: number | null;
@@ -48,6 +50,8 @@ export interface PermissionDTO extends BaseDto {
   federatedAutoTrainingAccess: AutoTrainingAccess | null;
   treTrainingAccess: TrainingAccess | null;
   treAutoTrainingAccess: AutoTrainingAccess | null;
+  // the platform shows the Keycloak name of this client instead of a generic one
+  treShareName?: boolean | null;
   autoStatisticsAccess: AutoStatisticsAccess | null;
   autoMetricsAccess: AutoMetricsAccess | null;
   querySampleThreshold: number | null;

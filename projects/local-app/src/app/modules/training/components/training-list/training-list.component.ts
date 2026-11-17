@@ -1,4 +1,7 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {catchError, of, switchMap, timer} from 'rxjs';
+import {FederatedLearningProjectService} from '../../services/federated-learning-project.service';
 import {RouterLink} from '@angular/router';
 import {MatTableModule} from "@angular/material/table";
 import {MatButtonModule} from "@angular/material/button";
@@ -39,6 +42,11 @@ export class TrainingListComponent implements OnInit {
   flRequests = this.store.selectSignal(selectItems);
   totalCount = this.store.selectSignal(selectTotal);
   displayedColumns: string[] = ['name', 'description', 'status', 'time'];
+  private readonly service = inject(FederatedLearningProjectService);
+  // position of each waiting run, refreshed while the page is open
+  readonly queue = toSignal(timer(0, 15000).pipe(switchMap(() => this.service.getQueue().pipe(catchError(() => of([]))))),
+    {initialValue: []});
+  readonly positions = computed(() => new Map(this.queue().map(entry => [entry.runId, entry.position])));
 
 
   ngOnInit(): void {

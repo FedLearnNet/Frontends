@@ -27,6 +27,8 @@ export class WorkflowValidationPanelComponent {
   private readonly workflowValidationService: WorkflowValidationService = inject(WorkflowValidationService);
   readonly workflow = input.required<WorkflowDTO>();
   readonly isValidChange = output<boolean>();
+  // rules of the caller, e.g. the tools a TRE allows
+  readonly extraErrors = input<WorkflowValidationError[]>([]);
 
   readonly showNavigate = input<boolean>(false);
   readonly mapNavigateTarget = input<((err: WorkflowValidationError) => unknown) | null>(null);
@@ -44,9 +46,10 @@ export class WorkflowValidationPanelComponent {
       const w = this.workflow();
       const r = this.workflowValidationService.validate(w);
       if (!r) return;
-      if (r.valid) this.expanded.set(false);
-      this.isValidChange.emit(r.valid);
-      const items = r.errors.map((e, idx) => {
+      const errors = [...r.errors, ...this.extraErrors()];
+      if (!errors.length) this.expanded.set(false);
+      this.isValidChange.emit(!errors.length);
+      const items = errors.map((e, idx) => {
         return {
           key: `${e.code}:${e.path}:${idx}`,
           ...e,

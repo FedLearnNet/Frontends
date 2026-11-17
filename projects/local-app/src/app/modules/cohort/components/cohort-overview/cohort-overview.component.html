@@ -6,7 +6,15 @@
   [mainGap]="false"
   [locationBack]="true">
   <div suffix class="tab-header-row">
-    @if (cohort()) {
+    @if (cohort()?.externalDatabase) {
+      <lib-btn
+        type="CUSTOM"
+        variant="SECONDARY"
+        label="External database"
+        icon="storage"
+        [disabled]="isDeleting()"
+        (clicked)="editExternalDatabase()"/>
+    } @else if (cohort()) {
       <lib-btn
         type="CUSTOM"
         variant="SECONDARY"
@@ -15,6 +23,8 @@
         [disabled]="isDeleting()"
         [matTooltip]="('TOOLTIP.MANAGE_CONNECTORS' | translate)"
         (clicked)="navigateToConnectors()"/>
+    }
+    @if (cohort()) {
 
       @if (selectedTabIndex() === 0) {
         <lib-btn

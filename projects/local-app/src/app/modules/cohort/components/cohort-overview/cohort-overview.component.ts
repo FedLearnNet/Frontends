@@ -28,6 +28,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SchemaService} from '@local-app/cohort/services/schema.service';
 import {SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
+import {ExternalDatabaseFormComponent} from '@local-app/cohort/components/external-database-form/external-database-form.component';
 import {CohortStatisticsComponent} from "@local-app/cohort/components/cohort-statistics/cohort-statistics.component";
 import {CohortMembersComponent} from "@local-app/cohort/components/cohort-members/cohort-members.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
@@ -141,7 +142,8 @@ export class CohortOverviewComponent implements OnInit {
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({cohort, allData}) => {
-      this.cohort.set({
+      // a cohort on an external database has no schema
+      this.cohort.set(!cohort.schemaRoot ? cohort : {
         ...cohort,
         schemaRoot: {
           ...cohort.schemaRoot,
@@ -225,6 +227,11 @@ export class CohortOverviewComponent implements OnInit {
 
   setSelectedTabIndex(index: number): void {
     this.selectedTabIndex.set(index);
+  }
+
+  editExternalDatabase(): void {
+    this.dialog.open(ExternalDatabaseFormComponent, {width: '880px', maxWidth: '95vw', autoFocus: false, data: {cohort: this.cohort()}})
+      .afterClosed().subscribe(saved => saved && this.cohort.set({...this.cohort()!, ...saved}));
   }
 
   navigateToConnectors(): void {

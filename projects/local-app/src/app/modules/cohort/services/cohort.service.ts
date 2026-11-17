@@ -65,6 +65,18 @@ export class CohortService {
     );
   }
 
+  uploadTestData(cohortId: number, file: File): Observable<unknown> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.apiService.post(`${this.getBaseUrl()}/${cohortId}/test-data`, form).pipe(
+      catchError(err => this.errorSnackbarService.showSnackBar(err, 'Could not upload the test data file')));
+  }
+
+  deleteTestData(cohortId: number): Observable<unknown> {
+    return this.apiService.delete(`${this.getBaseUrl()}/${cohortId}/test-data`).pipe(
+      catchError(err => this.errorSnackbarService.showSnackBar(err, 'Could not remove the test data file')));
+  }
+
   updateCohort(cohort: CohortDetailDto): Observable<CohortDetailDto> {
     return this.apiService.put<CohortDetailDto>(`${this.getBaseUrl()}/${cohort.id}`, cohort).pipe(
       tap(() => this.notifyCohortsChanged()),
