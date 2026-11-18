@@ -246,6 +246,13 @@
       "LEAD": "Transformationen sind optional und können später hinzugefügt werden.",
       "DESCRIPTION": "Du kannst deine Daten vor dem Mapping transformieren oder diesen Schritt überspringen und direkt zum Mapper gehen."
     },
+    "UNSAVED_CHANGES": {
+      "TITLE": "Ungespeicherte Änderungen",
+      "MESSAGE": "Sie haben ungespeicherte Änderungen. Wenn Sie jetzt die Seite verlassen, gehen diese verloren.",
+      "SAVE": "Speichern",
+      "KEEP_EDITING": "Weiter bearbeiten",
+      "DISCARD": "Änderungen verwerfen"
+    },
     "TRANSFORMER_MANAGER": {
       "TRANSFORMATION_SOURCE": "Transformationsquelle",
       "BUILT_IN_TRANSFORMATIONS": "Integriert",
@@ -746,5 +753,8 @@
   },
   "FOUND_CLIENTS": "Gefundene Clients",
   "CLIENT_N": "Client {{ n }}",
-  "NO_CLIENT_SYSTEM_INFO": "Die Clients dieser Abfrage haben keine Systeminformationen gemeldet."
+  "NO_CLIENT_SYSTEM_INFO": "Die Clients dieser Abfrage haben keine Systeminformationen gemeldet.",
+  "SUCCESS": {
+    "DATASET_DESIGN_SAVED": "Dataset-Design wurde im Projekt gespeichert."
+  }
 }
