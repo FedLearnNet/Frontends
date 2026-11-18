@@ -1,5 +1,5 @@
 import {Component, computed, inject, input, OnInit, Signal, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {PatientLogTraceabilityComponent} from "../patient-log-traceability/patient-log-traceability.component";
 import {PatientLogQueryComponent} from "../patient-log-query/patient-log-query.component";
 import {PatientLogTrainingComponent} from "../patient-log-training/patient-log-training.component";
@@ -55,8 +55,9 @@ export class PatientDetailComponent implements OnInit, HasPatientUnsavedChanges 
   loading = signal<boolean>(false);
   isEditing = signal(false);
 
-  private readonly cohortStore = inject(CohortStore);
-  schema: Signal<SchemaRootNodeDto | undefined> = computed(() => this.cohortStore.cohort()?.schemaRoot);
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
+  schema: Signal<SchemaRootNodeDto | undefined> = computed(() => this.cohort()?.schemaRoot as SchemaRootNodeDto | undefined);
 
   sortedTopLevelNodes = computed(() => {
     const nodes = this.schema()?.childNodes;

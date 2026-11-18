@@ -1,5 +1,5 @@
-import {Component, computed, inject, input, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {Component, computed, inject, input, signal, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {
@@ -34,7 +34,6 @@ import {
   ConnectorImportDialogComponent,
   ConnectorImportDialogData
 } from "../manage-connector/components/connector-import-dialog/connector-import-dialog.component";
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {ConnectorDTO} from "../../dto/connector";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
@@ -54,8 +53,8 @@ import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 })
 export class ListConnectorComponent implements OnInit {
   readonly cohortId = input<string>();
-  private readonly cohortStore = inject(CohortStore);
-  private readonly cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   baseRoute = 'connector';
   displayedColumns: string[] = ['name', 'source', 'last', 'actions'];
@@ -158,9 +157,13 @@ export class ListConnectorComponent implements OnInit {
   }
 
   onRunClick(connector: ConnectorDTO): void {
+    const cohort = this.cohort();
+    if (!cohort) {
+      return;
+    }
     const dialogRef = this.dialog.open(ConnectorRunDialogComponent, {
       data: {
-        cohort: this.cohort(),
+        cohort,
         connector: connector,
       },
     });

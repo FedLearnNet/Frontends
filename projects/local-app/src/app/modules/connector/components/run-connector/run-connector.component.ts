@@ -1,10 +1,11 @@
-import {ChangeDetectorRef, Component, computed, inject, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {ChangeDetectorRef, Component, computed, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
+import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Data} from "@angular/router";
 import {ConnectorRunDTO} from "../../dto/run";
 import {ConnectorDTO} from "../../dto/connector";
 import {RunLogsType} from '../../enum/run-logs';
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
 import {MatTab, MatTabContent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {MatTooltip} from '@angular/material/tooltip';
@@ -35,7 +36,7 @@ type RouteData = Data & { breadcrumb: string | any, run: ConnectorRunDTO, connec
   templateUrl: './run-connector.component.html',
   styleUrl: './run-connector.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatTabLabel, MatTooltip, MatTabContent, RunConnectorChangeLogComponent, RunConnectorLogComponent, TranslatePipe, KvComponent, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent, MatProgressBar, BadgeComponent]
+  imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatTabLabel, MatTooltip, MatTabContent, RunConnectorChangeLogComponent, RunConnectorLogComponent, TranslatePipe, KvComponent, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, BtnComponent, MatProgressBar, BadgeComponent, ErrorCardComponent, SkeletonLoaderComponent]
 })
 export class RunConnectorViewComponent implements OnInit, OnDestroy {
   private static readonly REFRESH_PERIOD = 5000;
@@ -43,8 +44,8 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   run?: ConnectorRunDTO = undefined;
   connector?: ConnectorDTO = undefined;
 
-  private readonly cohortStore = inject(CohortStore);
-  cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   get connectorCohortId(): string | undefined {
     return this.connector?.cohortId != null ? String(this.connector.cohortId) : undefined;

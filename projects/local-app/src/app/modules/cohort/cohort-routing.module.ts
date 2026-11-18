@@ -1,12 +1,9 @@
-import {inject, NgModule} from '@angular/core';
-import {toObservable} from '@angular/core/rxjs-interop';
-import {filter, map, take} from 'rxjs';
+import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {CohortComponent} from './cohort.component';
 import {CohortCreateComponent} from './components/cohort-create/cohort-create.component';
 import {CohortDashboardComponent} from './components/cohort-dashboard/cohort-dashboard.component';
-import {CohortShellComponent} from './components/cohort-shell/cohort-shell.component';
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {cohortBreadcrumb, cohortRouteResources} from '@local-app/cohort/services/cohort-route-resources';
 import {CohortOverviewComponent} from './components/cohort-overview/cohort-overview.component';
 import {cohortListResolver} from '@local-app/cohort/services/cohort-resolver.service';
 import {schemaHeadListResolver} from '@local-app/cohort/services/schema-resolver.service';
@@ -35,27 +32,18 @@ const routes: Routes = [
       },
       {
         path: ':cohortId',
-        component: CohortShellComponent,
-        // Runs in an injection context (BreadcrumbService); emits once the shell has loaded the cohort.
-        data: {
-          breadcrumb: () => {
-            const store = inject(CohortStore);
-            return toObservable(store.cohort).pipe(
-              map(cohort => cohort?.name),
-              filter((name): name is string => !!name),
-              take(1),
-            );
-          },
-        },
+        data: {breadcrumb: cohortBreadcrumb},
         children: [
           {
             path: '',
             component: CohortOverviewComponent,
+            resources: cohortRouteResources,
             resolve: {allData: cohortDataListResolver},
           },
           {
             path: 'patient/new',
             component: PatientFormComponent,
+            resources: cohortRouteResources,
             canDeactivate: [patientUnsavedChangesGuard],
             data: {
               breadcrumb: 'Add Patient',
@@ -65,6 +53,7 @@ const routes: Routes = [
           {
             path: 'patient/:patientId',
             component: PatientDetailComponent,
+            resources: cohortRouteResources,
             resolve: {patient: patientResolver},
             canDeactivate: [patientUnsavedChangesGuard],
             data: {

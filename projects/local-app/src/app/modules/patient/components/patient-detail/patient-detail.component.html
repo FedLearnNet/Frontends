@@ -1,5 +1,7 @@
-@if (loading()) {
+@if (loading() || cohortResource().isLoading()) {
   <lib-skeleton-loader />
+} @else if (cohortResource().error(); as error) {
+  <lib-error-card [errorObject]="error" />
 } @else {
   @if (patient(); as p) {
     @if (isEditing() && schema(); as schemaRoot) {

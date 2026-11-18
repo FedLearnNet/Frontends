@@ -1,4 +1,5 @@
 import {SchemaNodeNestedDto, SchemaNodeTypeEnum} from '@local-app/cohort/dto/schema';
+import {CohortDetailDto} from '@local-app/cohort/models';
 import {DatatypeFormTypeEnum, DataTypeTypeEnum} from '@local-app/cohort/dto/data-type';
 
 export const UNIQUE_PATIENT_ID_NODE: SchemaNodeNestedDto = {
@@ -20,3 +21,11 @@ export const UNIQUE_PATIENT_ID_NODE: SchemaNodeNestedDto = {
   } as any,
   childNodes: [],
 } as any;
+
+export function withUniquePatientIdNode(cohort: CohortDetailDto): CohortDetailDto {
+  const children = cohort.schemaRoot?.childNodes ?? [];
+  if (children.some(node => node.globalId === UNIQUE_PATIENT_ID_NODE.globalId)) {
+    return cohort;
+  }
+  return {...cohort, schemaRoot: {...cohort.schemaRoot, childNodes: [...children, UNIQUE_PATIENT_ID_NODE]}};
+}

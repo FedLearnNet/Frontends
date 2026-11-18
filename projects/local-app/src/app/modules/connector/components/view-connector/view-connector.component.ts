@@ -1,5 +1,5 @@
 import {Component, computed, inject, input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -38,7 +38,6 @@ import {
   ConnectorJsonEditorDialogComponent,
   EditConnectorJsonEditorData
 } from "../manage-connector/components/connector-json-editor-dialog/connector-json-editor-dialog.component";
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
@@ -61,8 +60,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   readonly cohortId = input<string | null>();
 
-  private readonly cohortStore = inject(CohortStore);
-  private readonly cohort = computed(() => this.cohortStore.cohort() ?? ({} as CohortDetailDto));
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   connector?: ConnectorDTO;
   availableTriggerConnectors: ConnectorDTO[] = [];
@@ -100,7 +99,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
       const routeData = data as RouteData;
       this.connector = routeData.connector;
       this.loadRuns();
-      this.loadTriggerConnectors(this.cohortStore.cohort()?.id);
+      this.loadTriggerConnectors(this.connector?.cohortId ?? undefined);
     });
   }
 
@@ -138,7 +137,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   save(field: string): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     this.connectorService.patch(configToConnectorDTO(this.connector)).subscribe((connector) => {
       this.connector = {
@@ -235,11 +235,12 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   onRunClick(): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     const dialogRef = this.dialog.open(ConnectorRunDialogComponent, {
       data: {
-        cohort: this.cohort(),
+        cohort,
         connector: this.connector,
       },
     });

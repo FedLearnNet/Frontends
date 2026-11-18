@@ -12,7 +12,7 @@
            routerLink="custom"/>
 </lib-header>
 
-<lib-page-wrapper [isEmpty]="connectors.length === 0">
+<lib-page-wrapper [isEmpty]="connectors.length === 0" [error]="cohortResource().error()">
   <div empty class="empty-view">
     <img src="assets/images/connector.jpg" alt="Empty Connector List"/>
     <h2>{{ 'CONNECTORS' | translate }}</h2>

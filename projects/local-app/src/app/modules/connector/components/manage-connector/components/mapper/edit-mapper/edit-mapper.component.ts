@@ -1,4 +1,5 @@
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
+import {CohortDetailDto} from '@local-app/cohort/models';
+import {withUniquePatientIdNode} from '@local-app/utils/constants/unique-patient-id-node';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -156,12 +157,12 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   });
 
   //TODO BIG TODO WE NEED TO MAKE THIS AT SUB TIME
-  // A derived copy: the shared cohort in CohortStore must never receive the synthetic Unique Patient ID node.
-  readonly cohort = inject(CohortStore).cohortWithUniquePatientId;
+  readonly routeCohort = input.required<CohortDetailDto>();
+  readonly cohort = computed(() => withUniquePatientIdNode(this.routeCohort()));
 
   private readonly flattenedSchemaFields = computed(() => {
     const cohort = this.cohort();
-    if (!cohort?.schemaRoot?.childNodes?.length) {
+    if (!cohort.schemaRoot?.childNodes?.length) {
       return [];
     }
 
@@ -420,7 +421,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   private buildPreviewValidationRequest(): PreviewValidationRequestDTO | undefined {
     const cohort = this.cohort();
     const validationConfig = this.validationConfig();
-    if (!cohort || !validationConfig?.inputConfig) return undefined;
+    if (!validationConfig?.inputConfig) return undefined;
 
     const connector = configToConnectorDTO({
       ...validationConfig,

@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
+import {cohortRouteResources} from '@local-app/cohort/services/cohort-route-resources';
 import {ConnectorComponent} from "./connector.component";
 import {ManageConnectorComponent} from "./components/manage-connector/manage-connector.component";
 import {ListConnectorComponent} from "./components/list-connector/list-connector.component";
@@ -24,11 +25,13 @@ const routes: Routes = [
       {
         path: '',
         component: ListConnectorComponent,
+        resources: cohortRouteResources,
         pathMatch: 'full',
       },
       {
         path: 'new',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {},
         data: {
           breadcrumb: 'New',
@@ -38,6 +41,7 @@ const routes: Routes = [
       {
         path: 'new/:connector-id',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {
           connector: connectorAndFileResolver,
         },
@@ -83,6 +87,7 @@ const routes: Routes = [
       {
         path: 'edit/:connector-id',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {
           connector: connectorAndFileResolver,
         },
@@ -100,6 +105,7 @@ const routes: Routes = [
             path: '',
             pathMatch: 'full',
             component: ViewConnectorComponent,
+            resources: cohortRouteResources,
             resolve: {
               connector: connectorResolver,
             },
@@ -107,6 +113,7 @@ const routes: Routes = [
           {
             path: 'run/:run-id',
             component: RunConnectorViewComponent,
+            resources: cohortRouteResources,
             // `connector` is inherited from the componentless parent route.
             resolve: {
               run: runResolver,

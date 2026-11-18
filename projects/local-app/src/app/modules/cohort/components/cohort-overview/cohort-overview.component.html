@@ -1,12 +1,12 @@
 <lib-header
-  [title]="$safeNavigationMigration(cohort()?.name)"
-  [description]="$safeNavigationMigration(cohort()?.description)"
-  [enableSkeleton]="!cohort()"
+  [title]="$safeNavigationMigration(current()?.name)"
+  [description]="$safeNavigationMigration(current()?.description)"
+  [enableSkeleton]="cohortResource().isLoading()"
   [enableGoBack]="true"
   [mainGap]="false"
   [locationBack]="true">
   <div suffix class="tab-header-row">
-    @if (cohort()) {
+    @if (current()) {
       <lib-btn
         type="CUSTOM"
         variant="SECONDARY"
@@ -55,7 +55,7 @@
     }
   </div>
 
-  @if (cohort()) {
+  @if (current()) {
     <div class="tab-header-row tab-header-row--center">
       @let si = selectedTabIndex();
       <nav mat-tab-nav-bar [tabPanel]="panel">
@@ -98,54 +98,55 @@
   </section>
 }
 
-<lib-page-wrapper [isEmpty]="!cohort()">
+<lib-page-wrapper [isEmpty]="!current() && !cohortResource().error()" [isLoading]="cohortResource().isLoading()"
+                  [skeletonOnLoading]="true" [error]="cohortResource().error()">
   <lib-error-card empty>
     {{ 'WARNING.COHORT_NOT_FOUND' | translate }}
   </lib-error-card>
 
   <mat-tab-nav-panel #panel>
-    @if (cohort()) {
+    @if (current()) {
       @switch (selectedTabIndex()) {
         @case (0) {
           <app-cohort-detail
             [isEditing]="isEditing()"
-            [cohort]="cohort()" (cohortChange)="cohortStore.cohort.set($event)"
+            [(cohort)]="current"
           />
         }
         @case (1) {
           @if (schema()) {
             <app-schema-detail [schema]="schema()!"/>
           } @else {
-            <app-data-review-permission-grid [filterCohort]="cohort()" />
+            <app-data-review-permission-grid [filterCohort]="current()" />
           }
         }
         @case (2) {
           @if (schema()) {
-            <app-patient-detail-queryability-form [cohortId]="cohort()!.id"
+            <app-patient-detail-queryability-form [cohortId]="current()!.id"
                                                   [schemaNodes]="schemaDynamicFormConfig()"/>
           } @else {
-            <app-cohort-statistics [cohortId]="cohort()!.id" />
+            <app-cohort-statistics [cohortId]="current()!.id" />
           }
         }
         @case (3) {
           @if (schema()) {
-            <app-data-review-permission-grid [filterCohort]="cohort()" />
+            <app-data-review-permission-grid [filterCohort]="current()" />
           } @else {
-            <app-cohort-patients [cohort]="cohort()!"
+            <app-cohort-patients [cohort]="current()!"
                                  [schemaNodes]="schemaDynamicFormConfig()!"
                                  [patients]="patients()!"/>
           }
         }
         @case (4) {
-          <app-cohort-statistics [cohortId]="cohort()!.id" />
+          <app-cohort-statistics [cohortId]="current()!.id" />
         }
         @case (5) {
-          <app-cohort-patients [cohort]="cohort()!"
+          <app-cohort-patients [cohort]="current()!"
                                [schemaNodes]="schemaDynamicFormConfig()!"
                                [patients]="patients()!"/>
         }
         @case (6) {
-          <app-cohort-members [cohort]="cohort()" (cohortChange)="cohortStore.cohort.set($event)" />
+          <app-cohort-members [(cohort)]="current" />
         }
       }
     }

@@ -74,8 +74,7 @@ export class BreadcrumbService {
         if (typeof bcData === 'string') return of(bcData);
         if (typeof bcData === 'function') {
             try {
-                // Run in an injection context so labels can read injectable state (e.g. a store).
-                const result = runInInjectionContext(this.injector, () => bcData(route.data));
+                const result = runInInjectionContext(this.injector, () => bcData(route.data, route));
                 if (result == null) return of(null);
                 if (typeof result === 'string') return of(result);
                 if (result instanceof Promise) return from(result).pipe() as Observable<string | null>;

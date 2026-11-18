@@ -1,4 +1,3 @@
-import {CohortStore} from '@local-app/cohort/services/cohort.store';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -9,6 +8,7 @@ import {
   signal,
   ViewChild
 } from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ConnectorCard} from "../../models/connector-card";
 import {ConnectorStepConfigs} from "../../enum/connector-step-config";
 import {ConnectorStepConfigChangeEmitter} from "../../models/connector-step-config";
@@ -70,6 +70,7 @@ import {UploadInfoDTO} from '../../dto/upload-info';
 import {getPrimarySheet, hasValidFileInfo, setMissingFileInfo} from '@shared-lib/utils';
 import {MAPPING_PREVIEW_FRAGMENT} from '../../constansts/mapping.constants';
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
+import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {
   connectorFilesDetailToFileInfo,
@@ -90,7 +91,6 @@ import {
   SkipTransformDialogResult
 } from './components/skip-transform-dialog/skip-transform-dialog.component';
 import {TransformerAssistantComponent} from './components/transformer-assistant/transformer-assistant.component';
-import {CohortDetailDto} from "@local-app/cohort/models";
 import {rematchMappingSchemaId} from "../../helper/connector-config-schema-helper";
 import {FileUploadSettings} from '../../models/input-config';
 import {Store} from '@ngrx/store';
@@ -125,7 +125,7 @@ function isSameStep(a: ConnectorCard, b: ConnectorCard): boolean {
   templateUrl: './manage-connector.component.html',
   styleUrl: './manage-connector.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent, TransformerAssistantComponent]
+  imports: [MatDrawerContainer, MatDrawer, ConnectorStepCardsComponent, MatDivider, CdkDropListGroup, CdkDropList, CdkDrag, MatDrawerContent, ConnectorStepConfigComponent, ConnectorDynamicTableComponent, ConnectorEditMapperComponent, MatToolbar, TranslatePipe, SkeletonLoaderComponent, ErrorCardComponent, BtnComponent, ImportActivityChipComponent, MatIcon, MatIconButton, MatTooltip, AppBasedTransformerComponent, TransformerAssistantComponent]
 })
 export class ManageConnectorComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
@@ -241,8 +241,8 @@ export class ManageConnectorComponent implements OnInit {
     type: 'TRANSFORM',
   }));
 
-  private readonly cohortStore = inject(CohortStore);
-  resolvedCohort = this.cohortStore.cohort;
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   public updateConfig(value: ConnectorDTO): void {
     const outputChanged = this.selectedOutputOf(this.config()) !== this.selectedOutputOf(value);
@@ -338,8 +338,9 @@ export class ManageConnectorComponent implements OnInit {
       let config = connectorDraftToConfig(JSON.parse(storedConfig));
       if (removeId) {
         (config.id as any) = null;
-        if (this.resolvedCohort()) {
-          config = rematchMappingSchemaId(config, this.resolvedCohort()!)
+        const cohort = this.cohort();
+        if (cohort) {
+          config = rematchMappingSchemaId(config, cohort);
         }
       }
       this.config.set(config);
@@ -606,7 +607,7 @@ export class ManageConnectorComponent implements OnInit {
         functions: this.functions,
         columns: this.getLatestColumns(),
         rows: this.getLatestData(),
-        schema: this.resolvedCohort()?.schemaRoot?.childNodes ?? [],
+        schema: this.cohort()?.schemaRoot?.childNodes ?? [],
         patientIdColumn: getPatientIdMappedColumn(this.config().schemaMapping),
         data: currentConfig,
         errorMessage: errorMessage,
