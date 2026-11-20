@@ -52,7 +52,6 @@ export class PatientDetailComponent implements OnInit, HasPatientUnsavedChanges 
 
   loadedPatient: Signal<PatientDto> = toSignal(this.activatedRoute.data.pipe(map(d => d['patient'])));
   patient = signal<PatientDto>(this.loadedPatient());
-  loading = signal<boolean>(false);
   isEditing = signal(false);
 
   readonly cohortResource = input.required<CohortResource>();

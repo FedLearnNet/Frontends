@@ -1,4 +1,4 @@
-@if (loading() || cohortResource().isLoading()) {
+@if (cohortResource().isLoading()) {
   <lib-skeleton-loader />
 } @else if (cohortResource().error(); as error) {
   <lib-error-card [errorObject]="error" />

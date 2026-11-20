@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, computed, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
 import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
@@ -45,7 +45,6 @@ export class RunConnectorViewComponent implements OnInit, OnDestroy {
   connector?: ConnectorDTO = undefined;
 
   readonly cohortResource = input.required<CohortResource>();
-  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   get connectorCohortId(): string | undefined {
     return this.connector?.cohortId != null ? String(this.connector.cohortId) : undefined;

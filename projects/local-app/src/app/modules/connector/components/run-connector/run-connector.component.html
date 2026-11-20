@@ -131,17 +131,17 @@
           </ng-template>
 
           <ng-template matTabContent>
-            @if (cohort(); as cohortDetail) {
+            @if (cohortResource().isLoading()) {
+              <lib-skeleton-loader/>
+            } @else if (cohortResource().error(); as error) {
+              <lib-error-card [errorObject]="error"/>
+            } @else {
               <app-run-error-log
                 [showPatientId]="true"
                 [runId]="run.id"
                 [type]="RunLogsType.HARMONIZER"
-                [schemaRoot]="cohortDetail.schemaRoot"
+                [schemaRoot]="cohortResource().value()?.schemaRoot"
               />
-            } @else if (cohortResource().error(); as error) {
-              <lib-error-card [errorObject]="error"/>
-            } @else {
-              <lib-skeleton-loader/>
             }
           </ng-template>
         </mat-tab>
