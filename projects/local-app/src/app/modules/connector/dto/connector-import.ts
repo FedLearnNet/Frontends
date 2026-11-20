@@ -9,6 +9,8 @@ export interface ImportUploadSettings {
   hasSupportFile?: boolean;
   deleteUnneededFileAfterSuccess?: boolean;
   supportFile?: boolean;
+  /** Store bytes for tool PATH inputs without tabular profiling. */
+  opaque?: boolean;
   previewRows?: number;
 }
 

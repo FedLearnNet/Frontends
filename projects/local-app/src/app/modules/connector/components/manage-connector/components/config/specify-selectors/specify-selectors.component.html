@@ -35,7 +35,7 @@
   }
 }
 
-@if (!isToolBased() && sourceTables.length > 0) {
+@if (!isToolBased() && sourceTables().length > 0) {
   <lib-info-card
     [type]="pivotedTableCount() > 0 ? 'SUCCESS' : 'PRIMARY'"
     icon="pivot_table_chart"
@@ -54,20 +54,20 @@
   </lib-info-card>
 }
 
-@if (sheets.length > 1 || mergeConfig) {
+@if (sheets().length > 1 || mergeConfig()) {
   <div class="multi-sheet-container">
     <div class="merge-action">
       <button mat-raised-button color="accent" (click)="openMergeDialog()">
         {{ (isCsvZip ? 'BUTTON.MERGE_CSV_FILES' : 'BUTTON.MERGE_SHEETS') | translate }}
       </button>
-      @if (mergeConfig) {
+      @if (mergeConfig(); as merge) {
         <span class="merge-status">{{ (isCsvZip ? 'CSV_FILES_MERGED_BY' : 'SHEETS_MERGED_BY') | translate }}
-          : {{ mergeConfig.commonUidColumnName }}</span>
+          : {{ merge.commonUidColumnName }}</span>
       }
     </div>
-    @if (sheets.length > 1) {
+    @if (sheets().length > 1) {
       <mat-tab-group [(selectedIndex)]="activeSheetIndex">
-        @for (sheet of sheets; track sheet.name) {
+        @for (sheet of sheets(); track sheet.name) {
           @if (sheet.info) {
             <mat-tab [label]="sheet.name">
 
@@ -83,20 +83,20 @@
           }
         }
       </mat-tab-group>
-    } @else if (sheets.length === 1) {
-      <app-dynamic-table [data]="sheets[0].info.json"
-                         [renamedColumns]="sheets[0].info.renamedColumns"
-                         [columns]="sheets[0].info.columns"
-                         [deletedColumns]="sheets[0].info.deletedColumns"
-                         (headerClicked)="headerClick($event, sheets[0].name)"/>
+    } @else if (sheets().length === 1) {
+      <app-dynamic-table [data]="sheets()[0].info.json"
+                         [renamedColumns]="sheets()[0].info.renamedColumns"
+                         [columns]="sheets()[0].info.columns"
+                         [deletedColumns]="sheets()[0].info.deletedColumns"
+                         (headerClicked)="headerClick($event, sheets()[0].name)"/>
     }
   </div>
-} @else if (sheets.length === 1) {
-  <app-dynamic-table [data]="sheets[0].info.json"
-                     [renamedColumns]="sheets[0].info.renamedColumns"
-                     [columns]="sheets[0].info.columns"
-                     [deletedColumns]="sheets[0].info.deletedColumns"
-                     (headerClicked)="headerClick($event, sheets[0].name)"/>
+} @else if (sheets().length === 1) {
+  <app-dynamic-table [data]="sheets()[0].info.json"
+                     [renamedColumns]="sheets()[0].info.renamedColumns"
+                     [columns]="sheets()[0].info.columns"
+                     [deletedColumns]="sheets()[0].info.deletedColumns"
+                     (headerClicked)="headerClick($event, sheets()[0].name)"/>
 } @else if (!isToolBased()) {
   <button mat-raised-button color="primary" (click)="loadColumns()">{{ 'ADD_DEFAULT_SELECTORS' | translate }}</button>
   <p>{{ 'ADD_DEFAULT_SELECTORS_MESSAGE' | translate }}</p>

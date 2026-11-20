@@ -1026,6 +1026,7 @@ export class ManageConnectorComponent implements OnInit {
 
   private resetConnectorEditorState(): void {
     this.config.set({} as ConnectorDTO);
+    this.ensureConfigCurrentCohort();
     this.setCards([this.initialCard]);
     this.currentStep.set(this.initialCard);
     this.transformers.set(new Map());

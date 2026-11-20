@@ -265,6 +265,25 @@ export function fileTypeLabel(settings: Partial<FileUploadSettings>): string | u
   return settings.fileType === 'CSV' && settings.firstSheetOnly === false ? 'ZIP' : settings.fileType;
 }
 
+/**
+ * Maps stored/backend parsing types onto the tabular FILE-connector UI type.
+ * Opaque PATH blobs are not tabular inputs and map to undefined.
+ */
+export function toFileUploadFileType(
+  fileType: string | undefined | null,
+): FileUploadSettings['fileType'] | undefined {
+  if (!fileType || fileType === 'OPAQUE') {
+    return undefined;
+  }
+  if (fileType === 'MULTIPLE_CSV_ZIP') {
+    return 'CSV';
+  }
+  if (fileType === 'EXCEL' || fileType === 'CSV' || fileType === 'JSON' || fileType === 'ZIP') {
+    return fileType;
+  }
+  return undefined;
+}
+
 export function isAppBasedUploadSettings(
   cfg: ConnectorInputConfig
 ): cfg is AppBasedUploadSettings {

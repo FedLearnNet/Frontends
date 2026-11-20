@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, NgZone, signal} from '@angular/core';
 import {HttpHeaders} from '@angular/common/http';
 import {SseClient} from 'ngx-sse-client';
 import {AppBasedExtractorRequestDTO, ConnectorExtractorStreamDTO} from "../dto/connector-app-based-extractor";
@@ -11,6 +11,7 @@ import {RunStatusTypes} from "../../../../../../global-app/src/app/modules/tool-
 @Injectable({providedIn: 'root'})
 export class ConnectorAppBasedExtractorService {
   private readonly sseClient: SseClient = inject(SseClient);
+  private readonly ngZone = inject(NgZone);
   private readonly _connected = signal(false);
   private readonly _running = signal(false);
   private readonly _error = signal<string | null>(null);
@@ -58,19 +59,28 @@ export class ConnectorAppBasedExtractorService {
 
           return parsed as ConnectorExtractorStreamDTO;
         }),
+        map(msg => this.ngZone.run(() => msg)),
         tap(msg => {
           this._connected.set(true);
           this._last.set(msg);
 
           if (msg.status === RunStatusTypes.ERROR) {
             this._error.set(msg.lastError ?? 'Run failed');
+            this._running.set(false);
           }
-          if (msg.status === RunStatusTypes.FINISHED && msg.uploadInfo) {
+          if (msg.status === RunStatusTypes.FINISHED && msg.uploadInfo?.length) {
             this._running.set(false);
           }
         }),
-        takeWhile(msg => !(msg.status === RunStatusTypes.FINISHED && msg.uploadInfo), true), // include terminal event
+        takeWhile(
+          msg => msg.status !== RunStatusTypes.ERROR
+            && !(msg.status === RunStatusTypes.FINISHED && !!msg.uploadInfo?.length),
+          true
+        ),
         finalize(() => {
+          if (this._running() && !this._error() && !this._last()?.uploadInfo?.length) {
+            this._error.set(this._last()?.lastError ?? 'Extractor run ended without a preview');
+          }
           this._connected.set(false);
           this._running.set(false);
         }),

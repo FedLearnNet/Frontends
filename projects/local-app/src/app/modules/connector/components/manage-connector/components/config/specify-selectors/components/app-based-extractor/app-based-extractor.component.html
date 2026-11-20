@@ -64,7 +64,7 @@
             } @else {
               <div class="inputs">
                 @for (k of inputDataKeys(); track k) {
-                  <lib-kv [label]="k" [value]="getFileName(appBasedConfig().inputData[k])"></lib-kv>
+                  <lib-kv [label]="k" [value]="formatInputDataValue(appBasedConfig().inputData[k])"></lib-kv>
                 }
               </div>
             }
@@ -81,8 +81,8 @@
 
               <div class="runtime">
                 <lib-kv label="Status" [value]="l.status"></lib-kv>
-                @if (l.lastLog) {
-                  <lib-kv label="Message" [value]="l.lastLog"></lib-kv>
+                @if (lastMessageText(l); as msg) {
+                  <lib-kv label="Message" [value]="msg"></lib-kv>
                 }
               </div>
             } @else if (hasStoredOutputs()) {

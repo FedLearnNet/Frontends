@@ -21,6 +21,14 @@
   @case (ToolConfigDataType.TEXT) {
     <textarea matInput [formControl]="formControl" rows="3"></textarea>
   }
+  @case (ToolConfigDataType.PATH) {
+    <app-lib-drag-and-drop-file [files]="formControl"
+                                [label]="parsedLabel()"
+                                [accept]="'.csv,.zip,.xlsx,.xlsm'"
+                                [multiple]="false"
+                                (filesChange)="formControl.setValue($event)"
+    />
+  }
   @default {
     <mat-form-field appearance="fill">
       <mat-label>{{ parsedLabel() }}</mat-label>

@@ -13,6 +13,7 @@ export interface AppBasedExtractorRequestDTO {
 
 export interface ConnectorExtractorStreamDTO extends ConnectorRunStepDTO {
   uploadInfo: ConnectorFileUploadInfoDTO[];
+  outputParams?: Record<string, number | string>;
   cached?: boolean;
   hash?: string;
 }

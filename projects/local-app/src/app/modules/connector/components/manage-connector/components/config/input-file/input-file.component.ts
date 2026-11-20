@@ -15,7 +15,8 @@ import {ConnectorFilesDTO, UploadInfoDTO} from '../../../../../dto/upload-info';
 import {
   connectorFilesDetailToFileInfo,
   fileTypeLabel,
-  isFileUploadSettings
+  isFileUploadSettings,
+  toFileUploadFileType,
 } from "../../../../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../../../../dto/connector";
 import {InputFileSelectDialogComponent} from "./components/input-file-select-dialog/input-file-select-dialog.component";
@@ -165,8 +166,7 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   private uploadDialogSettings(): FileUploadDialogSettings {
     const stored = this.selectedFile()?.uploadSettings;
     const archive = stored?.fileType === 'MULTIPLE_CSV_ZIP';
-    const storedType: FileUploadSettings['fileType'] | undefined =
-      stored?.fileType === 'MULTIPLE_CSV_ZIP' ? 'CSV' : stored?.fileType;
+    const storedType = toFileUploadFileType(stored?.fileType);
     return {
       fileType: storedType ?? this.settings.fileType,
       delimiter: stored?.delimiter ?? this.settings.delimiter,
@@ -242,11 +242,12 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
       }
 
       const uploadSettings = selectedFile.uploadSettings;
+      const mappedType = toFileUploadFileType(uploadSettings?.fileType);
       this.settings = {
         ...this.settings,
         ...(uploadSettings ? {
-          fileType: uploadSettings.fileType === 'MULTIPLE_CSV_ZIP' ? 'CSV' : uploadSettings.fileType,
-          delimiter: uploadSettings.delimiter,
+          ...(mappedType ? {fileType: mappedType} : {}),
+          delimiter: uploadSettings.delimiter ?? this.settings.delimiter,
           customDelimiter: uploadSettings.customDelimiter,
           hasHeader: uploadSettings.hasHeader,
           firstSheetOnly: uploadSettings.firstSheetOnly,

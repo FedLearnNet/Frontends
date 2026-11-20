@@ -20,4 +20,11 @@ describe('AppBasedExtractorComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('formats opaque PATH file ids without throwing', () => {
+    expect(component.formatInputDataValue(42)).toBe('File #42');
+    expect(component.formatInputDataValue('99')).toBe('File #99');
+    expect(component.formatInputDataValue('/data/ffq_archive.xlsx')).toBe('ffq_archive.xlsx');
+    expect(component.formatInputDataValue(undefined)).toBe('—');
+  });
 });
