@@ -1,10 +1,10 @@
 import {ActivatedRouteSnapshot, ResolveFn} from '@angular/router';
 import {inject} from '@angular/core';
 import {ExperimentService} from "./experiment-run.service";
-import {ExperimentDetailDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestRunDTO} from "../dto/test-run";
 
 
-export const experimentResolver: ResolveFn<ExperimentDetailDTO> = (route: ActivatedRouteSnapshot) => {
+export const experimentResolver: ResolveFn<TestRunDTO> = (route: ActivatedRouteSnapshot) => {
   return inject(ExperimentService).getExperiment(route.paramMap.get('app-id'), route.paramMap.get('experimentId'));
 }
 

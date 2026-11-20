@@ -10,7 +10,6 @@ import {
   EvaluationScalability,
   EvaluationSummaryDto
 } from '@global-app/project/dto/run-metrics-request';
-import {ProjectFederatedExperimentDetailDTO} from '@global-app/project/dto/project-experiments';
 import {
   SimpleMetricLineComponent
 } from '../../../../../tool-development/components/app-runs/components/metrics/simple-metric-line/simple-metric-line.component';
@@ -62,7 +61,6 @@ export class EvaluationTabComponent implements OnInit {
 
   projectId = input.required<number>();
   experimentId = input.required<number>();
-  experiment = input<ProjectFederatedExperimentDetailDTO | null>(null);
 
   readonly summary = signal<EvaluationSummaryDto | null>(null);
   readonly isLoading = signal(false);

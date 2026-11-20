@@ -11,7 +11,7 @@ import {
   ModelWorkflowChatMessageType,
   ModelWorkflowChatWrapperDTO
 } from "@shared-lib/modules/app-execution/dto/model-workflow-chat";
-import {DataAnalysisPredictionDTO} from "@shared-lib/modules/app-execution/dto/prediction";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 type ResultPatch = Partial<Omit<ResultAnalysisItemState, 'key' | 'dataAnalysisId' | 'fileId'>> & {
   appendText?: string;
@@ -118,7 +118,7 @@ export function upsertSelectedAnalysisMessage(
   const idx = msgs.findIndex((message) => areSameMessage(message, wrapper));
   const nextMessages =
     idx >= 0
-      ? [...msgs.slice(0, idx), mergeWorkflowMessage(msgs[idx], wrapper), ...msgs.slice(idx + 1)]
+      ? [...msgs.slice(0, idx), wrapper, ...msgs.slice(idx + 1)]
       : [...msgs, wrapper];
 
   return upsertDataAnalysisEntity(state, dataAnalysisId, { messages: nextMessages } as any);
@@ -145,37 +145,15 @@ export function patchSelectedAnalysisState(
 export function removeRunFromSelectedAnalysis(
   state: DataAnalysisState,
   dataAnalysisId: number,
-  runId: number,
-  workflowId?: number
+  runId: number
 ): DataAnalysisState {
   const selected = state.selectedAnalysis;
-  if (!selected || selected.id !== dataAnalysisId) return state;
+  if (!selected?.detail || selected.id !== dataAnalysisId) return state;
 
-  const detail: any = selected.detail;
-  const nextDetail =
-    detail && Array.isArray(detail.messages)
-      ? {
-        ...detail,
-        messages: detail.messages.filter((wrapper: any) => {
-          if (wrapper?.type !== 'PREDICTION') return true;
+  const messages = (selected.detail.messages ?? []).filter((wrapper) =>
+    wrapper.type !== ModelWorkflowChatMessageType.RUN || wrapper.message.id !== runId);
 
-          const message = wrapper?.message;
-          if (!message || message.id !== runId) return true;
-
-          if (workflowId != null && message.workflowId !== workflowId) return true;
-
-          return false;
-        }),
-      }
-      : detail;
-
-  return {
-    ...state,
-    selectedAnalysis: {
-      ...selected,
-      detail: nextDetail,
-    },
-  };
+  return upsertDataAnalysisEntity(state, dataAnalysisId, {messages});
 }
 
 export function removeRunFromExecution(
@@ -186,152 +164,32 @@ export function removeRunFromExecution(
     ...state,
     execution: {
       ...state.execution,
-      predictions: state.execution.predictions.filter((p: any) => p?.id !== runId),
-      lastPrediction:
-        (state.execution.lastPrediction as any)?.id === runId
-          ? null
-          : state.execution.lastPrediction,
+      runs: state.execution.runs.filter((run) => run.id !== runId),
+      lastRun: state.execution.lastRun?.id === runId ? null : state.execution.lastRun,
     },
   };
 }
 
-export function getExecutionPredictionKey(prediction: Partial<DataAnalysisPredictionDTO> | null | undefined): string | null {
-  if (!prediction) {
-    return null;
-  }
-
-  const workflowRunId = (prediction as any).workflowRunId;
-  if (prediction.workflowId != null && workflowRunId != null) {
-    if (prediction.id != null) {
-      return `workflow:${workflowRunId}:run:${prediction.id}`;
-    }
-
-    const stepKey = (prediction as any).currentWorkflowStepId ?? prediction.currentWorkflowStep;
-    if (stepKey != null) {
-      return `workflow:${workflowRunId}:step:${stepKey}`;
-    }
-
-    return `workflow:${workflowRunId}`;
-  }
-
-  if (prediction.id != null) {
-    return `run:${prediction.id}`;
-  }
-
-  if (prediction.workflowId != null && prediction.dataAnalysisId != null) {
-    return `workflow-fallback:${prediction.dataAnalysisId}:${prediction.workflowId}`;
-  }
-
-  return null;
+// Each event is the whole run, so it replaces the one known by id.
+export function upsertExecutionRun(
+  state: DataAnalysisState,
+  run: DataAnalysisRunDTO
+): DataAnalysisState {
+  const runs = state.execution.runs;
+  const idx = runs.findIndex((known) => known.id === run.id);
+  return {
+    ...state,
+    execution: {
+      ...state.execution,
+      runs: idx >= 0 ? [...runs.slice(0, idx), run, ...runs.slice(idx + 1)] : [...runs, run],
+      lastRun: run,
+    },
+  };
 }
 
 function areSameMessage(
   current: ModelWorkflowChatWrapperDTO,
   next: ModelWorkflowChatWrapperDTO
 ): boolean {
-  if (current.type !== next.type) {
-    return false;
-  }
-
-  if (current.type === ModelWorkflowChatMessageType.CHAT_MESSAGE) {
-    return (current.message as any)?.id === (next.message as any)?.id;
-  }
-
-  if (current.type === ModelWorkflowChatMessageType.WORKFLOW_PREDICTION) {
-    const currentRunId = (current.message as any)?.workflowRunId;
-    const nextRunId = (next.message as any)?.workflowRunId;
-    if (currentRunId != null && nextRunId != null) {
-      return currentRunId === nextRunId;
-    }
-  }
-
-  return getExecutionPredictionKey(current.message as DataAnalysisPredictionDTO) ===
-    getExecutionPredictionKey(next.message as DataAnalysisPredictionDTO);
-}
-
-function mergeWorkflowMessage(
-  current: ModelWorkflowChatWrapperDTO,
-  next: ModelWorkflowChatWrapperDTO
-): ModelWorkflowChatWrapperDTO {
-  if (
-    current.type !== ModelWorkflowChatMessageType.WORKFLOW_PREDICTION ||
-    next.type !== ModelWorkflowChatMessageType.WORKFLOW_PREDICTION
-  ) {
-    return next;
-  }
-
-  return {
-    ...next,
-    message: mergeWorkflowPrediction(
-      current.message as DataAnalysisPredictionDTO,
-      next.message as DataAnalysisPredictionDTO
-    ),
-  };
-}
-
-function mergeWorkflowPrediction(
-  current: DataAnalysisPredictionDTO,
-  next: DataAnalysisPredictionDTO
-): DataAnalysisPredictionDTO {
-  return {
-    ...current,
-    ...next,
-    inputs: {
-      ...(current.inputs ?? {}),
-      ...(next.inputs ?? {}),
-    },
-    hyperParams: {
-      ...(current.hyperParams ?? {}),
-      ...(next.hyperParams ?? {}),
-    },
-    result: mergeUnknown(current.result, next.result),
-    inputFiles: mergeFiles(current.inputFiles, next.inputFiles),
-    outputFiles: mergeFiles(current.outputFiles, next.outputFiles),
-  };
-}
-
-function mergeFiles<T extends { id?: number }>(current: T[] | undefined, next: T[] | undefined): T[] {
-  const merged = [...(current ?? [])];
-
-  for (const item of next ?? []) {
-    const idx = item.id == null
-      ? -1
-      : merged.findIndex((existing) => existing.id === item.id);
-
-    if (idx >= 0) {
-      merged[idx] = item;
-      continue;
-    }
-
-    merged.push(item);
-  }
-
-  return merged;
-}
-
-function mergeUnknown(current: any, next: any): any {
-  if (next == null) {
-    return current;
-  }
-
-  if (current == null) {
-    return next;
-  }
-
-  if (Array.isArray(current) && Array.isArray(next)) {
-    return [...current, ...next];
-  }
-
-  if (isPlainObject(current) && isPlainObject(next)) {
-    return {
-      ...current,
-      ...next,
-    };
-  }
-
-  return next;
-}
-
-function isPlainObject(value: any): value is Record<string, any> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+  return current.type === next.type && current.message?.id === next.message?.id;
 }

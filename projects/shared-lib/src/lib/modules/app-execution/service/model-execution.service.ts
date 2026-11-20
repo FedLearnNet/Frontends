@@ -4,20 +4,14 @@ import {SseClient} from "ngx-sse-client";
 import {catchError, map, Observable, takeWhile} from "rxjs";
 import {
   DataAnalysisCreatePredictionDTO,
-  DataAnalysisPredictionDTO,
-  DataAnalysisRunModesEnum,
-  DataAnalysisStopPredictionDTO
+  DataAnalysisRunModesEnum
 } from "@shared-lib/modules/app-execution/dto/prediction";
-import {RunStatusTypes} from "../../../../../../global-app/src/app/modules/tool-development/dto/test-run";
+import {DataAnalysisRunDTO, isFinalStatus} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {HttpHeaders, HttpParams} from '@angular/common/http';
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {ApiService} from "@shared-lib/services/api.service";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from "@ngx-translate/core";
-import {
-  hasMoreSteps,
-  isNotFinished
-} from "../../../../../../global-app/src/app/modules/tool-development/helper/run-helper";
 
 @Injectable({
   providedIn: 'root'
@@ -29,71 +23,25 @@ export class ModelExecutionService {
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
   private readonly translate: TranslateService = inject(TranslateService);
 
-
-  runModel(toCreate: DataAnalysisCreatePredictionDTO): Observable<DataAnalysisPredictionDTO> {
-    const url = this.apiUrl;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-    return this.sseClient.stream(
-      url,
-      {keepAlive: false, responseType: 'event'},
-      {body: toCreate, headers},
-      'POST'
-    ).pipe(
-      map(event => {
-        if (event.type === 'error') {
-          const errorEvent = event as ErrorEvent;
-          console.error(errorEvent.error, errorEvent.message);
-          throw new Error('SSE connection error');
-        }
-        const messageEvent = event as MessageEvent;
-        return JSON.parse(messageEvent.data) as DataAnalysisPredictionDTO;
-      }),
-      takeWhile(prediction => isNotFinished(prediction.status), true)
-    );
+  /** Starts a run outside a data analysis and follows it until it is done. */
+  startRun(toCreate: DataAnalysisCreatePredictionDTO): Observable<DataAnalysisRunDTO> {
+    return this.streamRun(this.apiUrl, 'POST', toCreate);
   }
 
-
-  runWorkflowModel(modelWorkflowId: number, toCreate: DataAnalysisCreatePredictionDTO): Observable<DataAnalysisPredictionDTO> {
-    const url = `${this.apiUrl}/workflow/${modelWorkflowId}`;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-    return this.sseClient.stream(
-      url,
-      {keepAlive: false, responseType: 'event'},
-      {body: toCreate, headers},
-      'POST'
-    ).pipe(
-      map(event => {
-        if (event.type === 'error') {
-          const errorEvent = event as ErrorEvent;
-          console.error(errorEvent.error, errorEvent.message);
-          throw new Error('SSE connection error');
-        }
-        const messageEvent = event as MessageEvent;
-        return JSON.parse(messageEvent.data) as DataAnalysisPredictionDTO;
-      }),
-      takeWhile(prediction => {
-        const isWorkflow = prediction.workflowId !== null;
-        if (isWorkflow && hasMoreSteps(prediction)) {
-          return true;
-        }
-        return isNotFinished(prediction.status);
-      }, true)
-    );
+  /** Starts a run of the data analysis and follows it until it is done. */
+  startAnalysisRun(dataAnalysisId: number, toCreate: DataAnalysisCreatePredictionDTO): Observable<DataAnalysisRunDTO> {
+    return this.streamRun(`${this.apiUrl}/workflow/${dataAnalysisId}`, 'POST', toCreate);
   }
 
+  /** Follows a run until it is done, starting with its current state. */
+  followRun(runId: number): Observable<DataAnalysisRunDTO> {
+    return this.streamRun(`${this.apiUrl}/${runId}`, 'GET');
+  }
 
-  public stopRun(
-    dataAnalysisId: number,
-    id: number,
-    dto?: DataAnalysisStopPredictionDTO
-  ): Observable<DataAnalysisPredictionDTO> {
+  public stopRun(dataAnalysisId: number, runId: number): Observable<DataAnalysisRunDTO> {
     const headers = new HttpHeaders().set(SKIP_LOADING, "true");
 
-    return this.apiService.put<DataAnalysisPredictionDTO>(
-      `${this.apiUrl}/workflow/${dataAnalysisId}/${id}`,
-      dto,
-      headers
-    );
+    return this.apiService.put<DataAnalysisRunDTO>(`${this.apiUrl}/workflow/${dataAnalysisId}/${runId}`, undefined, headers);
   }
 
   public deleteRun(
@@ -110,53 +58,6 @@ export class ModelExecutionService {
       `${this.apiUrl}/workflow/${dataAnalysisId}/${id}`,
       headers,
       params,
-    );
-  }
-
-  getRunningUpdates(id: number): Observable<DataAnalysisPredictionDTO> {
-    const url = `${this.apiUrl}/${id}`;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-    return this.sseClient.stream(
-      url,
-      {keepAlive: false, responseType: 'event'},
-      {headers},
-      'GET'
-    ).pipe(
-      map(event => {
-        if (event.type === 'error') {
-          const errorEvent = event as ErrorEvent;
-          console.error(errorEvent.error, errorEvent.message);
-          throw new Error('SSE connection error');
-        }
-        const messageEvent = event as MessageEvent;
-        return JSON.parse(messageEvent.data) as DataAnalysisPredictionDTO;
-      }),
-      takeWhile(prediction => prediction.status !== RunStatusTypes.FINISHED &&
-        prediction.status !== RunStatusTypes.STOPPED && prediction.status !== RunStatusTypes.ERROR, true)
-    );
-  }
-
-
-  getWorkflowRunning(dataAnalysisId: number, workflowId: number): Observable<DataAnalysisPredictionDTO> {
-    const url = `${this.apiUrl}/workflow/${dataAnalysisId}/${workflowId}`;
-    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
-    return this.sseClient.stream(
-      url,
-      {keepAlive: false, responseType: 'event'},
-      {headers},
-      'GET'
-    ).pipe(
-      map(event => {
-        if (event.type === 'error') {
-          const errorEvent = event as ErrorEvent;
-          console.error(errorEvent.error, errorEvent.message);
-          throw new Error('SSE connection error');
-        }
-        const messageEvent = event as MessageEvent;
-        return JSON.parse(messageEvent.data) as DataAnalysisPredictionDTO;
-      }),
-      takeWhile(prediction => prediction.status !== RunStatusTypes.FINISHED &&
-        prediction.status !== RunStatusTypes.STOPPED && prediction.status !== RunStatusTypes.ERROR, true)
     );
   }
 
@@ -190,6 +91,27 @@ export class ModelExecutionService {
           })
         )
       )
+    );
+  }
+
+  // Each event is the whole run; the stream closes after the event that finishes it.
+  private streamRun(url: string, method: 'GET' | 'POST', body?: DataAnalysisCreatePredictionDTO): Observable<DataAnalysisRunDTO> {
+    const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
+    return this.sseClient.stream(
+      url,
+      {keepAlive: false, responseType: 'event'},
+      {body, headers},
+      method
+    ).pipe(
+      map(event => {
+        if (event.type === 'error') {
+          const errorEvent = event as ErrorEvent;
+          console.error(errorEvent.error, errorEvent.message);
+          throw new Error('SSE connection error');
+        }
+        return JSON.parse((event as MessageEvent).data) as DataAnalysisRunDTO;
+      }),
+      takeWhile(run => !isFinalStatus(run.status), true)
     );
   }
 }

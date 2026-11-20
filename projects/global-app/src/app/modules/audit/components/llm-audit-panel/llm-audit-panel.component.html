@@ -1,0 +1,174 @@
+@if (enabled()) {
+<section class="llm-audit">
+  <div class="llm-audit__head">
+    <div class="llm-audit__title">
+      <mat-icon fontSet="material-symbols-outlined">shield_person</mat-icon>
+      <div>
+        <div class="title">AI security &amp; privacy audit</div>
+        <div class="muted small">Source code, static analysis, vulnerability and malware scans reviewed by an AI model</div>
+      </div>
+    </div>
+
+    <div class="llm-audit__actions">
+      @if (isAdmin() && audit()?.status === 'FINISHED') {
+        <button mat-stroked-button type="button" [disabled]="active() || requesting()" (click)="requestAudit(true)"
+                matTooltip="Audit again although source and scans are unchanged">
+          <mat-icon>refresh</mat-icon>
+          Force re-run
+        </button>
+      }
+      <button mat-flat-button type="button" [disabled]="!canRequest()" (click)="requestAudit()"
+              [matTooltip]="quotaHint()">
+        <mat-icon fontSet="material-symbols-outlined">policy</mat-icon>
+        {{ audit() ? 'Check again' : 'Run AI audit' }}
+      </button>
+    </div>
+  </div>
+
+  @if (quotaHint(); as hint) {
+    <div class="muted small">{{ hint }}
+      @if (audit()?.status === 'FINISHED') {
+        Unchanged tools return the existing result without using a request.
+      }
+    </div>
+  }
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"/>
+  } @else if (!audit()) {
+    <div class="llm-audit__empty muted">No AI audit yet for this version.</div>
+  } @else {
+    @let a = audit()!;
+
+    @if (a.status === 'PENDING' || a.status === 'RUNNING') {
+      <div class="llm-audit__progress">
+        <mat-progress-bar mode="indeterminate"/>
+        <span class="muted small">
+          {{ a.status === 'PENDING' ? 'Waiting in queue...' : 'Reviewing source code and scan results, this can take a few minutes...' }}
+        </span>
+      </div>
+    } @else if (a.status === 'FAILED') {
+      <div class="llm-audit__error">
+        <mat-icon>error_outline</mat-icon>
+        <span>The AI audit failed: {{ a.errorMessage || 'unknown error' }}</span>
+      </div>
+    }
+
+    @if (report(); as r) {
+      @if (verdict(); as v) {
+        <div [class]="'verdict verdict--' + v.color.toLowerCase()">
+          <mat-icon fontSet="material-symbols-outlined" class="verdict__icon">{{ v.icon }}</mat-icon>
+          <div class="verdict__text">
+            <div class="verdict__line">
+              <lib-badge [text]="v.label" [color]="v.color" size="MEDIUM"/>
+              <span class="verdict__headline">{{ v.headline }}</span>
+            </div>
+            @if (r.clinicianSummary) {
+              <p class="verdict__summary">{{ r.clinicianSummary }}</p>
+            }
+          </div>
+        </div>
+      }
+
+      @if (r.dataFlowSummary) {
+        <div class="block">
+          <div class="label">What happens to patient data</div>
+          <p>{{ r.dataFlowSummary }}</p>
+        </div>
+      }
+
+      <div class="block">
+        <div class="label">Findings ({{ r.findings.length }})</div>
+        @if (r.findings.length) {
+          <mat-accordion multi>
+            @for (finding of r.findings; track $index) {
+              <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title class="finding__title">
+                    <lib-badge [text]="finding.severity" [color]="severityColor(finding.severity)" size="X-SMALL"/>
+                    <span>{{ finding.title }}</span>
+                  </mat-panel-title>
+                  <mat-panel-description class="muted small">{{ label(finding.category) }}</mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="finding">
+                  @if (finding.filePath) {
+                    <div class="mono small">{{ location(finding.filePath, finding.line) }}</div>
+                  }
+                  @if (finding.description) {
+                    <p>{{ finding.description }}</p>
+                  }
+                  @if (finding.evidence) {
+                    <pre class="finding__evidence">{{ finding.evidence }}</pre>
+                  }
+                  @if (finding.recommendation) {
+                    <p><span class="label">Recommendation:</span> {{ finding.recommendation }}</p>
+                  }
+                  @if (finding.source) {
+                    <div class="muted small">Source: {{ label(finding.source) }}</div>
+                  }
+                </div>
+              </mat-expansion-panel>
+            }
+          </mat-accordion>
+        } @else {
+          <div class="muted small">No findings.</div>
+        }
+      </div>
+
+      @if (r.positives.length) {
+        <div class="block">
+          <div class="label">Good practices</div>
+          <ul>
+            @for (positive of r.positives; track $index) {
+              <li>{{ positive }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (r.technicalSummary) {
+        <div class="block">
+          <div class="label">Technical summary</div>
+          <p>{{ r.technicalSummary }}</p>
+        </div>
+      }
+
+      @if (r.limitations.length) {
+        <div class="block">
+          <div class="label">Limitations</div>
+          <ul class="muted">
+            @for (limitation of r.limitations; track $index) {
+              <li>{{ limitation }}</li>
+            }
+          </ul>
+        </div>
+      }
+    }
+
+    @if (a.status === 'FINISHED' || a.status === 'FAILED') {
+      <div class="meta muted small">
+        @if (a.finishedAt) {
+          <span>Audited {{ a.finishedAt | date: 'medium' }}</span>
+        }
+        @if (a.modelName) {
+          <span>Model {{ a.modelName }}</span>
+        }
+        @if (a.commitHash) {
+          <span class="mono">Commit {{ a.commitHash.substring(0, 10) }}</span>
+        }
+        @if (a.sourceAvailable) {
+          <span>{{ a.reviewedFiles }} of {{ a.totalFiles }} files reviewed</span>
+        } @else if (a.status === 'FINISHED') {
+          <span>Source code not available</span>
+        }
+      </div>
+    }
+  }
+
+  <div class="disclaimer muted small">
+    <mat-icon inline>info</mat-icon>
+    Generated by an AI model. It can miss issues or be wrong and does not replace the review by a human auditor.
+  </div>
+</section>
+}

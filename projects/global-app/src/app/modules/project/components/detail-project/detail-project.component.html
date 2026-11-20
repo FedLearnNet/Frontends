@@ -45,7 +45,7 @@
           <app-detail-project-overview [project]="p"/>
         }
         @case (1) {
-          <app-create-datasets [project]="p"/>
+          <app-create-datasets [project]="p" (addQuery)="setSelectedIndex(0)"/>
         }
         @case (2) {
           <lib-workflow-view [workflowId]="p.workflowId" [projectId]="p.id"

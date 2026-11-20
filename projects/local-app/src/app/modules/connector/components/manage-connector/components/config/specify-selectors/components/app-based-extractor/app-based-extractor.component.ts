@@ -18,6 +18,7 @@ import {environment} from "@global-app/env/environment";
 import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorDTO} from "../../../../../../../dto/connector";
 import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
+import {lastLogOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 @Component({
   selector: 'app-app-based-extractor',
@@ -40,6 +41,8 @@ import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
   styleUrl: './app-based-extractor.component.scss',
 })
 export class AppBasedExtractorComponent implements OnInit, OnDestroy {
+  protected readonly lastLogOf = lastLogOf;
+
   readonly connectorAppBasedExtractorService = inject(ConnectorAppBasedExtractorService);
 
   readonly isProduction = environment.production;
@@ -146,15 +149,9 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
   }
 
   lastMessageText(msg: ConnectorExtractorStreamDTO): string {
-    if (msg.lastLog?.trim()) {
-      return msg.lastLog;
-    }
-    const logs = msg.logs ?? [];
-    for (let i = logs.length - 1; i >= 0; i--) {
-      const text = logs[i]?.message?.trim();
-      if (text) {
-        return text;
-      }
+    const fromShared = lastLogOf(msg)?.trim();
+    if (fromShared) {
+      return fromShared;
     }
     if (msg.uploadInfo?.length) {
       return `Finished with ${msg.uploadInfo.length} preview table(s)`;

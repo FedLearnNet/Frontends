@@ -12,7 +12,7 @@ import {NgxEchartsDirective, provideEchartsCore} from "ngx-echarts";
 import * as echarts from 'echarts/core';
 
 import {EChartsOption} from "echarts";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO} from "../../../../dto/test-run";
 
 @Component({
   selector: 'app-experiments-metric-parameter-heatmap',
@@ -27,7 +27,7 @@ import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment
 export class ExperimentsMetricParameterHeatmapComponent implements OnInit, OnChanges {
   private readonly changeDetectorRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  readonly experimentRuns = input<ExperimentRunDTO[]>([]);
+  readonly experimentRuns = input<TestAttemptDTO[]>([]);
 
   randomId: string = Math.random().toString(36).substring(7);
 
@@ -52,7 +52,7 @@ export class ExperimentsMetricParameterHeatmapComponent implements OnInit, OnCha
     this.experimentRuns().forEach(run => {
       if (run.metrics) {
         run.metrics.forEach(metric => {
-          for (const param in run.hyperParams) {
+          for (const param in run.params ?? {}) {
             const key = `${metric.metric}-${param}`;
             if (!metricHyperParamMap[key]) {
               metricHyperParamMap[key] = [];

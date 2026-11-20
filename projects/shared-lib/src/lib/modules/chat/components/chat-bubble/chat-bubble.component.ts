@@ -1,5 +1,6 @@
 import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
-import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
+import {MarkdownComponent} from "ngx-markdown";
+import {provideChatMarkdown} from "@shared-lib/modules/chat/markdown/chat-markdown-sanitizer";
 import {DatePipe} from "@angular/common";
 
 @Component({
@@ -9,7 +10,7 @@ import {DatePipe} from "@angular/common";
     DatePipe
   ],
   providers: [
-    provideMarkdown(),
+    provideChatMarkdown(),
   ],
   templateUrl: './chat-bubble.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,

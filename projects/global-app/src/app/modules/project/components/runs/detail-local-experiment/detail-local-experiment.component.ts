@@ -1,11 +1,7 @@
-import {Component, computed, effect, inject, ChangeDetectionStrategy} from '@angular/core';
-import {Store} from "@ngrx/store";
+import {ChangeDetectionStrategy, Component, computed, effect, inject} from '@angular/core';
+import {Action, Store} from "@ngrx/store";
+import {ProjectRunKind} from "@global-app/project/dto/project-experiments";
 import {selectSelectedProject} from "@global-app/project/store/project.selectors";
-import {
-  selectConnectedById,
-  selectLoading,
-  selectSelectedExperiment
-} from "@global-app/project/store/project-local-experiments.selectors";
 import {MatDialog} from "@angular/material/dialog";
 import {selectSelectedWorkflow} from "@shared-lib/modules/workflow/store/workflow.selectors";
 import * as WorkflowActions from "@shared-lib/modules/workflow/store/workflow.actions";
@@ -19,9 +15,11 @@ import {
 import {
   ExperimentHeaderComponent
 } from "@global-app/project/components/runs/experiment-header/experiment-header.component";
-import {ProjectLocalExperimentsActions} from "@global-app/project/store/project-local-experiments.actions";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
+import {selectConnectedById, selectLoading, selectSelectedRun} from "@global-app/project/store/project-runs.selectors";
 
+/** A training of the project's workflow on the platform. */
 @Component({
   selector: 'app-detail-local-experiment',
   imports: [
@@ -38,58 +36,31 @@ export class DetailLocalExperimentComponent {
   private readonly dialog: MatDialog = inject(MatDialog);
 
   project = this.store.selectSignal(selectSelectedProject);
-  experiment = this.store.selectSignal(selectSelectedExperiment);
+  run = this.store.selectSignal(selectSelectedRun);
   selectedWorkflow = this.store.selectSignal(selectSelectedWorkflow);
   loading = this.store.selectSignal(selectLoading);
 
-  private readonly projectId = computed(() => this.project()?.id ?? null);
-
   connected = computed(() => {
-    const id = this.projectId();
-    if (!id) return false;
-    return this.store.selectSignal(selectConnectedById(id))();
+    const id = this.run()?.id;
+    return id ? this.store.selectSignal(selectConnectedById(id))() : false;
   });
 
   dispatchWorkflow$ = effect(() => {
-    if (this.project() && this.project()!.workflowId) {
+    if (this.project()?.workflowId) {
       this.store.dispatch(WorkflowActions.loadWorkflow({id: this.project()!.workflowId!}));
     }
   });
 
   start(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectLocalExperimentsActions.startLocalExperiment({
-      projectId: projectId!,
-      experimentId: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.start);
   }
 
   stop(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectLocalExperimentsActions.stopLocalExperiment({
-      projectId: projectId!,
-      experimentId: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.stop);
   }
 
   reload(): void {
-    const experimentId = this.experiment()?.id;
-    const projectId = this.projectId();
-    if (!experimentId || !projectId) {
-      return;
-    }
-    this.store.dispatch(ProjectLocalExperimentsActions.loadExperiment({
-      projectId: projectId!,
-      id: experimentId!
-    }));
+    this.dispatch(ProjectRunsActions.follow);
   }
 
   showDetail(node: WorkflowNodeDetailDTO): void {
@@ -99,5 +70,13 @@ export class DetailLocalExperimentComponent {
       position: {top: '0', right: '0'},
       data: node,
     });
+  }
+
+  private dispatch(action: (props: { projectId: number; kind: ProjectRunKind; runId: number }) => Action): void {
+    const runId = this.run()?.id;
+    const projectId = this.project()?.id;
+    if (runId && projectId) {
+      this.store.dispatch(action({projectId, kind: 'local', runId}));
+    }
   }
 }

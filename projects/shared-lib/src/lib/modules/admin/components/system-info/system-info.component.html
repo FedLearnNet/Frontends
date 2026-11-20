@@ -1,0 +1,82 @@
+@if (!info()) {
+  <p class="unavailable">
+    <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+    No system information reported yet
+  </p>
+} @else if (compact()) {
+  <dl class="spec-list">
+    @for (tile of tiles(); track tile.key) {
+      <div class="spec-row">
+        <dt>
+          <mat-icon fontSet="material-symbols-outlined" class="tile-icon">{{ tile.icon }}</mat-icon>
+          {{ tile.label }}
+        </dt>
+        <dd>
+          <span class="spec-name">{{ tile.name }}</span>
+          @if (tile.specs.length) {
+            <span class="spec-detail">{{ tile.specs.join(' · ') }}</span>
+          }
+          @if (tile.usage; as usage) {
+            <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100"
+                 [attr.aria-valuenow]="usage.percent" [attr.aria-label]="tile.label + ' usage'"
+                 [matTooltip]="usage.used + ' · ' + usage.free">
+              <div class="meter-fill" [class]="usage.level" [style.width.%]="usage.percent"></div>
+            </div>
+          }
+        </dd>
+      </div>
+    }
+    @if (!hasGpu()) {
+      <div class="spec-row">
+        <dt>
+          <mat-icon fontSet="material-symbols-outlined" class="tile-icon">developer_board_off</mat-icon>
+          GPU
+        </dt>
+        <dd class="spec-muted">None detected</dd>
+      </div>
+    }
+  </dl>
+} @else {
+  <div class="tiles">
+    @for (tile of tiles(); track tile.key) {
+      <section class="tile" [attr.aria-label]="tile.label">
+        <header class="tile-header">
+          <mat-icon fontSet="material-symbols-outlined" class="tile-icon">{{ tile.icon }}</mat-icon>
+          <span class="tile-label">{{ tile.label }}</span>
+          @if (tile.usage; as usage) {
+            <span class="tile-percent" [class]="usage.level">{{ usage.percent.toFixed(0) }}%</span>
+          }
+        </header>
+
+        <div class="tile-name" [matTooltip]="tile.name" matTooltipShowDelay="600">{{ tile.name }}</div>
+        <div class="tile-specs">
+          @for (spec of tile.specs; track spec) {
+            <span>{{ spec }}</span>
+          }
+        </div>
+
+        @if (tile.usage; as usage) {
+          <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100"
+               [attr.aria-valuenow]="usage.percent" [attr.aria-label]="tile.label + ' usage'">
+            <div class="meter-fill" [class]="usage.level" [style.width.%]="usage.percent"></div>
+          </div>
+          <div class="tile-foot">
+            <span>{{ usage.used }}</span>
+            <span>{{ usage.free }}</span>
+          </div>
+        }
+      </section>
+    }
+
+    @if (!hasGpu()) {
+      <section class="tile tile--muted" aria-label="GPU">
+        <header class="tile-header">
+          <mat-icon fontSet="material-symbols-outlined" class="tile-icon">developer_board_off</mat-icon>
+          <span class="tile-label">GPU</span>
+        </header>
+        <div class="tile-name">No GPU detected</div>
+        <div class="tile-specs"><span>CPU-only workloads</span></div>
+      </section>
+    }
+  </div>
+}

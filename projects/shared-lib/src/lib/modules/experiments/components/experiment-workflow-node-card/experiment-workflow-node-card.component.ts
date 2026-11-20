@@ -13,7 +13,7 @@ import {WorkflowDTO, WorkflowNodeDetailDTO} from "@shared-lib/modules/workflow/d
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {ModelDetailDto} from "@shared-lib/modules/app-execution/dto/model";
 import {MatIcon} from "@angular/material/icon";
-import {BaseWorkflowStepDTO} from "@shared-lib/modules/experiments/dto/experiments";
+import {BaseExecutionAttemptDTO, ExecutionRunStepDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {RunStatusTypes} from "../../../../../../../global-app/src/app/modules/tool-development/dto/test-run";
@@ -37,7 +37,7 @@ import {RunStatusTypes} from "../../../../../../../global-app/src/app/modules/to
 export class ExperimentWorkflowNodeCardComponent implements OnInit {
   node = model.required<WorkflowNodeDetailDTO>();
   workflow = input.required<WorkflowDTO>();
-  step = input<BaseWorkflowStepDTO>();
+  step = input<ExecutionRunStepDTO<BaseExecutionAttemptDTO>>();
 
   isModel = signal<boolean>(false);
 
@@ -51,15 +51,7 @@ export class ExperimentWorkflowNodeCardComponent implements OnInit {
     return runStatusToBadgeStatus(this.experimentStatusText())
   });
 
-  experimentStatusText = computed(() => {
-    if(!this.step()) {
-      return RunStatusTypes.INITIALIZED;
-    }
-    if (!this.step()!.stepStatus) {
-      return RunStatusTypes.INITIALIZED;
-    }
-    return this.step()!.stepStatus!;
-  })
+  experimentStatusText = computed(() => this.step()?.status ?? RunStatusTypes.INITIALIZED);
 
   ngOnInit(): void {
     if (this.node().appDetail) {

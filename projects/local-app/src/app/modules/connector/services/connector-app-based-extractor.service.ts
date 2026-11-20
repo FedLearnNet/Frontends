@@ -6,6 +6,7 @@ import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {catchError, finalize, map, Observable, takeWhile, tap, throwError} from "rxjs";
 import {environment} from "@local-app/env/environment";
 import {RunStatusTypes} from "../../../../../../global-app/src/app/modules/tool-development/dto/test-run";
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 
 @Injectable({providedIn: 'root'})
@@ -65,7 +66,8 @@ export class ConnectorAppBasedExtractorService {
           this._last.set(msg);
 
           if (msg.status === RunStatusTypes.ERROR) {
-            this._error.set(msg.lastError ?? 'Run failed');
+            // Prefer develop's failure model; clear running so the UI does not stay RUNNING.
+            this._error.set(errorOf(msg) ?? 'Run failed');
             this._running.set(false);
           }
           if (msg.status === RunStatusTypes.FINISHED && msg.uploadInfo?.length) {
@@ -79,7 +81,8 @@ export class ConnectorAppBasedExtractorService {
         ),
         finalize(() => {
           if (this._running() && !this._error() && !this._last()?.uploadInfo?.length) {
-            this._error.set(this._last()?.lastError ?? 'Extractor run ended without a preview');
+            const last = this._last();
+            this._error.set((last ? errorOf(last) : undefined) ?? 'Extractor run ended without a preview');
           }
           this._connected.set(false);
           this._running.set(false);

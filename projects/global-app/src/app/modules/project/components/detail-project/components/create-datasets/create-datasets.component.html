@@ -7,13 +7,23 @@
   <div class="project-data">
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab label="Federated Data">
-        <app-dataset-preview-card
-          [config]="exportConfig()"
-          [queryName]="query()?.name ?? null"
-          [actionLabel]="'Open dataset'"
-          [emptyActionLabel]="'Create new dataset'"
-          (actionClicked)="openDatasetBuilder()"
-        />
+        @if (builderOpen()) {
+          <div class="builder-back">
+            <button mat-button type="button" (click)="closeDatasetBuilder()">
+              <mat-icon>arrow_back</mat-icon>
+              Back to dataset overview
+            </button>
+          </div>
+          <app-dataset-builder-page/>
+        } @else {
+          <app-dataset-preview-card
+            [config]="exportConfig()"
+            [queryName]="query()?.name ?? null"
+            [actionLabel]="'Open dataset'"
+            [emptyActionLabel]="'Create new dataset'"
+            (actionClicked)="openDatasetBuilder()"
+          />
+        }
       </mat-tab>
       <mat-tab label="My Test Data">
         <app-project-local-experiment-data [project]="project()"/>
@@ -29,7 +39,11 @@
   } @else {
     <lib-empty-state
       empty
-      [title]="'WARNING.YOU_NEED_TO_SELECT_A_QUERY' | translate "
+      [title]="'WARNING.NO_QUERY_FOUND' | translate"
+      [subtitle]=" 'WARNING.NO_QUERY_FOUND_SUBTITLE' | translate"
+      [primaryButtonEnabled]="true"
+      [primaryButtonLabel]="'BUTTON.LINK_QUERY' | translate"
+      (cta)="addQuery.emit()"
     ></lib-empty-state>
   }
 

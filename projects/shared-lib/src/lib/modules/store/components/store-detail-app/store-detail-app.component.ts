@@ -18,10 +18,13 @@ import {WorkflowListComponent} from "@shared-lib/modules/workflow/components/wor
 import {loadFiles} from "@shared-lib/modules/files/store/file.actions";
 import {
   PipelinePublishInfoDetailComponent
-} from "../../../../../../../global-app/src/app/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
+} from "@shared-lib/modules/pipeline/components/pipeline-publish-info-detail/pipeline-publish-info-detail.component";
 import {
   AuditCardComponent
 } from "../../../../../../../global-app/src/app/modules/audit/components/audit-card/audit-card.component";
+import {
+  LlmAuditPanelComponent
+} from "../../../../../../../global-app/src/app/modules/audit/components/llm-audit-panel/llm-audit-panel.component";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {StoreCardComponent} from "@shared-lib/modules/store/components/store-card/store-card.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
@@ -40,6 +43,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
     WorkflowListComponent,
     PipelinePublishInfoDetailComponent,
     AuditCardComponent,
+    LlmAuditPanelComponent,
     HintCardComponent,
     StoreCardComponent,
     PageWrapperComponent

@@ -1,14 +1,15 @@
 @if (flProject(); as project) {
   <div class="wrapper">
     <div class="head">
+      @if (project.run; as run) {
       <app-experiment-header
-        [experiment]="project.experiment"
+        [run]="run"
         (refresh)="reload()"
         [isSSEConnected]="connected()"
         [loading]="loading()"
         [hasActions]="false"
-        [description]="project.project.description"
-        [name]="project.project.name">
+        [subtitle]="project.project.description"
+        [title]="project.project.name">
         <div header-conent class="detail">
           @if (project.project.isCoordinator) {
             <lib-status-badge [type]="'SUCCESS'" size="SMALL"
@@ -22,6 +23,7 @@
         </div>
 
       </app-experiment-header>
+      }
     </div>
   </div>
   <div class="container">
@@ -42,7 +44,7 @@
           <lib-workflow-readonly-view
             class="detail"
             [workflow]="wf!"
-            [experiment]="project.experiment"
+            [run]="project.run ?? undefined"
             (selectNode)="showDetail($event)"
           ></lib-workflow-readonly-view>
         }

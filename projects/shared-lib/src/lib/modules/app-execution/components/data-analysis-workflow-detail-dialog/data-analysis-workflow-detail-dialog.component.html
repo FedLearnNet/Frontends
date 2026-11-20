@@ -2,11 +2,11 @@
                             [title]="dialogTitle()"/>
 
 @if (workflow(); as wf) {
-  @if (experiment(); as exp) {
+  @if (experiment(); as run) {
     <lib-workflow-readonly-view
       class="detail"
       [workflow]="wf!"
-      [experiment]="exp"
+      [run]="run"
       (selectNode)="showDetail($event)"
     ></lib-workflow-readonly-view>
   } @else {
@@ -24,7 +24,7 @@
   <div class="detail-step">
 
     @if (selectedStep(); as step) {
-      <lib-status-title [type]="runStatusToBadgeStatus(step.stepStatus!)">
+      <lib-status-title [type]="runStatusToBadgeStatus(step.status)">
         #{{ node.executionOrder }} {{ getStepName() }}
         <div ngProjectAs="right">
           <button mat-icon-button (click)="hideDetail()">

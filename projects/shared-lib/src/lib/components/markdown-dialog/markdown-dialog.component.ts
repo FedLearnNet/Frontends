@@ -2,7 +2,7 @@ import {Component, inject, ChangeDetectionStrategy} from '@angular/core';
 import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {MAT_DIALOG_DATA, MatDialogContent, MatDialogRef} from "@angular/material/dialog";
 import {MarkdownComponent, provideMarkdown} from "ngx-markdown";
 
 export interface MarkdownDialogData {
@@ -15,6 +15,7 @@ export interface MarkdownDialogData {
   selector: 'lib-markdown-dialog',
   imports: [
     CloseableDialogTitleComponent,
+    MatDialogContent,
     MarkdownComponent
   ],
   templateUrl: './markdown-dialog.component.html',

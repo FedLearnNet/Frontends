@@ -1,18 +1,13 @@
 import {ActivatedRouteSnapshot, ResolveFn} from "@angular/router";
 import {inject} from "@angular/core";
 import {Store} from "@ngrx/store";
-import {ProjectLocalExperimentsActions} from "@global-app/project/store/project-local-experiments.actions";
-import {ProjectFederatedExperimentsActions} from "@global-app/project/store/project-federated-experiments.actions";
+import {ProjectRunsActions} from "@global-app/project/store/project-runs.actions";
+import {ProjectRunKind} from "@global-app/project/dto/project-experiments";
 
-export const projectLocalExperimentResolver: ResolveFn<void> = (route: ActivatedRouteSnapshot) => {
+// Follows the training the route names; the route data says where it runs.
+export const projectRunResolver: ResolveFn<void> = (route: ActivatedRouteSnapshot) => {
   const projectId = +route.paramMap.get('projectId')!;
-  const id = +route.paramMap.get('experiment-id')!;
-  inject(Store).dispatch(ProjectLocalExperimentsActions.loadExperiment({projectId, id}));
+  const runId = +route.paramMap.get('experiment-id')!;
+  const kind = route.data['kind'] as ProjectRunKind;
+  inject(Store).dispatch(ProjectRunsActions.follow({projectId, kind, runId}));
 }
-
-export const projectFedExperimentResolver: ResolveFn<void> = (route: ActivatedRouteSnapshot) => {
-  const projectId = +route.paramMap.get('projectId')!;
-  const id = +route.paramMap.get('experiment-id')!;
-  inject(Store).dispatch(ProjectFederatedExperimentsActions.loadExperiment({projectId, id}));
-}
-

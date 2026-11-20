@@ -1,4 +1,4 @@
-import {ConnectorRunStepDTO} from "./log";
+import {ExecutionRunDetailDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ConnectorFileUploadInfoDTO} from "./upload-info";
 
 export interface AppBasedExtractorRequestDTO {
@@ -11,7 +11,7 @@ export interface AppBasedExtractorRequestDTO {
   inputData?: Record<string, any>;
 }
 
-export interface ConnectorExtractorStreamDTO extends ConnectorRunStepDTO {
+export interface ConnectorExtractorStreamDTO extends ExecutionRunDetailDTO {
   uploadInfo: ConnectorFileUploadInfoDTO[];
   outputParams?: Record<string, number | string>;
   cached?: boolean;

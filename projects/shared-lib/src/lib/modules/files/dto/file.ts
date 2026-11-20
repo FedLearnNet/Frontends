@@ -6,6 +6,8 @@ export interface FileDTO extends BaseAuthDto {
   contentType: string;
   size: number;
   secret: string;
+  // Base link of the file on the platform, the download link adds /download?secret=
+  downloadUrl?: string;
 }
 
 export interface FileRenameDTO {

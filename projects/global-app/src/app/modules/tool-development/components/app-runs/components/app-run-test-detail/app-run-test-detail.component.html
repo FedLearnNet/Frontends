@@ -1,11 +1,11 @@
-<lib-status-title [type]="runStatusToBadgeStatus(data.run.status)">
+<lib-status-title [type]="runStatusToBadgeStatus(run().status)">
   #{{ data.nr }} {{ 'TEST_RUN_FOR' | translate: {name: data.app.name} }}
 </lib-status-title>
 <mat-dialog-content>
-  <lib-run-performance [meta]="data.run.meta"/>
+  <lib-run-performance [meta]="meta()"/>
   <lib-experiment-workflow-node-detail
     [config]="data.app.appConfig"
-    [experimentData]="experimentData"
+    [experimentData]="experimentData()"
   />
 </mat-dialog-content>
 <mat-dialog-actions align="end">

@@ -28,16 +28,23 @@ import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.c
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {
-  selectExecutionLastRunPredictionForWorkflow,
+  selectExecutionLastRunForAnalysis,
   selectExecutionRunRunning
 } from "@shared-lib/modules/app-execution/store/data-analysis/data-analysis.selectors";
 import {
   AiTaskExecutionInfoDialogComponent,
-  TaskExecutionInfoDialogData
+  taskExecutionInfoOf
 } from "@shared-lib/modules/app-execution/components/ai-task-execution-info-dialog/ai-task-execution-info-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {MatTooltip} from "@angular/material/tooltip";
 import {WorkflowNodeDetailDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
+import {
+  currentStep,
+  displayedAttempt,
+  errorOf,
+  hasFinishedStep
+} from "@shared-lib/modules/app-execution/dto/execution-run";
+import {RunStatusTypes} from "../../../../../../../global-app/src/app/modules/tool-development/dto/test-run";
 import {loadWorkflow} from "@shared-lib/modules/workflow/store/workflow.actions";
 import {
   DataAnalysisWorkflowDetailDialogComponent,
@@ -100,7 +107,7 @@ export class AiTaskExecutionComponent {
 
   modelWorkflow = input<number>();
 
-  modelPrediction = this.store.selectSignal(selectExecutionLastRunPredictionForWorkflow(this.modelWorkflow()));
+  run = this.store.selectSignal(selectExecutionLastRunForAnalysis(this.modelWorkflow()));
   executionRunning = this.store.selectSignal(selectExecutionRunRunning);
 
   viewState = signal<ViewState>(ViewState.SELECTION);
@@ -119,34 +126,47 @@ export class AiTaskExecutionComponent {
     return storeElement.workflow;
   });
 
+  step = computed(() => {
+    const run = this.run();
+    return run ? currentStep(run) : undefined;
+  });
+
+  attempt = computed(() => {
+    const step = this.step();
+    return step ? displayedAttempt(step) : undefined;
+  });
+
+  stepPosition = computed(() => {
+    const run = this.run();
+    const step = this.step();
+    return run && step ? run.steps.indexOf(step) + 1 : 0;
+  });
+
+  error = computed(() => {
+    const run = this.run();
+    return run ? errorOf(run) : undefined;
+  });
+
+  lastLog = computed(() => this.attempt()?.lastLog);
+  outputData = computed(() => this.attempt()?.outputData ?? {});
+  appId = computed(() => this.step()?.modelId ?? 0);
+
   currentWorkflowNode = computed<WorkflowNodeDetailDTO | null>(() => {
-    const prediction = this.modelPrediction() as any;
+    const step = this.step();
     const workflow = this.workflow();
-    if (!prediction || !workflow) {
+    if (!step || !workflow) {
       return null;
     }
-
-    if (prediction.currentWorkflowStepId != null) {
-      return workflow.nodes.find((node) => node.id === prediction.currentWorkflowStepId) ?? null;
-    }
-
-    if (prediction.currentWorkflowStep != null) {
-      return workflow.nodes.find((node) => node.executionOrder === prediction.currentWorkflowStep) ?? null;
-    }
-
-    return null;
+    return workflow.nodes.find((node) => node.id === step.workflowNodeId) ?? null;
   });
 
-  canOpenWorkflowDetail = computed(() => {
-    const prediction = this.modelPrediction() as any;
-    return prediction?.workflowId != null && prediction?.workflowRunId != null;
-  });
+  canOpenWorkflowDetail = computed(() => this.run()?.workflowId != null);
 
+  // A workflow step finished and the next one has not started yet.
   waitingForNextWorkflowStep = computed(() => {
-    const prediction = this.modelPrediction();
-    return !!this.modelWorkflow() &&
-      this.executionRunning() &&
-      String(prediction?.status ?? '').toLowerCase() === 'finished';
+    const run = this.run();
+    return !!run && run.workflowId != null && this.executionRunning() &&
+      this.step()?.status === RunStatusTypes.PENDING && hasFinishedStep(run);
   });
 
   name = computed(() => {
@@ -186,14 +206,14 @@ export class AiTaskExecutionComponent {
   });
 
   private readonly statusEffect = effect(() => {
-    const model = this.modelPrediction();
+    const run = this.run();
     if (this.executionRunning()) {
       this.viewState.set(ViewState.STATUS);
     }
 
-    if (model?.status) {
+    if (run?.status) {
       this.viewState.set(ViewState.STATUS);
-      if (model.status.toLowerCase() === 'finished' && !this.executionRunning()) {
+      if (run.status === RunStatusTypes.FINISHED && !this.executionRunning()) {
         this.viewState.set(ViewState.RESULT);
       }
     } else if (!this.executionRunning()) {
@@ -242,7 +262,7 @@ export class AiTaskExecutionComponent {
     }
 
     if (this.modelWorkflow()) {
-      this.store.dispatch(DataAnalysisActions.startWorkflowRun({workflowId: this.modelWorkflow()!, data: toCreate}));
+      this.store.dispatch(DataAnalysisActions.startAnalysisRun({dataAnalysisId: this.modelWorkflow()!, data: toCreate}));
     } else {
       this.store.dispatch(DataAnalysisActions.startRun({data: toCreate}));
     }
@@ -257,64 +277,44 @@ export class AiTaskExecutionComponent {
   }
 
   openDetail() {
-    if (!this.modelPrediction()) return;
+    const run = this.run();
+    if (!run) return;
     this.dialog.open(AiTaskExecutionInfoDialogComponent, {
       height: '80vh',
       width: '90vw',
       maxWidth: '100vw',
       autoFocus: false,
-      data: this.modelPrediction() as TaskExecutionInfoDialogData,
+      data: taskExecutionInfoOf(run),
     });
 
   }
 
   openWorkflowDetail() {
-    const prediction = this.modelPrediction() as any;
-    if (!prediction || prediction.workflowId == null || prediction.workflowRunId == null) {
+    const run = this.run();
+    if (!run || run.workflowId == null || run.dataAnalysisId == null) {
       return;
     }
 
-    this.store.dispatch(loadWorkflow({id: prediction.workflowId}));
+    this.store.dispatch(loadWorkflow({id: run.workflowId}));
     this.dialog.open(DataAnalysisWorkflowDetailDialogComponent, {
       height: '80vh',
       width: '90vw',
       maxWidth: '100vw',
       autoFocus: false,
       data: {
-        workflowId: prediction.workflowId,
-        dataAnalysisId: prediction.dataAnalysisId,
-        experimentId: prediction.workflowRunId,
+        workflowId: run.workflowId,
+        dataAnalysisId: run.dataAnalysisId,
+        experimentId: run.id,
       } as DataAnalysisWorkflowDetailDialogData,
     });
   }
 
   stopExecution() {
-    const prediction = this.modelPrediction();
-    if (!prediction || prediction.id == null) return;
+    const run = this.run();
+    const dataAnalysisId = run?.dataAnalysisId ?? this.modelWorkflow();
+    if (!run || dataAnalysisId == null) return;
 
-    const id = prediction.id;
-    if (prediction.dataAnalysisId != null && prediction.workflowId != null) {
-      const dataAnalysisId = prediction.dataAnalysisId;
-      const workflowId = prediction.workflowId;
-
-      this.store.dispatch(
-        DataAnalysisActions.stopWorkflowRun({
-          dataAnalysisId,
-          id,
-          workflowId,
-        })
-      );
-      return;
-    }
-    const dataAnalysisId = this.modelWorkflow();
-    if (dataAnalysisId == null) return;
-
-    this.store.dispatch(
-      DataAnalysisActions.stopRun({
-        dataAnalysisId,
-        id,
-      })
-    );
+    this.store.dispatch(DataAnalysisActions.stopRun({dataAnalysisId, id: run.id}));
   }
 
   getHyperParamName(hyperparam: ToolHyperParamConfigDTO): string {

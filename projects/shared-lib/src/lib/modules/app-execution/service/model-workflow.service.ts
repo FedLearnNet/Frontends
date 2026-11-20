@@ -7,7 +7,7 @@ import {
   ModelWorkflowDetailDTO,
   ModelWorkflowDTO
 } from "@shared-lib/modules/app-execution/dto/model-workflow";
-import {DataAnalysisWorkflowRunDTO} from "@shared-lib/modules/app-execution/dto/data-analysis-workflow";
+import {DataAnalysisRunDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {TranslateService} from "@ngx-translate/core";
 import {HttpHeaders} from "@angular/common/http";
@@ -62,10 +62,10 @@ export class ModelWorkflowService {
     return this.apiService.post<ModelWorkflowDTO>(this.getBaseUrl(), workflow, headers);
   }
 
-  retrieveWorkflowExperiment(id: number, experimentId: number): Observable<DataAnalysisWorkflowRunDTO> {
+  retrieveWorkflowExperiment(id: number, experimentId: number): Observable<DataAnalysisRunDTO> {
     const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
 
-    return this.apiService.get<DataAnalysisWorkflowRunDTO>(`${this.getBaseUrl()}/${id}/experiment/${experimentId}`,
+    return this.apiService.get<DataAnalysisRunDTO>(`${this.getBaseUrl()}/${id}/experiment/${experimentId}`,
       undefined, headers);
   }
 

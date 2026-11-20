@@ -10,6 +10,9 @@
   <main class="content">
     <header class="topbar">
       <div class="topbar-left">
+        <button type="button" class="menu-toggle" (click)="onToggle()" [attr.aria-label]="'OPEN_MENU' | translate">
+          <mat-icon>menu</mat-icon>
+        </button>
         <app-lib-breadcrumb />
       </div>
 

@@ -8,9 +8,8 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
 import {BytesPipe} from "@shared-lib/pipies/bytes.pipe";
 import {APP_EXPORT_STATUS_BADGES} from "@shared-lib/modules/data-modeler/utils/app-export-status.util";
-import {
-  PatientToolRunSummaryDTO
-} from "../../../../../../../local-app/src/app/modules/patient/dto/patient-tool-run";
+import {PatientToolRunStatus} from "../../../../../../../local-app/src/app/modules/patient/dto/patient-tool-run";
+import {errorOf, ExecutionRunDetailDTO, outputsOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 /** Earlier app-based exports of a cohort, each downloadable again. */
 @Component({
@@ -30,18 +29,28 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppExportHistoryComponent {
-  runs = input<PatientToolRunSummaryDTO[]>([]);
+  runs = input<ExecutionRunDetailDTO[]>([]);
   loading = input<boolean>(false);
   error = input<string | null>(null);
   downloadingRunId = input<number | null>(null);
 
   download = output<number>();
 
-  badge(run: PatientToolRunSummaryDTO): StatusBadeType {
-    return APP_EXPORT_STATUS_BADGES[run.runStatus] ?? 'PENDING';
+  badge(run: ExecutionRunDetailDTO): StatusBadeType {
+    return APP_EXPORT_STATUS_BADGES[run.status as PatientToolRunStatus] ?? 'PENDING';
   }
 
-  toDate(value?: string): Date | null {
-    return value ? new Date(value) : null;
+  appName(run: ExecutionRunDetailDTO): string {
+    return run.name || 'Export app';
   }
+
+  outputSize(run: ExecutionRunDetailDTO): number {
+    return outputsOf(run).reduce((size, output) => size + (output.file?.size ?? 0), 0);
+  }
+
+  hasOutputs(run: ExecutionRunDetailDTO): boolean {
+    return outputsOf(run).length > 0;
+  }
+
+  protected readonly errorOf = errorOf;
 }
