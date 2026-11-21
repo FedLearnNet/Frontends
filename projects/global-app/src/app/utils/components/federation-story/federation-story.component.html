@@ -1,0 +1,125 @@
+<section class="story" [class.story--solution]="mode() === 'solution'">
+  <h2>
+    @if (mode() === 'problem') {
+      Why hospital data is hard to use
+    } @else {
+      How {{ project() }} solves it
+    }
+  </h2>
+
+  <div class="story__body">
+    <svg class="story__scene" viewBox="0 0 600 340" role="img"
+         [attr.aria-label]="mode() === 'problem'
+           ? 'Hospitals try to send patient data to a central server and are blocked.'
+           : 'The model is sent to each hospital, trained there, and only results return.'">
+
+      @if (mode() === 'problem') {
+        <!-- Data travels towards a central store and is stopped half way. -->
+        @for (site of sites; track site.id; let i = $index) {
+          <line class="link link--blocked" [attr.x1]="site.x" [attr.y1]="site.y"
+                [attr.x2]="centre.x" [attr.y2]="centre.y"/>
+
+          @if (!reducedMotion) {
+            <rect class="packet" x="-7" y="-9" width="14" height="18" rx="2">
+              <animateMotion [attr.path]="pathToCentre(site)" dur="2.6s" repeatCount="indefinite"
+                             calcMode="linear" keyPoints="0;0.5;0.5" keyTimes="0;0.55;1"
+                             [attr.begin]="(i * 0.5) + 's'"/>
+              <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.6;1" dur="2.6s"
+                       repeatCount="indefinite" [attr.begin]="(i * 0.5) + 's'"/>
+            </rect>
+          }
+
+          <g class="barrier" [attr.transform]="'translate(' + barrier(site).x + ',' + barrier(site).y + ')'">
+            <circle r="13"/>
+            <path class="barrier__shackle" d="M-4,-2 v-3 a4,4 0 0 1 8,0 v3"/>
+            <rect class="barrier__body" x="-6" y="-2" width="12" height="9" rx="1.5"/>
+          </g>
+        }
+
+        <g class="centre centre--empty" [attr.transform]="'translate(' + centre.x + ',' + centre.y + ')'">
+          <ellipse cx="0" cy="-22" rx="40" ry="10"/>
+          <path d="M-40,-22 v44 a40,10 0 0 0 80,0 v-44"/>
+          <text y="4" text-anchor="middle">Central</text>
+          <text y="18" text-anchor="middle">data lake</text>
+        </g>
+      } @else {
+        <!-- The model travels to every site, is trained there, and only results come back. -->
+        @for (site of sites; track site.id; let i = $index) {
+          <line class="link" [attr.x1]="site.x" [attr.y1]="site.y" [attr.x2]="centre.x" [attr.y2]="centre.y"/>
+
+          @if (!reducedMotion) {
+            <circle class="model" r="7">
+              <animateMotion [attr.path]="pathFromCentre(site)" dur="3s" repeatCount="indefinite"
+                             calcMode="linear" keyPoints="0;1;1" keyTimes="0;0.35;1"
+                             [attr.begin]="(i * 0.4) + 's'"/>
+              <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.35;0.4;1" dur="3s"
+                       repeatCount="indefinite" [attr.begin]="(i * 0.4) + 's'"/>
+            </circle>
+            <circle class="training" [attr.cx]="site.x" [attr.cy]="site.y" r="30">
+              <animate attributeName="r" values="30;30;44;44" keyTimes="0;0.38;0.6;1" dur="3s"
+                       repeatCount="indefinite" [attr.begin]="(i * 0.4) + 's'"/>
+              <animate attributeName="opacity" values="0;0.7;0;0" keyTimes="0;0.38;0.6;1" dur="3s"
+                       repeatCount="indefinite" [attr.begin]="(i * 0.4) + 's'"/>
+            </circle>
+            <circle class="result" r="6">
+              <animateMotion [attr.path]="pathToCentre(site)" dur="3s" repeatCount="indefinite"
+                             calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.6;0.95;1"
+                             [attr.begin]="(i * 0.4) + 's'"/>
+              <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.58;0.62;0.95;1" dur="3s"
+                       repeatCount="indefinite" [attr.begin]="(i * 0.4) + 's'"/>
+            </circle>
+          }
+        }
+
+        <g class="centre" [attr.transform]="'translate(' + centre.x + ',' + centre.y + ')'">
+          <rect x="-46" y="-30" width="92" height="60" rx="10"/>
+          <text y="-4" text-anchor="middle">{{ project() }}</text>
+          <text class="centre__sub" y="14" text-anchor="middle">shared model</text>
+        </g>
+      }
+
+      @for (site of sites; track site.id) {
+        <g class="site" [class.site--affected]="isAffected(site)"
+           [attr.transform]="'translate(' + site.x + ',' + site.y + ')'">
+          <rect x="-26" y="-26" width="52" height="52" rx="10"/>
+          <path class="site__cross" d="M-4,-14 h8 v10 h10 v8 h-10 v10 h-8 v-10 h-10 v-8 h10 z"/>
+          <text class="site__name" y="44" text-anchor="middle">Hospital {{ site.id }}</text>
+        </g>
+
+        <!-- The active point as a block (bottleneck) or a badge (solution) on the hospitals it affects. -->
+        @if (isAffected(site)) {
+          @let pos = badgePosition(site);
+          <g class="badge" [attr.transform]="'translate(' + pos.x + ',' + pos.y + ')'">
+            <rect x="-66" y="-12" width="132" height="24" rx="12"/>
+            <text y="4" text-anchor="middle">{{ mode() === 'problem' ? '✕ ' : '✓ ' }}{{ badgeOf(active()) }}</text>
+          </g>
+        }
+      }
+    </svg>
+
+    <ol class="story__points">
+      @for (point of points(); track $index; let i = $index) {
+        <li>
+          <button type="button" class="story__point" [class.active]="i === activeIndex()"
+                  [attr.aria-current]="i === activeIndex() ? 'step' : null" (click)="select(i)">
+            <span class="story__icon" aria-hidden="true">{{ mode() === 'problem' ? '✕' : '✓' }}</span>
+            <span class="story__text">
+              <strong>{{ mode() === 'problem' ? point.problem.title : point.solution.title }}</strong>
+              <span>{{ mode() === 'problem' ? point.problem.description : point.solution.description }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ol>
+  </div>
+
+  <div class="story__footer">
+    <button type="button" class="story__cta" (click)="toggleMode()">
+      @if (mode() === 'problem') {
+        See how {{ project() }} solves it <span aria-hidden="true">→</span>
+      } @else {
+        <span aria-hidden="true">←</span> Back to the bottlenecks
+      }
+    </button>
+  </div>
+</section>
