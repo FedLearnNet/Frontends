@@ -12,8 +12,9 @@
     <h3>Settings</h3>
     @if (hasHyperParams()) {
       <lib-app-run-hyperparameter [app]="app"
-                                  (formsValid)="hyperParamValid=$event"
+                                  [hyperParams]="hyperParams()"
                                   (hyperParamsChange)="hyperParams.set($event)"
+                                  (formsValid)="hyperParamValid=$event"
       />
     } @else {
       <lib-hint-card>There are no HyperParams</lib-hint-card>
@@ -33,4 +34,3 @@
     <lib-error-card>No App found</lib-error-card>
   }
 }
-

@@ -71,7 +71,7 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
     const service = this.connectorAppBasedExtractorService;
     if (service.running()) return 'RUNNING';
     if (service.error()) return 'FAILED';
-    if (this.last()?.uploadInfo || this.hasStoredOutputs()) return 'SUCCESS';
+    if (this.last()?.uploadInfo?.length || this.hasStoredOutputs()) return 'SUCCESS';
     return 'PENDING';
   });
 
@@ -114,7 +114,16 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
       next: msg => {
         this.last.set(msg);
         this.messages.update(m => [...m, msg]);
-        if (msg.uploadInfo) {
+        if (msg.uploadInfo?.length) {
+          if (msg.outputParams && Object.keys(msg.outputParams).length > 0) {
+            this.config.update(c => ({
+              ...c,
+              inputConfig: {
+                ...(c.inputConfig as AppBasedUploadSettings),
+                outputParams: {...msg.outputParams},
+              } as AppBasedUploadSettings,
+            }));
+          }
           this.runFinished.emit(msg.uploadInfo);
         }
       },
@@ -122,12 +131,32 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
     })];
   }
 
-  getFileName(path?: string) {
-    if (!path || !path.includes("/")) {
-      return path;
+  formatInputDataValue(value: unknown): string {
+    if (value == null || value === '') {
+      return '—';
     }
-    const paths = path.split("/");
-    return paths[paths.length - 1];
+    if (typeof value === 'number' || (typeof value === 'string' && /^\d+$/.test(value))) {
+      return `File #${value}`;
+    }
+    if (value instanceof File) {
+      return value.name;
+    }
+    const text = String(value);
+    if (!text.includes('/')) {
+      return text;
+    }
+    return text.split('/').pop() || text;
+  }
+
+  lastMessageText(msg: ConnectorExtractorStreamDTO): string {
+    const fromShared = lastLogOf(msg)?.trim();
+    if (fromShared) {
+      return fromShared;
+    }
+    if (msg.uploadInfo?.length) {
+      return `Finished with ${msg.uploadInfo.length} preview table(s)`;
+    }
+    return msg.status ?? '—';
   }
 
   cleanup() {

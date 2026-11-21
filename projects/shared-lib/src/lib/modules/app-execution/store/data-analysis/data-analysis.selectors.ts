@@ -122,7 +122,7 @@ export const selectDataAnalysisCurrentUploadForCurrentWorkflow = createSelector(
 export const selectDataAnalysisCurrentUploadByFileId = (fileId?: number) => createSelector(
   selectDataAnalysisState,
   state => {
-    if (fileId) {
+    if (fileId && state?.file?.currentUpload) {
       return state.file.currentUpload[fileId] || {progress: 0, inProgress: false};
     }
     return {progress: 0, inProgress: false};

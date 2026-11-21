@@ -28,7 +28,7 @@ export class ConnectorUploadService {
     file?: File,
     supportFile = false,
     _replaceFiles = false,
-    settings?: FileUploadSettings,
+    settings?: Partial<FileUploadSettings> & {opaque?: boolean},
   ): Observable<ConnectorFilesDetailDTO> {
     if (!file) {
       const err = new Error(this.translate.instant('ERROR.NO_FILE_PROVIDED'));
@@ -102,8 +102,21 @@ export class ConnectorUploadService {
   private toUploadSettings(
     file: File,
     supportFile: boolean,
-    settings?: FileUploadSettings,
+    settings?: Partial<FileUploadSettings> & {opaque?: boolean},
   ): ConnectorFileUploadSettingsDTO {
+    if (settings?.opaque) {
+      return {
+        fileType: 'OPAQUE',
+        opaque: true,
+        hasHeader: false,
+        firstSheetOnly: true,
+        hasSupportFile: settings.hasSupportFile ?? false,
+        deleteUnneededFileAfterSuccess: settings.deleteUnneededFileAfterSuccess ?? true,
+        supportFile: true,
+        previewRows: 1,
+      };
+    }
+
     const name = file.name.toLocaleLowerCase();
     const archive = name.endsWith('.zip');
     const detectedType = name.endsWith('.xls') || name.endsWith('.xlsx')
@@ -122,6 +135,7 @@ export class ConnectorUploadService {
       hasSupportFile: settings?.hasSupportFile ?? false,
       deleteUnneededFileAfterSuccess: settings?.deleteUnneededFileAfterSuccess ?? true,
       supportFile,
+      opaque: false,
       previewRows: 10,
     };
   }

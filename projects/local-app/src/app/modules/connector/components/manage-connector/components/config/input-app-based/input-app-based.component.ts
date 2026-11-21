@@ -5,7 +5,11 @@ import {
   AppRunHyperparameterComponent
 } from "@shared-lib/modules/app-execution/components/app-run-hyperparameter/app-run-hyperparameter.component";
 import {AppRunInputComponent} from "@shared-lib/modules/app-execution/components/app-run-input/app-run-input.component";
-import {ToolHyperParamConfigDTO, ToolInputConfigDTO} from "@shared-lib/modules/app-execution/dto/config";
+import {
+  ToolConfigDataType,
+  ToolHyperParamConfigDTO,
+  ToolInputConfigDTO
+} from "@shared-lib/modules/app-execution/dto/config";
 import {StoreActions} from "@shared-lib/modules/store/store/store.actions";
 import {selectSelectedApp, selectStoreError, selectStoreLoading} from "@shared-lib/modules/store/store/store.selectors";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
@@ -43,6 +47,7 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   private readonly translate: TranslateService = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
 
+  readonly cohortId = input<number>();
   // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
   configInput = input.required<ConnectorDTO>({alias: 'config'});
   config = linkedSignal(this.configInput);
@@ -76,6 +81,10 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
       }
       if (inputConfig && isAppBasedUploadSettings(inputConfig)) {
         this.settings.set(inputConfig);
+        if (inputConfig.inputData && Object.keys(inputConfig.inputData).length > 0
+          && Object.keys(this.inputs).length === 0) {
+          this.inputs = {...inputConfig.inputData};
+        }
         if (!id && inputConfig.appVersionId) {
           this.store.dispatch(StoreActions.loadAppByVersion({appVersionId: inputConfig.appVersionId}));
         }
@@ -132,22 +141,22 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   changeInput(data: { [key: string]: any }): void {
     let allValid = true;
     const input: ToolInputConfigDTO[] = this.appDetail()?.appConfig.input ?? [];
-    input.forEach((input) => {
-      const name = input.variableName ?? input.name;
-      const isRequired = input.required;
-      if (isRequired) {
-        if (!data[name] || data[name].length === 0) {
-          allValid = false;
-        }
+    input.forEach((entry) => {
+      const name = entry.variableName ?? entry.name;
+      if ((data[name] == null || data[name] === '') && typeof this.inputs[name] === 'number') {
+        data[name] = this.inputs[name];
+      }
+      if (entry.required && (data[name] == null || data[name] === ''
+        || (typeof data[name] !== 'number' && data[name]?.length === 0))) {
+        allValid = false;
       }
       if (this.isFileValue(data[name])) {
-        this.onFileSelected(name, data[name]);
+        this.onFileSelected(name, data[name], entry);
       }
     });
     this.inputValid = allValid;
     this.inputs = data;
   }
-
 
   private isFileValue(v: any): v is File | FileList | File[] {
     if (!v) return false;
@@ -156,7 +165,11 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
     return (Array.isArray(v) && v.length > 0 && v.every((x) => x instanceof File))
   }
 
-  onFileSelected(key: string, value: File | FileList | File[]): void {
+  getCohortId(): number | undefined {
+    return this.config().cohortId ?? this.cohortId();
+  }
+
+  onFileSelected(key: string, value: File | FileList | File[], entry?: ToolInputConfigDTO): void {
     const file: File | null =
       value instanceof File ? value :
         value instanceof FileList ? (value.item(0) ?? null) :
@@ -164,7 +177,21 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
             null;
 
     if (!file) return;
-    this.uploadService.uploadFile(this.config().cohortId!, file).pipe(
+
+    const cohortId = this.getCohortId();
+    if (cohortId == null) {
+      this.snackBar.open(
+        this.translate.instant('ERROR.ERROR_OCCURRED_PLEASE_TRY_AGAIN'),
+        this.translate.instant('BUTTON.CLOSE'), {
+          duration: 5000,
+          verticalPosition: 'top',
+        });
+      return;
+    }
+
+    // PATH → opaque. CSV and other types → normal tabular upload (old behaviour).
+    const opaque = entry?.type === ToolConfigDataType.PATH;
+    this.uploadService.uploadFile(cohortId, file, false, false, opaque ? {opaque: true} : undefined).pipe(
       catchError((error) => {
         console.error(this.translate.instant('ERROR.ERROR_IMPORTING_FILE'), error);
         this.snackBar.open(
@@ -177,6 +204,7 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
       })
     ).subscribe((response: ConnectorFilesDTO): void => {
       this.inputs[key] = response.id;
+      this.inputValid = true;
     });
   }
 
@@ -202,15 +230,22 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
     if (!inputConfig) {
       return false;
     }
+    if (Object.values(this.inputs).some(v => this.isFileValue(v))) {
+      this.snackBar.open(
+        this.translate.instant('WARNING.PLEASE_IMPORT_A_FILE'),
+        this.translate.instant('BUTTON.CLOSE'), {
+          duration: 5000,
+          verticalPosition: 'top',
+        });
+      return false;
+    }
     inputConfig.hyperParams = this.hyperParams();
-    inputConfig.inputData = this.inputs;
+    inputConfig.inputData = {...this.inputs};
     inputConfig.mode = "APP";
-    this.config.update(c => {
-      return {
-        ...c,
-        inputConfig: inputConfig
-      }
-    });
+    this.config.update(c => ({
+      ...c,
+      inputConfig: {...inputConfig},
+    }));
 
     this.configChange.emit(this.config());
     return true;

@@ -190,8 +190,8 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
     ));
 
     expect(previewService.previewPivot).toHaveBeenCalled();
-    expect(component.sheets[0].info.columns).toEqual(['patientId', 'icd_A', 'icd_B']);
-    expect(component.sheets[0].info.json).toEqual([
+    expect(component.sheets()[0].info.columns).toEqual(['patientId', 'icd_A', 'icd_B']);
+    expect(component.sheets()[0].info.json).toEqual([
       {patientId: 1, icd_A: true, icd_B: false},
     ]);
   });
@@ -213,7 +213,7 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
     }, {mergeConfig}));
 
     expect(previewService.previewPivot).toHaveBeenCalled();
-    expect(component.sheets[0].info.columns).toEqual(['patientId', 'sex', '2019']);
-    expect(component.sheets[0].info.json).toEqual([{patientId: 1, '2019': 5, sex: 'f'}]);
+    expect(component.sheets()[0].info.columns).toEqual(['patientId', 'sex', '2019']);
+    expect(component.sheets()[0].info.json).toEqual([{patientId: 1, '2019': 5, sex: 'f'}]);
   });
 });

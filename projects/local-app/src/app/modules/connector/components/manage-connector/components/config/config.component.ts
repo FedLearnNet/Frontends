@@ -106,6 +106,7 @@ export class ConnectorStepConfigComponent implements OnInit, OnChanges, Connecto
 
   private usesCohortInput(): boolean {
     return this.activeComponentType() === ConnectorStepConfigs.STEP_SOURCE_FILE_CONFIG
+      || this.activeComponentType() === ConnectorStepConfigs.STEP_SOURCE_APP_BASED
       || this.activeComponentType() === ConnectorStepConfigs.STEP_SPECIFY_SELECTORS_CONFIG;
   }
 

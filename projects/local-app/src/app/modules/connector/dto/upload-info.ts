@@ -42,8 +42,8 @@ export interface ConnectorFilesDTO extends BaseDto {
 }
 
 export interface FileParsingSettingsDTO {
-  fileType: 'EXCEL' | 'CSV' | 'JSON' | 'MULTIPLE_CSV_ZIP';
-  delimiter: ',' | '|' | ';' | 's' | '\t' | 'CUSTOM';
+  fileType: 'EXCEL' | 'CSV' | 'JSON' | 'MULTIPLE_CSV_ZIP' | 'OPAQUE';
+  delimiter?: ',' | '|' | ';' | 's' | '\t' | 'CUSTOM';
   customDelimiter?: string;
   hasHeader: boolean;
   firstSheetOnly: boolean;
@@ -53,6 +53,8 @@ export interface ConnectorFileUploadSettingsDTO extends FileParsingSettingsDTO {
   hasSupportFile: boolean;
   deleteUnneededFileAfterSuccess: boolean;
   supportFile: boolean;
+  /** Store for tool PATH inputs without tabular profiling. */
+  opaque?: boolean;
   previewRows: number;
 }
 

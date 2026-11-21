@@ -76,10 +76,10 @@ import {MatOption, MatSelect} from "@angular/material/select";
 export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConfig<ConnectorDTO>, OnInit {
   private uploadService = inject(ConnectorUploadService);
   private snackBar = inject(MatSnackBar);
-  private cdr = inject(ChangeDetectorRef);
   dialog = inject(MatDialog);
   private translate = inject(TranslateService);
   private connectorPreviewService = inject(ConnectorPreviewService);
+  private cdr = inject(ChangeDetectorRef);
 
   readonly cohortId = input<number | undefined>(undefined);
   // eslint-disable-next-line @angular-eslint/no-input-rename -- public name belongs to the linkedSignal below
@@ -87,11 +87,12 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   readonly config = linkedSignal(this.configInput);
   readonly configChange = output<ConnectorDTO>();
   readonly save = output<ConnectorStepConfigChangeEmitter>();
-  sheets: { name: string; info: UploadInfoView }[] = [];
-  sourceTables: { name: string; info: UploadInfoView }[] = [];
-  pivotTables: { name: string; info: UploadInfoView }[] = [];
+  /** Preview tables — signals so SSE/async updates paint under Eager/zoneless CD without a click. */
+  readonly sheets = signal<{ name: string; info: UploadInfoView }[]>([]);
+  readonly sourceTables = signal<{ name: string; info: UploadInfoView }[]>([]);
+  readonly pivotTables = signal<{ name: string; info: UploadInfoView }[]>([]);
   activeSheetIndex = 0;
-  mergeConfig?: SheetMergeResultDTO;
+  readonly mergeConfig = signal<SheetMergeResultDTO | undefined>(undefined);
   pivotPreviewRunning = signal(false);
   isToolBased = signal<boolean>(false);
   fileDetails = signal<ConnectorFilesDetailDTO | null>(null);
@@ -116,7 +117,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
         this.isToolBased.set(true);
       }
       if (config.mergeConfig) {
-        this.mergeConfig = config.mergeConfig;
+        this.mergeConfig.set(config.mergeConfig);
       }
       if (config.fileInfo && Object.keys(config.fileInfo).length > 0) {
         this.applyFileInfo(config.fileInfo, false);
@@ -152,7 +153,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   toolRunStarted(): void {
-    this.sheets = [];
+    this.sheets.set([]);
   }
 
   loadColumns() {
@@ -172,13 +173,12 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
       this.uploadService.getFileDetail(cohortId, inputConfig.fileId).pipe(
         catchError((error) => {
           console.error(this.translate.instant('ERROR.ERROR_WITH_LOADING_THE_COLUMNS'), error);
-          this.snackBar.open(
+              this.snackBar.open(
             this.translate.instant('ERROR.ERROR_WITH_LOADING_THE_COLUMNS'),
             this.translate.instant('BUTTON.CLOSE'), {
               duration: 5000,
               verticalPosition: 'top',
             });
-          this.cdr.detectChanges();
           throw error;
         })
       ).subscribe((info: ConnectorFilesDetailDTO) => {
@@ -231,12 +231,21 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
 
       this.fileDetails.set(lastDetail);
       this.applyFileInfo(fileInfo);
-      this.cdr.detectChanges();
     });
   }
 
   setAppBasedResult(uploadInfo: ConnectorFileUploadInfoDTO[]) {
-    this.setFileInfo({uploadInfo} as ConnectorFilesDetailDTO)
+    if (!uploadInfo?.length) {
+      return;
+    }
+    const outputNames = this.outputNames();
+    const normalized = uploadInfo.length === 1 && outputNames.length === 1
+      ? [{...uploadInfo[0], sheet: outputNames[0]}]
+      : uploadInfo.map((sheet, index) =>
+        sheet.sheet && sheet.sheet !== String(index)
+          ? sheet
+          : {...sheet, sheet: outputNames[index] ?? sheet.sheet ?? String(index)});
+    this.setFileInfo({uploadInfo: normalized} as ConnectorFilesDetailDTO);
   }
 
   setFileInfo(info: ConnectorFilesDetailDTO) {
@@ -245,7 +254,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   openRenameDialog(renamedColumn: string, columnName: string, index: number, sheetName: string): void {
-    const sheet = this.sheets.find(s => s.name === sheetName);
+    const sheet = this.sheets().find(s => s.name === sheetName);
     if (!sheet) {
       console.error('Sheet not found:', sheetName);
       return;
@@ -265,16 +274,23 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
 
     dialogRef.afterClosed().subscribe((result: UploadInfoDialog) => {
       if (!result) return;
-      sheet.info.renamedColumns[index] = result.renamedColumn;
-      sheet.info.deletedColumns[index] = result.deleted;
+      this.sheets.update(all => all.map(s => {
+        if (s.name !== sheetName) {
+          return s;
+        }
+        const renamedColumns = [...s.info.renamedColumns];
+        const deletedColumns = [...s.info.deletedColumns];
+        renamedColumns[index] = result.renamedColumn;
+        deletedColumns[index] = result.deleted;
+        return {...s, info: {...s.info, renamedColumns, deletedColumns}};
+      }));
       this.updateConfigFileInfo();
       this.emitConfigChange();
-      this.cdr.detectChanges();
     });
   }
 
   headerClick(event: { columnName: string, index: number }, sheetName: string): void {
-    const sheet = this.sheets.find(s => s.name === sheetName);
+    const sheet = this.sheets().find(s => s.name === sheetName);
     if (!sheet) {
       console.error('Sheet not found:', sheetName);
       return;
@@ -284,7 +300,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   selectOutputs(outputNames: string[]): void {
-    this.mergeConfig = undefined;
+    this.mergeConfig.set(undefined);
     this.config.update(config => ({
       ...config,
       mergeConfig: undefined,
@@ -301,7 +317,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     if (this.selectedOutputs().length === 0) {
       return 'WARNING.SELECT_APP_OUTPUT';
     }
-    return this.selectedOutputs().length > 1 && !this.mergeConfig ? 'WARNING.MERGE_APP_OUTPUTS' : undefined;
+    return this.selectedOutputs().length > 1 && !this.mergeConfig() ? 'WARNING.MERGE_APP_OUTPUTS' : undefined;
   }
 
   onContinueClick(): boolean {
@@ -336,7 +352,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
       maxWidth: '1400px',
       height: '80vh',
       data: {
-        sheets: this.sourceTables,
+        sheets: this.sourceTables(),
         pivotConfig: this.config().pivotConfig,
       },
     });
@@ -354,10 +370,11 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   openMergeDialog(): void {
-    const isMerged = this.sheets.length === 1
-      && this.sheets[0].name === 'Merged' && this.mergeConfig;
+    const sheets = this.sheets();
+    const isMerged = sheets.length === 1
+      && sheets[0].name === 'Merged' && !!this.mergeConfig();
 
-    if (this.pivotTables.length > 1) {
+    if (this.pivotTables().length > 1) {
       this.showMergeDialog();
       return;
     }
@@ -389,8 +406,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
         })
       ).subscribe((info: ConnectorFilesDetailDTO) => {
         this.fileDetails.set(info);
-        this.sheets = this.mapFileInfoToSheets(connectorFilesDetailToFileInfo(info));
-        this.cdr.detectChanges();
+        this.sheets.set(this.mapFileInfoToSheets(connectorFilesDetailToFileInfo(info)));
         this.showMergeDialog();
       });
     } else {
@@ -399,7 +415,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   private showMergeDialog(): void {
-    const sheetData = this.pivotTables.map(sheet => ({
+    const sheetData = this.pivotTables().map(sheet => ({
       name: sheet.name,
       columns: sheet.info.columns
     }));
@@ -415,12 +431,13 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     dialogRef.afterClosed().subscribe((result: SheetMergeResultDTO) => {
       if (!result) {
         // User canceled — re-merge with existing config if we unmerged
-        if (this.mergeConfig && this.sheets.length > 1) {
-          this.mergeSheets(this.mergeConfig, false);
+        const mergeConfig = this.mergeConfig();
+        if (mergeConfig && this.sheets().length > 1) {
+          this.mergeSheets(mergeConfig, false);
         }
         return;
       }
-      this.mergeConfig = result;
+      this.mergeConfig.set(result);
       this.config.update(configValue => ({...configValue, mergeConfig: result}));
       this.emitConfigChange();
       this.mergeSheets(result);
@@ -428,16 +445,15 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   private mergeSheets(_mergeConfig: SheetMergeResultDTO, showMessage: boolean = true): void {
-    if (this.pivotTables.length < 2) return;
+    if (this.pivotTables().length < 2) return;
 
     // Build UploadInfoDTO map from current sheets
-    const fileInfoMap = this.sheetsToFileInfo(this.pivotTables);
+    const fileInfoMap = this.sheetsToFileInfo(this.pivotTables());
 
     const mergedFileInfo = mergeFileInfo(fileInfoMap, _mergeConfig);
-    this.sheets = this.mapFileInfoToSheets(mergedFileInfo);
+    this.sheets.set(this.mapFileInfoToSheets(mergedFileInfo));
     this.updateConfigFileInfo();
     this.emitConfigChange();
-    this.cdr.detectChanges();
     this.refreshMergedPreview();
 
     if (showMessage) {
@@ -456,7 +472,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
 
   private updateConfigFileInfo(): void {
     const updatedFileInfo: Record<string, UploadInfoDTO> = {};
-    this.sheets.forEach(sheet => {
+    this.sheets().forEach(sheet => {
       updatedFileInfo[sheet.name] = {
         json: JSON.stringify(sheet.info.json),
         data: sheet.info.json,
@@ -471,7 +487,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
       ...config,
       fileInfo: updatedFileInfo,
       uploadInfo: updatedFileInfo,
-      mergeConfig: this.mergeConfig,
+      mergeConfig: this.mergeConfig(),
     }));
   }
 
@@ -531,22 +547,24 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     if (this.isToolBased()) {
       fileInfo = filterSelectedOutputs(fileInfo, this.selectedOutputs());
     }
-    this.sourceTables = this.mapFileInfoToSheets(fileInfo);
-    this.pivotTables = this.mapFileInfoToSheets(fileInfo);
+    const mapped = this.mapFileInfoToSheets(fileInfo);
+    this.sourceTables.set(mapped);
+    this.pivotTables.set(mapped);
     this.reconcileSingleTablePivotKey();
 
-    const nextFileInfo = this.mergeConfig && this.pivotTables.length > 1
-      ? mergeFileInfo(this.sheetsToFileInfo(this.pivotTables), this.mergeConfig)
+    const mergeConfig = this.mergeConfig();
+    const pivotTables = this.pivotTables();
+    const nextFileInfo = mergeConfig && pivotTables.length > 1
+      ? mergeFileInfo(this.sheetsToFileInfo(pivotTables), mergeConfig)
       : fileInfo;
 
-    this.sheets = this.mapFileInfoToSheets(nextFileInfo);
+    this.sheets.set(this.mapFileInfoToSheets(nextFileInfo));
     this.updateConfigFileInfo();
+    this.cdr.detectChanges();
 
     if (emitChange) {
       this.emitConfigChange();
     }
-
-    this.cdr.detectChanges();
 
     if (emitChange && this.config().pivotConfig) {
       this.refreshPivotPreview();
@@ -556,29 +574,32 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   private refreshMergedPreview(): void {
-    if (!this.mergeConfig || this.config().pivotConfig || this.sheets.length !== 1) {
+    if (!this.mergeConfig() || this.config().pivotConfig || this.sheets().length !== 1) {
       return;
     }
     const config = {...this.config(), fileInfo: undefined, uploadInfo: undefined};
     this.connectorPreviewService.previewPivot(configToConnectorConfigDTO(config)).subscribe({
       next: ([table]) => {
-        if (!table?.rows.length || this.sheets.length !== 1) {
+        if (!table?.rows.length || this.sheets().length !== 1) {
           return;
         }
         const {rows, columns} = table;
-        const sheet = this.sheets[0];
-        const previous = sheet.info;
-        const indexOf = (column: string) => previous.columns.indexOf(column);
-        sheet.info = {
-          ...previous,
-          json: rows,
-          columns,
-          renamedColumns: columns.map(c => indexOf(c) >= 0 ? previous.renamedColumns[indexOf(c)] : c),
-          deletedColumns: columns.map(c => indexOf(c) >= 0 ? previous.deletedColumns[indexOf(c)] : false),
-        };
+        this.sheets.update(all => {
+          const previous = all[0].info;
+          const indexOf = (column: string) => previous.columns.indexOf(column);
+          return [{
+            ...all[0],
+            info: {
+              ...previous,
+              json: rows,
+              columns,
+              renamedColumns: columns.map(c => indexOf(c) >= 0 ? previous.renamedColumns[indexOf(c)] : c),
+              deletedColumns: columns.map(c => indexOf(c) >= 0 ? previous.deletedColumns[indexOf(c)] : false),
+            }
+          }];
+        });
         this.updateConfigFileInfo();
         this.emitConfigChange();
-        this.cdr.detectChanges();
       },
       error: () => {
         // The service already reports preview errors.
@@ -599,7 +620,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     this.emitConfigChange();
 
     if (!pivotConfig) {
-      this.pivotTables = this.sourceTables;
+      this.pivotTables.set(this.sourceTables());
       this.refreshMergeAfterPivotPreview();
       return;
     }
@@ -620,10 +641,11 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   private applyPivotPreview(tables: PreviewTable[]): void {
-    const responseContainsAllTables = tables.length === this.sourceTables.length;
+    const sourceTables = this.sourceTables();
+    const responseContainsAllTables = tables.length === sourceTables.length;
     let enabledResponseIndex = 0;
 
-    this.pivotTables = this.sourceTables.map((table, tableIndex) => {
+    this.pivotTables.set(sourceTables.map((table, tableIndex) => {
       let preview: PreviewTable = {
         rows: table.info.json,
         columns: table.info.json.length > 0 ? table.info.columns : []
@@ -645,29 +667,31 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
           deletedColumns: new Array(columns.length).fill(false),
         }
       };
-    });
+    }));
     this.refreshMergeAfterPivotPreview();
   }
 
   private refreshMergeAfterPivotPreview(): void {
-    if (this.mergeConfig && !this.isMergeConfigValid(this.mergeConfig)) {
-      this.mergeConfig = undefined;
+    const mergeConfig = this.mergeConfig();
+    if (mergeConfig && !this.isMergeConfigValid(mergeConfig)) {
+      this.mergeConfig.set(undefined);
     }
 
-    if (this.mergeConfig && this.pivotTables.length > 1) {
-      const merged = mergeFileInfo(this.sheetsToFileInfo(this.pivotTables), this.mergeConfig);
-      this.sheets = this.mapFileInfoToSheets(merged);
+    const activeMerge = this.mergeConfig();
+    const pivotTables = this.pivotTables();
+    if (activeMerge && pivotTables.length > 1) {
+      const merged = mergeFileInfo(this.sheetsToFileInfo(pivotTables), activeMerge);
+      this.sheets.set(this.mapFileInfoToSheets(merged));
     } else {
-      this.sheets = this.pivotTables;
+      this.sheets.set(pivotTables);
     }
 
     this.updateConfigFileInfo();
     this.emitConfigChange();
-    this.cdr.detectChanges();
   }
 
   private isMergeConfigValid(mergeConfig: SheetMergeResultDTO): boolean {
-    return this.pivotTables.every(table => {
+    return this.pivotTables().every(table => {
       const selectedColumn = mergeConfig.sheetUidMapping[table.name];
       return !!selectedColumn && table.info.columns.includes(selectedColumn);
     });
@@ -689,7 +713,8 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   }
 
   private reconcileSingleTablePivotKey(): void {
-    if (this.sourceTables.length !== 1 || this.sourceTables[0].name === 'Merged') {
+    const sourceTables = this.sourceTables();
+    if (sourceTables.length !== 1 || sourceTables[0].name === 'Merged') {
       return;
     }
 
@@ -699,7 +724,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     }
 
     const entries = Object.entries(valueColumnIndex);
-    const tableName = this.sourceTables[0].name;
+    const tableName = sourceTables[0].name;
     if (entries.length !== 1 || entries[0][0] === tableName) {
       return;
     }

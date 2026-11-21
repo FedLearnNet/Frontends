@@ -274,7 +274,8 @@ export class AppRunInputComponent implements OnInit, AfterViewInit {
   }
 
   uploadFile(files: Array<any>, input: ToolInputConfigDTO): void {
-    if (!this.directUploadToWorkflow() && files.length === 0) return;
+    if (!this.directUploadToWorkflow()) return;
+    if (!files || files.length === 0) return;
 
     const file = files?.[0];
     if (!file) return;
