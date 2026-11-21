@@ -84,18 +84,22 @@
         }
       </mat-tab-group>
     } @else if (sheets.length === 1) {
-      <app-dynamic-table [data]="sheets[0].info.json"
+      <app-dynamic-table [data]="primaryRows()"
                          [renamedColumns]="sheets[0].info.renamedColumns"
                          [columns]="sheets[0].info.columns"
                          [deletedColumns]="sheets[0].info.deletedColumns"
+                         [showPreviewControls]="canShowPreviewControls()"
+                         [loading]="displayRowsLoading()"
                          (headerClicked)="headerClick($event, sheets[0].name)"/>
     }
   </div>
 } @else if (sheets.length === 1) {
-  <app-dynamic-table [data]="sheets[0].info.json"
+  <app-dynamic-table [data]="primaryRows()"
                      [renamedColumns]="sheets[0].info.renamedColumns"
                      [columns]="sheets[0].info.columns"
                      [deletedColumns]="sheets[0].info.deletedColumns"
+                     [showPreviewControls]="canShowPreviewControls()"
+                     [loading]="displayRowsLoading()"
                      (headerClicked)="headerClick($event, sheets[0].name)"/>
 } @else if (!isToolBased()) {
   <button mat-raised-button color="primary" (click)="loadColumns()">{{ 'ADD_DEFAULT_SELECTORS' | translate }}</button>

@@ -18,6 +18,7 @@ import {
 } from '../dto/connector-validation';
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {ConnectorDTO} from "../dto/connector";
+import {ConnectorPreviewSettingsService} from "./connector-preview-settings.service";
 
 export interface PreviewTable {
   rows: any[];
@@ -39,6 +40,7 @@ export class ConnectorPreviewService {
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
   private readonly apiService: ApiService = inject(ApiService);
   private readonly sseClient: SseClient = inject(SseClient);
+  private readonly previewSettings = inject(ConnectorPreviewSettingsService);
 
   private readonly apiUrl = environment.localLearningAPIURL;
 
@@ -48,10 +50,13 @@ export class ConnectorPreviewService {
   buildConfigDTO(config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): ConnectorConfigDTO {
     config.transformer = Array.from(transformers.values());
 
-    return configToConnectorConfigDTO({
-      ...config,
-      cohortId,
-    });
+    return {
+      ...configToConnectorConfigDTO({
+        ...config,
+        cohortId,
+      }),
+      ...this.previewSettings.toDto(),
+    };
   }
 
   preview(transFormerCards: ConnectorCard[], config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): Observable<PreviewResult> {

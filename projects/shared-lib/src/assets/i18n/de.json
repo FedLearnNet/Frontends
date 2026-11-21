@@ -103,6 +103,12 @@
   "PIVOT_VALUE_COLUMN": "Spalte mit Feldnamen",
   "PIVOT_TABLE_HELP": "Werte in der ausgewählten Spalte werden zu Spaltennamen. Die übrigen Quellspalten werden zu Zeilen. Die Pivotierung erfolgt vor dem Zusammenführen der Tabellen.",
   "PIVOT_TABLES_CONFIGURED": "{{count}} Tabelle(n) konfiguriert",
+  "PREVIEW_OPTIONS": {
+    "ROWS": "Zeilen",
+    "PREFER_NON_EMPTY": "Zeilen mit Daten bevorzugen",
+    "PREFER_NON_EMPTY_HINT": "Zeilen so wählen, dass möglichst viele Spalten einen Wert zeigen",
+    "SHOWING": "{{count}} Zeilen angezeigt"
+  },
   "PIVOT_MODE": "Pivot-Modus",
   "PIVOT_MODE_TRANSPOSE": "Zeilen und Spalten transponieren",
   "PIVOT_MODE_ONE_HOT": "Lang zu breit (wahr/falsch)",
