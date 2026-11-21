@@ -22,7 +22,7 @@ import {CohortDetailDto} from '@local-app/cohort/models';
 import {MatCardModule} from '@angular/material/card';
 import {Router} from '@angular/router';
 import {MAPPING_PREVIEW_FRAGMENT} from '../../../../constansts/mapping.constants';
-import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-id-node';
+import {withUniquePatientIdNode} from '@local-app/utils/constants/unique-patient-id-node';
 import {connectorFilesDetailToFileInfo, isFileUploadSettings} from "../../../../helper/connector-config-helper";
 import {ConnectorMappingConfig} from "../../../../models/connector-model";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
@@ -85,22 +85,7 @@ export class ConnectorRunDialogComponent implements OnInit {
   ngOnInit(): void {
     this.connector.set(this.data.connector);
 
-    const cohort = this.data.cohort;
-    const existingChildren = cohort.schemaRoot.childNodes ?? [];
-
-    const hasUniquePatientNode = existingChildren.some(
-      node => node.globalId === UNIQUE_PATIENT_ID_NODE.globalId
-    );
-
-    this.cohort.set({
-      ...cohort,
-      schemaRoot: {
-        ...cohort.schemaRoot,
-        childNodes: hasUniquePatientNode
-          ? existingChildren
-          : [...existingChildren, UNIQUE_PATIENT_ID_NODE]
-      }
-    });
+    this.cohort.set(withUniquePatientIdNode(this.data.cohort));
 
     const inputConfig = this.connector().inputConfig;
     if (inputConfig && isFileUploadSettings(inputConfig)) {
