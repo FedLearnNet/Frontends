@@ -1,4 +1,5 @@
-import {Component, computed, DestroyRef, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, DestroyRef, effect, inject, input, linkedSignal, OnInit, signal, untracked, ChangeDetectionStrategy} from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
@@ -80,7 +81,7 @@ export class CohortOverviewComponent implements OnInit {
   isLargeScreen: boolean = true;
 
   isStarred = computed(() => {
-    const c = this.cohort();
+    const c = this.currentCohort();
     return !!c && this.cohortStars.starredIds().includes(String(c.id));
   });
 
@@ -88,20 +89,39 @@ export class CohortOverviewComponent implements OnInit {
     if (this.isDeleting()) {
       return;
     }
-    const c = this.cohort();
+    const c = this.currentCohort();
     if (c) this.cohortStars.toggle(String(c.id));
   }
 
-  cohort = signal<CohortDetailDto | undefined>(undefined);
+  readonly cohortResource = input.required<CohortResource>();
+  private readonly routeCohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
+
+  currentCohort = linkedSignal<CohortDetailDto | undefined>(() => {
+    const cohort = this.routeCohort();
+    if (!cohort) {
+      return undefined;
+    }
+    return {
+      ...cohort,
+      schemaRoot: {
+        ...cohort.schemaRoot,
+        childNodes: this.schemaService.sortSchemaNodes(
+          cohort.schemaRoot?.childNodes as SchemaNodeNestedDto[],
+          'name'
+        ),
+      },
+    } as CohortDetailDto;
+  });
   isEditing = signal<boolean>(false);
   selectedTabIndex = signal<number>(0);
-  patients = signal<PaginatedResponse<any> | undefined>(undefined);
+  /** Patients page, resolved by `cohortDataListResolver` and bound by the router. */
+  readonly allData = input<PaginatedResponse<any>>();
   isDeleting = computed(() => {
-    const current = this.cohort();
-    if (!current) {
+    const cohort = this.currentCohort();
+    if (!cohort) {
       return false;
     }
-    return isCohortDeleting(current) || this.cohortService.pendingDeletionIds().has(current.id);
+    return isCohortDeleting(cohort) || this.cohortService.pendingDeletionIds().has(cohort.id);
   });
 
   private deletionPollSub?: Subscription;
@@ -111,9 +131,9 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   schema = computed(() => {
-    if (!this.cohort()) return undefined;
+    if (!this.currentCohort()) return undefined;
 
-    return this.cohort()?.schemaRoot;
+    return this.currentCohort()?.schemaRoot;
   });
 
   private readonly tabNames = computed<string[]>(() =>
@@ -122,9 +142,17 @@ export class CohortOverviewComponent implements OnInit {
   );
 
   schemaDynamicFormConfig = computed(() => {
-    if (!this.cohort()) return [];
+    if (!this.currentCohort()) return [];
 
     return this.dynamicFormService.getDynamicFormConfig(this.schema()?.childNodes);
+  });
+
+  private readonly currentCohortId = computed(() => this.currentCohort()?.id);
+
+  private readonly _resumeDeletionEffect = effect(() => {
+    if (this.currentCohortId() != null) {
+      untracked(() => this.resumeDeletionPollingIfNeeded());
+    }
   });
 
   private _changeEffect = effect(() => {
@@ -140,21 +168,6 @@ export class CohortOverviewComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({cohort, allData}) => {
-      this.cohort.set({
-        ...cohort,
-        schemaRoot: {
-          ...cohort.schemaRoot,
-          childNodes:
-            this.schemaService.sortSchemaNodes(
-              cohort?.schemaRoot.childNodes as SchemaNodeNestedDto[],
-              'name'
-            ),
-        }
-      } as CohortDetailDto);
-      this.patients.set(allData);
-      this.resumeDeletionPollingIfNeeded();
-    });
     this.activatedRoute.fragment.pipe(first())
       .subscribe(f => {
         const idx = this.fragToIndex(f);
@@ -169,14 +182,15 @@ export class CohortOverviewComponent implements OnInit {
   checkAndAdjustResponsiveLayout(): void {
     this.responsiveService
       .isScreenSizeGreaterThan(SMALL)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(isLargeScreen => this.isLargeScreen = isLargeScreen);
   }
 
   deleteCohort(): void {
-    if (!this.cohort() || this.isDeleting()) {
+    if (!this.currentCohort() || this.isDeleting()) {
       return;
     }
-    const cohort = this.cohort()!;
+    const cohort = this.currentCohort()!;
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       data: {
@@ -201,7 +215,7 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   exportCohort(): void {
-    if (!this.cohort() || this.isDeleting()) {
+    if (!this.currentCohort() || this.isDeleting()) {
       return;
     }
     this.dialog.open(DataExportConfigDialogComponent, {
@@ -211,7 +225,7 @@ export class CohortOverviewComponent implements OnInit {
       maxHeight: '100vh',
       autoFocus: false,
       data: {
-        cohort: this.cohort(),
+        cohort: this.currentCohort(),
       },
     });
   }
@@ -235,7 +249,7 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   private resumeDeletionPollingIfNeeded(): void {
-    const cohort = this.cohort();
+    const cohort = this.currentCohort();
     if (!isCohortDeleting(cohort)) {
       return;
     }
@@ -243,14 +257,14 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   private markCohortDeleting(): void {
-    const currentId = this.cohort()?.id;
+    const currentId = this.currentCohort()?.id;
     if (currentId != null) {
       this.cohortService.beginCohortDeletion(currentId);
     }
-    this.cohort.update(current => current ? {
-      ...current,
+    this.currentCohort.update(cohort => cohort ? {
+      ...cohort,
       deletionInProgress: true,
-    } : current);
+    } : cohort);
     if (this.isEditing()) {
       this.isEditing.set(false);
     }
@@ -266,11 +280,11 @@ export class CohortOverviewComponent implements OnInit {
           this.onDeletionCompleted();
           return;
         }
-        this.cohort.update(current => current ? {
-          ...current,
+        this.currentCohort.update(cohort => cohort ? {
+          ...cohort,
           ...event.cohort,
-          schemaRoot: current.schemaRoot ?? event.cohort.schemaRoot,
-        } : current);
+          schemaRoot: cohort.schemaRoot ?? event.cohort.schemaRoot,
+        } : cohort);
       },
       error: () => {
         this.deletionPollSub?.unsubscribe();
@@ -289,7 +303,7 @@ export class CohortOverviewComponent implements OnInit {
         verticalPosition: 'top',
       },
     );
-    const cohortId = this.cohort()?.id;
+    const cohortId = this.currentCohort()?.id;
     if (cohortId != null) {
       this.cohortService.completeCohortDeletion(cohortId);
     } else {
