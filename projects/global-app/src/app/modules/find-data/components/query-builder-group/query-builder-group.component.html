@@ -1,4 +1,4 @@
-<section class="group-card" [class.or]="group().connectingOperator === '$or'" [class.and]="group().connectingOperator === '$and'"
+<section class="group-card" [class.or]="group().connectingOperator === 'OR'" [class.and]="group().connectingOperator === 'AND'"
          [class.nested]="!isRoot()">
   <header class="group-card__header">
     <div class="header-main">
@@ -9,10 +9,10 @@
       </button>
 
       <div class="op-switch" role="group" [attr.aria-label]="'QUERY_BUILDER.HELP.CONNECTING' | translate">
-        <button type="button" class="op-pill" [class.active]="group().connectingOperator === '$and'"
-                [attr.aria-pressed]="group().connectingOperator === '$and'" (click)="setOperator('$and')">AND</button>
-        <button type="button" class="op-pill" [class.active]="group().connectingOperator === '$or'"
-                [attr.aria-pressed]="group().connectingOperator === '$or'" (click)="setOperator('$or')">OR</button>
+        <button type="button" class="op-pill" [class.active]="group().connectingOperator === 'AND'"
+                [attr.aria-pressed]="group().connectingOperator === 'AND'" (click)="setOperator('AND')">AND</button>
+        <button type="button" class="op-pill" [class.active]="group().connectingOperator === 'OR'"
+                [attr.aria-pressed]="group().connectingOperator === 'OR'" (click)="setOperator('OR')">OR</button>
       </div>
       <button type="button" class="info-button"
               [matTooltip]="'QUERY_BUILDER.HELP.CONNECTING' | translate"
@@ -22,7 +22,7 @@
       </button>
 
       <p class="match-summary">
-        {{ (group().connectingOperator === '$or' ? 'QUERY_BUILDER.MATCH_ANY' : 'QUERY_BUILDER.MATCH_ALL') | translate }}
+        {{ (group().connectingOperator === 'OR' ? 'QUERY_BUILDER.MATCH_ANY' : 'QUERY_BUILDER.MATCH_ALL') | translate }}
         · {{ leafCount() }} {{ 'QUERY_BUILDER.CONDITIONS' | translate }}
         @if (!isRoot()) {
           · {{ 'QUERY_BUILDER.GROUP_NUMBER' | translate: {number: numberPrefix()} }}
@@ -166,7 +166,7 @@
       @for (child of group().children; track child.id) {
         @if (!$first) {
           <div class="join">
-            <span class="join-pill">{{ group().connectingOperator === '$or' ? 'OR' : 'AND' }}</span>
+            <span class="join-pill">{{ group().connectingOperator === 'OR' ? 'OR' : 'AND' }}</span>
           </div>
         }
         @if (isGroup(child)) {

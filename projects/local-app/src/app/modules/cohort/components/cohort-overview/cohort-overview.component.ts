@@ -99,8 +99,9 @@ export class CohortOverviewComponent implements OnInit {
 
   currentCohort = linkedSignal<CohortDetailDto | undefined>(() => {
     const cohort = this.routeCohort();
-    if (!cohort) {
-      return undefined;
+    // a cohort on an external database has no schema
+    if (!cohort?.schemaRoot) {
+      return cohort;
     }
     // a cohort on an external database has no schema
     if (!cohort.schemaRoot) {
@@ -247,6 +248,9 @@ export class CohortOverviewComponent implements OnInit {
   }
 
   editExternalDatabase(): void {
+    if (!this.currentCohort() || this.isDeleting()) {
+      return;
+    }
     this.dialog.open(ExternalDatabaseFormComponent, {width: '880px', maxWidth: '95vw', autoFocus: false, data: {cohort: this.currentCohort()}})
       .afterClosed().subscribe(saved => saved && this.currentCohort.update(cohort => cohort ? {...cohort, ...saved} : cohort));
   }

@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TranslateModule} from '@ngx-translate/core';
 import {QueryDetailCardComponent} from './query-detail-card.component';
-import {QueryDetailDTO} from "@global-app/find-data/dto/query";
+import {QueryDetailDTO, QueryOperatorTypes} from "@global-app/find-data/dto/query";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
 
 describe('QueryDetailCardComponent', () => {
@@ -27,11 +27,12 @@ describe('QueryDetailCardComponent', () => {
       globalQueryId: 11,
       status: 'completed',
       statusMessage: 'Done',
-      query: [],
+      query: {connectingOperator: 'AND', conditions: []},
       enhancedQuery: [{
         ontologyId: 'vitals',
         dataTypeId: 'weight',
-        operator: [{operator: 'EQUAL' as any, value: '70'}],
+        operator: QueryOperatorTypes.EQUAL,
+        value: '70',
         schemaNodes: [{
           id: 1,
           version: 1,
@@ -69,14 +70,15 @@ describe('QueryDetailCardComponent', () => {
       globalUniqueId: 'global-9',
       groupId: 'group-1',
       query: {
-        connecting_operator: '$and',
+        connectingOperator: 'AND',
         conditions: [],
       },
       enhancedQuery: [{
         ontologyId: 'vitals',
         dataTypeId: 'weight',
         ontologyName: 'Vitals',
-        operator: [{operator: 'EQUAL' as any, value: '70'}],
+        operator: QueryOperatorTypes.EQUAL,
+        value: '70',
       }],
     };
 
@@ -87,7 +89,7 @@ describe('QueryDetailCardComponent', () => {
     expect(fixture.nativeElement.textContent).not.toContain('Done');
   });
 
-  it('should render a lang2 group when there is no flat enhanced query', () => {
+  it('should render a query group when there is no flat enhanced query', () => {
     const query: QueryDetailDTO = {
       id: 9,
       version: 1,
@@ -102,17 +104,14 @@ describe('QueryDetailCardComponent', () => {
       globalUniqueId: 'global-9',
       groupId: 'group-1',
       query: {
-        connecting_operator: '$or',
-        temporal_relations: [{source_condition: 0, target_condition: 0, relationship: 'same group'}],
+        connectingOperator: 'OR',
+        temporalRelations: [{sourceCondition: 0, targetCondition: 0, relationship: 'IN_THE_FOLLOWING', interval: [{count: 2, unit: 'WEEKS'}]}],
         conditions: [{
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          value_mode: 'absolute',
-          time_aggregation_method: 'first',
-          value_aggregation_method: 'None',
-          datatype: 'Float',
+          timeAggregationMethod: 'FIRST',
         }],
       },
     };
@@ -123,6 +122,6 @@ describe('QueryDetailCardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('value-ontology-uuid / value-datatype-uuid');
     expect(fixture.nativeElement.textContent).toContain('100');
     expect(fixture.nativeElement.textContent).toContain('Or');
-    expect(fixture.nativeElement.textContent).toContain('same group');
+    expect(fixture.nativeElement.textContent).toContain('in the following 2 weeks');
   });
 });

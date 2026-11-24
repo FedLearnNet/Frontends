@@ -1,5 +1,5 @@
 import {BaseDto} from "@shared-lib/base/base-dto";
-import {Lang2Group} from "@global-app/find-data/dto/lang2-query";
+import {QueryGroupDTO, QueryLeafDTO} from "@global-app/find-data/dto/query-item";
 
 export enum QueryOperatorTypes {
   EQUAL = 'EQUAL',
@@ -22,23 +22,14 @@ export enum QueryOperatorTypes {
   CHANGED_TO = 'CHANGED_TO',
 }
 
-export interface QueryOperatorDTO {
-  operator: QueryOperatorTypes;
-  value: string | string[];
-}
-
-export interface QueryItemDTO {
-  ontologyId: string;
-  dataTypeId: string;
-  operator: QueryOperatorDTO[];
-}
-
-export interface EnhancedQueryItemDTO extends QueryItemDTO {
+// leaf of a stored query with catalog names resolved
+export interface EnhancedQueryItemDTO extends QueryLeafDTO {
   ontologyName?: string;
+  dataTypeName?: string;
 }
 
 export interface CreateQueryDTO {
-  query: Lang2Group;
+  query: QueryGroupDTO;
   description: string;
   name: string;
   groupId?: string;
@@ -46,7 +37,7 @@ export interface CreateQueryDTO {
 
 
 export interface QueryDTO extends BaseDto {
-  query: Lang2Group;
+  query: QueryGroupDTO;
   description: string;
   name: string;
   globalUniqueId: string;
@@ -55,7 +46,6 @@ export interface QueryDTO extends BaseDto {
   hasResult: boolean;
 
   hasFired: boolean;
-  error?: string | null;
   keycloakId: string;
 
   projectIds?: number[];
