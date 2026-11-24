@@ -5,7 +5,7 @@ import {DataTypeSubscriptionDTO} from "@global-app/schema/dto/datatype";
 import {ProjectDto} from "@global-app/project/dto/project";
 import {TranslatePipe} from "@ngx-translate/core";
 import {QueryDTO} from "@global-app/find-data/dto/query";
-import {isLang2Group} from "@global-app/find-data/dto/lang2-query";
+import {isQueryGroup} from "@global-app/find-data/dto/query-item";
 import {collectOntologyIds} from "@global-app/find-data/helpers/query-tree.serializer";
 import {MatTabsModule} from "@angular/material/tabs";
 import {
@@ -77,7 +77,7 @@ export class CreateDatasetsComponent {
       return;
     }
     const storedQuery = this.query()!.query;
-    const ontologyIds = isLang2Group(storedQuery) ? collectOntologyIds(storedQuery) : [];
+    const ontologyIds = isQueryGroup(storedQuery) ? collectOntologyIds(storedQuery) : [];
     this.dataTypeError.set(undefined);
     this.dataTypeService.getAllForQuery(ontologyIds).subscribe({
       next: dataTypes => {

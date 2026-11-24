@@ -7,13 +7,13 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
-import {EnhancedQueryItemDTO, QueryDTO, QueryDetailDTO, QueryItemDTO} from "@global-app/find-data/dto/query";
-import {isLang2Group, Lang2Group} from "@global-app/find-data/dto/lang2-query";
+import {EnhancedQueryItemDTO, QueryDTO, QueryDetailDTO} from "@global-app/find-data/dto/query";
+import {IntervalPartDTO, isQueryGroup, QueryGroupDTO, TemporalRelationDTO} from "@global-app/find-data/dto/query-item";
 import {NgTemplateOutlet} from "@angular/common";
 import {parseValue, prettifyOperator} from "../../../../../../local-app/src/app/modules/logs/helper/query.helper";
 
 type QueryCardDto = LocalQueryDto | QueryDTO | QueryDetailDTO;
-type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemDTO | QueryItemDTO;
+type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemDTO;
 
 @Component({
   selector: 'lib-query-detail-card',
@@ -42,15 +42,20 @@ export class QueryDetailCardComponent {
     return [];
   });
 
-  readonly lang2Query = computed<Lang2Group | null>(() => {
+  readonly queryTree = computed<QueryGroupDTO | null>(() => {
     const query = this.query();
     if ('enhancedQuery' in query && query.enhancedQuery?.length) {
       return null;
     }
-    return isLang2Group(query.query) ? query.query : null;
+    return isQueryGroup(query.query) ? query.query : null;
   });
 
-  readonly isGroup = isLang2Group;
+  readonly rootOperator = computed(() => {
+    const query = this.query().query;
+    return isQueryGroup(query) ? query.connectingOperator : 'AND';
+  });
+
+  readonly isGroup = isQueryGroup;
 
   readonly statusText = computed(() => {
     const query = this.query();
@@ -73,6 +78,16 @@ export class QueryDetailCardComponent {
     return parseValue(val);
   }
 
+  hasValue(value?: string | number | null): boolean {
+    return value !== undefined && value !== null && value !== '';
+  }
+
+  relationLabel(relation: TemporalRelationDTO): string {
+    const phrase = relation.relationship.toLowerCase().replace(/_/g, ' ');
+    const interval = this.intervalLabel(relation.interval);
+    return interval ? `${phrase} ${interval}` : phrase;
+  }
+
   getGroupLabels(group: QueryCardItem): string[] {
     if ('schemaNodes' in group && group.schemaNodes?.length) {
       return group.schemaNodes.map(node => node.name);
@@ -88,6 +103,10 @@ export class QueryDetailCardComponent {
     }
 
     return ontologyId ? [ontologyId] : [];
+  }
+
+  private intervalLabel(parts?: IntervalPartDTO[]): string {
+    return (parts ?? []).map(part => `${part.count} ${part.unit.toLowerCase()}`).join(' ');
   }
 
   private isLocalQuery(query: QueryCardDto): query is LocalQueryDto {

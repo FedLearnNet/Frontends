@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {TranslateModule} from '@ngx-translate/core';
 import {QueryOverviewCardComponent} from './query-overview-card.component';
-import {QueryDetailDTO} from "@global-app/find-data/dto/query";
+import {QueryDetailDTO, QueryOperatorTypes} from "@global-app/find-data/dto/query";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
 
 describe('QueryOverviewCardComponent', () => {
@@ -27,11 +27,12 @@ describe('QueryOverviewCardComponent', () => {
       globalQueryId: 11,
       status: 'completed',
       statusMessage: 'Done',
-      query: [],
+      query: {connectingOperator: 'AND', conditions: []},
       enhancedQuery: [{
         ontologyId: 'vitals',
         dataTypeId: 'weight',
-        operator: [{operator: 'EQUAL' as any, value: '70'}],
+        operator: QueryOperatorTypes.EQUAL,
+        value: '70',
         schemaNodes: [{
           id: 1,
           version: 1,
@@ -68,14 +69,15 @@ describe('QueryOverviewCardComponent', () => {
       globalUniqueId: 'global-9',
       groupId: 'group-1',
       query: {
-        connecting_operator: '$and',
+        connectingOperator: 'AND',
         conditions: [],
       },
       enhancedQuery: [{
         ontologyId: 'vitals',
         dataTypeId: 'weight',
         ontologyName: 'Vitals',
-        operator: [{operator: 'EQUAL' as any, value: '70'}],
+        operator: QueryOperatorTypes.EQUAL,
+        value: '70',
       }],
     };
 
@@ -85,7 +87,7 @@ describe('QueryOverviewCardComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('Vitals / weight: = 70');
   });
 
-  it('should render a lang2 group summary', () => {
+  it('should render a query group summary', () => {
     const query: QueryDetailDTO = {
       id: 9,
       version: 1,
@@ -100,15 +102,12 @@ describe('QueryOverviewCardComponent', () => {
       globalUniqueId: 'global-9',
       groupId: 'group-1',
       query: {
-        connecting_operator: '$and',
+        connectingOperator: 'AND',
         conditions: [{
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          value_mode: 'absolute',
-          time_aggregation_method: 'None',
-          value_aggregation_method: 'None',
         }],
       },
     };

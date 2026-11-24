@@ -25,14 +25,13 @@ describe('query tree serializer', () => {
     dataTypeId: 'value-datatype-uuid',
     operator: QueryOperatorTypes.BIGGER,
     value: '100',
-    datatypeHint: 'Float',
     catalogType: DataTypes.FLOAT,
     ...partial,
   });
 
   it('serializes first, last, and unaggregated numeric comparisons', () => {
     const wire = serializeQueryTree(group({
-      connectingOperator: '$or',
+      connectingOperator: 'OR',
       children: [
         valueLeaf({timeAfter: '2023-12-31', timeAggregation: 'first'}),
         valueLeaf({timeBefore: '2025-01-01', timeAggregation: 'last'}),
@@ -41,45 +40,40 @@ describe('query tree serializer', () => {
     }));
 
     expect(wire).toEqual({
-      connecting_operator: '$or',
+      connectingOperator: 'OR',
       conditions: [
         {
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          value_mode: 'absolute',
-          time_filter: {after: '2023-12-31'},
-          time_aggregation_method: 'first',
-          value_aggregation_method: 'None',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          datatype: 'Float',
+          timeFilter: {after: '2023-12-31'},
+          timeAggregationMethod: 'FIRST',
         },
         {
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          value_mode: 'absolute',
-          time_filter: {before: '2025-01-01'},
-          time_aggregation_method: 'last',
-          value_aggregation_method: 'None',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          datatype: 'Float',
+          timeFilter: {before: '2025-01-01'},
+          timeAggregationMethod: 'LAST',
         },
         {
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          value_mode: 'absolute',
-          time_filter: {before: '2024-01-01'},
-          time_aggregation_method: 'None',
-          value_aggregation_method: 'None',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          datatype: 'Float',
+          timeFilter: {before: '2024-01-01'},
         },
       ],
     });
     expect(JSON.stringify(wire)).not.toContain('scale');
     expect(groupCarriesLeafFields(wire)).toBeFalse();
+  });
+
+  it('flags a group that carries leaf fields', () => {
+    expect(groupCarriesLeafFields({connectingOperator: 'AND', conditions: [], ontologyId: 'x'})).toBeTrue();
+    expect(groupCarriesLeafFields({connectingOperator: 'AND', conditions: [], timeWindow: []})).toBeTrue();
   });
 
   it('serializes a same-group relation between a code and the first numeric value', () => {
@@ -98,36 +92,30 @@ describe('query tree serializer', () => {
         source: 0,
         target: 1,
         kind: 'same_group',
-        interval: [],
+        interval: [{count: 2, unit: 'days'}],
         atLeast: null,
         atMost: null,
       }],
     }));
 
     expect(wire).toEqual({
-      connecting_operator: '$and',
-      temporal_relations: [
-        {source_condition: 0, target_condition: 1, relationship: 'same group'},
+      connectingOperator: 'AND',
+      temporalRelations: [
+        {sourceCondition: 0, targetCondition: 1, relationship: 'SAME_GROUP'},
       ],
       conditions: [
         {
-          ontology_id: 'code-ontology-uuid',
-          data_type_id: 'code-datatype-uuid',
-          operator: '=',
+          ontologyId: 'code-ontology-uuid',
+          dataTypeId: 'code-datatype-uuid',
+          operator: QueryOperatorTypes.EQUAL,
           value: '9999-9',
-          value_mode: 'absolute',
-          time_aggregation_method: 'None',
-          value_aggregation_method: 'None',
         },
         {
-          ontology_id: 'value-ontology-uuid',
-          data_type_id: 'value-datatype-uuid',
-          operator: '>',
+          ontologyId: 'value-ontology-uuid',
+          dataTypeId: 'value-datatype-uuid',
+          operator: QueryOperatorTypes.BIGGER,
           value: 100,
-          datatype: 'Float',
-          value_mode: 'absolute',
-          time_aggregation_method: 'first',
-          value_aggregation_method: 'None',
+          timeAggregationMethod: 'FIRST',
         },
       ],
     });
@@ -141,30 +129,24 @@ describe('query tree serializer', () => {
           dataTypeId: 'string-datatype-uuid',
           operator: QueryOperatorTypes.CONTAINS,
           value: 'Employee',
-          datatypeHint: 'String',
           atLeast: 2,
         }),
       ],
     }));
 
     expect(wire).toEqual({
-      connecting_operator: '$and',
+      connectingOperator: 'AND',
       conditions: [
         {
-          ontology_id: 'role-ontology-uuid',
-          data_type_id: 'string-datatype-uuid',
-          operator: 'contains',
+          ontologyId: 'role-ontology-uuid',
+          dataTypeId: 'string-datatype-uuid',
+          operator: QueryOperatorTypes.CONTAINS,
           value: 'Employee',
-          datatype: 'String',
-          value_mode: 'absolute',
-          time_aggregation_method: 'None',
-          value_aggregation_method: 'None',
-          at_least: 2,
+          atLeast: 2,
         },
       ],
     });
-    expect(wire.temporal_relations).toBeUndefined();
-    expect(wire.conditions[0]).not.toEqual(jasmine.objectContaining({time_filter: 'anytime', scale: 'years'}));
+    expect(wire.temporalRelations).toBeUndefined();
   });
 
   it('sends membership values as one string and omits values for exists and has_changed', () => {
@@ -186,23 +168,34 @@ describe('query tree serializer', () => {
       ],
     }));
 
-    expect(wire.conditions[0]).toEqual(jasmine.objectContaining({operator: 'in', value: 'A, B'}));
-    expect(wire.conditions[1]).toEqual(jasmine.objectContaining({operator: 'has_changed', value_mode: 'delta'}));
+    expect(wire.conditions[0]).toEqual(jasmine.objectContaining({operator: QueryOperatorTypes.IN, value: 'A, B'}));
+    expect(wire.conditions[1]).toEqual(jasmine.objectContaining({operator: QueryOperatorTypes.HAS_CHANGED, valueMode: 'DELTA'}));
     expect(wire.conditions[1]).not.toEqual(jasmine.objectContaining({value: jasmine.anything()}));
   });
 
-  it('keeps a string hint as text even when the value looks numeric', () => {
+  it('drops a stored datatype hint', () => {
+    const root = hydrateQueryTree({
+      connectingOperator: 'AND',
+      conditions: [{ontologyId: 'lab', dataTypeId: 'lab-value', datatype: 'FLOAT', operator: 'EQUAL', value: 'abc'}],
+    });
+
+    expect(Object.keys(serializeQueryTree(root).conditions[0])).not.toContain('datatype');
+  });
+
+  it('sends window fields only with a method that uses them', () => {
     const wire = serializeQueryTree(group({
-      children: [leaf({
-        ontologyId: 'lab',
-        dataTypeId: 'lab-value',
-        operator: QueryOperatorTypes.BIGGER,
-        value: '100',
-        datatypeHint: 'String',
-      })],
+      children: [
+        valueLeaf({timeAggregation: 'first', timeWindow: [{count: 1, unit: 'weeks'}], timeWindowCount: 2}),
+        valueLeaf({timeAggregation: 'within', valueAggregation: 'average', timeWindow: [{count: 1, unit: 'weeks'}], timeWindowCount: 2}),
+        valueLeaf({valueMode: 'absolute', deltaInterval: [{count: 1, unit: 'days'}]}),
+      ],
     }));
 
-    expect(wire.conditions[0]).toEqual(jasmine.objectContaining({value: '100', datatype: 'String'}));
+    expect(Object.keys(wire.conditions[0])).not.toContain('timeWindow');
+    expect(Object.keys(wire.conditions[0])).not.toContain('timeWindowCount');
+    expect(wire.conditions[1]).toEqual(jasmine.objectContaining({timeWindow: [{count: 1, unit: 'WEEKS'}]}));
+    expect(Object.keys(wire.conditions[1])).not.toContain('timeWindowCount');
+    expect(Object.keys(wire.conditions[2])).not.toContain('deltaInterval');
   });
 
   it('round-trips intervals, deltas, and bounded windows', () => {
@@ -231,21 +224,65 @@ describe('query tree serializer', () => {
         target: 2,
         kind: 'in_the_following',
         interval: [{count: 1, unit: 'weeks'}],
-        atLeast: null,
+        atLeast: 1,
         atMost: null,
       }],
     }));
 
-    expect(wire.conditions[0]).toEqual(jasmine.objectContaining({value_mode: 'delta 2 weeks 3 days'}));
+    expect(wire.conditions[0]).toEqual(jasmine.objectContaining({
+      valueMode: 'DELTA',
+      deltaInterval: [{count: 2, unit: 'WEEKS'}, {count: 3, unit: 'DAYS'}],
+    }));
     expect(wire.conditions[1]).toEqual(jasmine.objectContaining({
-      time_aggregation_method: 'within 1 week',
-      value_aggregation_method: 'average',
+      timeAggregationMethod: 'WITHIN',
+      timeWindow: [{count: 1, unit: 'WEEKS'}],
+      valueAggregationMethod: 'AVERAGE',
     }));
     expect(wire.conditions[2]).toEqual(jasmine.objectContaining({
-      time_aggregation_method: 'within 1 year at least 3 times',
+      timeAggregationMethod: 'WITHIN_AT_LEAST',
+      timeWindow: [{count: 1, unit: 'YEARS'}],
+      timeWindowCount: 3,
     }));
-    expect(wire.temporal_relations?.[0].relationship).toBe('in the following 1 week');
+    expect(wire.temporalRelations?.[0]).toEqual({
+      sourceCondition: 1,
+      targetCondition: 2,
+      relationship: 'IN_THE_FOLLOWING',
+      interval: [{count: 1, unit: 'WEEKS'}],
+      atLeast: 1,
+    });
     expect(serializeQueryTree(hydrateQueryTree(wire))).toEqual(wire);
+  });
+
+  it('hydrates a stored query from the backend', () => {
+    const root = hydrateQueryTree({
+      connectingOperator: 'OR',
+      conditions: [{
+        ontologyId: 'o',
+        dataTypeId: 'd',
+        operator: 'SMALLER_EQUAL',
+        value: '5',
+        valueMode: 'DELTA',
+        deltaInterval: [{count: 3, unit: 'MONTHS'}],
+        timeFilter: {after: '2024-01-01', before: '2025-01-01'},
+        timeAggregationMethod: 'LAST',
+        atMost: 4,
+      }],
+      temporalRelations: [{sourceCondition: 0, targetCondition: 1, relationship: 'ANYTIME_AFTER'}],
+    });
+    const hydrated = root.children[0] as QueryLeafNode;
+
+    expect(root.connectingOperator).toBe('OR');
+    expect(hydrated).toEqual(jasmine.objectContaining({
+      operator: QueryOperatorTypes.SMALLER_EQUAL,
+      value: '5',
+      valueMode: 'delta',
+      deltaWindow: true,
+      deltaInterval: [{count: 3, unit: 'months'}],
+      timeFilterChoice: 'between',
+      timeAggregation: 'last',
+      atMost: 4,
+    }));
+    expect(root.relations[0]).toEqual(jasmine.objectContaining({source: 0, target: 1, kind: 'anytime_after', interval: []}));
   });
 
   it('opens a fresh root when the stored query is not a group', () => {
@@ -279,7 +316,7 @@ describe('query tree serializer', () => {
 
   it('describes a nested group with a temporal relationship', () => {
     const nested = group({
-      connectingOperator: '$and',
+      connectingOperator: 'AND',
       children: [
         leaf({
           catalogName: 'age',
@@ -311,7 +348,7 @@ describe('query tree serializer', () => {
       }],
     });
     const root = group({
-      connectingOperator: '$or',
+      connectingOperator: 'OR',
       children: [
         leaf({
           catalogName: 'height',
@@ -434,7 +471,7 @@ describe('query tree validator', () => {
   it('accepts a same-group pair and a counted text match', () => {
     expect(isQueryTreeValid(group([
       leaf({operator: QueryOperatorTypes.EQUAL, value: '9999-9'}),
-      leaf({operator: QueryOperatorTypes.BIGGER, value: '100', datatypeHint: 'Float', timeAggregation: 'first'}),
+      leaf({operator: QueryOperatorTypes.BIGGER, value: '100', timeAggregation: 'first'}),
     ], {
       relations: [{
         id: 'relation-1',
@@ -448,7 +485,7 @@ describe('query tree validator', () => {
     }))).toBeTrue();
 
     expect(isQueryTreeValid(group([
-      leaf({operator: QueryOperatorTypes.CONTAINS, value: 'Employee', datatypeHint: 'String', catalogType: DataTypes.STRING, atLeast: 2}),
+      leaf({operator: QueryOperatorTypes.CONTAINS, value: 'Employee', catalogType: DataTypes.STRING, atLeast: 2}),
     ]))).toBeTrue();
   });
 
@@ -462,7 +499,7 @@ describe('query tree validator', () => {
     ]))).toContain('text-operator-type');
 
     expect(isQueryTreeValid(group([
-      leaf({operator: QueryOperatorTypes.SMALLER, value: '12', catalogType: DataTypes.STRING, datatypeHint: 'Integer'}),
+      leaf({operator: QueryOperatorTypes.SMALLER, value: '12', catalogType: DataTypes.STRING}),
     ]))).toBeTrue();
   });
 

@@ -16,7 +16,7 @@ import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {StatusBadeType} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {QueryConfig} from '@global-app/find-data/models';
-import {Lang2Group} from '@global-app/find-data/dto/lang2-query';
+import {QueryGroupDTO} from '@global-app/find-data/dto/query-item';
 import {CreateQueryDTO, QueryDetailDTO, QueryDTO} from "@global-app/find-data/dto/query";
 import {
   QueryBuilderGroupComponent
@@ -415,14 +415,14 @@ const RELATION_TEXT: Record<RelationKind, string> = {
   same_group: 'same group',
 };
 
-function outlineQuery(query: Lang2Group, configs: QueryConfig[], unknown: string): VersionGroupView {
+function outlineQuery(query: QueryGroupDTO, configs: QueryConfig[], unknown: string): VersionGroupView {
   return outlineGroup(hydrateQueryTree(query, configs), unknown);
 }
 
 function outlineGroup(group: QueryGroupNode, unknown: string): VersionGroupView {
   return {
     kind: 'group',
-    connector: group.connectingOperator === '$or' ? 'OR' : 'AND',
+    connector: group.connectingOperator === 'OR' ? 'OR' : 'AND',
     children: group.children.map(child => outlineNode(child, unknown)),
     relations: group.relations.map(relation => outlineRelation(group, relation, unknown)),
   };
@@ -463,5 +463,5 @@ function endpointName(node: QueryNode | undefined, unknown: string): string {
   if (node.kind === 'leaf') {
     return node.catalogName || unknown;
   }
-  return node.connectingOperator === '$or' ? 'OR' : 'AND';
+  return node.connectingOperator === 'OR' ? 'OR' : 'AND';
 }

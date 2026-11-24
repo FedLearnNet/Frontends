@@ -9,7 +9,8 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepperModule} from "@angular/material/stepper";
 import {QueryDTO} from "@global-app/find-data/dto/query";
-import {isLang2Group, Lang2Leaf} from "@global-app/find-data/dto/lang2-query";
+import {isQueryGroup, QueryLeafDTO} from "@global-app/find-data/dto/query-item";
+import {operatorSpelling} from "@global-app/find-data/helpers/query-tree.rules";
 import {collectLeaves} from "@global-app/find-data/helpers/query-tree.serializer";
 import {DataStatisticsResponseDTO, StatisticsColumnProfile} from "@global-app/find-data/dto/query-statistics";
 import {QueryStatisticsResponseService} from "@global-app/find-data/services/query-statistics-response.service";
@@ -247,23 +248,23 @@ export class DatasetBuilderPageComponent {
 
   private readonly loadSelectionOptionsEffect = effect((onCleanup) => {
     const query = this.query();
-    const leaves = query?.query && isLang2Group(query.query) ? collectLeaves(query.query) : [];
+    const leaves = query?.query && isQueryGroup(query.query) ? collectLeaves(query.query) : [];
     if (leaves.length === 0) {
       this.rawSelectionOptions.set([]);
       return;
     }
 
     this.dataSelectionsLoading.set(true);
-    const requestedSelectionKeys = new Map<string, Lang2Leaf>();
+    const requestedSelectionKeys = new Map<string, QueryLeafDTO>();
     const ontologyIds = new Set<string>();
 
     for (const item of leaves) {
       requestedSelectionKeys.set(toSelectionKey({
-        globalOntologyId: item.ontology_id,
-        globalDataTypeId: item.data_type_id,
+        globalOntologyId: item.ontologyId,
+        globalDataTypeId: item.dataTypeId,
       }), item);
-      if (item.ontology_id) {
-        ontologyIds.add(item.ontology_id);
+      if (item.ontologyId) {
+        ontologyIds.add(item.ontologyId);
       }
     }
 
@@ -653,7 +654,7 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private buildSelectionOptions(pairs: OntologyDataTypeDTO[], requestedSelectionKeys: Map<string, Lang2Leaf>): DatasetSelectionOption[] {
+  private buildSelectionOptions(pairs: OntologyDataTypeDTO[], requestedSelectionKeys: Map<string, QueryLeafDTO>): DatasetSelectionOption[] {
     const options = new Map<string, DatasetSelectionOption>();
 
     for (const {ontology, dataType, subscriptionsCount} of pairs) {
@@ -679,7 +680,7 @@ export class DatasetBuilderPageComponent {
 
       const queryItem = requestedSelectionKeys.get(key);
       const ontologyQueryItem = queryItem ?? Array.from(requestedSelectionKeys.values()).find(
-        item => item.ontology_id === ontologyId
+        item => item.ontologyId === ontologyId
       );
 
       options.set(key, {
@@ -841,15 +842,16 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private formatQuerySummary(leaf: Lang2Leaf): string {
+  private formatQuerySummary(leaf: QueryLeafDTO): string {
     return this.formatLeafOperator(leaf);
   }
 
-  private formatLeafOperator(leaf: Lang2Leaf): string {
+  private formatLeafOperator(leaf: QueryLeafDTO): string {
+    const operator = operatorSpelling(leaf.operator);
     if (leaf.value == null || leaf.value === '') {
-      return leaf.operator;
+      return operator;
     }
-    return `${leaf.operator}: ${leaf.value}`;
+    return `${operator}: ${leaf.value}`;
   }
 
   private averageMissingRate(profiles: StatisticsColumnProfile[]): number | null {

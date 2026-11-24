@@ -7,7 +7,7 @@ import {QueryJsonPreviewComponent} from './query-json-preview.component';
 describe('QueryJsonPreviewComponent', () => {
   let fixture: ComponentFixture<QueryJsonPreviewComponent>;
   let clipboard: jasmine.SpyObj<Clipboard>;
-  const body = {name: 'Adults', description: 'Age above 18', query: {connecting_operator: '$and', conditions: []}};
+  const body = {name: 'Adults', description: 'Age above 18', query: {connectingOperator: 'AND', conditions: []}};
 
   beforeEach(() => {
     clipboard = jasmine.createSpyObj<Clipboard>('Clipboard', ['copy']);

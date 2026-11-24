@@ -22,7 +22,6 @@ import {
   valueModeChoices,
 } from '@global-app/find-data/helpers/query-tree.rules';
 import {
-  DatatypeHintValue,
   IntervalPart,
   QueryLeafNode,
   TimeAggregation,
@@ -37,7 +36,6 @@ type TimeButton = 'None' | 'first' | 'last' | 'within';
 interface LeafFormValue {
   operator: QueryOperatorTypes | '';
   value: string;
-  datatypeHint: DatatypeHintValue;
   valueMode: ValueMode;
   timeFilterMode: TimeFilterChoice;
   timeAfter: string;
@@ -87,13 +85,11 @@ export class QueryBuilderItemComponent {
   readonly advancedOpen = signal(false);
   readonly catalogControl = new FormControl<QueryConfig | string | null>(null);
   readonly catalogQuery = signal('');
-  readonly datatypeHints: DatatypeHintValue[] = ['String', 'Integer', 'Float', 'Boolean'];
   readonly timeFilterModes: TimeFilterChoice[] = ['anytime', 'after', 'before', 'between'];
 
   readonly form = this.formBuilder.nonNullable.group({
     operator: this.formBuilder.nonNullable.control<QueryOperatorTypes | ''>(''),
     value: '',
-    datatypeHint: this.formBuilder.nonNullable.control<DatatypeHintValue>(''),
     valueMode: this.formBuilder.nonNullable.control<ValueMode>('absolute'),
     timeFilterMode: this.formBuilder.nonNullable.control<TimeFilterChoice>('anytime'),
     timeAfter: '',
@@ -436,9 +432,6 @@ export class QueryBuilderItemComponent {
     if (!previous || previous.value !== current.value) {
       patch.value = current.value ?? '';
     }
-    if (!previous || previous.datatypeHint !== current.datatypeHint) {
-      patch.datatypeHint = current.datatypeHint ?? '';
-    }
     if (!previous || previous.valueMode !== current.valueMode) {
       patch.valueMode = current.valueMode ?? 'absolute';
     }
@@ -491,7 +484,6 @@ function toFormValue(leaf: QueryLeafNode): LeafFormValue {
   return {
     operator: leaf.operator,
     value: leaf.value,
-    datatypeHint: leaf.datatypeHint,
     valueMode: leaf.valueMode,
     timeFilterMode: leaf.timeFilterChoice,
     timeAfter: leaf.timeAfter,

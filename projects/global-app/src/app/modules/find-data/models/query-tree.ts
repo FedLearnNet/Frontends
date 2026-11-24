@@ -1,5 +1,6 @@
 import {QueryOperatorTypes} from '@global-app/find-data/dto/query';
 import {DataTypes} from '@global-app/schema/dto/datatype';
+import {ConnectingOperator} from '@global-app/find-data/dto/query-item';
 
 export type IntervalUnit = 'minutes' | 'hours' | 'days' | 'weeks' | 'months' | 'years';
 
@@ -28,8 +29,6 @@ export type ValueMode = 'absolute' | 'delta';
 
 export type TimeFilterChoice = 'anytime' | 'after' | 'before' | 'between';
 
-export type DatatypeHintValue = '' | 'String' | 'Integer' | 'Float' | 'Boolean';
-
 export interface QueryLeafNode {
   kind: 'leaf';
   id: string;
@@ -39,7 +38,6 @@ export interface QueryLeafNode {
   catalogType: DataTypes | '';
   operator: QueryOperatorTypes | '';
   value: string;
-  datatypeHint: DatatypeHintValue;
   valueMode: ValueMode;
   deltaWindow: boolean;
   deltaInterval: IntervalPart[];
@@ -67,7 +65,7 @@ export interface TemporalRelationDraft {
 export interface QueryGroupNode {
   kind: 'group';
   id: string;
-  connectingOperator: '$and' | '$or';
+  connectingOperator: ConnectingOperator;
   children: QueryNode[];
   relations: TemporalRelationDraft[];
   collapsed: boolean;
@@ -92,7 +90,6 @@ export function createEmptyLeaf(): QueryLeafNode {
     catalogType: '',
     operator: '',
     value: '',
-    datatypeHint: '',
     valueMode: 'absolute',
     deltaWindow: false,
     deltaInterval: [],
@@ -112,7 +109,7 @@ export function createEmptyGroup(withLeaf = true): QueryGroupNode {
   return {
     kind: 'group',
     id: createQueryNodeId(),
-    connectingOperator: '$and',
+    connectingOperator: 'AND',
     children: withLeaf ? [createEmptyLeaf()] : [],
     relations: [],
     collapsed: false,
