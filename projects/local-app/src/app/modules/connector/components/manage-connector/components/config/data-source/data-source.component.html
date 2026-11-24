@@ -30,6 +30,10 @@
 } @else {
   <p>{{ 'SPECIFIC_SOURCE_DESC' | translate }}</p>
 
+  <lib-network-access-warning [access]="selectedAppNetworkAccess()">
+    <p>{{ 'NETWORK_ACCESS_WARNING.ADD' | translate }}</p>
+  </lib-network-access-warning>
+
   <div class="source-wrapper">
     @for (card of storeItems(); track getStoreItemId(card)) {
       <lib-store-card

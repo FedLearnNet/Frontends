@@ -54,17 +54,6 @@
         </div>
       </div>
 
-      @if (summary().legacyCount > 0) {
-        <div class="workflow-card__divider"></div>
-
-        <div class="workflow-card__stat">
-          <div class="workflow-card__stat-label">Legacy</div>
-          <div class="workflow-card__stat-value workflow-card__stat-value--warning">
-            {{ summary().legacyCount }}
-          </div>
-          <div class="workflow-card__stat-sub">Old FC versions</div>
-        </div>
-      }
       <span class="spacer"></span>
       @if (workflow().updatedAt; as updated) {
         <lib-time-badge [date]="updated" [color]="'GRAY'"></lib-time-badge>

@@ -99,14 +99,6 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
       hyperParams: this.appBasedConfig().hyperParams,
       inputData: this.appBasedConfig().inputData,
     };
-    /*
-   const data: AppBasedExtractorRequestDTO = {
-     appImage: "gitlab.cosy.bio:5050/cosybio/federated-learning/federated_db/apps/import-diabetes-130-us-hospitals-for-years-1999-2008/model:latest",
-     appVersionId: 1,
-     cohortId: "1",
-     hyperParams: {},
-     inputData: {},
-   };*/
     this.runStarted.emit(true);
     this.cleanup();
     this.subscriptions.forEach(s => s.unsubscribe());

@@ -103,6 +103,10 @@ export class CohortOverviewComponent implements OnInit {
     if (!cohort?.schemaRoot) {
       return cohort;
     }
+    // a cohort on an external database has no schema
+    if (!cohort.schemaRoot) {
+      return cohort;
+    }
     return {
       ...cohort,
       schemaRoot: {
