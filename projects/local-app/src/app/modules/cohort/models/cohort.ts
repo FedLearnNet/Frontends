@@ -1,3 +1,4 @@
+import {ExternalDatabaseAccess, ExternalDatabaseType, TreTestDataFileDto} from '@shared-lib/modules/workflow/dto/tre-source';
 import {BaseAuthDto} from "@shared-lib/base/base-dto";
 import {SchemaRootNodeDto} from "@local-app/cohort/dto/schema";
 import {CohortMemberDto} from "@local-app/cohort/models/cohort-member";
@@ -18,6 +19,26 @@ export interface CohortDto extends BaseAuthDto {
 
   globalSchemaId: string;
   internalSchemaId: number;
+  externalDatabase?: ExternalDatabaseDto;
+}
+
+export interface ExternalDatabaseDto {
+  type: ExternalDatabaseType;
+  location?: 'CONTAINER' | 'ADDRESS';
+  host: string;
+  port: number;
+  database?: string;
+  username?: string;
+  password?: string;
+  env?: Record<string, string>;
+  access?: ExternalDatabaseAccess;
+  toolVersionId?: number;
+  toolName?: string;
+  hyperParams?: Record<string, unknown>;
+  // synthetic test data: a script, a link or how to get it, shown on the platform
+  testData?: string;
+  // on the platform's file store, set only by uploading it
+  testDataFile?: TreTestDataFileDto;
 }
 
 export interface CohortDetailDto extends CohortDto {
@@ -40,5 +61,6 @@ export interface CreateCohortDto {
   copyright?: string;
   copyrightLabel?: string;
   criteria?: CohortCriterionDto[];
-  globalSchemaID: string;
+  globalSchemaID?: string;
+  externalDatabase?: ExternalDatabaseDto;
 }

@@ -7,6 +7,9 @@
   @if (appDetail(); as app) {
     <h3>Overview</h3>
     <lib-store-card [linkToShop]="false" [storeElement]="{app: app}" size="x-large"></lib-store-card>
+    <lib-network-access-warning [access]="networkAccess()">
+      <p>{{ 'NETWORK_ACCESS_WARNING.ADD' | translate }}</p>
+    </lib-network-access-warning>
     <mat-divider></mat-divider>
 
     <h3>Settings</h3>

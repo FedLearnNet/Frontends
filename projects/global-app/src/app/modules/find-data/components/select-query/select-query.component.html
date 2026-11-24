@@ -45,12 +45,31 @@
       <div class="client">
         <div class="client-label">
           <mat-icon fontSet="material-symbols-outlined">dns</mat-icon>
-          {{ 'CLIENT_N' | translate: { n: $index + 1 } }}
+          {{ partner.clientName || ('CLIENT_N' | translate: { n: $index + 1 }) }}
           @for (mode of partner.supportedModes ?? []; track mode) {
-            <span class="client-mode">{{ mode === 'TRE' ? 'TRE' : 'FL' }}</span>
+            <span class="client-mode" [matTooltip]="mode === 'TRE'
+              ? 'Trusted research environment: tools run on this client alone, results leave it only after the client releases them'
+              : 'Federated learning: trains together with other clients, only model updates leave this client'">
+              {{ mode === 'TRE' ? 'TRE' : 'FL' }}
+            </span>
           }
+          <span class="client-count">
+            @if (partner.count !== null && partner.count !== undefined) {
+              {{ partner.count }} patients
+            } @else {
+              Number and hardware only visible if TRE is enabled
+            }
+          </span>
         </div>
-        <lib-system-info [info]="partner.system" compact />
+        @if (hardwareOf(partner); as hardware) {
+          <div class="client-hardware">
+            @for (item of hardware; track item.icon) {
+              <span class="client-spec" [matTooltip]="item.detail">
+                <mat-icon fontSet="material-symbols-outlined">{{ item.icon }}</mat-icon>{{ item.text }}
+              </span>
+            }
+          </div>
+        }
       </div>
     } @empty {
       <p class="clients-empty">{{ 'NO_CLIENT_SYSTEM_INFO' | translate }}</p>

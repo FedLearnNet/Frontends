@@ -23,9 +23,12 @@
   }
 </lib-header>
 
-<lib-page-wrapper [isLoading]="!connector" [skeletonOnLoading]="true">
+<lib-page-wrapper [isLoading]="!connector" [skeletonOnLoading]="true" [error]="cohortResource().error()">
   <div class="connector-content">
     @if (connector) {
+      <lib-network-access-warning [access]="networkAccess()">
+        <p>{{ 'NETWORK_ACCESS_WARNING.RUN' | translate }}</p>
+      </lib-network-access-warning>
       <h3>{{ 'CONNECTOR_SUMMARY' | translate }}</h3>
       <div class="summary">
         <div class="summary-group summary-group-action">

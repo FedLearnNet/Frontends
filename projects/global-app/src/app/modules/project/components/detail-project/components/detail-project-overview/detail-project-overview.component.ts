@@ -1,4 +1,9 @@
-import {Component, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ChangeDetectionStrategy} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {catchError, Observable, of} from 'rxjs';
+import {MatSelectModule} from '@angular/material/select';
+import {QueryService} from '@global-app/find-data/services/query.service';
+import {TreSourceDto} from '@shared-lib/modules/workflow/dto/tre-source';
 import {ProjectDto} from '../../../../dto/project';
 import {FormControl, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -11,7 +16,6 @@ import {MatDivider} from '@angular/material/divider';
 import {SelectQueryComponent} from '@global-app/find-data/components/select-query/select-query.component';
 import {Store} from '@ngrx/store';
 import {Actions} from '@ngrx/effects';
-import {Observable, of} from 'rxjs';
 import {UnsavedChangesService} from '@shared-lib/services/unsaved-changes.service';
 import {dispatchAndAwait} from '@shared-lib/utils/dispatch-and-await';
 import {ProjectActions} from '@global-app/project/store/project.actions';
@@ -36,6 +40,7 @@ import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardTitle} fro
     MatCardTitle,
     MatCardContent,
     MatCardAvatar,
+    MatSelectModule,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
@@ -50,6 +55,7 @@ export class DetailProjectOverviewComponent {
   readonly description = new FormControl('', {nonNullable: true, validators: [Validators.required]});
 
   readonly queryId = signal<number | undefined>(undefined);
+  readonly treSources = toSignal(inject(QueryService).getTreSources().pipe(catchError(() => of([]))), {initialValue: []});
   readonly editModeName = signal(false);
   readonly editModeDescription = signal(false);
 
@@ -124,6 +130,21 @@ export class DetailProjectOverviewComponent {
     this.editModeDescription.set(false);
     this.updateProject({ description: this.description.value! });
     this.description.disable();
+  }
+
+  // the project's database stays selectable while its client is offline
+  readonly treSourceOptions = computed(() => {
+    const current = this.project().treSource;
+    const live = this.treSources();
+    return current && !live.some(s => s.id === current.id) ? [current, ...live] : live;
+  });
+
+  onSelectTreSource(id: string | null): void {
+    this.updateProject({treSource: this.treSourceOptions().find(s => s.id === id)});
+  }
+
+  lockedHyperParams(source: TreSourceDto): string {
+    return Object.entries(source.hyperParams ?? {}).map(([key, value]) => `${key}=${value}`).join(', ');
   }
 
   setQueryId(queryId: number | undefined): void {

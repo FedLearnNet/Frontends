@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector, runInInjectionContext } from '@angular/core';
 import { Router, ActivatedRouteSnapshot, NavigationEnd } from '@angular/router';
 import { BehaviorSubject, Observable, of, from, forkJoin } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { Breadcrumb } from '@shared-lib/models/breadcrumb';
 @Injectable({ providedIn: 'root' })
 export class BreadcrumbService {
     private router = inject(Router);
+    private injector = inject(Injector);
     private _breadcrumbs$ = new BehaviorSubject<Breadcrumb[]>([]);
 
     public breadcrumbs$ = this._breadcrumbs$.asObservable();
@@ -73,7 +74,7 @@ export class BreadcrumbService {
         if (typeof bcData === 'string') return of(bcData);
         if (typeof bcData === 'function') {
             try {
-                const result = bcData(route.data);
+                const result = runInInjectionContext(this.injector, () => bcData(route.data, route));
                 if (result == null) return of(null);
                 if (typeof result === 'string') return of(result);
                 if (result instanceof Promise) return from(result).pipe() as Observable<string | null>;

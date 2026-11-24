@@ -829,6 +829,14 @@
     "CONTENT_TYPE": "Content Type",
     "FILE_NAME": "File Name"
   },
+  "NETWORK_ACCESS_WARNING": {
+    "TITLE": "Tools with network access",
+    "INTERNET": "Needs internet access: {{ tools }}. These tools can reach external servers and send data outside this site.",
+    "HOST": "Needs host access: {{ tools }}. These tools can reach the host system and services in its network.",
+    "RUN": "Running this connector starts these tools.",
+    "ADD": "Adding this tool lets it run with this access whenever the connector runs.",
+    "ACCEPT": "Accepting this request runs these tools on your site."
+  },
   "DIALOG": {
     "OK": "Ok",
     "THANKS": "Thanks",
@@ -1447,8 +1455,6 @@
     "DATA_TYPE": "Data type",
     "OPERATOR": "Operator",
     "VALUE": "Value",
-    "DATATYPE_HINT": "Datatype hint",
-    "UNSET": "Unset",
     "VALUE_MODE": "Value mode",
     "TIME_FILTER": "Time filter",
     "TIME_AGGREGATION": "Time aggregation",
@@ -1495,7 +1501,6 @@
       "CATALOG": "Pick the ontology and data type. The query only reads schema nodes mapped to that pair.",
       "OPERATOR": "How the value is compared. exists, !exists, and has_changed need no value. changed_from and changed_to compare a change and require delta.",
       "VALUE": "The value to compare. For in and !in, separate several values with commas.",
-      "DATATYPE": "Type to convert to when the stored value is string but the comparison should be numeric or boolean.",
       "VALUE_MODE": "Absolute uses the recorded value. Delta compares the change between consecutive values, no matter how far apart. Delta within a time window only compares values at most that far apart.",
       "TIME_FILTER": "Only look at events that happened during this time frame. After and before dates are exclusive.",
       "TIME_AGGREGATION": "Among the matching events, use every event, only the earliest, only the latest, or events inside a sliding window. A plain window uses the average. At least or at most counts how many events fall in that window and cannot use average.",
@@ -1589,9 +1594,9 @@
     "TABLE_FAILED": "could not be read",
     "STEP": {
       "TRANSFER_TITLE": "Transferring",
-      "TRANSFER_DETAIL": "{{loaded}} MB of {{total}} MB sent",
+      "TRANSFER_DETAIL": "{{loaded}} of {{total}} sent",
       "PARSING_TITLE": "Reading",
-      "PARSING_DETAIL": "Reading the file and measuring its columns as it goes ({{size}} MB)",
+      "PARSING_DETAIL": "Reading the file and measuring its columns as it goes ({{size}})",
       "SAMPLING_TITLE": "Sampling",
       "SAMPLING_DETAIL": "Keeping a preview of each of the {{tables}} tables",
       "COMPARING_TITLE": "Comparing",

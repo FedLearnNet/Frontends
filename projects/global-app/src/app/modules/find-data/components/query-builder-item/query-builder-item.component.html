@@ -100,21 +100,6 @@
         </mat-form-field>
       </div>
 
-      <div class="qb-field">
-        <span class="qb-label" [id]="fieldId() + '-hint'">
-          {{ 'QUERY_BUILDER.DATATYPE_HINT' | translate }}
-          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.DATATYPE'}"/>
-        </span>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-select formControlName="datatypeHint" [aria-labelledby]="fieldId() + '-hint'">
-            <mat-option value="">{{ 'QUERY_BUILDER.UNSET' | translate }}</mat-option>
-            @for (hint of datatypeHints; track hint) {
-              <mat-option [value]="hint">{{ hint }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
-
       <div class="leaf-actions">
         <button mat-icon-button type="button" [disabled]="isFirst()" (click)="moveUp.emit()"
                 [matTooltip]="'QUERY_BUILDER.MOVE_UP' | translate" [attr.aria-label]="'QUERY_BUILDER.MOVE_UP' | translate">

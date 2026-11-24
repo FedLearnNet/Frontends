@@ -1,3 +1,4 @@
+import {TreSourceDto} from "@shared-lib/modules/workflow/dto/tre-source";
 import {BaseDto} from "@shared-lib/base/base-dto";
 import {FileDTO} from "@shared-lib/modules/files/dto/file";
 import {PatientDataExportConfigDTO} from "@shared-lib/modules/data-modeler/dto/data-export.dto";
@@ -31,6 +32,8 @@ export interface ProjectDto extends BaseDto {
   queryId?: number;
   workflowId?: number | undefined;
   exportConfig?: PatientDataExportConfigDTO;
+  // TRE on an external database of a client instead of the query's data
+  treSource?: TreSourceDto;
   status: ProjectStatus;
   coordinatorHasData?: boolean;
   role?: ProjectRole;

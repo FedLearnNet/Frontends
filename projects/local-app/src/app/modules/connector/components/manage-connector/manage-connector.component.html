@@ -160,7 +160,9 @@
         }
 
         @if (step.type === 'MAPPING') {
+          @if (cohort(); as cohortDetail) {
           <app-edit-mapper
+            [routeCohort]="cohortDetail"
             [columns]="getMapperColumns()"
             [inputData]="getLatestData()"
             [validationConfig]="config()"
@@ -169,6 +171,11 @@
             [config]="config().schemaMapping"
             (configChange)="onMappingChange($event)"
             (cardDetail)="onMappingCardContentChange($event)"/>
+          } @else if (cohortResource().error(); as error) {
+            <lib-error-card [errorObject]="error"/>
+          } @else {
+            <lib-skeleton-loader/>
+          }
         }
       }
     </mat-drawer-content>

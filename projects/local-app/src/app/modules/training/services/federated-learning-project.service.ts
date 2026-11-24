@@ -4,7 +4,7 @@ import {ApiService} from '@shared-lib/services/api.service';
 import {environment} from '@local-app/env/environment';
 import {PaginatedResponse} from "@shared-lib/models";
 import {HttpHeaders, HttpParams} from "@angular/common/http";
-import {FederatedLearningProjectDto} from "../dto/federated-learning-project";
+import {FederatedLearningProjectDto, QueuedRunDto} from "../dto/federated-learning-project";
 import {ExecutionRunDetailDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ApiErrorSnackbarService} from "@shared-lib/services/api-error-snackbar.service";
 import {TranslateService} from "@ngx-translate/core";
@@ -79,6 +79,11 @@ export class FederatedLearningProjectService {
         }),
         takeWhile(run => !isFinalStatus(run.status), true)
       );
+  }
+
+  getQueue(): Observable<QueuedRunDto[]> {
+    return this.apiService.get<QueuedRunDto[]>(`${this.getBaseUrl()}/queue`, undefined,
+      new HttpHeaders().set(SKIP_LOADING, 'true'));
   }
 
   private getBaseUrl(): string {

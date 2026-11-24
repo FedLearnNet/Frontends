@@ -1,17 +1,21 @@
 <div class="project-runs">
   <mat-tab-group>
-    <mat-tab [label]="('EXPERIMENTS' | translate)">
-      <app-list-project-runs kind="federated" [project]="project()" [workflow]="workflow()"/>
-    </mat-tab>
+    <!-- a project on an external database only runs as TRE -->
+    @if (!project().treSource) {
+      <mat-tab [label]="('EXPERIMENTS' | translate)">
+        <app-list-project-runs kind="federated" [project]="project()" [workflow]="workflow()"/>
+      </mat-tab>
+    }
     <mat-tab [label]="('TRE_EXPERIMENTS' | translate)">
       <app-list-project-runs kind="tre" [project]="project()" [workflow]="workflow()"/>
     </mat-tab>
-    <mat-tab [label]="('LOCAL_EXPERIMENTS' | translate)">
-      <app-list-project-runs kind="local" [project]="project()" [workflow]="workflow()"/>
-    </mat-tab>
+    @if (!project().treSource) {
+      <mat-tab [label]="('LOCAL_EXPERIMENTS' | translate)">
+        <app-list-project-runs kind="local" [project]="project()" [workflow]="workflow()"/>
+      </mat-tab>
+    }
     <mat-tab [label]="('TEST_RUNS' | translate)">
       <app-local-test-experiment [project]="project()" [workflow]="workflow()"/>
     </mat-tab>
   </mat-tab-group>
 </div>
-

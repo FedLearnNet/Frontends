@@ -5,7 +5,6 @@ export type QueryRunStatus = 'draft' | 'pending' | 'finished' | 'failed';
 
 type QueryStatusFields = Pick<QueryDTO, 'hasFired' | 'hasResult'> & {
   result?: number | null;
-  error?: string | null;
 };
 
 const STATUS_COLOR: Record<QueryRunStatus, BadgeColor> = {
@@ -23,7 +22,7 @@ export function queryStatus(query: QueryStatusFields): QueryRunStatus {
   if (queryHasPatientCount(query)) {
     return 'finished';
   }
-  if (query.error?.trim() || query.hasResult) {
+  if (query.hasResult) {
     return 'failed';
   }
   if (query.hasFired) {

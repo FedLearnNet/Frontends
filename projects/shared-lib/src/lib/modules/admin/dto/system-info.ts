@@ -17,4 +17,8 @@ export interface QueryPartnerSystemDTO {
   id: number;
   system?: SystemComputingInfoReducedDTO;
   supportedModes?: ('FEDERATED' | 'TRE')[];
+  // only sent when the client allows TRE
+  count?: number;
+  // Keycloak name of the client, only when it allows TRE and shares it
+  clientName?: string;
 }

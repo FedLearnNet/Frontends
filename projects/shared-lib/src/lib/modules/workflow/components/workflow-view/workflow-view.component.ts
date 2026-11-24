@@ -10,6 +10,8 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import {TreSourceDto, treWorkflowErrors, withTreHyperParams} from '@shared-lib/modules/workflow/dto/tre-source';
+import {WorkflowValidationError} from '@shared-lib/modules/workflow/service/workflow-validation.service';
 import {
   EFMarkerType,
   FCanvasComponent,
@@ -99,6 +101,11 @@ export class WorkflowViewComponent {
   workflowId = input<number | undefined>();
   projectId = input<number | undefined>();
   isForFederatedLearning = input<boolean>(false);
+  // external database of the project, it may allow only one tool with hyper parameters of the client
+  treSource = input<TreSourceDto | undefined>();
+  treErrors = computed<WorkflowValidationError[]>(() => this.treSource()
+    ? treWorkflowErrors(this.workflow(), this.treSource()).map(message => ({code: 'TRE.TOOL', path: 'workflow', message}))
+    : []);
 
   private readonly _canvas = viewChild.required(FCanvasComponent);
   private readonly _flow = viewChild.required(FFlowComponent);
@@ -293,7 +300,7 @@ export class WorkflowViewComponent {
     updater: (w: WorkflowDTO) => WorkflowDTO
   ): void {
     this.workflow.update(w => {
-      const updated = updater(w);
+      const updated = withTreHyperParams(updater(w), this.treSource());
       return {
         ...updated,
         nodes: [...updated.nodes],

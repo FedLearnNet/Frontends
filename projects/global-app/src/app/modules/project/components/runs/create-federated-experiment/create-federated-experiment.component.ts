@@ -23,6 +23,7 @@ import {
   CloseableDialogTitleComponent
 } from "@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component";
 import {WorkflowDTO} from "@shared-lib/modules/workflow/dto/workflow.dto";
+import {treWorkflowErrors} from "@shared-lib/modules/workflow/dto/tre-source";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {ProjectService} from "@global-app/project/services/project-service";
@@ -64,6 +65,7 @@ export class CreateFederatedExperimentComponent {
 
   readonly platformAggregatorSupported = signal(false);
   readonly tre = this.data.kind === 'tre';
+  readonly treErrors = this.tre ? treWorkflowErrors(this.data.workflow, this.project?.treSource) : [];
   // clients of the query, numbered as on the query; TRE only on one that allows it
   readonly treClients = toSignal(this.tre && this.project?.queryId
     ? inject(QueryService).getSystems(this.project.queryId).pipe(catchError(() => of([])))
@@ -75,7 +77,8 @@ export class CreateFederatedExperimentComponent {
     acceptProcess: new FormControl<boolean>(false, [Validators.requiredTrue]),
     modelNeedToBePublic: new FormControl<boolean>(false, [Validators.required]),
     platformIsCoordinator: new FormControl<boolean>(false, {nonNullable: true}),
-    queryResponseId: new FormControl<number | null>(null, this.tre ? [Validators.required] : []),
+    // an external database fixes the client
+    queryResponseId: new FormControl<number | null>(null, this.tre && !this.project?.treSource ? [Validators.required] : []),
   });
 
   constructor() {
@@ -101,16 +104,16 @@ export class CreateFederatedExperimentComponent {
   }
 
   get hasEnoughSelectedData(): boolean {
-    return this.hasProject && hasExportSelections(this.project.exportConfig);
+    return this.hasProject && (!!this.project.treSource || hasExportSelections(this.project.exportConfig));
   }
 
   get hasQueryId(): boolean {
-    return !!(this.hasProject && this.project.queryId);
+    return !!(this.hasProject && (this.project.treSource || this.project.queryId));
   }
 
   isValidProject(): boolean {
     return this.hasProject && this.hasProjectName &&
-      this.hasProjectDescription && this.hasEnoughSelectedData && this.hasQueryId;
+      this.hasProjectDescription && this.hasEnoughSelectedData && this.hasQueryId && !this.treErrors.length;
   }
 
   onSubmit(): void {

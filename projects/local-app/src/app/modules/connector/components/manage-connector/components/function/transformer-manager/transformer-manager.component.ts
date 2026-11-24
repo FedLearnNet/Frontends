@@ -56,6 +56,8 @@ import {SelectBtnComponent} from '@shared-lib/components/select-btn/select-btn.c
 import {KvComponent} from '@shared-lib/components/kv/kv.component';
 import {CodeTransformerComponent} from '../code-transformer/code-transformer.component';
 import {SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
+import {NetworkAccessWarningComponent} from '@shared-lib/components/network-access-warning/network-access-warning.component';
+import {networkAccessOf} from '@shared-lib/modules/store/model/network-access';
 
 export interface TransformerDialogData {
   functions: FunctionsDetailDTO[];
@@ -103,6 +105,7 @@ function isAppTransformer(transformer: FunctionsDetailDTO): boolean {
     SelectBtnComponent,
     KvComponent,
     CodeTransformerComponent,
+    NetworkAccessWarningComponent,
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   providers: [provideMarkdown()],
@@ -146,6 +149,7 @@ export class ConnectorTransformerFunctionManagerComponent implements OnInit {
   readonly storeUnavailable = toSignal(this.store.select(selectStoreError), {initialValue: null});
 
   readonly selectedTool = signal<AppDetailDto | null>(null);
+  readonly selectedToolNetworkAccess = computed(() => networkAccessOf([this.selectedTool()]));
 
   readonly configuredApp = signal<{ appImage?: string | null; appVersionId?: number | null } | null>(null);
   private readonly pendingToolId = signal<number | null>(null);

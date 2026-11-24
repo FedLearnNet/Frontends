@@ -252,6 +252,10 @@
             }
           </div>
 
+          <lib-network-access-warning [access]="selectedToolNetworkAccess()">
+            <p>{{ 'NETWORK_ACCESS_WARNING.ADD' | translate }}</p>
+          </lib-network-access-warning>
+
           @if (tool.longDescription) {
             <div class="rail-section markdown-card">
               <markdown [data]="tool.longDescription"></markdown>

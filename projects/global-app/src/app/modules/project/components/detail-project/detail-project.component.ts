@@ -1,3 +1,4 @@
+import {TreSourceDataComponent} from "./components/tre-source-data/tre-source-data.component";
 import {Component, effect, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {MatTabsModule} from "@angular/material/tabs";
@@ -33,6 +34,7 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
   imports: [
     MatTabsModule,
     WorkflowViewComponent,
+    TreSourceDataComponent,
     ProjectRunsComponent,
     TranslatePipe,
     DetailProjectOverviewComponent,
