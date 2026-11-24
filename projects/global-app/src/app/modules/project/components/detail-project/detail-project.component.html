@@ -48,7 +48,7 @@
           @if (p.treSource; as source) {
             <app-tre-source-data [source]="source"/>
           } @else {
-            <app-create-datasets [project]="p"/>
+            <app-create-datasets [project]="p" (addQuery)="setSelectedIndex(0)"/>
           }
         }
         @case (2) {

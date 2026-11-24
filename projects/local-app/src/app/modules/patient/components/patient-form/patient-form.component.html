@@ -1,4 +1,8 @@
-@if (schema(); as schemaRoot) {
+@if (cohortResource().isLoading()) {
+  <lib-skeleton-loader />
+} @else if (cohortResource().error(); as error) {
+  <lib-error-card [errorObject]="error" />
+} @else if (schema(); as schemaRoot) {
   @if (initialPatient(); as patient) {
     <lib-page-wrapper [margin]="false">
       <div class="patient-form-shell">
