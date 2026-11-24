@@ -79,7 +79,9 @@ export function dataTypeOptionLabel(option: DataTypeOptionsDto | string | boolea
 
 export function dataTypeAllowedValueLabels(dataType?: DataTypeDto): string[] {
   const values = dataType?.options?.length ? dataType.options : dataType?.allowedValues ?? [];
-  return values.map(option => dataTypeOptionLabel(option));
+  return values
+    .map(option => dataTypeOptionLabel(option))
+    .sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
 }
 
 export function dataTypeValidationLabel(validation: DataTypeValidationDto): string {

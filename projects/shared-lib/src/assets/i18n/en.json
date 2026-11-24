@@ -1583,9 +1583,9 @@
     "TABLE_FAILED": "could not be read",
     "STEP": {
       "TRANSFER_TITLE": "Transferring",
-      "TRANSFER_DETAIL": "{{loaded}} MB of {{total}} MB sent",
+      "TRANSFER_DETAIL": "{{loaded}} of {{total}} sent",
       "PARSING_TITLE": "Reading",
-      "PARSING_DETAIL": "Reading the file and measuring its columns as it goes ({{size}} MB)",
+      "PARSING_DETAIL": "Reading the file and measuring its columns as it goes ({{size}})",
       "SAMPLING_TITLE": "Sampling",
       "SAMPLING_DETAIL": "Keeping a preview of each of the {{tables}} tables",
       "COMPARING_TITLE": "Comparing",

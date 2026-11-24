@@ -23,7 +23,7 @@
   }
 </lib-header>
 
-<lib-page-wrapper [isLoading]="!connector" [skeletonOnLoading]="true">
+<lib-page-wrapper [isLoading]="!connector" [skeletonOnLoading]="true" [error]="cohortResource().error()">
   <div class="connector-content">
     @if (connector) {
       <h3>{{ 'CONNECTOR_SUMMARY' | translate }}</h3>

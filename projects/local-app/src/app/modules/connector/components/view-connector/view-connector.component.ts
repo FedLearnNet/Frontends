@@ -1,4 +1,5 @@
-import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -37,7 +38,6 @@ import {
   ConnectorJsonEditorDialogComponent,
   EditConnectorJsonEditorData
 } from "../manage-connector/components/connector-json-editor-dialog/connector-json-editor-dialog.component";
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
@@ -45,7 +45,7 @@ import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wra
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 
-type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, cohort: CohortDetailDto }
+type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO }
 
 @Component({
   selector: 'app-view-connector',
@@ -60,7 +60,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   readonly cohortId = input<string | null>();
 
-  private readonly cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   connector?: ConnectorDTO;
   availableTriggerConnectors: ConnectorDTO[] = [];
@@ -98,9 +99,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
       const routeData = data as RouteData;
       this.connector = routeData.connector;
       this.loadRuns();
-      this.loadTriggerConnectors(routeData.cohort?.id);
-
-      this.cohort.set(routeData.cohort);
+      this.loadTriggerConnectors(this.connector?.cohortId ?? undefined);
     });
   }
 
@@ -138,7 +137,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   save(field: string): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     this.connectorService.patch(configToConnectorDTO(this.connector)).subscribe((connector) => {
       this.connector = {
@@ -235,11 +235,12 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   onRunClick(): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     const dialogRef = this.dialog.open(ConnectorRunDialogComponent, {
       data: {
-        cohort: this.cohort(),
+        cohort,
         connector: this.connector,
       },
     });
