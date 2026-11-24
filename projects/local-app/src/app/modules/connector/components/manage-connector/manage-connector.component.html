@@ -133,6 +133,7 @@
                   [stepIndex]="stage.stepIndex"
                   [transformer]="getTransformer()"
                   [stage]="stage"
+                  [previewRows]="previewRows()"
                   (finished)="applyTransform()"
                   (openBlockingStep)="openTransformStep($event)"/>
               }
@@ -151,7 +152,8 @@
                                  [loading]="step.previewRunning ?? false"
                                  [headerAction]="false"
                                  [renewColumns]="true"
-                                 [showPreviewControls]="true"
+                                 [previewRows]="previewRows()"
+                                 (previewRowsChange)="changePreviewRows($event)"
                                  [calledColumns]="getTransformedColumns()"/>
             } @else {
               <lib-skeleton-loader></lib-skeleton-loader>

@@ -6,7 +6,6 @@ import {of} from 'rxjs';
 import {ConnectorStepSpecifySelectorsComponent} from './specify-selectors.component';
 import {ConnectorUploadService} from '../../../../../services/connector-upload.service';
 import {ConnectorPreviewService} from '../../../../../services/connector-preview.service';
-import {ConnectorPreviewSettingsService} from '../../../../../services/connector-preview-settings.service';
 import {ConnectorDTO, PivotMode, PivotValueFormat, SheetMergeResultDTO} from '../../../../../dto/connector';
 import {UploadInfoDTO} from '../../../../../dto/upload-info';
 import {MergeSheetsDialogComponent} from './components/merge-sheets/merge-sheets.component';
@@ -82,6 +81,7 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
 
   it('calls the backend only after pivot configuration is applied', () => {
     createComponent(createConfig({'patients.csv': sheet('patients.csv', ['patientId', 'field', 'value'])}));
+    previewService.previewPivot.calls.reset();
 
     component.openPivotDialog();
     expect(previewService.previewPivot).not.toHaveBeenCalled();
@@ -216,40 +216,5 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
     expect(previewService.previewPivot).toHaveBeenCalled();
     expect(component.sheets[0].info.columns).toEqual(['patientId', 'sex', '2019']);
     expect(component.sheets[0].info.json).toEqual([{patientId: 1, '2019': 5, sex: 'f'}]);
-  });
-
-  it('shows more preview rows without storing them in the connector', () => {
-    const fileInfo = {'patients.csv': sheet('patients.csv', ['patientId', 'weight'])};
-    createComponent(createConfig(fileInfo));
-    const storedRows = component.sheets[0].info.json;
-    const emitted: ConnectorDTO[] = [];
-    component.configChange.subscribe(config => emitted.push(config));
-    const moreRows = Array.from({length: 50}, (_, i) => ({patientId: i, weight: '?'}));
-    previewService.previewPivot.and.returnValue(of([{rows: moreRows, columns: ['patientId', 'weight']}]));
-    previewService.previewPivot.calls.reset();
-
-    TestBed.inject(ConnectorPreviewSettingsService).rows.set(50);
-    fixture.detectChanges();
-
-    expect(previewService.previewPivot).toHaveBeenCalledTimes(1);
-    const request = previewService.previewPivot.calls.mostRecent().args[0];
-    expect(request.previewRows).toBe(50);
-    expect(request.fileInfo).toBeUndefined();
-    expect(component.primaryRows()).toEqual(moreRows);
-    expect(component.sheets[0].info.json).toBe(storedRows);
-    expect(emitted).toEqual([]);
-  });
-
-  it('goes back to the stored sample at the default settings', () => {
-    createComponent(createConfig({'patients.csv': sheet('patients.csv', ['patientId', 'weight'])}));
-    const settings = TestBed.inject(ConnectorPreviewSettingsService);
-    previewService.previewPivot.and.returnValue(of([{rows: [{patientId: 1, weight: '[75-100)'}], columns: ['patientId', 'weight']}]));
-    settings.preferNonEmpty.set(true);
-    fixture.detectChanges();
-
-    settings.reset();
-    fixture.detectChanges();
-
-    expect(component.primaryRows()).toBe(component.sheets[0].info.json);
   });
 });

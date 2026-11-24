@@ -13,18 +13,10 @@
 }
 
 .preview-controls {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 24px;
   margin-bottom: 12px;
 
   .preview-rows {
     width: 120px;
-  }
-
-  .preview-count {
-    color: rgba(0, 0, 0, 0.6);
   }
 }
 

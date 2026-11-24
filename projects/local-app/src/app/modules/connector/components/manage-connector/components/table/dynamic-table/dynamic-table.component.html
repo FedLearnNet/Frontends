@@ -2,19 +2,12 @@
   <div class="preview-controls">
     <mat-form-field appearance="outline" class="preview-rows" subscriptSizing="dynamic">
       <mat-label>{{ 'PREVIEW_OPTIONS.ROWS' | translate }}</mat-label>
-      <mat-select [value]="previewSettings.rows()" (selectionChange)="previewSettings.rows.set($event.value)">
+      <mat-select [value]="previewRows()" (selectionChange)="previewRowsChange.emit($event.value)">
         @for (option of previewRowOptions; track option) {
           <mat-option [value]="option">{{ option }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
-    <mat-slide-toggle
-      [checked]="previewSettings.preferNonEmpty()"
-      (change)="previewSettings.preferNonEmpty.set($event.checked)"
-      [matTooltip]="'PREVIEW_OPTIONS.PREFER_NON_EMPTY_HINT' | translate">
-      {{ 'PREVIEW_OPTIONS.PREFER_NON_EMPTY' | translate }}
-    </mat-slide-toggle>
-    <span class="preview-count">{{ 'PREVIEW_OPTIONS.SHOWING' | translate: {count: data().length} }}</span>
   </div>
 }
 <div class="table-scroll" [class.limited]="showPreviewControls()">

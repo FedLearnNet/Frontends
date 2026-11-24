@@ -6,7 +6,6 @@ import {ApiErrorSnackbarService} from '@shared-lib/services/api-error-snackbar.s
 import {TranslateService} from '@ngx-translate/core';
 import {SseClient} from 'ngx-sse-client';
 import {ConnectorPreviewService, PreviewResult, PreviewTable} from './connector-preview.service';
-import {ConnectorPreviewSettingsService} from './connector-preview-settings.service';
 import {ConnectorConfigDTO} from '../dto/preview';
 import {ConnectorDTO} from '../dto/connector';
 import {ConnectorCard} from '../models/connector-card';
@@ -109,32 +108,6 @@ describe('ConnectorPreviewService', () => {
 
     const body = apiService.post.calls.mostRecent().args[1] as ConnectorConfigDTO;
     expect(body.pivotConfig).toEqual(config.pivotConfig);
-  });
-
-  it('leaves the preview settings out of the request at their defaults', () => {
-    apiService.post.and.returnValue(of({jsons: [JSON.stringify([{result: true}])]}));
-    const cards = [{id: 'transformer-1'}] as unknown as ConnectorCard[];
-
-    service.preview(cards, {} as ConnectorDTO, new Map(), 7).subscribe();
-
-    const body = apiService.post.calls.mostRecent().args[1] as ConnectorConfigDTO;
-    expect('previewRows' in body).toBeFalse();
-    expect('previewNonEmpty' in body).toBeFalse();
-  });
-
-  it('sends the chosen row count and data preference with the preview request', () => {
-    const settings = TestBed.inject(ConnectorPreviewSettingsService);
-    settings.rows.set(50);
-    settings.preferNonEmpty.set(true);
-    apiService.post.and.returnValue(of({jsons: [JSON.stringify([{result: true}])]}));
-    const cards = [{id: 'transformer-1'}] as unknown as ConnectorCard[];
-
-    service.preview(cards, {} as ConnectorDTO, new Map(), 7).subscribe();
-
-    const body = apiService.post.calls.mostRecent().args[1] as ConnectorConfigDTO;
-    expect(body.previewRows).toBe(50);
-    expect(body.previewNonEmpty).toBeTrue();
-    expect(body.cohortId).toBe(7);
   });
 
   it('streams preview validation placeholders and replacements through the shared SSE client', async () => {

@@ -18,7 +18,6 @@ import {
 } from '../dto/connector-validation';
 import {SKIP_LOADING} from "@shared-lib/interceptors/loading.interceptor";
 import {ConnectorDTO} from "../dto/connector";
-import {ConnectorPreviewSettingsService} from "./connector-preview-settings.service";
 
 export interface PreviewTable {
   rows: any[];
@@ -40,27 +39,22 @@ export class ConnectorPreviewService {
   private readonly errorSnackbarService: ApiErrorSnackbarService = inject(ApiErrorSnackbarService);
   private readonly apiService: ApiService = inject(ApiService);
   private readonly sseClient: SseClient = inject(SseClient);
-  private readonly previewSettings = inject(ConnectorPreviewSettingsService);
 
   private readonly apiUrl = environment.localLearningAPIURL;
 
   private readonly path = 'connectors'
 
 
-  buildConfigDTO(config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): ConnectorConfigDTO {
+  buildConfigDTO(config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number,
+                 previewRows?: number): ConnectorConfigDTO {
     config.transformer = Array.from(transformers.values());
 
-    return {
-      ...configToConnectorConfigDTO({
-        ...config,
-        cohortId,
-      }),
-      ...this.previewSettings.toDto(),
-    };
+    return {...configToConnectorConfigDTO({...config, cohortId}), previewRows};
   }
 
-  preview(transFormerCards: ConnectorCard[], config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): Observable<PreviewResult> {
-    const dto = this.buildConfigDTO(config, transformers, cohortId);
+  preview(transFormerCards: ConnectorCard[], config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number,
+          previewRows?: number): Observable<PreviewResult> {
+    const dto = this.buildConfigDTO(config, transformers, cohortId, previewRows);
     const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
 
     return this.apiService.post<PreviewResponseDTO>(`${this.getBaseUrl()}/preview`, dto, headers).pipe(

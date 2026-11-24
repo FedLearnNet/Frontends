@@ -2,12 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
   OnInit,
   signal,
-  untracked,
   ViewChild
 } from '@angular/core';
 import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
@@ -43,7 +41,7 @@ import {FunctionExecutionMode, FunctionsDetailDTO} from "../../dto/function";
 import {
   AppBasedTransformerComponent
 } from './components/function/app-based-transformer/app-based-transformer.component';
-import {PreviewStageDTO} from "../../dto/preview";
+import {DEFAULT_PREVIEW_ROWS, PreviewStageDTO} from "../../dto/preview";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -53,7 +51,6 @@ import {
   PreviewCacheDialogResult
 } from "./components/preview-cache-dialog/preview-cache-dialog.component";
 import {ConnectorPreviewService} from "../../services/connector-preview.service";
-import {ConnectorPreviewSettingsService} from "../../services/connector-preview-settings.service";
 import {ConnectorMappingConfig} from "../../models/connector-model";
 import {ManageConnectorSaveDialogComponent} from "./components/save-dialog/save-dialog.component";
 import {ConnectorService} from "../../services/connector-crud.service";
@@ -140,23 +137,7 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
-  private readonly previewSettings = inject(ConnectorPreviewSettingsService);
-  /** The preview settings the transformation grid was last computed with. */
-  private lastPreviewSettings = '';
-
-  /** Recomputes the transformation preview when the user picks another row count or data preference. */
-  private readonly previewSettingsEffect = effect(() => {
-    const settings = `${this.previewSettings.rows()}|${this.previewSettings.preferNonEmpty()}`;
-    if (settings === this.lastPreviewSettings) {
-      return;
-    }
-    this.lastPreviewSettings = settings;
-    untracked(() => {
-      if (this.transformCards().length > 0) {
-        this.applyTransform();
-      }
-    });
-  });
+  readonly previewRows = signal(DEFAULT_PREVIEW_ROWS);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -282,9 +263,6 @@ export class ManageConnectorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Every wizard session starts with the default preview (10 rows, file order).
-    this.previewSettings.reset();
-    this.lastPreviewSettings = `${this.previewSettings.rows()}|${this.previewSettings.preferNonEmpty()}`;
     this.baseRoute = "cohort/" + this.cohortId() + "/connector";
     this.functionService.getAllFunctionsDetails().subscribe(data => {
       this.functions.push(...data);
@@ -766,6 +744,13 @@ export class ManageConnectorComponent implements OnInit {
     this.currentStep.set(this.mappingCards()[0]);
   }
 
+  changePreviewRows(rows: number): void {
+    this.previewRows.set(rows);
+    if (this.transformCards().length > 0) {
+      this.applyTransform();
+    }
+  }
+
   public applyTransform() {
     const transFormerCards = this.transformCards();
     if (transFormerCards.length === 0) {
@@ -780,7 +765,7 @@ export class ManageConnectorComponent implements OnInit {
     const isPreviewed = (card: ConnectorCard) => card.type === 'TRANSFORM' && previewedIds.has(card.id);
 
     this.patchCards(isPreviewed, {previewRunning: true});
-    this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId()).subscribe({
+    this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId(), this.previewRows()).subscribe({
       next: (data) => {
         this.patchCards(isPreviewed, {previewRunning: false});
         this.transformedData.set(data.rows);

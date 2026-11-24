@@ -47,6 +47,8 @@ export class AppBasedTransformerComponent implements OnDestroy {
   stepIndex = input.required<number>();
   transformer = input<FunctionsDetailDTO | undefined>();
   stage = input<PreviewStageDTO | undefined>();
+  /** Same row count as the grid, so the step result matches its preview. */
+  previewRows = input<number | undefined>(undefined);
 
   finished = output<void>();
 
@@ -109,7 +111,7 @@ export class AppBasedTransformerComponent implements OnDestroy {
     this.running.set(true);
 
     const request = {
-      config: this.previewService.buildConfigDTO(this.config(), this.transformers(), this.cohortId()),
+      config: this.previewService.buildConfigDTO(this.config(), this.transformers(), this.cohortId(), this.previewRows()),
       stepIndex: this.stepIndex(),
     };
 
