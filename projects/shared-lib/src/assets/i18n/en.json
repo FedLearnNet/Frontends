@@ -823,6 +823,14 @@
     "CONTENT_TYPE": "Content Type",
     "FILE_NAME": "File Name"
   },
+  "NETWORK_ACCESS_WARNING": {
+    "TITLE": "Tools with network access",
+    "INTERNET": "Needs internet access: {{ tools }}. These tools can reach external servers and send data outside this site.",
+    "HOST": "Needs host access: {{ tools }}. These tools can reach the host system and services in its network.",
+    "RUN": "Running this connector starts these tools.",
+    "ADD": "Adding this tool lets it run with this access whenever the connector runs.",
+    "ACCEPT": "Accepting this request runs these tools on your site."
+  },
   "DIALOG": {
     "OK": "Ok",
     "THANKS": "Thanks",

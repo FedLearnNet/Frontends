@@ -198,6 +198,14 @@
     "NO_MEMBERS_TITLE": "Noch keine Mitglieder",
     "NO_MEMBERS_SUBTITLE": "Füge einen lokalen Benutzer hinzu, um diese Kohorte zu verwalten."
   },
+  "NETWORK_ACCESS_WARNING": {
+    "TITLE": "Tools mit Netzwerkzugriff",
+    "INTERNET": "Benötigt Internetzugriff: {{ tools }}. Diese Tools können externe Server erreichen und Daten aus diesem Standort senden.",
+    "HOST": "Benötigt Host-Zugriff: {{ tools }}. Diese Tools können das Host-System und Dienste in dessen Netzwerk erreichen.",
+    "RUN": "Das Ausführen dieses Connectors startet diese Tools.",
+    "ADD": "Nach dem Hinzufügen läuft dieses Tool mit diesem Zugriff bei jedem Connector-Lauf.",
+    "ACCEPT": "Das Annehmen dieser Anfrage führt diese Tools an deinem Standort aus."
+  },
   "DIALOG": {
     "DELETE_COHORT_MEMBER": {
       "TITLE": "Kohortenmitglied löschen",

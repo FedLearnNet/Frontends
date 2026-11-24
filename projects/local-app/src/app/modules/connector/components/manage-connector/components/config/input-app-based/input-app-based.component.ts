@@ -16,11 +16,13 @@ import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.comp
 import {isAppBasedUploadSettings} from "../../../../../helper/connector-config-helper";
 import {AppBasedUploadSettings} from "../../../../../models/input-config";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {TranslateService} from "@ngx-translate/core";
+import {TranslatePipe, TranslateService} from "@ngx-translate/core";
 import {catchError} from "rxjs";
 import {ConnectorUploadService} from "../../../../../services/connector-upload.service";
 import {ConnectorDTO} from "../../../../../dto/connector";
 import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
+import {NetworkAccessWarningComponent} from "@shared-lib/components/network-access-warning/network-access-warning.component";
+import {networkAccessOf} from "@shared-lib/modules/store/model/network-access";
 
 @Component({
   selector: 'app-input-app-based',
@@ -31,7 +33,9 @@ import {ConnectorFilesDTO} from "../../../../../dto/upload-info";
     ErrorCardComponent,
     StoreCardComponent,
     MatDivider,
-    HintCardComponent
+    HintCardComponent,
+    NetworkAccessWarningComponent,
+    TranslatePipe
   ],
   templateUrl: './input-app-based.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -56,6 +60,7 @@ export class InputAppBasedComponent implements ConnectorStepConfig<ConnectorDTO>
   settings = signal<AppBasedUploadSettings | undefined>(undefined);
 
   name = computed(() => this.appDetail()?.name)
+  networkAccess = computed(() => networkAccessOf([this.appDetail()]))
   inputHyperParams = computed(() => this.settings()?.hyperParams)
 
   inputs: { [key: string]: any } = {};

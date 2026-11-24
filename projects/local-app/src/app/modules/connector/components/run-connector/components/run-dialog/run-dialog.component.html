@@ -2,6 +2,10 @@
   connector().name } }}</h2>
 <mat-divider />
 <mat-dialog-content>
+  <lib-network-access-warning [access]="networkAccess()">
+    <p>{{ 'NETWORK_ACCESS_WARNING.RUN' | translate }}</p>
+  </lib-network-access-warning>
+
   <mat-checkbox [checked]="deleteExistingPatients()" [disabled]="dryRun()"
     (change)="onDeleteExistingChanged($event.checked)" class="run-mode-radio">
     <div class="run-mode-radio-label">

@@ -54,7 +54,7 @@
             </span>
           }
           <span class="client-count">
-            @if (partner.count != null) {
+            @if (partner.count !== null && partner.count !== undefined) {
               {{ partner.count }} patients
             } @else {
               Number and hardware only visible if TRE is enabled
