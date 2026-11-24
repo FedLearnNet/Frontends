@@ -98,7 +98,7 @@
   "PREVIEW_OPTIONS": {
     "ROWS": "Rows",
     "PREFER_NON_EMPTY": "Prefer rows with data",
-    "PREFER_NON_EMPTY_HINT": "Pick rows so that as many columns as possible show a value",
+    "PREFER_NON_EMPTY_HINT": "Pick rows so that as many columns as possible show a value; rows with values in rarely filled columns are shown first",
     "SHOWING": "Showing {{count}} rows"
   },
   "PIVOT_MODE": "Pivot mode",

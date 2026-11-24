@@ -106,7 +106,7 @@
   "PREVIEW_OPTIONS": {
     "ROWS": "Zeilen",
     "PREFER_NON_EMPTY": "Zeilen mit Daten bevorzugen",
-    "PREFER_NON_EMPTY_HINT": "Zeilen so wählen, dass möglichst viele Spalten einen Wert zeigen",
+    "PREFER_NON_EMPTY_HINT": "Zeilen so wählen, dass möglichst viele Spalten einen Wert zeigen; Zeilen mit Werten in selten gefüllten Spalten stehen oben",
     "SHOWING": "{{count}} Zeilen angezeigt"
   },
   "PIVOT_MODE": "Pivot-Modus",
