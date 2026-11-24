@@ -108,6 +108,14 @@ describe('SchemaNodeDetailComponent', () => {
     expect(text).not.toContain('NO ALLOWED VALUES CONFIGURED');
   });
 
+  it('shows allowed values sorted alphanumerically', () => {
+    render(attributeNode(SchemaNodeTypeEnum.ATOMIC_ATTRIBUTE, dataType({
+      allowedValues: ['b', '10', 'a', '2']
+    })));
+
+    expect(component.allowedValueLabels()).toEqual(['2', '10', 'a', 'b']);
+  });
+
   it('shows MIN and MAX validations of a numeric datatype', () => {
     const text = render(attributeNode(SchemaNodeTypeEnum.ATOMIC_ATTRIBUTE, dataType({
       validations: [

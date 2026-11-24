@@ -36,7 +36,6 @@ export class WorkflowOverviewCardComponent {
 
     const appNodeCount = nodes.filter((n) => n.federatedAppId != null).length;
     const modelNodeCount = nodes.filter((n) => n.modelSubId != null).length;
-    const legacyCount = nodes.filter((n) => n.oldFCVersion).length;
 
     const distinctAppIds = new Set<number>();
     nodes.forEach((n) => {
@@ -56,7 +55,6 @@ export class WorkflowOverviewCardComponent {
       inputCount: inputs.length,
       appNodeCount,
       modelNodeCount,
-      legacyCount,
       distinctInputCount: distinctInputTypes.size,
       distinctAppCount: distinctAppIds.size,
     };
