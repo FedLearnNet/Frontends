@@ -16,6 +16,8 @@ import {StoreCardComponent} from "@shared-lib/modules/store/components/store-car
 import {StoreDTO} from "@shared-lib/modules/store/dto/store";
 import {ConnectorDTO} from "../../../../../dto/connector";
 import {isAppBasedUploadSettings} from "../../../../../helper/connector-config-helper";
+import {NetworkAccessWarningComponent} from "@shared-lib/components/network-access-warning/network-access-warning.component";
+import {networkAccessOf} from "@shared-lib/modules/store/model/network-access";
 
 function withoutTag(image: string): string {
   const tagStart = image.lastIndexOf(':');
@@ -34,7 +36,7 @@ function withoutTag(image: string): string {
     MatCardAvatar,
     MatCardTitle,
     MatCardSubtitle,
-    TranslatePipe, StoreCardComponent, BadgeComponent]
+    TranslatePipe, StoreCardComponent, BadgeComponent, NetworkAccessWarningComponent]
 })
 export class ConnectorStepDataSourceConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
   private readonly store: Store = inject(Store);
@@ -60,6 +62,9 @@ export class ConnectorStepDataSourceConfigComponent implements OnInit, Connector
     const used = items.filter(item => this.isApp(item, String(inputConfig.appVersionId), inputConfig.appImage));
     return [...used, ...items.filter(item => !used.includes(item))];
   });
+
+  readonly selectedAppNetworkAccess = computed(() =>
+    networkAccessOf([this.storeItems().find(item => this.isSelectedApp(item))?.app]));
 
   genericSource: ConnectorSourceCard[] = globalGenericSource.filter(source => source.id === 'file_upload');
 

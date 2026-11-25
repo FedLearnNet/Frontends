@@ -31,6 +31,9 @@
       You need to specify which data you need
     </lib-error-card>
   }
+  @for (error of treErrors; track error) {
+    <lib-error-card warningButtonText="Edit" (warningClicked)="routeToPage('workflow')">{{ error }}</lib-error-card>
+  }
   @if (!hasQueryId) {
     <lib-error-card warningButtonText="Specify" (warningClicked)="routeToPage('overview')">
       You need to select a federated query
@@ -62,7 +65,10 @@
       <textarea matInput [placeholder]="('GRID.DESCRIPTION_OF_THE_EXPERIMENT' | translate)"
                 formControlName="description" required rows="5"></textarea>
     </mat-form-field>
-    @if (tre) {
+    @if (project.treSource; as source) {
+      <lib-hint-card>Runs on the client offering <b>{{ source.name }}</b>.</lib-hint-card>
+      <mat-divider></mat-divider>
+    } @else if (tre) {
       <div class="aggregator-location">
         <p>{{ 'DIALOG.CREATE_EXPERIMENT.TRE_CLIENT_LABEL' | translate }}</p>
         <mat-radio-group formControlName="queryResponseId">

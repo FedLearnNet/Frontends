@@ -34,8 +34,13 @@
       <mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</mat-header-cell>
       <mat-cell *matCellDef="let flRequest">
         @if (flRequest.run; as run) {
-          <lib-status-badge [text]="run.status" [type]="runStatusToBadgeStatus(run.status)" size="SMALL"
-                            [animate]="true" />
+          @if (positions().get(run.id); as position) {
+            <lib-status-badge [text]="'Queued #' + position" type="PENDING" size="SMALL" [animate]="false"
+                              [matTooltip]="position === 1 ? 'Starts when the running training ends' : (position - 1) + ' trainings start before'"/>
+          } @else {
+            <lib-status-badge [text]="run.status" [type]="runStatusToBadgeStatus(run.status)" size="SMALL"
+                              [animate]="true" />
+          }
         }
       </mat-cell>
     </ng-container>

@@ -84,8 +84,39 @@
   line-height: 1.25rem;
 }
 
+.client-count {
+  margin-left: auto;
+  color: #6b7280;
+  font-size: .75rem;
+  font-weight: 400;
+}
+
 .clients-empty {
   margin: 0;
   color: #6b7280;
   font-size: .875rem;
+}
+
+.client-hardware {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.client-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-low, #f3f4f6);
+  color: var(--mat-sys-on-surface-variant, #6b7280);
+  font-size: .75rem;
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
 }

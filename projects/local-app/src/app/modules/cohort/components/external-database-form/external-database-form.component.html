@@ -1,0 +1,259 @@
+<form class="db-form" [class.db-form--dialog]="dialogRef" [formGroup]="form" (ngSubmit)="save()">
+  @if (dialogRef) {
+    <header class="db-form__header">
+      <h2>External database</h2>
+      <p class="muted">Only TRE runs reach it, each over its own network.</p>
+    </header>
+  }
+
+  <div class="db-form__body">
+    <section class="db-section">
+      <div class="db-section__intro">
+        <h3>About</h3>
+        <p class="muted">Shown on the platform, so researchers know what is inside before they ask for a run.</p>
+      </div>
+      <div class="db-section__fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" maxlength="80" autocomplete="off" placeholder="Clinical knowledge graph">
+          <mat-hint align="end">{{ form.controls.name.value.length }} / 80</mat-hint>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>What is inside</mat-label>
+          <textarea matInput formControlName="description" rows="4" maxlength="1000"
+                    placeholder="Node labels or tables, number of patients, time range, known gaps"></textarea>
+          <mat-hint align="end">{{ form.controls.description.value.length }} / 1000</mat-hint>
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="db-section">
+      <div class="db-section__intro">
+        <h3>Connection</h3>
+        <p class="muted">A Docker container next to FL-Net, or an address in your network. The orchestration has to
+          list it in <code>container.network.external-sources</code>, a container by its name, an address as
+          <code>host:port</code>.</p>
+      </div>
+      <div class="db-section__fields">
+        <div class="types" role="radiogroup" aria-label="Database type">
+          @for (type of types; track type.value) {
+            <button type="button" role="radio" class="type"
+                    [attr.aria-checked]="form.controls.type.value === type.value"
+                    [class.type--active]="form.controls.type.value === type.value"
+                    (click)="selectType(type)">
+              <mat-icon>{{ type.icon }}</mat-icon>
+              <span>{{ type.label }}</span>
+            </button>
+          }
+        </div>
+        <div class="grid">
+          <mat-button-toggle-group formControlName="location" class="grid__wide location" aria-label="Location"
+                                   hideSingleSelectionIndicator>
+            <mat-button-toggle value="CONTAINER"><mat-icon>deployed_code</mat-icon> Docker container</mat-button-toggle>
+            <mat-button-toggle value="ADDRESS"><mat-icon>lan</mat-icon> Address in your network</mat-button-toggle>
+          </mat-button-toggle-group>
+          @let address = form.controls.location.value === 'ADDRESS';
+          <mat-form-field appearance="outline" class="grid__wide">
+            <mat-label>{{ address ? 'Host or IP' : 'Container' }}</mat-label>
+            <mat-icon matPrefix>dns</mat-icon>
+            <input matInput formControlName="host" [placeholder]="address ? '10.0.5.12' : 'neo4j'" autocomplete="off">
+            <mat-hint>
+              @if (address) {
+                Relayed to the tool by a forwarder, the tool itself stays without network access
+              } @else {
+                Joined to the tool's own network
+              }
+            </mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Port</mat-label>
+            <input matInput type="number" formControlName="port">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Database</mat-label>
+            <input matInput formControlName="database" placeholder="optional" autocomplete="off">
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>User</mat-label>
+            <input matInput formControlName="username" autocomplete="off">
+            <mat-hint>Read-only recommended</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                   autocomplete="new-password" [placeholder]="data.cohort ? 'Unchanged' : ''">
+            <button mat-icon-button matSuffix type="button" (click)="showPassword.set(!showPassword())"
+                    [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-hint>Stays on this client</mat-hint>
+          </mat-form-field>
+        </div>
+      </div>
+    </section>
+
+    <section class="db-section">
+      <div class="db-section__intro">
+        <h3>Access</h3>
+        <p class="muted">Which tools of a TRE run may read the database. Results still leave only after you release them.</p>
+      </div>
+      <div class="db-section__fields">
+        <div class="choices" role="radiogroup" aria-label="Access">
+          <button type="button" role="radio" class="choice"
+                  [attr.aria-checked]="form.controls.access.value === 'DIRECT'"
+                  [class.choice--active]="form.controls.access.value === 'DIRECT'"
+                  (click)="form.controls.access.setValue('DIRECT')">
+            <mat-icon>lock_open</mat-icon>
+            <span class="choice__title">Direct access</span>
+            <span class="muted">Any tool of the project's workflow gets the connection.</span>
+          </button>
+          <button type="button" role="radio" class="choice"
+                  [attr.aria-checked]="form.controls.access.value === 'TOOL'"
+                  [class.choice--active]="form.controls.access.value === 'TOOL'"
+                  (click)="form.controls.access.setValue('TOOL')">
+            <mat-icon>verified_user</mat-icon>
+            <span class="choice__title">Only one tool</span>
+            <span class="muted">You pick the tool and fix the hyper parameters that matter to you.</span>
+          </button>
+        </div>
+
+        @if (form.controls.access.value === 'TOOL') {
+          @if (tool(); as picked) {
+            <div class="tool">
+              <span class="tool__icon"><mat-icon>storage</mat-icon></span>
+              <span class="tool__info">
+                <span class="tool__name">{{ picked.name }}</span>
+                <span class="muted">Extractor, only this version reads the database</span>
+              </span>
+              @if (versions().length > 1) {
+                <mat-select class="tool__version" [value]="picked.versionId" aria-label="Version"
+                            (selectionChange)="pickVersion($event.value)">
+                  @for (version of versions(); track version.id) {
+                    <mat-option [value]="version.id">v{{ version.appVersion }}</mat-option>
+                  }
+                </mat-select>
+              } @else if (versions().length) {
+                <span class="tool__tag">v{{ versions()[0].appVersion }}</span>
+              }
+              <button mat-stroked-button type="button" (click)="chooseTool()">Change</button>
+            </div>
+          } @else {
+            <button type="button" class="drop" (click)="chooseTool()">
+              <mat-icon>extension</mat-icon>
+              <span><b>Choose an extractor</b> from the store</span>
+              <span class="muted">Extractors read a database, other tools can not be picked</span>
+            </button>
+          }
+
+          @if (hyperParams().length) {
+            <div class="params">
+              <div class="params__head muted">
+                <span>Hyper parameter</span>
+                <span>Fixed by this client</span>
+              </div>
+              @for (param of hyperParams(); track param.name) {
+                <div class="param" [class.param--fixed]="isFixed(param)">
+                  <div class="param__info">
+                    <span class="param__name">{{ param.name }}</span>
+                    <span class="muted param__text">{{ param.description }}</span>
+                  </div>
+                  <div class="param__control">
+                    @if (isFixed(param)) {
+                      @if (param.options?.length) {
+                        <mat-select class="param__input" [value]="values()[param.name]"
+                                    (selectionChange)="setValue(param, $event.value)">
+                          @for (option of param.options; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                          }
+                        </mat-select>
+                      } @else {
+                        <input class="param__input" [value]="values()[param.name] ?? ''"
+                               [attr.aria-label]="param.name"
+                               (input)="setValue(param, $any($event.target).value)">
+                      }
+                    } @else {
+                      <span class="muted">Set by the project</span>
+                    }
+                    <mat-slide-toggle color="primary" [checked]="isFixed(param)" (change)="toggleFixed(param, $event.checked)"
+                                      [attr.aria-label]="'Fix ' + param.name"/>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (form.controls.toolVersionId.value) {
+            <p class="muted">This tool has no hyper parameters.</p>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="db-section">
+      <div class="db-section__intro">
+        <h3>Test data <span class="optional">optional</span></h3>
+        <p class="muted">Made-up records in the same structure. Researchers download them on the platform and build
+          their tool against their own copy.</p>
+      </div>
+      <div class="db-section__fields">
+        @if (testFile() ?? storedFile(); as file) {
+          <div class="test-file">
+            <mat-icon>description</mat-icon>
+            <span class="test-file__info">
+              <span class="test-file__name">{{ $any(file).name ?? $any(file).fileName }}</span>
+              <span class="muted">{{ sizeOf(file.size) }} · {{ testFile() ? 'uploaded on save' : 'on the platform' }}</span>
+            </span>
+            <button mat-button type="button" (click)="testFileInput.click()">Replace</button>
+            <button mat-icon-button type="button" aria-label="Remove file" (click)="removeTestFile()">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        } @else {
+          <button type="button" class="drop" [class.drop--over]="dragging()"
+                  (click)="testFileInput.click()"
+                  (dragover)="$event.preventDefault(); dragging.set(true)"
+                  (dragleave)="dragging.set(false)"
+                  (drop)="$event.preventDefault(); pickTestFile($event.dataTransfer?.files?.[0])">
+            <mat-icon>upload_file</mat-icon>
+            <span><b>Drop a file</b> or choose one</span>
+            <span class="muted">Database dump, SQL, Cypher, CSV or archive, up to 100 MB</span>
+          </button>
+        }
+        <input #testFileInput type="file" hidden (change)="pickTestFile(testFileInput.files?.[0]); testFileInput.value = ''">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Script, link or instructions</mat-label>
+          <textarea matInput formControlName="testData" rows="5" class="mono" spellcheck="false"></textarea>
+          @if (form.controls.testData.hasError('maxlength')) {
+            <mat-error>At most 256 KB</mat-error>
+          } @else {
+            <mat-hint>A script, a link or how to get the data</mat-hint>
+          }
+        </mat-form-field>
+        @if (hasTestData()) {
+          <mat-checkbox color="primary" formControlName="synthetic" class="synthetic">
+            The records are made up and contain no real patient data. They leave this client.
+          </mat-checkbox>
+        }
+      </div>
+    </section>
+
+    <mat-expansion-panel class="db-env">
+      <mat-expansion-panel-header>
+        <mat-panel-title>Environment of the tool</mat-panel-title>
+        <mat-panel-description>What the tool reads to connect</mat-panel-description>
+      </mat-expansion-panel-header>
+      <pre class="db-env__preview">{{ envPreview() }}</pre>
+      <mat-form-field appearance="outline" class="db-env__extra">
+        <mat-label>More variables, one KEY=VALUE per line</mat-label>
+        <textarea matInput formControlName="env" rows="3" class="mono"></textarea>
+      </mat-form-field>
+    </mat-expansion-panel>
+  </div>
+
+  <footer class="db-form__actions">
+    <button mat-button type="button" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="!canSave()">
+      <mat-icon>{{ data.cohort ? 'save' : 'add_link' }}</mat-icon>
+      {{ data.cohort ? 'Save' : 'Create cohort' }}
+    </button>
+  </footer>
+</form>

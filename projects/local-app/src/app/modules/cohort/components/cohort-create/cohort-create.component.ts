@@ -1,86 +1,93 @@
-import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {MatDialog} from '@angular/material/dialog';
-import {LARGE, MEDIUM, SMALL, XLARGE, XSMALL} from '@shared-lib/constants';
-import {ResponsiveService} from '@shared-lib/services/responsive.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
+import {map} from 'rxjs';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
 import {
   CohortCreateDialogComponent
-} from "@local-app/cohort/components/cohort-create-dialog/cohort-create-dialog.component";
-import {MatGridListModule} from "@angular/material/grid-list";
-import {MatCardModule} from "@angular/material/card";
-import {NgClass, UpperCasePipe} from "@angular/common";
-import {TranslatePipe} from "@ngx-translate/core";
-import {MatButtonModule} from "@angular/material/button";
-import {SchemaNodeNestedDto} from "@local-app/cohort/dto/schema";
+} from '@local-app/cohort/components/cohort-create-dialog/cohort-create-dialog.component';
+import {
+  ExternalDatabaseFormComponent
+} from '@local-app/cohort/components/external-database-form/external-database-form.component';
+import {SchemaRootNodeDto} from '@local-app/cohort/dto/schema';
+import {HeaderComponent} from '@shared-lib/components/header/header.component';
+import {PageWrapperComponent} from '@shared-lib/components/page-wrapper/page-wrapper.component';
 
+type CohortSource = 'schema' | 'external';
+
+interface SourceOption {
+  value: CohortSource;
+  icon: string;
+  title: string;
+  text: string;
+  tags: string[];
+}
+
+// A new cohort, either on a harmonized schema filled by ETL or on an external database for TRE.
 @Component({
   selector: 'app-cohort-create',
   templateUrl: './cohort-create.component.html',
   styleUrl: './cohort-create.component.scss',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [
-    MatGridListModule,
-    MatCardModule,
-    NgClass,
-    TranslatePipe,
-    MatButtonModule,
-    UpperCasePipe,
-  ]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, HeaderComponent, PageWrapperComponent,
+    ExternalDatabaseFormComponent],
 })
-export class CohortCreateComponent implements OnInit {
-  private readonly dialog: MatDialog = inject(MatDialog);
-  private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private readonly responsiveService: ResponsiveService = inject(ResponsiveService);
+export class CohortCreateComponent {
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  cols: number = 3;
-  rowHeight: string = '1:1';
-  screenSize: string = LARGE;
+  readonly sources: SourceOption[] = [
+    {
+      value: 'schema', icon: 'account_tree', title: 'Harmonized schema',
+      text: 'Map your data to a schema of the platform and import it with a connector.',
+      tags: ['Queries', 'Federated learning', 'TRE', 'Statistics'],
+    },
+    {
+      value: 'external', icon: 'storage', title: 'External database',
+      text: 'Link a database you already run, such as Neo4j or PostgreSQL. Nothing is imported.',
+      tags: ['TRE only'],
+    },
+  ];
 
-  schemaList: SchemaNodeNestedDto[];
+  readonly schemas = toSignal(this.route.data.pipe(map(data => (data['schemaHeadList'] ?? []) as SchemaRootNodeDto[])),
+    {initialValue: []});
+  // kept in the URL, so the choice survives a reload and can be linked
+  readonly source = toSignal(this.route.queryParamMap.pipe(
+    map(params => (params.get('source') === 'external' ? 'external' : 'schema') as CohortSource)), {initialValue: 'schema'});
+  readonly search = signal('');
+  readonly filteredSchemas = computed(() => {
+    const query = this.search().trim().toLowerCase();
+    return this.schemas()
+      .filter(schema => !query || `${schema.name} ${schema.description ?? ''}`.toLowerCase().includes(query))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
 
-
-  ngOnInit(): void {
-    this.activatedRoute.data.subscribe(({schemaHeadList}) => this.schemaList = schemaHeadList);
-    this.responsiveService.getScreenSize().subscribe(screenSize => this.screenSize = screenSize);
-    this.checkAndAdjustResponsiveLayout();
+  // schema names start with their release, e.g. 2026-07_mimic_iv_v2
+  labelOf(name: string): { date?: string; title: string } {
+    const match = /^(\d{4}-\d{2})[_-]?(.+)$/.exec(name);
+    return {date: match?.[1], title: (match?.[2] ?? name).replace(/_/g, ' ')};
   }
 
-  openSchemaDetailDialog(schema: SchemaNodeNestedDto, event: MouseEvent): void {
-    event.stopPropagation();
-    this.dialog.open(CohortCreateDialogComponent, {
-      height: '80vh',
-      width: '90vw',
-      maxWidth: '100vw',
-      maxHeight: '100vh',
-      autoFocus: false,
-      data: {
-        schemaId: schema.globalId,
-      }
+  selectSource(source: CohortSource): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {source: source === 'external' ? source : null},
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
-  private checkAndAdjustResponsiveLayout(): void {
-    this.responsiveService
-      .getScreenSize()
-      .subscribe(screenSize => {
-        this.screenSize = screenSize;
-        switch (screenSize) {
-          case XLARGE:
-            this.cols = 4;
-            break;
-          case LARGE:
-            this.cols = 3;
-            break;
-          case MEDIUM:
-          case SMALL:
-            this.cols = 2;
-            break;
-          case XSMALL:
-            this.cols = 1;
-            break;
-          default:
-            this.cols = 2;
-        }
-      });
+  openSchema(schema: SchemaRootNodeDto): void {
+    this.dialog.open(CohortCreateDialogComponent, {
+      width: '90vw',
+      maxWidth: '1280px',
+      autoFocus: false,
+      data: {schemaId: schema.globalId},
+    });
   }
 }

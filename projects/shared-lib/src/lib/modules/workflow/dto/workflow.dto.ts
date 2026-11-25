@@ -31,7 +31,6 @@ export interface WorkflowNodeDTO extends BaseDto {
   imageName?: string;
   position: IPoint;
   hyperParams?: { [key: string]: any };
-  oldFCVersion?: boolean;
   supportsFederatedLearning?: boolean;
   hasChildren?: boolean;
   hasParent?: boolean;

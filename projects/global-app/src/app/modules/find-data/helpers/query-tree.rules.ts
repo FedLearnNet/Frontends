@@ -1,5 +1,4 @@
 import {QueryOperatorTypes} from '@global-app/find-data/dto/query';
-import {Lang2Operator} from '@global-app/find-data/dto/lang2-query';
 import {
   QueryLeafNode,
   RelationKind,
@@ -13,7 +12,8 @@ const CHANGE_OPERATORS = new Set<QueryOperatorTypes>([
   QueryOperatorTypes.CHANGED_TO,
 ]);
 
-export const OPERATOR_TO_WIRE: Record<QueryOperatorTypes, Lang2Operator> = {
+// short spelling shown in labels and summaries
+const OPERATOR_SPELLING: Record<QueryOperatorTypes, string> = {
   [QueryOperatorTypes.EQUAL]: '=',
   [QueryOperatorTypes.NOT_EQUAL]: '!=',
   [QueryOperatorTypes.BIGGER]: '>',
@@ -34,46 +34,26 @@ export const OPERATOR_TO_WIRE: Record<QueryOperatorTypes, Lang2Operator> = {
   [QueryOperatorTypes.CHANGED_TO]: 'changed_to',
 };
 
-const WIRE_TO_OPERATOR = Object.fromEntries(
-  Object.entries(OPERATOR_TO_WIRE).map(([operator, wire]) => [wire, operator])
-) as Record<Lang2Operator, QueryOperatorTypes>;
-
 export function isChangeOperator(operator: QueryOperatorTypes | ''): boolean {
   return operator !== '' && CHANGE_OPERATORS.has(operator);
 }
 
-export function operatorHasValue(operator: QueryOperatorTypes | Lang2Operator | string | null | undefined): boolean {
+export function operatorHasValue(operator: QueryOperatorTypes | string | null | undefined): boolean {
   return operator !== QueryOperatorTypes.EXISTS
     && operator !== QueryOperatorTypes.NOT_EXISTS
-    && operator !== QueryOperatorTypes.HAS_CHANGED
-    && operator !== 'exists'
-    && operator !== '!exists'
-    && operator !== 'has_changed';
+    && operator !== QueryOperatorTypes.HAS_CHANGED;
 }
 
-export function toWireOperator(operator: QueryOperatorTypes): Lang2Operator {
-  return OPERATOR_TO_WIRE[operator];
+export function operatorSpelling(operator: QueryOperatorTypes | string): string {
+  return OPERATOR_SPELLING[operator as QueryOperatorTypes] ?? operator;
 }
 
 export function operatorMenuLabel(operator: QueryOperatorTypes, phrase: string): string {
-  const spelling = OPERATOR_TO_WIRE[operator] ?? operator;
+  const spelling = operatorSpelling(operator);
   if (!phrase || phrase === spelling) {
     return spelling;
   }
   return `${phrase} (${spelling})`;
-}
-
-export function fromWireOperator(value: unknown): QueryOperatorTypes | '' {
-  if (typeof value !== 'string' || value === '') {
-    return '';
-  }
-  if (value in WIRE_TO_OPERATOR) {
-    return WIRE_TO_OPERATOR[value as Lang2Operator];
-  }
-  if (Object.values(QueryOperatorTypes).includes(value as QueryOperatorTypes)) {
-    return value as QueryOperatorTypes;
-  }
-  return '';
 }
 
 export function relationNeedsInterval(kind: RelationKind): boolean {

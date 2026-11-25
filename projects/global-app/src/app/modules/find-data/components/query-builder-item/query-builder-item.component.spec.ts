@@ -198,7 +198,6 @@ describe('QueryBuilderItemComponent', () => {
       ...createEmptyLeaf(),
       operator: QueryOperatorTypes.EQUAL,
       value: '70',
-      datatypeHint: 'Integer',
     });
     fixture.detectChanges();
     expect(component.advancedOpen()).toBeFalse();

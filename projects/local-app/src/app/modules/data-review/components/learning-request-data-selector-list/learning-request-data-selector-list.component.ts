@@ -1,5 +1,5 @@
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef} from '@angular/material/dialog';
 import {
@@ -47,6 +47,8 @@ import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
 import {TrainingService} from "@local-app/data-review/services/training.service";
 import {MatProgressBar} from "@angular/material/progress-bar";
+import {NetworkAccessWarningComponent} from "@shared-lib/components/network-access-warning/network-access-warning.component";
+import {networkAccessOf, NetworkAccessTool} from "@shared-lib/modules/store/model/network-access";
 
 interface LearningRequestDataSelectorData {
   request: FederatedLearningRequestDto;
@@ -77,6 +79,19 @@ export function getAggregatorLocationKey(platformIsCoordinator?: boolean): strin
     : 'DIALOG.CREATE_EXPERIMENT.AGGREGATOR_LOCATION_RANDOM_CLINIC';
 }
 
+/**
+ * Access flags of a workflow node: the pinned version wins over the app's latest version, as in the backend.
+ */
+export function workflowNodeNetworkAccessTool(node: WorkflowNodeDetailDTO): NetworkAccessTool | null {
+  const app = node.appDetail;
+  if (!app) {
+    return null;
+  }
+  const pinned = app.versions?.find(version => version?.id === node.federatedAppVersionId);
+  const flags = pinned ?? app;
+  return {name: app.name, needsInternetAccess: flags.needsInternetAccess, needsHostAccess: flags.needsHostAccess};
+}
+
 @Component({
   selector: 'app-learning-request-data-selector-list',
   imports: [
@@ -105,7 +120,8 @@ export function getAggregatorLocationKey(platformIsCoordinator?: boolean): strin
     TrainingUsedDataComponent,
     BadgeComponent,
     HintCardComponent,
-    MatProgressBar
+    MatProgressBar,
+    NetworkAccessWarningComponent
   ],
   templateUrl: './learning-request-data-selector-list.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -130,6 +146,11 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
 
   selectedWorkflow = this.store.selectSignal(selectSelectedWorkflow);
   selectedWorkflowLoading = this.store.selectSignal(selectWorkflowLoading);
+  readonly networkAccess = computed(() => {
+    const workflow = this.selectedWorkflow();
+    const nodes = workflow?.id === this.project.workflowId ? workflow?.nodes ?? [] : [];
+    return networkAccessOf(nodes.map(workflowNodeNetworkAccessTool));
+  });
 
   displayedColumns: string[] = ['actions', 'name', 'patientId'];
   isLargeScreen: boolean = true;
@@ -149,6 +170,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   searchValue: string;
 
   ngOnInit(): void {
+    this.loadWorkflow();
     this.trainingService.getTraining(this.data.request.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -215,7 +237,7 @@ export class LearningRequestDataSelectorListComponent implements OnInit {
   }
 
   loadWorkflow() {
-    if (this.project.workflowId && !this.selectedWorkflow()) {
+    if (this.project.workflowId && this.selectedWorkflow()?.id !== this.project.workflowId) {
       this.store.dispatch(loadWorkflow({id: this.project.workflowId}))
     }
   }

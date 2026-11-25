@@ -29,6 +29,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SchemaService} from '@local-app/cohort/services/schema.service';
 import {SchemaNodeNestedDto} from '@local-app/cohort/dto/schema';
+import {ExternalDatabaseFormComponent} from '@local-app/cohort/components/external-database-form/external-database-form.component';
 import {CohortStatisticsComponent} from "@local-app/cohort/components/cohort-statistics/cohort-statistics.component";
 import {CohortMembersComponent} from "@local-app/cohort/components/cohort-members/cohort-members.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
@@ -98,8 +99,13 @@ export class CohortOverviewComponent implements OnInit {
 
   currentCohort = linkedSignal<CohortDetailDto | undefined>(() => {
     const cohort = this.routeCohort();
-    if (!cohort) {
-      return undefined;
+    // a cohort on an external database has no schema
+    if (!cohort?.schemaRoot) {
+      return cohort;
+    }
+    // a cohort on an external database has no schema
+    if (!cohort.schemaRoot) {
+      return cohort;
     }
     return {
       ...cohort,
@@ -239,6 +245,14 @@ export class CohortOverviewComponent implements OnInit {
 
   setSelectedTabIndex(index: number): void {
     this.selectedTabIndex.set(index);
+  }
+
+  editExternalDatabase(): void {
+    if (!this.currentCohort() || this.isDeleting()) {
+      return;
+    }
+    this.dialog.open(ExternalDatabaseFormComponent, {width: '880px', maxWidth: '95vw', autoFocus: false, data: {cohort: this.currentCohort()}})
+      .afterClosed().subscribe(saved => saved && this.currentCohort.update(cohort => cohort ? {...cohort, ...saved} : cohort));
   }
 
   navigateToConnectors(): void {

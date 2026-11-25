@@ -1,0 +1,15 @@
+@if (visible()) {
+  <div class="network-access-warning" role="alert">
+    <mat-icon class="network-access-warning--icon">perm_scan_wifi</mat-icon>
+    <div class="network-access-warning--content">
+      <strong>{{ 'NETWORK_ACCESS_WARNING.TITLE' | translate }}</strong>
+      @if (internetTools()) {
+        <p>{{ 'NETWORK_ACCESS_WARNING.INTERNET' | translate:{tools: internetTools()} }}</p>
+      }
+      @if (hostTools()) {
+        <p>{{ 'NETWORK_ACCESS_WARNING.HOST' | translate:{tools: hostTools()} }}</p>
+      }
+      <ng-content/>
+    </div>
+  </div>
+}

@@ -1,33 +1,100 @@
-<div class="cohort-create-container">
-  @if (!schemaList.length) {
-    <div>
-      {{ 'BUTTON.NO_AVAILABLE' | translate  | uppercase }} {{ 'SCHEMA' | translate | uppercase }}
-    </div>
-  }
+<lib-header
+  title="New cohort"
+  description="Choose where the data of the cohort comes from."
+  [enableGoBack]="true"
+  [locationBack]="true"/>
 
-  <div class="schema-list-container">
-    <mat-grid-list [cols]="cols" [rowHeight]="rowHeight" gutterSize="10px"
-                   class="schema-list-container--grid-list">
-      @for (schema of schemaList; track schema.globalId) {
-        <mat-grid-tile class="mat-elevation-z2">
-          <mat-card
-            class="schema-list-container--card"
-          >
-            <mat-card-header>
-              <mat-card-title class="schema-list-container--card-title">{{ schema.name }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="schema-list-container--card-content">
-              <p [ngClass]="'schema-list-description-' + screenSize">{{ schema.description }}</p>
-              <div class="button-container">
-                <button mat-raised-button color="secondary" (click)="openSchemaDetailDialog(schema, $event)">
-                  {{ 'BUTTON.VIEW' | translate }}
-                </button>
-
-              </div>
-            </mat-card-content>
-          </mat-card>
-        </mat-grid-tile>
+<lib-page-wrapper>
+  <div class="new-cohort">
+    <section class="sources" role="radiogroup" aria-label="Data source">
+      @for (option of sources; track option.value) {
+        <button type="button" role="radio" class="source"
+                [attr.aria-checked]="source() === option.value"
+                [class.source--active]="source() === option.value"
+                (click)="selectSource(option.value)">
+          <span class="source__icon"><mat-icon>{{ option.icon }}</mat-icon></span>
+          <span class="source__body">
+            <span class="source__title">{{ option.title }}</span>
+            <span class="source__text">{{ option.text }}</span>
+            <span class="tags">
+              @for (tag of option.tags; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </span>
+          </span>
+          <mat-icon class="source__check">
+            {{ source() === option.value ? 'radio_button_checked' : 'radio_button_unchecked' }}
+          </mat-icon>
+        </button>
       }
-    </mat-grid-list>
+    </section>
+
+    @if (source() === 'schema') {
+      <section class="panel">
+        <div class="panel__toolbar">
+          <div>
+            <h2 class="panel__title">
+              Pick a schema
+              <span class="count">{{ filteredSchemas().length }}</span>
+            </h2>
+            <p class="muted">The variables your data is mapped to. You preview it before the cohort is created.</p>
+          </div>
+          @if (schemas().length > 3) {
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="panel__search">
+              <mat-icon matPrefix>search</mat-icon>
+              <input matInput placeholder="Search schemas" aria-label="Search schemas"
+                     [value]="search()" (input)="search.set($any($event.target).value)">
+              @if (search()) {
+                <button mat-icon-button matSuffix type="button" aria-label="Clear search" (click)="search.set('')">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </mat-form-field>
+          }
+        </div>
+
+        <div class="schemas">
+          @for (schema of filteredSchemas(); track schema.globalId) {
+            @let label = labelOf(schema.name);
+            <button type="button" class="schema" [title]="schema.name" (click)="openSchema(schema)">
+              <span class="schema__head">
+                <span class="schema__avatar"><mat-icon>account_tree</mat-icon></span>
+                <span class="schema__meta">
+                  @if (label.date) {
+                    <span class="tag">{{ label.date }}</span>
+                  }
+                  @if (schema.globalVersion) {
+                    <span class="tag">v{{ schema.globalVersion }}</span>
+                  }
+                </span>
+              </span>
+              <span class="schema__name">{{ label.title }}</span>
+              <span class="schema__text">{{ schema.description || 'No description' }}</span>
+              <span class="schema__foot">
+                Preview and use
+                <mat-icon>arrow_forward</mat-icon>
+              </span>
+            </button>
+          } @empty {
+            <div class="empty">
+              <mat-icon>{{ schemas().length ? 'search_off' : 'inventory_2' }}</mat-icon>
+              @if (schemas().length) {
+                <p>No schema matches "{{ search() }}".</p>
+                <button mat-button type="button" (click)="search.set('')">Clear search</button>
+              } @else {
+                <p>The platform has no schema yet.</p>
+                <button mat-stroked-button type="button" (click)="selectSource('external')">
+                  Link an external database instead
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    } @else {
+      <section class="panel">
+        <app-external-database-form/>
+      </section>
+    }
   </div>
-</div>
+</lib-page-wrapper>
