@@ -95,6 +95,9 @@
   "PIVOT_VALUE_COLUMN": "Column containing field names",
   "PIVOT_TABLE_HELP": "Values in the selected column become column names. The remaining source columns become rows. Pivoting is applied before tables are merged.",
   "PIVOT_TABLES_CONFIGURED": "{{count}} table(s) configured",
+  "PREVIEW_OPTIONS": {
+    "ROWS": "Rows"
+  },
   "PIVOT_MODE": "Pivot mode",
   "PIVOT_MODE_TRANSPOSE": "Transpose rows and columns",
   "PIVOT_MODE_ONE_HOT": "Long to wide (true/false)",

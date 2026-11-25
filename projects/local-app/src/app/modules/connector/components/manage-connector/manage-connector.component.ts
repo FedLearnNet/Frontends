@@ -41,7 +41,7 @@ import {FunctionExecutionMode, FunctionsDetailDTO} from "../../dto/function";
 import {
   AppBasedTransformerComponent
 } from './components/function/app-based-transformer/app-based-transformer.component';
-import {PreviewStageDTO} from "../../dto/preview";
+import {DEFAULT_PREVIEW_ROWS, PreviewStageDTO} from "../../dto/preview";
 import {MatIcon} from "@angular/material/icon";
 import {MatIconButton} from "@angular/material/button";
 import {MatTooltip} from "@angular/material/tooltip";
@@ -137,6 +137,7 @@ export class ManageConnectorComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly store = inject(Store);
+  readonly previewRows = signal(DEFAULT_PREVIEW_ROWS);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
   readonly ongoingImports = computed(() =>
@@ -743,6 +744,13 @@ export class ManageConnectorComponent implements OnInit {
     this.currentStep.set(this.mappingCards()[0]);
   }
 
+  changePreviewRows(rows: number): void {
+    this.previewRows.set(rows);
+    if (this.transformCards().length > 0) {
+      this.applyTransform();
+    }
+  }
+
   public applyTransform() {
     const transFormerCards = this.transformCards();
     if (transFormerCards.length === 0) {
@@ -757,7 +765,7 @@ export class ManageConnectorComponent implements OnInit {
     const isPreviewed = (card: ConnectorCard) => card.type === 'TRANSFORM' && previewedIds.has(card.id);
 
     this.patchCards(isPreviewed, {previewRunning: true});
-    this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId()).subscribe({
+    this.connectorPreviewService.preview(transFormerCards, config, this.transformers(), this.cohortId(), this.previewRows()).subscribe({
       next: (data) => {
         this.patchCards(isPreviewed, {previewRunning: false});
         this.transformedData.set(data.rows);
