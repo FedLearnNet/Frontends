@@ -17,12 +17,12 @@
     <span class="spacer"></span>
     <div class="right">
     <span class="caption">Groups are linked with</span>
-    <lib-badge [text]="lang2Query()?.connecting_operator === '$or' ? 'OR' : 'AND'" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
+    <lib-badge [text]="rootOperator()" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
     </div>
   </div>
 
   <div class="groups">
-    @if (lang2Query(); as tree) {
+    @if (queryTree(); as tree) {
       <ng-container *ngTemplateOutlet="treeGroup; context: { $implicit: tree }"/>
     } @else {
     @for (group of items(); track $index) {
@@ -55,15 +55,13 @@
         <div class="row">
           <div class="label">Condition</div>
           <div class="values cond-list">
-            @if (group.operator && group.operator!.length) {
-              @for (op of group.operator; track $index) {
-                <div class="cond">
-                  <lib-badge [text]="prettify(op.operator) | translate" color="ORANGE" [size]="'SMALL'" [border]="true"/>
-                  @if (op.value) {
-                    <lib-badge [text]="prettyValue(op.value)" color="GRAY" [size]="'MEDIUM'"/>
-                  }
-                </div>
-              }
+            @if (group.operator) {
+              <div class="cond">
+                <lib-badge [text]="prettify(group.operator) | translate" color="ORANGE" [size]="'SMALL'" [border]="true"/>
+                @if (hasValue(group.value)) {
+                  <lib-badge [text]="prettyValue('' + group.value)" color="GRAY" [size]="'MEDIUM'"/>
+                }
+              </div>
             } @else {
               <span class="muted">—</span>
             }
@@ -83,18 +81,18 @@
   <ng-template #treeGroup let-group>
     <section class="group">
       <header class="group-header">
-        <lib-badge [text]="group.connecting_operator === '$or' ? 'OR' : 'AND'" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
+        <lib-badge [text]="group.connectingOperator" color="BLUE" [size]="'X-SMALL'" [border]="true"/>
       </header>
       @for (condition of group.conditions; track $index) {
         @if (isGroup(condition)) {
           <ng-container *ngTemplateOutlet="treeGroup; context: { $implicit: condition }"/>
         } @else {
           <div class="row">
-            <div class="label">{{ condition.ontology_id }} / {{ condition.data_type_id }}</div>
+            <div class="label">{{ condition.ontologyId }} / {{ condition.dataTypeId }}</div>
             <div class="values cond-list">
               <div class="cond">
-                <lib-badge [text]="prettify(condition.operator)" color="ORANGE" [size]="'SMALL'" [border]="true"/>
-                @if (condition.value !== undefined && condition.value !== '') {
+                <lib-badge [text]="prettify(condition.operator) | translate" color="ORANGE" [size]="'SMALL'" [border]="true"/>
+                @if (hasValue(condition.value)) {
                   <lib-badge [text]="prettyValue('' + condition.value)" color="GRAY" [size]="'MEDIUM'"/>
                 }
               </div>
@@ -103,14 +101,14 @@
         }
         @if (!$last) {
           <div class="and-connector">
-            <span class="and-pill">{{ group.connecting_operator === '$or' ? 'OR' : 'AND' }}</span>
+            <span class="and-pill">{{ group.connectingOperator }}</span>
           </div>
         }
       }
-      @for (relation of group.temporal_relations ?? []; track $index) {
+      @for (relation of group.temporalRelations ?? []; track $index) {
         <div class="row">
-          <div class="label">{{ relation.source_condition + 1 }} → {{ relation.target_condition + 1 }}</div>
-          <div class="values">{{ relation.relationship }}</div>
+          <div class="label">{{ relation.sourceCondition + 1 }} → {{ relation.targetCondition + 1 }}</div>
+          <div class="values">{{ relationLabel(relation) }}</div>
         </div>
       }
     </section>

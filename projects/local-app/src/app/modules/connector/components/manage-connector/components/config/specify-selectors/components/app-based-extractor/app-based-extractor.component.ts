@@ -18,6 +18,7 @@ import {environment} from "@global-app/env/environment";
 import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorDTO} from "../../../../../../../dto/connector";
 import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
+import {lastLogOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 @Component({
   selector: 'app-app-based-extractor',
@@ -40,6 +41,8 @@ import {ConnectorFileUploadInfoDTO} from "../../../../../../../dto/upload-info";
   styleUrl: './app-based-extractor.component.scss',
 })
 export class AppBasedExtractorComponent implements OnInit, OnDestroy {
+  protected readonly lastLogOf = lastLogOf;
+
   readonly connectorAppBasedExtractorService = inject(ConnectorAppBasedExtractorService);
 
   readonly isProduction = environment.production;
@@ -96,14 +99,6 @@ export class AppBasedExtractorComponent implements OnInit, OnDestroy {
       hyperParams: this.appBasedConfig().hyperParams,
       inputData: this.appBasedConfig().inputData,
     };
-    /*
-   const data: AppBasedExtractorRequestDTO = {
-     appImage: "gitlab.cosy.bio:5050/cosybio/federated-learning/federated_db/apps/import-diabetes-130-us-hospitals-for-years-1999-2008/model:latest",
-     appVersionId: 1,
-     cohortId: "1",
-     hyperParams: {},
-     inputData: {},
-   };*/
     this.runStarted.emit(true);
     this.cleanup();
     this.subscriptions.forEach(s => s.unsubscribe());

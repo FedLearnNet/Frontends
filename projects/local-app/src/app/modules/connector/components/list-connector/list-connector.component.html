@@ -4,12 +4,15 @@
 
   <lib-btn suffix type="ADD" [label]="'BUTTON.ADD_A_CONNECTOR' | translate"
            [matTooltip]="('TOOLTIP.ADD_A_CONNECTOR' | translate)"
+           [loading]="openingWizard()" [disabled]="openingWizard()"
            (clicked)="onAddClick()"/>
   <lib-btn suffix variant="SECONDARY" label="Files" icon="folder"
            [routerLink]="getFilesRoute()"/>
+  <lib-btn suffix variant="SECONDARY" [label]="'CUSTOM_TRANSFORMERS.TITLE' | translate" icon="code"
+           routerLink="custom"/>
 </lib-header>
 
-<lib-page-wrapper [isEmpty]="connectors.length === 0">
+<lib-page-wrapper [isEmpty]="connectors.length === 0" [error]="cohortResource().error()">
   <div empty class="empty-view">
     <img src="assets/images/connector.jpg" alt="Empty Connector List"/>
     <h2>{{ 'CONNECTORS' | translate }}</h2>

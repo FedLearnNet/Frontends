@@ -20,8 +20,8 @@
                             autoActiveFirstOption
                             [displayWith]="displayColumnName"
                             (optionSelected)="onCatalogSelected($event.option.value)">
-            @for (column of filteredColumns(); track column.value) {
-              <mat-option [value]="column.value">{{ column.label }}</mat-option>
+            @for (config of filteredColumns(); track config.ontology.id + '::' + config.dataType.id) {
+              <mat-option [value]="config">{{ config.label }}</mat-option>
             }
           </mat-autocomplete>
           @if (catalogControl.value) {
@@ -97,21 +97,6 @@
           <input matInput readonly tabindex="-1" [value]="dataTypeText()"
                  [attr.aria-labelledby]="fieldId() + '-type'"
                  [matTooltip]="selectedConfig() ? ('QUERY_BUILDER.ONTOLOGY' | translate) + ': ' + ontologyLabel() : ''">
-        </mat-form-field>
-      </div>
-
-      <div class="qb-field">
-        <span class="qb-label" [id]="fieldId() + '-hint'">
-          {{ 'QUERY_BUILDER.DATATYPE_HINT' | translate }}
-          <ng-container [ngTemplateOutlet]="help" [ngTemplateOutletContext]="{key: 'QUERY_BUILDER.HELP.DATATYPE'}"/>
-        </span>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-select formControlName="datatypeHint" [aria-labelledby]="fieldId() + '-hint'">
-            <mat-option value="">{{ 'QUERY_BUILDER.UNSET' | translate }}</mat-option>
-            @for (hint of datatypeHints; track hint) {
-              <mat-option [value]="hint">{{ hint }}</mat-option>
-            }
-          </mat-select>
         </mat-form-field>
       </div>
 

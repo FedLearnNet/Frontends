@@ -63,7 +63,7 @@ export class ConnectorAppBasedExtractorService {
           this._last.set(msg);
 
           if (msg.status === RunStatusTypes.ERROR) {
-            this._error.set(msg.lastError ?? 'Run failed');
+            this._error.set(msg.failure?.message ?? 'Run failed');
             this._running.set(false);
           }
           if (msg.status === RunStatusTypes.FINISHED && msg.uploadInfo) {

@@ -1,4 +1,5 @@
-import {Component, inject, input, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, signal, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Router, RouterLink} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {
@@ -33,7 +34,6 @@ import {
   ConnectorImportDialogComponent,
   ConnectorImportDialogData
 } from "../manage-connector/components/connector-import-dialog/connector-import-dialog.component";
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {ConnectorDTO} from "../../dto/connector";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
@@ -53,7 +53,8 @@ import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
 })
 export class ListConnectorComponent implements OnInit {
   readonly cohortId = input<string>();
-  private readonly cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   baseRoute = 'connector';
   displayedColumns: string[] = ['name', 'source', 'last', 'actions'];
@@ -72,14 +73,13 @@ export class ListConnectorComponent implements OnInit {
   private connectorService = inject(ConnectorService);
 
   ngOnInit(): void {
-    this.activatedRoute.data.subscribe(data => {
-      this.cohort.set(data['cohort']);
-    })
-
     this.baseRoute = "cohort/" + this.cohortId() + "/connector";
 
     this.loadConnectors();
   }
+
+  /** Opening the wizard loads its module and the cohort's files, which takes a moment; the button shows it. */
+  readonly openingWizard = signal(false);
 
   onAddClick(): void {
     this.dialog.open(ConnectorCreateChoiceDialogComponent, {
@@ -87,8 +87,10 @@ export class ListConnectorComponent implements OnInit {
       maxWidth: '95vw',
       autoFocus: false,
     }).afterClosed().subscribe((choice: ConnectorCreateChoice | undefined) => {
-      if (choice === 'create') {
-        this.router.navigate([this.baseRoute, 'new']);
+      if (choice === 'create' || choice === 'assistant') {
+        this.openingWizard.set(true);
+        this.router.navigate([this.baseRoute, 'new'], choice === 'assistant' ? {queryParams: {assistant: true}} : {})
+          .finally(() => this.openingWizard.set(false));
         return;
       }
 
@@ -155,9 +157,13 @@ export class ListConnectorComponent implements OnInit {
   }
 
   onRunClick(connector: ConnectorDTO): void {
+    const cohort = this.cohort();
+    if (!cohort) {
+      return;
+    }
     const dialogRef = this.dialog.open(ConnectorRunDialogComponent, {
       data: {
-        cohort: this.cohort(),
+        cohort,
         connector: connector,
       },
     });

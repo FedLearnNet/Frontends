@@ -36,15 +36,16 @@
     <div class="title-strong">Pipelines</div>
     <span class="spacer"></span>
     @if (canCreate()) {
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Run mode</mat-label>
-        <mat-select [ngModel]="runMode()" (ngModelChange)="runMode.set($event)">
-          <mat-option [value]="PipelineRunMode.ALL">Build and publish</mat-option>
-          @if (modelSubId()) {
-            <mat-option [value]="PipelineRunMode.LOCAL_BUILD">Local build from uploaded files</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      @if (runModes().length > 1) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Run mode</mat-label>
+          <mat-select [ngModel]="runMode()" (ngModelChange)="runMode.set($event)">
+            @for (mode of runModes(); track mode) {
+              <mat-option [value]="mode">{{ runModeOptionLabels[mode] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
       <lib-btn
         type="START"
         label="Start new pipeline" (clicked)="create()"/>

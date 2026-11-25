@@ -14,12 +14,18 @@ import {ControllerSocketService} from "../../../../service/testembed-socket.serv
 import {TranslatePipe} from "@ngx-translate/core";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
-import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {ActionCardButtonComponent} from "@shared-lib/components/action-card-button/action-card-button.component";
+import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 
+import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine-badge.component";
+import {AppRunEngineSingleDialogComponent} from '../app-run-engine-single-dialog/app-run-engine-single-dialog.component';
 @Component({
   selector: 'app-app-run-test',
   imports: [
+    AppRunEngineBadgeComponent,
     CommonModule,
     MatButtonModule,
     MatTableModule,
@@ -27,7 +33,9 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     MatProgressSpinnerModule,
     TranslatePipe,
     StatusBadgeComponent,
-    BtnComponent,
+    ActionCardButtonComponent,
+    EmptyStateComponent,
+    RunExecutionHelpComponent,
   ],
   templateUrl: './app-run-test.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -42,7 +50,7 @@ export class AppRunTestComponent implements OnInit {
   readonly appRunning = input<boolean>(false);
   readonly datafiles = input<string[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'error', 'startTime', 'appVersion'];
+  displayedColumns: string[] = ['position', 'status', 'engine', 'error', 'startTime', 'appVersion'];
   dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {
@@ -52,9 +60,6 @@ export class AppRunTestComponent implements OnInit {
         this.dataSource.data = runs;
       });
 
-      this.runTestEmbedService.getRunCreated$().subscribe((run) => {
-        this.updateOrAddRun(run);
-      });
       this.runTestEmbedService.getRunUpdate$().subscribe((run) => {
         this.updateOrAddRun(run);
       });
@@ -75,12 +80,9 @@ export class AppRunTestComponent implements OnInit {
     }
   }
 
-  addNewTest(): void {
-    const dialogRef = this.dialog.open(AppRunTestStartComponent, {
-      minHeight: '500px',
-      minWidth: '500px',
-      width: '50vw',
-      height: '50vh',
+  addNewTest(builtImage = false): void {
+    const dialogRef = this.dialog.open<unknown>(builtImage ? AppRunEngineSingleDialogComponent : AppRunTestStartComponent, {
+      width: '800px',
       maxWidth: '95vw',
       maxHeight: '95vh',
       autoFocus: false,
@@ -113,4 +115,5 @@ export class AppRunTestComponent implements OnInit {
   }
 
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly errorOf = errorOf;
 }

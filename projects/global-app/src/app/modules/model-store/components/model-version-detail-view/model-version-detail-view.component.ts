@@ -36,7 +36,9 @@ export class ModelVersionDetailViewComponent implements OnInit {
 
   selectedVersion = this.store.selectSignal(selectSubModelForExperiment);
   selectedModel = this.store.selectSignal(selectModelDetail);
-  selectModelError = this.store.selectSignal(selectModelError);
+  private readonly modelError = this.store.selectSignal(selectModelError);
+  // No model yet is the empty state, not an error.
+  selectModelError = computed(() => (this.modelError() as { status?: number } | null)?.status === 404 ? null : this.modelError());
   selectModelLoading = this.store.selectSignal(selectModelLoading);
 
 

@@ -1,0 +1,129 @@
+@let s = current();
+<section class="card">
+  <header class="card__head">
+    <span class="card__icon"><mat-icon>storage</mat-icon></span>
+    <div class="card__title">
+      <h3>{{ s.name }}</h3>
+      <p class="muted">External database of one client, the data can not be selected here.</p>
+    </div>
+    <span class="chips">
+      @if (s.type) {
+        <span class="chip">{{ format().label }}</span>
+      }
+      <span class="chip" [class.chip--on]="online()"
+            [matTooltip]="online() ? 'The client is connected' : 'Shown as stored with the project'">
+        {{ online() ? 'Online' : 'Offline' }}
+      </span>
+    </span>
+  </header>
+  @if (s.description) {
+    <p class="card__text">{{ s.description }}</p>
+  }
+  <dl class="facts">
+    <div>
+      <dt>Tools</dt>
+      <dd>{{ s.access === 'TOOL' ? 'Only ' + s.toolName : 'Any tool of the workflow' }}</dd>
+    </div>
+    @if (s.hyperParams && (s.hyperParams | keyvalue).length) {
+      <div>
+        <dt>Fixed by the client</dt>
+        <dd class="mono">
+          @for (param of s.hyperParams | keyvalue; track param.key) {
+            <span class="chip">{{ param.key }} = {{ param.value }}</span>
+          }
+        </dd>
+      </div>
+    }
+  </dl>
+</section>
+
+<section class="card">
+  <header class="card__head">
+    <span class="card__icon"><mat-icon>science</mat-icon></span>
+    <div class="card__title">
+      <h3>Test data</h3>
+      <p class="muted">Made up records in the structure of the database, to build and try a tool before a run.</p>
+    </div>
+  </header>
+
+  @if (s.testDataFile || s.testData) {
+    @if (s.testDataFile; as file) {
+      <div class="file">
+        <mat-icon>description</mat-icon>
+        <span class="file__info">
+          <span class="file__name">{{ file.fileName }}</span>
+          <span class="muted">{{ sizeOf(file.size) }}</span>
+        </span>
+        <a mat-flat-button color="primary" [href]="fileUrl(file)" download>
+          <mat-icon>download</mat-icon>
+          Download
+        </a>
+      </div>
+    }
+    @if (link(); as url) {
+      <div class="file">
+        <mat-icon>link</mat-icon>
+        <span class="file__info">
+          <span class="file__name">{{ url }}</span>
+          <span class="muted">Link from the client</span>
+        </span>
+        <a mat-stroked-button [href]="url" target="_blank" rel="noopener noreferrer">
+          <mat-icon>open_in_new</mat-icon>
+          Open
+        </a>
+      </div>
+    } @else if (s.testData) {
+      <div class="code">
+        <div class="code__bar muted">
+          <span>{{ s.testDataFile ? 'Notes from the client' : 'Script and notes from the client' }}</span>
+          <span class="code__actions">
+            <button mat-button type="button" (click)="copy()">
+              <mat-icon>{{ copied() ? 'check' : 'content_copy' }}</mat-icon>
+              {{ copied() ? 'Copied' : 'Copy' }}
+            </button>
+            @if (!s.testDataFile) {
+              <button mat-button type="button" (click)="download()">
+                <mat-icon>download</mat-icon>
+                test-data.{{ format().extension }}
+              </button>
+            }
+          </span>
+        </div>
+        <pre class="code__body">{{ s.testData }}</pre>
+      </div>
+    }
+
+    <div class="steps">
+      <div class="step">
+        <span class="step__no">1</span>
+        <div>
+          <b>Load it into a local {{ format().label }}</b>
+          @if (loadCommand(); as command) {
+            <pre class="step__cmd">{{ command }}</pre>
+          } @else {
+            <p class="muted">Restore it with the tools of {{ format().label }}, see the notes of the client.</p>
+          }
+        </div>
+      </div>
+      <div class="step">
+        <span class="step__no">2</span>
+        <div>
+          <b>Connect the tool from its environment</b>
+          <p class="muted">A run sets the same variables, pointing to the client's database.</p>
+          <span class="env">
+            @for (name of env(); track name) {
+              <code>{{ name }}</code>
+            }
+          </span>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="empty">
+      <mat-icon>inventory_2</mat-icon>
+      <p>The client provides no test data for this database.</p>
+      <p class="muted">The tool reads <code>FLNET_DB_HOST</code>, <code>FLNET_DB_PORT</code>, <code>FLNET_DB_USER</code> and
+        <code>FLNET_DB_PASSWORD</code>, ask the site for the structure.</p>
+    </div>
+  }
+</section>

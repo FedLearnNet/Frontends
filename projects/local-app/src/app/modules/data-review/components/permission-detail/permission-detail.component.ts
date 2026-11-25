@@ -12,6 +12,7 @@ import {
   AutoStatisticsAccess,
   AutoTrainingAccess,
   CreatePermissionDTO,
+  TrainingAccess,
   PermissionDTO
 } from "@local-app/data-review/models";
 import {CohortDetailDto, CohortDto} from '@local-app/cohort/models';
@@ -84,7 +85,11 @@ export class PermissionDetailComponent implements OnInit {
         [Validators.required, Validators.min(3), Validators.max(10)],
       ],
       querySampleThreshold: [100, [Validators.required, Validators.min(100)]],
-      autoTrainingAccess: [AutoTrainingAccess.NONE, Validators.required],
+      federatedTrainingAccess: [TrainingAccess.ENABLED, Validators.required],
+      federatedAutoTrainingAccess: [AutoTrainingAccess.NONE, Validators.required],
+      treTrainingAccess: [TrainingAccess.DISABLED, Validators.required],
+      treAutoTrainingAccess: [AutoTrainingAccess.NONE, Validators.required],
+      treShareName: [false],
       autoStatisticsAccess: [AutoStatisticsAccess.NONE, Validators.required],
       autoMetricsAccess: [AutoMetricsAccess.NONE, Validators.required],
     }),
@@ -172,7 +177,11 @@ export class PermissionDetailComponent implements OnInit {
       permissions: {
         isAllowedToQuery: this.permissionDetail?.isAllowedToQuery ?? false,
         retryTimeToQuery: this.permissionDetail?.queryRetryTime ?? 3,
-        autoTrainingAccess: this.permissionDetail?.autoTrainingAccess || null,
+        federatedTrainingAccess: this.permissionDetail?.federatedTrainingAccess ?? TrainingAccess.ENABLED,
+        federatedAutoTrainingAccess: this.permissionDetail?.federatedAutoTrainingAccess || null,
+        treTrainingAccess: this.permissionDetail?.treTrainingAccess ?? TrainingAccess.DISABLED,
+        treAutoTrainingAccess: this.permissionDetail?.treAutoTrainingAccess || null,
+        treShareName: this.permissionDetail?.treShareName ?? false,
         autoStatisticsAccess: this.permissionDetail?.autoStatisticsAccess || null,
         autoMetricsAccess: this.permissionDetail?.autoMetricsAccess || null,
         querySampleThreshold: this.permissionDetail?.querySampleThreshold ?? 100,
@@ -227,7 +236,11 @@ export class PermissionDetailComponent implements OnInit {
       cohortId: formValue.cohort ?? this.permissionDetail?.cohortId,
       isAllowedToQuery: formValue.permissions.isAllowedToQuery ?? false,
       queryRetryTime: formValue.permissions.retryTimeToQuery ?? null,
-      autoTrainingAccess: formValue.permissions.autoTrainingAccess || null,
+      federatedTrainingAccess: formValue.permissions.federatedTrainingAccess || null,
+      federatedAutoTrainingAccess: formValue.permissions.federatedAutoTrainingAccess || null,
+      treTrainingAccess: formValue.permissions.treTrainingAccess || null,
+      treAutoTrainingAccess: formValue.permissions.treAutoTrainingAccess || null,
+      treShareName: formValue.permissions.treShareName ?? false,
       autoStatisticsAccess: formValue.permissions.autoStatisticsAccess || null,
       autoMetricsAccess: formValue.permissions.autoMetricsAccess || null,
       querySampleThreshold: formValue.permissions.querySampleThreshold ?? null,
@@ -244,7 +257,11 @@ export class PermissionDetailComponent implements OnInit {
       cohortId: formValue.cohort,
       isAllowedToQuery: formValue.permissions.isAllowedToQuery ?? false,
       queryRetryTime: formValue.permissions.retryTimeToQuery ?? null,
-      autoTrainingAccess: formValue.permissions.autoTrainingAccess || null,
+      federatedTrainingAccess: formValue.permissions.federatedTrainingAccess || null,
+      federatedAutoTrainingAccess: formValue.permissions.federatedAutoTrainingAccess || null,
+      treTrainingAccess: formValue.permissions.treTrainingAccess || null,
+      treAutoTrainingAccess: formValue.permissions.treAutoTrainingAccess || null,
+      treShareName: formValue.permissions.treShareName ?? false,
       autoStatisticsAccess: formValue.permissions.autoStatisticsAccess || null,
       autoMetricsAccess: formValue.permissions.autoMetricsAccess || null,
       querySampleThreshold: formValue.permissions.querySampleThreshold ?? null,
@@ -279,6 +296,8 @@ export class PermissionDetailComponent implements OnInit {
   }
 
   protected readonly AutoTrainingAccess = AutoTrainingAccess;
+  protected readonly TrainingAccess = TrainingAccess;
+  protected readonly trainingModes = ['federated', 'tre'] as const;
   protected readonly AutoStatisticsAccess = AutoStatisticsAccess;
   protected readonly AutoMetricsAccess = AutoMetricsAccess;
 }

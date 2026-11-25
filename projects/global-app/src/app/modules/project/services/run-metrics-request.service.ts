@@ -4,7 +4,11 @@ import {TranslateService} from '@ngx-translate/core';
 import {ApiService} from '@shared-lib/services/api.service';
 import {ApiErrorSnackbarService} from '@shared-lib/services/api-error-snackbar.service';
 import {environment} from '@global-app/env/environment';
-import {EvaluationSummaryDto, RunMetricsRequestDto} from '@global-app/project/dto/run-metrics-request';
+import {
+  EvaluationSummaryDto,
+  RunMetricsRequestDto,
+  RunMetricsRequestType
+} from '@global-app/project/dto/run-metrics-request';
 
 @Injectable({
   providedIn: 'root'
@@ -15,12 +19,12 @@ export class RunMetricsRequestService {
   private readonly translate = inject(TranslateService);
   private readonly apiUrl = environment.globalLearningApiUrl;
 
-  getRequest(projectId: number, experimentId: number): Observable<RunMetricsRequestDto | null> {
-    return this.apiService.get<RunMetricsRequestDto | null>(this.baseUrl(projectId, experimentId));
+  getRequest(projectId: number, experimentId: number, type: RunMetricsRequestType = 'METRICS'): Observable<RunMetricsRequestDto | null> {
+    return this.apiService.get<RunMetricsRequestDto | null>(`${this.baseUrl(projectId, experimentId)}?type=${type}`);
   }
 
-  createRequest(projectId: number, experimentId: number): Observable<RunMetricsRequestDto> {
-    return this.apiService.postEmpty<RunMetricsRequestDto>(this.baseUrl(projectId, experimentId)).pipe(
+  createRequest(projectId: number, experimentId: number, type: RunMetricsRequestType = 'METRICS'): Observable<RunMetricsRequestDto> {
+    return this.apiService.postEmpty<RunMetricsRequestDto>(`${this.baseUrl(projectId, experimentId)}?type=${type}`).pipe(
       catchError((err) => this.errorSnackbarService.showSnackBar(
         err,
         this.translate.instant('ERROR.FAILED_TO_CREATE', {name: 'metrics request'})

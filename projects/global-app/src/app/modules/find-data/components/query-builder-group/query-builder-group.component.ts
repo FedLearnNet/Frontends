@@ -9,6 +9,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {QueryConfig} from '@global-app/find-data/models';
 import {describeQueryGroup} from '@global-app/find-data/helpers/query-tree.serializer';
 import {relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
+import {ConnectingOperator} from '@global-app/find-data/dto/query-item';
 import {
   canAddRelation,
   cloneQueryNode,
@@ -104,7 +105,7 @@ export class QueryBuilderGroupComponent {
     return relationNeedsInterval(kind);
   }
 
-  setOperator(operator: '$and' | '$or'): void {
+  setOperator(operator: ConnectingOperator): void {
     this.groupChange.emit({...this.group(), connectingOperator: operator});
   }
 

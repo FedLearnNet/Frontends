@@ -1,4 +1,4 @@
-import {ConnectorRunStepDTO} from "./log";
+import {ExecutionRunDetailDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 import {ConnectorConfigDTO} from "./preview";
 
 export interface AppTransformerPreviewRequestDTO {
@@ -6,7 +6,7 @@ export interface AppTransformerPreviewRequestDTO {
   stepIndex: number;
 }
 
-export interface AppTransformerPreviewStreamDTO extends ConnectorRunStepDTO {
+export interface AppTransformerPreviewStreamDTO extends ExecutionRunDetailDTO {
   stepIndex?: number;
   rowCount?: number;
   finished?: boolean;

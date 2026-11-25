@@ -167,6 +167,25 @@
                   </div>
                   <p
                     class="node-detail__meta">{{ dataType.description || ('DIALOG.MAPPER.NO_DESCRIPTION' | translate) }}</p>
+                  @let allowedValues = allowedValueLabels(dataType);
+                  @if (allowedValues.length) {
+                    <span class="node-detail__label node-detail__sublabel">{{ 'DIALOG.MAPPER.ALLOWED_VALUES' | translate }}</span>
+                    <div class="node-detail__validations">
+                      @for (allowedValue of allowedValues; track allowedValue) {
+                        <lib-badge [text]="allowedValue" color="BLUE" size="X-SMALL" [border]="true" [wrap]="true"
+                                   [uppercase]="true"/>
+                      }
+                    </div>
+                  }
+                  @if (dataType.validations?.length) {
+                    <span class="node-detail__label node-detail__sublabel">{{ 'DIALOG.MAPPER.VALIDATION_RULES' | translate }}</span>
+                    <div class="node-detail__validations">
+                      @for (validation of dataType.validations; track validation) {
+                        <lib-badge [text]="validationLabel(validation)" color="GRAY" size="X-SMALL" [border]="true"
+                                   [wrap]="true" [uppercase]="true"/>
+                      }
+                    </div>
+                  }
                 } @else {
                   <p class="node-detail__empty">{{ 'DIALOG.MAPPER.NO_DATATYPE' | translate }}</p>
                 }

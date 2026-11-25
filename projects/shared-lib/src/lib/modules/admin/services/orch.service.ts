@@ -17,6 +17,7 @@ import {
 import {ApiService} from "@shared-lib/services/api.service";
 import {SseClient} from 'ngx-sse-client';
 import {SKIP_LOADING} from '@shared-lib/interceptors/loading.interceptor';
+import {SystemComputingInfoDTO} from '../dto/system-info';
 
 @Injectable({providedIn: 'root'})
 export class OrchRelayService {
@@ -51,6 +52,11 @@ export class OrchRelayService {
           )
         )
       );
+  }
+
+  getComputingInfo(): Observable<SystemComputingInfoDTO> {
+    return this.apiService.get<SystemComputingInfoDTO>(`${this.baseUrl()}/info/computing`, undefined,
+      new HttpHeaders().set(SKIP_LOADING, 'true'));
   }
 
   getRegistryImages(): Observable<RegistryImagesDTO> {

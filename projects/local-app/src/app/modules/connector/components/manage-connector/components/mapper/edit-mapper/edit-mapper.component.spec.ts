@@ -7,7 +7,7 @@ import {ActivatedRoute} from '@angular/router';
 import {EMPTY, Observable, of, Subject, throwError} from 'rxjs';
 import {ConnectorMappingMode} from '../../../../../models/connector-value-mapping';
 import {ConnectorMappingElement} from '../../../../../models/connector-preview';
-import {PreviewValidationResponseDTO} from '../../../../../dto/connector-validation';
+import {PreviewValidationResponseDTO, PreviewValidationWarningDTO} from '../../../../../dto/connector-validation';
 
 describe('ConnectorEditMapperComponent', () => {
   let component: ConnectorEditMapperComponent;
@@ -55,6 +55,23 @@ describe('ConnectorEditMapperComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('lists the field rows in the order of its columns, also when filtered', () => {
+    component.dataSource.set([
+      unmappedElement('Patient ID'),
+      unmappedElement('weight'),
+      mappedElement('height', 54),
+      unmappedElement('lab::glucose'),
+      mappedElement('age', 53),
+    ]);
+
+    expect(component.tableDataSource().map(element => element.column))
+      .toEqual(['Patient ID', 'weight', 'height', 'lab::glucose', 'age']);
+
+    component.filterMapped.set(['Mapped']);
+
+    expect(component.tableDataSource().map(element => element.column)).toEqual(['height', 'age']);
+  });
+
   it('should use the next non-empty row when the first sample value is null', () => {
     const value = (component as any).getSampleData([
       {age: null},
@@ -97,7 +114,7 @@ describe('ConnectorEditMapperComponent', () => {
       }
     }];
     component.dataSource.set(elements);
-    component.validateColumns(elements);
+    component.validateColumns();
 
     expect(previewService.validatePreview).toHaveBeenCalledTimes(1);
     const request = previewService.validatePreview.calls.mostRecent().args[0];
@@ -159,7 +176,7 @@ describe('ConnectorEditMapperComponent', () => {
       },
     ];
     component.dataSource.set(elements);
-    component.validateColumns(elements);
+    component.validateColumns();
 
     const request = previewService.validatePreview.calls.mostRecent().args[0];
     expect(request.schemaMapping).toEqual([
@@ -210,7 +227,7 @@ describe('ConnectorEditMapperComponent', () => {
       }
     }]);
 
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
 
     const summary = component.dataSource()[0].validationSummary!;
     expect(summary.examples.map(example => example.value)).toEqual(['42', '', 'unknown']);
@@ -245,7 +262,7 @@ describe('ConnectorEditMapperComponent', () => {
       mappedElement('height', 54),
     ]);
 
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
     stream.next({column: 'age', checks: [], warnings: null});
     stream.next({column: 'height', checks: [], warnings: null});
 
@@ -302,7 +319,7 @@ describe('ConnectorEditMapperComponent', () => {
     element.validation = 'Valid';
     component.dataSource.set([element]);
 
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
     stream.next({column: 'age', checks: [], warnings: null});
 
     expect(component.getValidationState(element)).toBe('SYNC');
@@ -335,7 +352,7 @@ describe('ConnectorEditMapperComponent', () => {
     });
     component.dataSource.set([mappedElement('age', 53)]);
 
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
     stream.next({column: 'age', checks: [], warnings: null});
     expect(component.getValidationState(component.dataSource()[0])).toBe('SYNC');
 
@@ -357,13 +374,13 @@ describe('ConnectorEditMapperComponent', () => {
       inputConfig: {mode: 'FILE', fileId: 11, fileType: 'CSV', hasHeader: true},
     });
     component.dataSource.set([mappedElement('age', 53)]);
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
 
     fixture.componentRef.setInput('validationConfig', {
       cohortId: 1,
       inputConfig: {mode: 'FILE', fileId: 12, fileType: 'CSV', hasHeader: true},
     });
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
 
     expect(firstTeardown).toHaveBeenCalled();
     expect(previewService.validatePreview).toHaveBeenCalledTimes(2);
@@ -378,7 +395,7 @@ describe('ConnectorEditMapperComponent', () => {
       inputConfig: {mode: 'FILE', fileId: 11, fileType: 'CSV', hasHeader: true},
     });
     component.dataSource.set([mappedElement('age', 53)]);
-    component.validateColumns(component.dataSource());
+    component.validateColumns();
 
     fixture.destroy();
 
@@ -393,9 +410,110 @@ describe('ConnectorEditMapperComponent', () => {
       inputConfig: {mode: 'FILE', fileId: 11, fileType: 'CSV', hasHeader: true},
     });
 
-    component.validateColumns([]);
+    component.validateColumns();
 
     expect(component.validationLoading()).toBeFalse();
+  });
+
+  it('keeps both streamed columns in a value-column owner summary', () => {
+    const previewService = TestBed.inject(ConnectorPreviewService) as jasmine.SpyObj<ConnectorPreviewService>;
+    const stream = new Subject<PreviewValidationResponseDTO>();
+    previewService.validatePreview.and.returnValue(stream);
+    fixture.componentRef.setInput('validationConfig', {
+      cohortId: 1,
+      inputConfig: {mode: 'FILE', fileId: 11, fileType: 'CSV', hasHeader: true},
+    });
+    component.dataSource.set([
+      {
+        column: 'kind',
+        data: 'A',
+        mapping: '1 value route measurement',
+        validation: 'Sync',
+        valueMappingConfig: {
+          mode: ConnectorMappingMode.VALUE_COLUMN,
+          mappingColumn: 'kind',
+          valueColumn: 'measurement',
+          valueMappings: [{
+            sourceValue: 'A',
+            displayValue: 'Measurements > A',
+            value: 'Measurements.A',
+            schemaId: 61,
+          }],
+        },
+      },
+      {column: 'measurement', data: '7', mapping: 'Routed by kind', validation: ''},
+      mappedElement('age', 53),
+    ]);
+
+    component.validateColumns();
+    ['kind', 'measurement', 'age'].forEach(column => stream.next({column, checks: [], warnings: null}));
+    stream.next({
+      column: 'kind',
+      checks: [{value: 'A', mapped: true, validated: true, result: {valid: true, message: 'Valid', schemaId: 61}}],
+      warnings: [],
+    });
+    stream.next({
+      column: 'measurement',
+      checks: [{value: '7', mapped: true, validated: true, result: {valid: true, message: 'Valid', schemaId: 61}}],
+      warnings: [],
+    });
+    const ownerSummaryBeforeUnrelatedResult = component.dataSource()[0].validationSummary!;
+    expect(ownerSummaryBeforeUnrelatedResult.examples.map(example => [example.sourceLabel, example.value]))
+      .toEqual([['kind', 'A'], ['measurement', '7']]);
+    stream.next({
+      column: 'age',
+      checks: [{value: '42', mapped: true, validated: true, result: {valid: true, message: 'Valid', schemaId: 53}}],
+      warnings: [],
+    });
+    expect(component.dataSource()[0].validationSummary).toBe(ownerSummaryBeforeUnrelatedResult);
+    stream.complete();
+
+    const [owner, valueSource, age] = component.dataSource();
+    expect(owner.validationSummary!.examples.map(example => [example.sourceLabel, example.value]))
+      .toEqual([['kind', 'A'], ['measurement', '7']]);
+    expect(owner.valueMappingConfig!.validationSummary).toBe(owner.validationSummary);
+    expect(valueSource.validationSummary).toBeUndefined();
+    expect(component.getValidationState(valueSource)).toBe('VALID');
+    expect(age.validationSummary!.examples.map(example => example.value)).toEqual(['42']);
+  });
+
+  it('re-validates after a field is mapped in the mapping dialog, so its transformer warning shows', () => {
+    const previewService = TestBed.inject(ConnectorPreviewService) as jasmine.SpyObj<ConnectorPreviewService>;
+    fixture.componentRef.setInput('validationConfig', {
+      cohortId: 1,
+      inputConfig: {mode: 'FILE', fileId: 11, fileType: 'CSV', hasHeader: true},
+    });
+    fixture.componentRef.setInput('transformers', [{moduleName: 'm', methodName: 'double_age', column: 'age'} as any]);
+    component.dataSource.set([unmappedElement('age')]);
+    component.validateColumns();
+    previewService.validatePreview.calls.reset();
+
+    // The backend warns about a transformer output only once that column is also mapped.
+    const warnings: PreviewValidationWarningDTO[] = [
+      {type: 'TRANSFORMED_MAPPING_KEY', message: "Column 'age' is created or overwritten by a transformer"},
+    ];
+    previewService.validatePreview.and.returnValue(of({
+      column: 'age',
+      checks: [{value: '42', mapped: true, validated: true, result: {valid: true, message: 'Valid', schemaId: 53}}],
+      warnings,
+    }));
+    (TestBed.inject(MatDialog).open as jasmine.Spy).and.returnValue({
+      afterClosed: () => of({
+        mode: ConnectorMappingMode.DIRECT,
+        displayValue: 'Demographics > Age',
+        value: 'Demographics.Age',
+        schemaId: 53,
+        validationSummary: {valid: true, examples: []},
+      }),
+    });
+
+    component.viewSelectedColumn(component.dataSource()[0]);
+
+    expect(previewService.validatePreview).toHaveBeenCalledTimes(1);
+    expect(previewService.validatePreview.calls.mostRecent().args[0].schemaMapping)
+      .toEqual([jasmine.objectContaining({column: 'age', mapping: 'Demographics.Age'})]);
+    expect(component.getColumnWarnings(component.dataSource()[0])).toEqual(warnings);
+    expect(component.getValidValidationIcon(component.dataSource()[0])).toBe('warning');
   });
 });
 
@@ -411,4 +529,8 @@ function mappedElement(column: string, schemaId: number): ConnectorMappingElemen
       schemaId,
     },
   };
+}
+
+function unmappedElement(column: string): ConnectorMappingElement {
+  return {column, data: '', mapping: 'Mapping', validation: ''};
 }

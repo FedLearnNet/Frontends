@@ -1,0 +1,52 @@
+.dynamic-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+
+  lib-console-output {
+    display: block;
+    flex: 1;
+    min-height: 0;
+  }
+
+  &--docked {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 90;
+  }
+}
+
+.console-title {
+  margin: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.resize-handle {
+  background-color: #b8ccdb;
+  border: none;
+  cursor: row-resize;
+  transition: background-color 0.3s;
+  width: 100%;
+  height: 3px;
+}
+
+.resize-handle:hover {
+  background-color: #98a8b7;
+}
+
+.connected {
+  &-success {
+    color: var(--success-text);
+  }
+
+  &-error {
+    color: var(--failed-text);
+  }
+
+  &-warn {
+    color: var(--warning-text);
+  }
+}

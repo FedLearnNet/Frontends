@@ -92,17 +92,29 @@
 
         <!-- Automatic Training Access For -->
         <p>All Tools with internet access need <b>manual</b> approval </p>
-        <mat-form-field appearance="fill" class="full-width">
-          <mat-label>{{ 'AUTOMATIC_TRAINING_ACCESS_FOR' | translate }}</mat-label>
-          <mat-select formControlName="autoTrainingAccess">
-            <mat-option [value]="AutoTrainingAccess.ALL">{{ 'ALL' | translate }}</mat-option>
-            <mat-option [value]="AutoTrainingAccess.NONE">{{ 'NONE' | translate }}</mat-option>
-            <mat-option [value]="AutoTrainingAccess.CERTIFIED_APPS">{{ 'CERTIFIED_APPS' | translate }}</mat-option>
-          </mat-select>
-          @if (permissionForm.controls.permissions.controls.autoTrainingAccess.hasError('required')) {
-            <mat-error>{{ 'VALIDATION.REQUIRED' | translate:{ fieldName: ('GRID.AUTOMATIC_TRAINING_ACCESS' | translate) } }}</mat-error>
-          }
-        </mat-form-field>
+        @for (mode of trainingModes; track mode) {
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>{{ 'TRAINING_ACCESS.' + mode | translate }}</mat-label>
+            <mat-select [formControlName]="mode + 'TrainingAccess'">
+              <mat-option [value]="TrainingAccess.ENABLED">{{ 'TRAINING_ACCESS.ENABLED' | translate }}</mat-option>
+              <mat-option [value]="TrainingAccess.DISABLED">{{ 'TRAINING_ACCESS.DISABLED' | translate }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>{{ 'AUTOMATIC_TRAINING_ACCESS_FOR' | translate }} ({{ 'TRAINING_ACCESS.' + mode | translate }})</mat-label>
+            <mat-select [formControlName]="mode + 'AutoTrainingAccess'">
+              <mat-option [value]="AutoTrainingAccess.ALL">{{ 'ALL' | translate }}</mat-option>
+              <mat-option [value]="AutoTrainingAccess.NONE">{{ 'NONE' | translate }}</mat-option>
+              <mat-option [value]="AutoTrainingAccess.CERTIFIED_APPS">{{ 'CERTIFIED_APPS' | translate }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        }
+        @if (permissionForm.getRawValue().permissions.treTrainingAccess === TrainingAccess.ENABLED) {
+          <mat-slide-toggle formControlName="treShareName" color="primary" class="full-width"
+                            matTooltip="Researchers see the name of this client's platform account instead of 'Client N'">
+            Show the name of this client for TRE
+          </mat-slide-toggle>
+        }
         <!-- Automatic Statistics Access For -->
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>{{ 'AUTOMATIC_STATISTICS_ACCESS_FOR' | translate }}</mat-label>

@@ -19,12 +19,12 @@
     <ng-container matColumnDef="time">
       <mat-header-cell *matHeaderCellDef>{{ 'GRID.TIME' | translate }}</mat-header-cell>
       <mat-cell *matCellDef="let flRequest">
-        @if (flRequest.experiment.finishedAt) {
-          <lib-time-badge [date]="flRequest.experiment.finishedAt" />
+        @if (flRequest.run?.finishedAt) {
+          <lib-time-badge [date]="flRequest.run.finishedAt" />
         } @else {
-          <lib-time-badge [date]="flRequest.experiment.startedAt" />
-          @if (flRequest.experiment.startedAt) {
-            <lib-time-badge [date]="flRequest.experiment.startedAt" [calcDuration]="true" />
+          <lib-time-badge [date]="flRequest.run?.startedAt" />
+          @if (flRequest.run?.startedAt) {
+            <lib-time-badge [date]="flRequest.run.startedAt" [calcDuration]="true" />
           }
         }
       </mat-cell>
@@ -33,8 +33,15 @@
     <ng-container matColumnDef="status">
       <mat-header-cell *matHeaderCellDef>{{ 'GRID.STATUS' | translate }}</mat-header-cell>
       <mat-cell *matCellDef="let flRequest">
-        <lib-status-badge [text]="flRequest.experiment.experimentStatus" [type]="projectStatusToBadgeStatus(flRequest.experiment.experimentStatus)" size="SMALL"
-                          [animate]="true" />
+        @if (flRequest.run; as run) {
+          @if (positions().get(run.id); as position) {
+            <lib-status-badge [text]="'Queued #' + position" type="PENDING" size="SMALL" [animate]="false"
+                              [matTooltip]="position === 1 ? 'Starts when the running training ends' : (position - 1) + ' trainings start before'"/>
+          } @else {
+            <lib-status-badge [text]="run.status" [type]="runStatusToBadgeStatus(run.status)" size="SMALL"
+                              [animate]="true" />
+          }
+        }
       </mat-cell>
     </ng-container>
     <mat-header-row *matHeaderRowDef="displayedColumns" />

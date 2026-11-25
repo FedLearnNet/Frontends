@@ -25,6 +25,13 @@ export class AdminCenterComponent {
       badge: 'Live'
     },
     {
+      id: 'executions',
+      title: 'Executions',
+      description: 'Inspect all execution runs with their steps, attempts, logs, metrics and files.',
+      icon: 'play_circle',
+      routerLink: '/admin/executions'
+    },
+    {
       id: 'observer',
       title: 'WebSocket Observer',
       description: 'Monitor live federated learning client connections and inspect sent and received messages.',

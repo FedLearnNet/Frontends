@@ -12,6 +12,9 @@
       [enableHover]="false"
       [storeElement]="{app: app}"
       [size]="displayMode() === 'DIALOG' ? 'x-small' : 'x-large'"/>
+    <lib-network-access-warning [access]="networkAccess()">
+      <p>{{ 'NETWORK_ACCESS_WARNING.ADD' | translate }}</p>
+    </lib-network-access-warning>
     <mat-divider></mat-divider>
 
     <h3>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.SETTINGS' | translate }}</h3>

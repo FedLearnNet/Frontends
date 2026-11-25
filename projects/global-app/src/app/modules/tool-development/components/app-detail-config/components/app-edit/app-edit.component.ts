@@ -78,7 +78,7 @@ export class AppEditComponent {
 
   longDescriptionContent = signal<string>('');
 
-  readonly urlRegex: RegExp = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[\w\-_~:/?#[\]@!$&'()*+,;=.]+$/;
+  readonly urlRegex: RegExp = /^(?:https?:\/\/)?[\w-]+(?:\.[\w-]+)*\.[\w-]{2,}(?:[:/?#][\w\-~:/?#[\]@!$&'()*+,;=.]*)?$/;
 
   editAppForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),

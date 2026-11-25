@@ -112,24 +112,6 @@
               </span>
               </div>
 
-              <div class="row span2">
-                <span class="label">Mapping</span>
-                <span class="value">
-                @if (objectKeys(dt.mapping).length) {
-                  <div class="kv">
-                    @for (k of objectKeys(dt.mapping); track $index) {
-                      <div class="kv-row">
-                        <span class="k mono">{{ k }}</span>
-                        <mat-icon>arrow_forward</mat-icon>
-                        <span class="v mono">{{ dt.mapping![k] }}</span>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  —
-                }
-              </span>
-              </div>
             </div>
           } @else {
             <lib-error-card>

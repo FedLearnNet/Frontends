@@ -22,7 +22,6 @@ import {
   valueModeChoices,
 } from '@global-app/find-data/helpers/query-tree.rules';
 import {
-  DatatypeHintValue,
   IntervalPart,
   QueryLeafNode,
   TimeAggregation,
@@ -37,7 +36,6 @@ type TimeButton = 'None' | 'first' | 'last' | 'within';
 interface LeafFormValue {
   operator: QueryOperatorTypes | '';
   value: string;
-  datatypeHint: DatatypeHintValue;
   valueMode: ValueMode;
   timeFilterMode: TimeFilterChoice;
   timeAfter: string;
@@ -85,15 +83,13 @@ export class QueryBuilderItemComponent {
   readonly moveDown = output<void>();
 
   readonly advancedOpen = signal(false);
-  readonly catalogControl = new FormControl('', {nonNullable: true});
+  readonly catalogControl = new FormControl<QueryConfig | string | null>(null);
   readonly catalogQuery = signal('');
-  readonly datatypeHints: DatatypeHintValue[] = ['String', 'Integer', 'Float', 'Boolean'];
   readonly timeFilterModes: TimeFilterChoice[] = ['anytime', 'after', 'before', 'between'];
 
   readonly form = this.formBuilder.nonNullable.group({
     operator: this.formBuilder.nonNullable.control<QueryOperatorTypes | ''>(''),
     value: '',
-    datatypeHint: this.formBuilder.nonNullable.control<DatatypeHintValue>(''),
     valueMode: this.formBuilder.nonNullable.control<ValueMode>('absolute'),
     timeFilterMode: this.formBuilder.nonNullable.control<TimeFilterChoice>('anytime'),
     timeAfter: '',
@@ -132,12 +128,7 @@ export class QueryBuilderItemComponent {
 
   readonly filteredColumns = computed(() => {
     const filter = this.catalogQuery().toLowerCase();
-    return this.queryConfigs()
-      .map(config => ({
-        label: `${config.name} (${config.label})`,
-        value: config.name,
-      }))
-      .filter(option => option.label.toLowerCase().includes(filter));
+    return this.queryConfigs().filter(config => config.label.toLowerCase().includes(filter));
   });
 
   readonly operatorOptions = computed(() => {
@@ -240,13 +231,8 @@ export class QueryBuilderItemComponent {
     this.leaf().timeAggregation === 'within_at_least' || this.leaf().timeAggregation === 'within_at_most'
   );
 
-  readonly displayColumnName = (value: string | null): string => {
-    if (!value) {
-      return '';
-    }
-    const config = this.queryConfigs().find(item => item.name === value);
-    return config ? `${config.name} (${config.label})` : value;
-  };
+  readonly displayColumnName = (value: QueryConfig | string | null): string =>
+    typeof value === 'string' ? value : value?.label ?? '';
 
   private formSnapshot: LeafFormValue | null = null;
   private lastEmitted = '';
@@ -268,6 +254,12 @@ export class QueryBuilderItemComponent {
       this.lastEmitted = serialized;
     });
 
+    effect(() => {
+      const config = this.selectedConfig();
+      this.catalogControl.setValue(config ?? (this.leaf().catalogName || null), {emitEvent: false});
+      this.catalogQuery.set('');
+    });
+
     this.form.valueChanges.subscribe(() => {
       if (this.syncing) {
         return;
@@ -286,11 +278,7 @@ export class QueryBuilderItemComponent {
     this.catalogQuery.set(value);
   }
 
-  onCatalogSelected(name: string): void {
-    const config = this.queryConfigs().find(item => item.name === name);
-    if (!config) {
-      return;
-    }
+  onCatalogSelected(config: QueryConfig): void {
     this.emit(patchLeaf(this.leaf(), {
       catalogName: config.name,
       ontologyId: config.ontology.id ?? '',
@@ -302,6 +290,8 @@ export class QueryBuilderItemComponent {
   }
 
   clearCatalog(): void {
+    this.catalogControl.setValue(null, {emitEvent: false});
+    this.catalogQuery.set('');
     this.emit(patchLeaf(this.leaf(), {
       catalogName: '',
       ontologyId: '',
@@ -431,10 +421,6 @@ export class QueryBuilderItemComponent {
     const formValue = toFormValue(leaf);
     this.form.patchValue(formValue, {emitEvent: false});
     this.formSnapshot = formValue;
-    if (this.catalogControl.value !== leaf.catalogName) {
-      this.catalogControl.setValue(leaf.catalogName, {emitEvent: false});
-    }
-    this.catalogQuery.set(leaf.catalogName);
     this.syncing = false;
   }
 
@@ -445,9 +431,6 @@ export class QueryBuilderItemComponent {
     }
     if (!previous || previous.value !== current.value) {
       patch.value = current.value ?? '';
-    }
-    if (!previous || previous.datatypeHint !== current.datatypeHint) {
-      patch.datatypeHint = current.datatypeHint ?? '';
     }
     if (!previous || previous.valueMode !== current.valueMode) {
       patch.valueMode = current.valueMode ?? 'absolute';
@@ -501,7 +484,6 @@ function toFormValue(leaf: QueryLeafNode): LeafFormValue {
   return {
     operator: leaf.operator,
     value: leaf.value,
-    datatypeHint: leaf.datatypeHint,
     valueMode: leaf.valueMode,
     timeFilterMode: leaf.timeFilterChoice,
     timeAfter: leaf.timeAfter,

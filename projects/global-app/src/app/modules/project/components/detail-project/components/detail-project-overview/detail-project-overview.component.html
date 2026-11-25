@@ -105,11 +105,45 @@
       <app-select-query
         [queryId]="queryId()"
         (queryIdChange)="setQueryId($event)"
-        (queryIdSave)="save()">
+        (queryIdSave)="onSaveQuery()">
       </app-select-query>
       <p class="edit-hint">
         {{ 'Click the pencil icon to edit' }}
       </p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="detail-card">
+    <mat-card-header class="detail-card-header">
+      <div mat-card-avatar class="header-avatar">
+        <mat-icon>storage</mat-icon>
+      </div>
+      <mat-card-title>External database (TRE only)</mat-card-title>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content class="card-content">
+      <mat-form-field class="full-width custom-field">
+        <mat-label>Database a client offers</mat-label>
+        <mat-select [value]="project().treSource?.id ?? null" (selectionChange)="onSelectTreSource($event.value)">
+          <mat-option [value]="null">None, train on the query's data</mat-option>
+          @for (source of treSourceOptions(); track source.id) {
+            <mat-option [value]="source.id">{{ source.name }} ({{ source.type }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      @if (project().treSource; as source) {
+        <p>{{ source.description }}</p>
+        <p class="edit-hint">
+          @if (source.access === 'TOOL') {
+            Only {{ source.toolName }} may read it. Set by the client: {{ lockedHyperParams(source) || 'nothing' }}
+          } @else {
+            Any tool of the workflow reads it directly.
+          }
+          The project only runs as TRE on this client.
+        </p>
+      }
     </mat-card-content>
   </mat-card>
 </div>

@@ -7,6 +7,7 @@ import {TranslatePipe} from '@ngx-translate/core';
 import {BadgeComponent} from '@shared-lib/components/badge/badge.component';
 import {BtnComponent} from '@shared-lib/components/btn/btn.component';
 import {InfoCardComponent} from '@shared-lib/components/info-card/info-card.component';
+import {BytesPipe} from '@shared-lib/pipies/bytes.pipe';
 import {
   IMPORT_PHASE_ORDER,
   ImportPhase,
@@ -82,6 +83,8 @@ export class ImportActivityComponent {
   readonly cancelled = output<void>();
   readonly retried = output<void>();
 
+  private readonly bytesPipe = new BytesPipe();
+
   readonly openTable = signal<string | undefined>(undefined);
 
   readonly finished = computed(() => isImportFinished(this.activity().phase));
@@ -133,8 +136,8 @@ export class ImportActivityComponent {
     switch (activity.phase) {
       case 'TRANSFER':
         return this.buildStep('TRANSFER', 'IMPORT.STEP.TRANSFER_DETAIL', {
-          loaded: this.megabytes(activity.transferred),
-          total: this.megabytes(activity.fileSize),
+          loaded: this.formatSize(activity.transferred),
+          total: this.formatSize(activity.fileSize),
         }, activity.transferPercent);
       case 'PARSING':
         return this.tables().length
@@ -143,7 +146,7 @@ export class ImportActivityComponent {
             total: this.tables().length,
           })
           : this.buildStep('PARSING', 'IMPORT.STEP.PARSING_DETAIL', {
-            size: this.megabytes(activity.fileSize),
+            size: this.formatSize(activity.fileSize),
           });
       case 'SAMPLING':
         return this.buildStep('SAMPLING', 'IMPORT.STEP.SAMPLING_DETAIL', {
@@ -156,7 +159,7 @@ export class ImportActivityComponent {
     }
   });
 
-  readonly sizeLabel = computed(() => this.megabytes(this.activity().fileSize));
+  readonly sizeLabel = computed(() => this.formatSize(this.activity().fileSize));
 
   toggleTable(table: ImportTableDTO): void {
     this.openTable.update(open => open === table.name ? undefined : table.name);
@@ -182,7 +185,8 @@ export class ImportActivityComponent {
     };
   }
 
-  private megabytes(bytes: number | undefined): number {
-    return Math.round(((bytes ?? 0) / (1024 * 1024)) * 10) / 10;
+  /** Human-readable size in the most fitting unit (e.g. "45 KB", "1.2 MB"), so small files never show as "0 MB". */
+  private formatSize(bytes: number | undefined): string {
+    return this.bytesPipe.transform(bytes ?? 0);
   }
 }

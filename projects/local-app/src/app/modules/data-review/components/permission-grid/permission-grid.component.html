@@ -99,7 +99,8 @@
           @if (isXSmallScreen()) {
             <span class="column-name">{{ 'GRID.AUTO_TRAINING_ACCESS' | translate }}:</span>
           }
-          <span>{{ element.autoTrainingAccess }}</span>
+          <span>FL: {{ element.federatedTrainingAccess ?? 'ENABLED' }} / {{ element.federatedAutoTrainingAccess }},
+            TRE: {{ element.treTrainingAccess ?? 'DISABLED' }} / {{ element.treAutoTrainingAccess }}{{ element.treShareName ? ', named' : '' }}</span>
         </mat-cell>
       </ng-container>
 

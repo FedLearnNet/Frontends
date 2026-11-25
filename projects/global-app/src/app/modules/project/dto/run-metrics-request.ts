@@ -9,7 +9,11 @@ export enum RunMetricsRequestStatus {
   COMPLETED = 'COMPLETED',
 }
 
+// Metrics the apps reported, or the outputs of a TRE run.
+export type RunMetricsRequestType = 'METRICS' | 'OUTPUTS';
+
 export interface RunMetricsRequestDto extends BaseDto {
+  type?: RunMetricsRequestType;
   experimentId: number;
   projectId: number;
   status: RunMetricsRequestStatus;

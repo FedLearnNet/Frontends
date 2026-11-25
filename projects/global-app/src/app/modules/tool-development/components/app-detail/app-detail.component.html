@@ -38,6 +38,9 @@
         </button>
 
       }
+      @if (app.id) {
+        <app-test-engine-control [app]="app" [appConnected]="appConnected()"/>
+      }
       @if (app.type) {
         <lib-app-type-badge [type]="app.type"
                             [supportsFederatedLearning]="app.supportsFederatedLearning"></lib-app-type-badge>

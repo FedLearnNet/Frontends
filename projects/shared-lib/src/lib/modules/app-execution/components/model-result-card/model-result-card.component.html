@@ -2,15 +2,15 @@
   class="result" #result>
   <div
     class="result--wrapper">
-    @if (prediction(); as p) {
-      @if (p.runMode === DataAnalysisRunModesEnum.WORKFLOW) {
+    @if (run(); as p) {
+      @if (isWorkflow()) {
         <div
           class="result--workflow-header">
           @if (p.status === RunStatusTypes.STOPPED || p.status === RunStatusTypes.ERROR) {
             <lib-badge [text]="p.status" color="RED" [border]="true" [pulseCircle]="true"></lib-badge>
           }
           <mat-icon class="wf-icon">rebase_edit</mat-icon>
-          <span>Node {{ p.currentWorkflowStep }}/{{ p.maxWorkflowSteps }}</span>
+          <span>Node {{ stepPosition() }}/{{ p.steps.length }}</span>
 
           <div>
             <button mat-icon-button
@@ -55,33 +55,33 @@
             [showAnalyzeBtn]="true"
             [showDownloadBtn]="false"
             [appId]="appId"
-            [runId]="runId"
+            [runId]="run().id"
             [runType]="runType"
-            [outputData]="prediction().result"
-            [outputFiles]="prediction().outputFiles"
+            [outputData]="$any(outputData())"
+            [outputFiles]="outputFiles()"
             (analyzeClicked)="openModelAnalyzeDialog($event)"
           />
           @if (isError()) {
             <lib-error-card
               class="error-card"
             >
-              <span> {{ prediction().lastError }}</span>
+              <span> {{ error() }}</span>
             </lib-error-card>
           }
         }
         @case (1) {
-          <lib-app-run-param-list [params]="prediction().hyperParams"/>
+          <lib-app-run-param-list [params]="hyperParams()"/>
         }
         @case (2) {
           <lib-app-run-param-list [noParamsText]="'NO_INPUT'"
-                                  [inputFiles]="prediction().inputFiles"
-                                  [params]="prediction().inputs"/>
+                                  [inputFiles]="inputFiles()"
+                                  [params]="inputs()"/>
         }
       }
     </div>
   </div>
   <mat-toolbar>
-    <span>{{ prediction().updatedAt | date }} </span>
+    <span>{{ run().updatedAt | date }} </span>
     <span class="spacer"></span>
     <button mat-icon-button
             [matTooltip]="'BUTTON.DOWNLOAD_OUTPUT' | translate"

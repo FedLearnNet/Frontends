@@ -2,6 +2,10 @@
   connector().name } }}</h2>
 <mat-divider />
 <mat-dialog-content>
+  <lib-network-access-warning [access]="networkAccess()">
+    <p>{{ 'NETWORK_ACCESS_WARNING.RUN' | translate }}</p>
+  </lib-network-access-warning>
+
   <mat-checkbox [checked]="deleteExistingPatients()" [disabled]="dryRun()"
     (change)="onDeleteExistingChanged($event.checked)" class="run-mode-radio">
     <div class="run-mode-radio-label">
@@ -44,7 +48,7 @@
         <mat-card appearance="outlined" class="app-source-status running">
           <mat-card-content>
             <strong>{{ 'DIALOG.RUN_CONNECTOR.APP_SOURCE.RUNNING_TITLE' | translate }}</strong>
-            <span>{{ appSourceLastMessage()?.lastLog || ('DIALOG.RUN_CONNECTOR.APP_SOURCE.RUNNING_DESC' | translate) }}</span>
+            <span>{{ lastLogOf(appSourceLastMessage()!) || ('DIALOG.RUN_CONNECTOR.APP_SOURCE.RUNNING_DESC' | translate) }}</span>
             <mat-progress-bar mode="indeterminate"/>
           </mat-card-content>
         </mat-card>

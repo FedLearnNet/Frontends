@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM cgr.dev/chainguard/nginx:latest
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
