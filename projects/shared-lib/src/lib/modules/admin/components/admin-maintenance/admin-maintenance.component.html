@@ -1,0 +1,182 @@
+<lib-header
+  title="Updates & backups"
+  [description]="'Install another FL-Net version on this ' + kind + ', roll back, and back up its data.'"
+  [enableSearch]="false"
+  [enableAddBtn]="false">
+</lib-header>
+
+<lib-page-wrapper [isLoading]="!maintenance() && !unreachable() && !error()" [error]="error()">
+
+  @if (unreachable()) {
+    <lib-hint-card>
+      <mat-icon>cloud_off</mat-icon>
+      <span>Not reachable. An installation restarts the services; this page continues once they are back.</span>
+    </lib-hint-card>
+  }
+
+  @if (maintenance(); as maintenance) {
+    @if (!maintenance.status.enabled) {
+      <lib-hint-card>
+        <mat-icon>info</mat-icon>
+        <span>
+          This {{ kind }} does not support updates and backups yet. Run <code>flnet {{ kind }} init</code> once on
+          the server with a current flnet.
+        </span>
+      </lib-hint-card>
+    } @else {
+      <section class="maintenance-layout">
+
+        @if (activity()) {
+          <mat-card class="activity">
+            <mat-spinner diameter="22" />
+            <div class="activity-text">
+              <strong>{{ activity() }}</strong>
+              @if (maintenance.status.lastLogMessage) {
+                <code class="log-line">{{ maintenance.status.lastLogMessage }}</code>
+              }
+            </div>
+          </mat-card>
+        }
+
+        <mat-card class="card">
+          <div class="card-header">
+            <div>
+              <h2>Update</h2>
+              <p class="card-subtitle">
+                Download while everything runs, then install once no training or analysis runs. The {{ kind }} is
+                offline for a few minutes and goes back on its own if anything fails.
+              </p>
+            </div>
+            <lib-status-badge [text]="updateBadge().text" [type]="updateBadge().type" size="SMALL"
+                              [animate]="updateBadge().type === 'RUNNING'" />
+          </div>
+
+          <div class="facts">
+            <div class="fact">
+              <span class="fact-label">Installed</span>
+              <span class="fact-value monospace">{{ maintenance.installedVersion }}</span>
+            </div>
+            @if (isPlatform) {
+              <mat-form-field appearance="outline" class="version-field" subscriptSizing="dynamic">
+                <mat-label>Version to install</mat-label>
+                <input matInput placeholder="e.g. 1.5.0" [value]="target()" (input)="requested.set($any($event.target).value)">
+              </mat-form-field>
+            } @else {
+              <div class="fact">
+                <span class="fact-label">Available</span>
+                <span class="fact-value monospace">{{ maintenance.targetVersion || '–' }}</span>
+              </div>
+            }
+          </div>
+
+          <p class="update-text">{{ updateText() }}</p>
+
+          <div class="actions">
+            <button mat-stroked-button [disabled]="!canPrepare()" (click)="start('PREPARE')">
+              <mat-icon>download</mat-icon>
+              Download {{ target() }}
+            </button>
+            <button mat-flat-button [disabled]="!canApply()" (click)="start('APPLY')">
+              <mat-icon>system_update_alt</mat-icon>
+              Install {{ target() }}
+            </button>
+            <button mat-button [disabled]="!canRollback()" (click)="start('ROLLBACK')">
+              <mat-icon>undo</mat-icon>
+              Roll back
+            </button>
+          </div>
+        </mat-card>
+
+        <mat-card class="card">
+          <div class="card-header">
+            <div>
+              <h2>Backups</h2>
+              <p class="card-subtitle">
+                A backup holds the databases; with configuration and secrets, the whole {{ kind }}. Open one to see
+                where it is and to restore it.
+              </p>
+            </div>
+            <div class="backup-actions">
+              <mat-checkbox [checked]="all()" (change)="all.set($event.checked)">Configuration and secrets</mat-checkbox>
+              <button mat-flat-button [disabled]="!idle()" (click)="backup()">
+                <mat-icon>backup</mat-icon>
+                Back up now
+              </button>
+            </div>
+          </div>
+
+          @if (maintenance.status.backups.length === 0) {
+            <p class="empty-text">No backup yet.</p>
+          } @else {
+            <ul class="backup-list">
+              @for (backup of maintenance.status.backups; track backup.name) {
+                <li class="backup" [class.backup--open]="selected() === backup.name">
+                  <button type="button" class="backup-row" [attr.aria-expanded]="selected() === backup.name"
+                          (click)="toggle(backup)">
+                    <mat-icon class="backup-icon">{{ backup.backUpAll ? 'inventory_2' : 'storage' }}</mat-icon>
+                    <span class="backup-main">
+                      <span class="monospace backup-name">{{ backup.name }}</span>
+                      <span class="backup-meta">
+                        {{ backup.backUpAll ? 'Everything' : 'Databases' }}
+                        @if (backup.version) {
+                          · {{ backup.version }}
+                        }
+                        @if (backup.message) {
+                          · {{ backup.message }}
+                        }
+                      </span>
+                    </span>
+                    @if (backup.complete) {
+                      <span class="backup-date">{{ backup.createdAt | date:'medium' }}</span>
+                    } @else {
+                      <lib-status-badge [text]="backupState(backup).text" [type]="backupState(backup).type" size="X-SMALL"
+                                        [animate]="backupState(backup).type === 'RUNNING'" />
+                    }
+                    <mat-icon class="backup-chevron">{{ selected() === backup.name ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </button>
+
+                  @if (selected() === backup.name) {
+                    <div class="backup-details">
+                      <div class="fact">
+                        <span class="fact-label">Location on the server</span>
+                        <code class="backup-path">{{ backup.path || 'backups/' + backup.name }}</code>
+                      </div>
+                      <div class="fact">
+                        <span class="fact-label">Holds</span>
+                        <span>{{ backup.backUpAll ? 'Databases, configuration and secrets' : 'Databases only' }}</span>
+                      </div>
+
+                      @if (restorable(backup)) {
+                        <div class="restore restore--ok">
+                          <mat-icon>check_circle</mat-icon>
+                          <span>Taken on the installed version {{ backup.version }}, so it can be restored here. Everything
+                            written since then is lost.</span>
+                          <button mat-flat-button [disabled]="!idle()" (click)="restore(backup)">
+                            <mat-icon>settings_backup_restore</mat-icon>
+                            Restore
+                          </button>
+                        </div>
+                      } @else {
+                        <div class="restore restore--no">
+                          <mat-icon>info</mat-icon>
+                          <span>
+                            @if (!backup.complete) {
+                              This backup is not complete and cannot be restored.
+                            } @else {
+                              Taken on {{ backup.version }}, this {{ kind }} runs {{ maintenance.installedVersion }}.
+                              Restore it on the server: <code>flnet {{ kind }} restore {{ backup.name }}</code>
+                            }
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </mat-card>
+      </section>
+    }
+  }
+</lib-page-wrapper>

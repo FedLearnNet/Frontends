@@ -5,6 +5,7 @@ export interface SystemComputingInfoReducedDTO {
 }
 
 export interface SystemComputingInfoDTO extends SystemComputingInfoReducedDTO {
+  flNetSoftwareVersion?: string;
   gpuAvailable: boolean;
   cpuDetails?: {modelName: string; logicalCores: number; architecture: string;
     usedCores: number; freeCores: number; usagePercent: number};

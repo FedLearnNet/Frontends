@@ -69,7 +69,7 @@ export class AppComponent implements OnInit {
   readonly versionLoading = this.infoService.loading;
   readonly versionHint = computed(() => {
     const info = this.infoService.info();
-    return info?.globalVersionNewer ? `Platform runs ${info.globalVersion}, update this Client` : null;
+    return info?.platformVersionNewer ? `Platform runs ${info.platformVersion}, update this Client` : null;
   });
 
   title = environment.appTitle;

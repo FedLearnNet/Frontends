@@ -8,6 +8,7 @@ import {AdminDockerDashboardComponent} from "./components/admin-docker-dashboard
 import {
   AdminDockerContainerDetailComponent
 } from "./components/admin-docker-container-detail/admin-docker-container-detail.component";
+import {AdminMaintenanceComponent} from "@shared-lib/modules/admin/components/admin-maintenance/admin-maintenance.component";
 import {ADMIN_EXECUTION_ROUTES} from "@shared-lib/modules/admin/components/admin-execution/admin-execution.routes";
 
 const routes: Routes = [
@@ -42,6 +43,12 @@ const routes: Routes = [
         path: 'health',
         data: {breadcrumb: 'Health'},
         component: HealthDashboardComponent
+      },
+      {
+        path: 'maintenance',
+        pathMatch: 'full',
+        data: {breadcrumb: 'Updates & backups'},
+        component: AdminMaintenanceComponent
       },
     ],
   },

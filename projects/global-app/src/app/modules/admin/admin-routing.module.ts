@@ -5,6 +5,7 @@ import {ADMIN_REALM_ROLE} from "@shared-lib/services/auth.helper";
 import {AdminCenterComponent} from './components/admin-center/admin-center.component';
 import {AdminDockerDashboardComponent} from './components/admin-docker-dashboard/admin-docker-dashboard.component';
 import {AdminDockerContainerDetailComponent} from './components/admin-docker-container-detail/admin-docker-container-detail.component';
+import {AdminMaintenanceComponent} from "@shared-lib/modules/admin/components/admin-maintenance/admin-maintenance.component";
 import {ADMIN_EXECUTION_ROUTES} from "@shared-lib/modules/admin/components/admin-execution/admin-execution.routes";
 import {AdminFLNetClientObserverComponent} from './components/admin-flnet-client-observer/admin-flnet-client-observer.component';
 
@@ -42,6 +43,12 @@ const routes: Routes = [
         pathMatch: 'full',
         data: {breadcrumb: 'WS Observer'},
         component: AdminFLNetClientObserverComponent
+      },
+      {
+        path: 'maintenance',
+        pathMatch: 'full',
+        data: {breadcrumb: 'Updates & backups'},
+        component: AdminMaintenanceComponent
       }
     ]
   }
