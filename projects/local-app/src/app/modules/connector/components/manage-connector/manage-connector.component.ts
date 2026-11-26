@@ -95,6 +95,7 @@ import {rematchMappingSchemaId} from "../../helper/connector-config-schema-helpe
 import {FileUploadSettings} from '../../models/input-config';
 import {Store} from '@ngrx/store';
 import {selectAllImports} from '../../store/import/import.selectors';
+import {ImportActions} from '../../store/import/import.actions';
 import {ImportActivityChipComponent} from '../import/import-activity-chip/import-activity-chip.component';
 
 const SOURCE_STEPS: (string | number)[] = [
@@ -140,8 +141,12 @@ export class ManageConnectorComponent implements OnInit {
   readonly previewRows = signal(DEFAULT_PREVIEW_ROWS);
 
   private readonly allImports = this.store.selectSignal(selectAllImports);
-  readonly ongoingImports = computed(() =>
-    this.allImports().filter(activity => activity.cohortId === this.cohortId()));
+  readonly latestImport = computed(() =>
+    this.allImports().find(activity => activity.cohortId === this.cohortId()));
+
+  dismissImport(importId: string): void {
+    this.store.dispatch(ImportActions.dismissImport({importId}));
+  }
 
   private readonly initialCard: ConnectorCard = {
     index: 0,

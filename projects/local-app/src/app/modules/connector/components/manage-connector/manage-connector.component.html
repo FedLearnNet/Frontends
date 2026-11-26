@@ -65,10 +65,13 @@
     </mat-drawer>
 
     <mat-drawer-content>
-      @if (ongoingImports().length) {
+      @if (latestImport(); as activity) {
         <div class="connector-imports">
-          @for (activity of ongoingImports(); track activity.importId) {
-            <app-import-activity-chip [activity]="activity"/>
+          <app-import-activity-chip [activity]="activity"/>
+          @if (activity.finishedAt) {
+            <button mat-icon-button type="button" aria-label="Close" (click)="dismissImport(activity.importId)">
+              <mat-icon>close</mat-icon>
+            </button>
           }
         </div>
       }
