@@ -12,9 +12,10 @@ export const importFeatureKey = 'connectorImports';
 
 export interface ImportsState {
   activities: Record<string, ImportActivity>;
+  dismissed: string[];
 }
 
-export const initialImportsState: ImportsState = {activities: {}};
+export const initialImportsState: ImportsState = {activities: {}, dismissed: []};
 
 export const importsReducer = createReducer(
   initialImportsState,
@@ -41,10 +42,11 @@ export const importsReducer = createReducer(
   on(ImportActions.cancelImport, (state, {importId}): ImportsState => forget(state, importId)),
 
   on(ImportActions.dismissImport, (state, {importId}): ImportsState =>
-    state.activities[importId]?.finishedAt === undefined ? state : forget(state, importId)),
+    state.activities[importId]?.finishedAt === undefined ? state
+      : {...forget(state, importId), dismissed: [...state.dismissed, importId]}),
 
   on(ImportActions.cohortImportsLoaded, (state, {imports}): ImportsState => {
-    const unknown = imports.filter(report => !state.activities[report.importId]);
+    const unknown = imports.filter(report => !state.activities[report.importId] && !state.dismissed.includes(report.importId));
     return unknown.reduce((next, report) => write(next, adopted(report)), state);
   }),
 );
