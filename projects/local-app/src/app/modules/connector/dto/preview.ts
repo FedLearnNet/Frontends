@@ -15,7 +15,12 @@ export interface ConnectorConfigDTO {
   schemaMapping?: ConnectorMappingDTO[];
   mergeConfig?: SheetMergeResultDTO;
   pivotConfig?: PivotConfigDTO;
+  /** Rows the preview shows (display only, never saved). */
+  previewRows?: number;
 }
+
+export const DEFAULT_PREVIEW_ROWS = 10;
+export const PREVIEW_ROW_OPTIONS = [10, 25, 50, 100] as const;
 
 export interface PreviewStageDTO {
   stepIndex: number;

@@ -44,6 +44,7 @@ import {MatTooltip} from "@angular/material/tooltip";
 import {ConnectorFileInfoDialogComponent} from "./components/file-info-dialog/file-info-dialog.component";
 import {ConnectorPreviewService, PreviewTable} from "../../../../../services/connector-preview.service";
 import {configToConnectorConfigDTO} from "../../../../../models/connector-config";
+import {DEFAULT_PREVIEW_ROWS} from "../../../../../dto/preview";
 import {PivotTableDialogComponent, PivotTableDialogResult} from "../pivot-table-dialog/pivot-table-dialog.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {InfoCardComponent} from "@shared-lib/components/info-card/info-card.component";
@@ -95,6 +96,10 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   pivotPreviewRunning = signal(false);
   isToolBased = signal<boolean>(false);
   fileDetails = signal<ConnectorFilesDetailDTO | null>(null);
+
+  /** The backend's preview rows (rows with data first); display only, never saved with the connector. */
+  displayRows: any[] | undefined;
+  readonly previewRows = signal(DEFAULT_PREVIEW_ROWS);
 
   /** The outputs the extractor stored on its last run. */
   readonly outputNames = computed(() => {
@@ -541,6 +546,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
 
     this.sheets = this.mapFileInfoToSheets(nextFileInfo);
     this.updateConfigFileInfo();
+    this.refreshDisplayRows();
 
     if (emitChange) {
       this.emitConfigChange();
@@ -586,6 +592,40 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
     });
   }
 
+  /** Only one table without a pivot gets the preview rows and the row-count selector. */
+  canShowPreviewControls(): boolean {
+    return this.sheets.length === 1 && !this.config().pivotConfig;
+  }
+
+  changePreviewRows(rows: number): void {
+    this.previewRows.set(rows);
+    this.refreshDisplayRows();
+  }
+
+  primaryRows(): any[] {
+    if (this.canShowPreviewControls() && this.displayRows) {
+      return this.displayRows;
+    }
+    return this.sheets[0]?.info.json ?? [];
+  }
+
+  private refreshDisplayRows(): void {
+    this.displayRows = undefined;
+    if (!this.canShowPreviewControls()) {
+      return;
+    }
+    // Raw columns, like the merged preview: the grid maps renames and deletions by column.
+    const config = {...this.config(), cohortId: this.getCohortId(), fileInfo: undefined, uploadInfo: undefined};
+    this.connectorPreviewService.previewPivot({...configToConnectorConfigDTO(config), previewRows: this.previewRows()})
+      .subscribe({
+        next: ([table]) => {
+          this.displayRows = table?.rows.length ? table.rows : undefined;
+          this.cdr.markForCheck();
+        },
+        error: () => undefined // the service reports the error; the stored sample stays visible
+      });
+  }
+
   private emitConfigChange(): void {
     this.configChange.emit(this.config());
   }
@@ -597,6 +637,7 @@ export class ConnectorStepSpecifySelectorsComponent implements ConnectorStepConf
   private applyPivotConfig(pivotConfig?: PivotConfigDTO): void {
     this.config.update(config => ({...config, pivotConfig}));
     this.emitConfigChange();
+    this.refreshDisplayRows();
 
     if (!pivotConfig) {
       this.pivotTables = this.sourceTables;

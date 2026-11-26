@@ -81,6 +81,7 @@ describe('ConnectorStepSpecifySelectorsComponent pivot configuration', () => {
 
   it('calls the backend only after pivot configuration is applied', () => {
     createComponent(createConfig({'patients.csv': sheet('patients.csv', ['patientId', 'field', 'value'])}));
+    previewService.previewPivot.calls.reset();
 
     component.openPivotDialog();
     expect(previewService.previewPivot).not.toHaveBeenCalled();

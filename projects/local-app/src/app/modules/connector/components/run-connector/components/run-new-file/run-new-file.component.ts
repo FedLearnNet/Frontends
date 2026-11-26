@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -18,7 +19,7 @@ import {ConnectorFileImportResultDTO, ConnectorFilesDTO, FileParsingSettingsDTO}
 import {
   ConnectorStepDataSourceMultiFileUploadComponent
 } from "../../../manage-connector/components/config/input-file/components/multi-file/multi-file.component";
-import {MatDialog} from "@angular/material/dialog";
+import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {FormsModule} from '@angular/forms';
@@ -82,16 +83,22 @@ export class RunNewFileComponent {
   }
 
   private _fileInput?: ElementRef<HTMLInputElement>;
+  private reuploadDialog?: MatDialogRef<ConfirmDialogComponent, boolean>;
 
   private readonly fileMissingEffect = effect(() => {
-    if (this.config().inputConfig && isFileUploadSettings(this.config().inputConfig!)) {
-      const isMissing = !(this.config().inputConfig as any)?.fileExists;
+    const inputConfig = this.config().inputConfig;
+    const isMissing = !!inputConfig && isFileUploadSettings(inputConfig) && !(inputConfig as any).fileExists;
 
-      if (isMissing) {
-        this.openReuploadModal();
-      }
+    if (isMissing) {
+      this.openReuploadModal();
+    } else {
+      this.closeReuploadModal();
     }
   });
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.closeReuploadModal());
+  }
 
   private readonly fileConfig = computed<FileUploadSettings | undefined>(() => {
     const inputConfig = this.config().inputConfig;
@@ -247,6 +254,9 @@ export class RunNewFileComponent {
   }
 
   private openReuploadModal(): void {
+    if (this.reuploadDialog) {
+      return;
+    }
     const inputConfig = this.config().inputConfig;
     const fileName = inputConfig && 'fileName' in inputConfig ? inputConfig.fileName : '';
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -258,11 +268,22 @@ export class RunNewFileComponent {
       },
     });
 
-    dialogRef.afterClosed().subscribe((upload: true | false) => {
+    this.reuploadDialog = dialogRef;
+
+    dialogRef.afterClosed().subscribe((upload?: boolean) => {
+      if (this.reuploadDialog === dialogRef) {
+        this.reuploadDialog = undefined;
+      }
       if (upload) {
         this.triggerNewFileUpload();
       }
     });
+  }
+
+  private closeReuploadModal(): void {
+    const dialogRef = this.reuploadDialog;
+    this.reuploadDialog = undefined;
+    dialogRef?.close();
   }
 
   private triggerNewFileUpload(): void {
