@@ -12,6 +12,7 @@
 } @else {
   <lib-workflow-validation-panel class="error-panel"
                                  (isValidChange)="updateIsValid($event)"
+                                 [extraErrors]="treErrors()"
                                  [workflow]="workflow()">
   </lib-workflow-validation-panel>
   <lib-workflow-palette

@@ -271,6 +271,18 @@ export function isAppBasedUploadSettings(
   return cfg.mode === 'APP';
 }
 
+/**
+ * Version ids of all store tools a connector runs: the app-based extractor and the tool transformers.
+ */
+export function connectorToolVersionIds(connector: ConnectorDTO): number[] {
+  const inputConfig = connector.inputConfig;
+  const extractorId = inputConfig && isAppBasedUploadSettings(inputConfig) ? inputConfig.appVersionId : null;
+  const ids = [extractorId, ...(connector.transformer ?? []).map(t => t.appVersionId)]
+    .map(id => id == null || id === '' ? NaN : Number(id))
+    .filter(id => Number.isFinite(id));
+  return [...new Set(ids)];
+}
+
 export function orderColumnsLikeHeaders(
   columns: string[],
   fileInfo: Record<string, UploadInfoDTO> | undefined,

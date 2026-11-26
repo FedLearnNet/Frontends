@@ -24,8 +24,8 @@
                          [streaming]="isSSEConnected()"
                          (clicked)="refresh.emit()"/>
 
-    <lib-status-badge [text]="experiment().experimentStatus!"
-                      [type]="projectStatusToBadgeStatus(experiment().experimentStatus!)"
+    <lib-status-badge [text]="statusText()"
+                      [type]="statusType()"
                       size="SMALL"
                       [animate]="true"/>
 
@@ -42,15 +42,15 @@
 
   <lib-info-grid title="Details">
     <lib-info-item title="Started At">
-      <lib-time-badge [date]="experiment().startedAt"/>
+      <lib-time-badge [date]="run().startedAt"/>
     </lib-info-item>
     <lib-info-item title="Finished At">
-      <lib-time-badge [date]="experiment().finishedAt"/>
+      <lib-time-badge [date]="run().finishedAt"/>
     </lib-info-item>
     <lib-info-item title="Duration">
-      <lib-time-badge [date]="experiment().startedAt"
+      <lib-time-badge [date]="run().startedAt"
                       [calcDuration]="true"
-                      [dateTo]="experiment().finishedAt"
+                      [dateTo]="run().finishedAt"
       />
     </lib-info-item>
   </lib-info-grid>

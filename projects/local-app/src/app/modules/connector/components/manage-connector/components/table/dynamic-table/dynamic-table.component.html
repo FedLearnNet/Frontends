@@ -1,3 +1,16 @@
+@if (showPreviewControls()) {
+  <div class="preview-controls">
+    <mat-form-field appearance="outline" class="preview-rows" subscriptSizing="dynamic">
+      <mat-label>{{ 'PREVIEW_OPTIONS.ROWS' | translate }}</mat-label>
+      <mat-select [value]="previewRows()" (selectionChange)="previewRowsChange.emit($event.value)">
+        @for (option of previewRowOptions; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+}
+<div class="table-scroll" [class.limited]="showPreviewControls()">
 <table mat-table [dataSource]="dataSource"
        [class.hideDeleted]="hideDeleted()"
 >
@@ -36,9 +49,10 @@
     </ng-container>
   }
 
-  <tr class="element-header" mat-header-row *matHeaderRowDef="getColumns()"></tr>
+  <tr class="element-header" mat-header-row *matHeaderRowDef="getColumns(); sticky: showPreviewControls()"></tr>
   <tr class="element-row" mat-row *matRowDef="let row; columns: getColumns();"></tr>
 </table>
+</div>
 @if (loading()) {
   <lib-skeleton-loader [showHeader]="false"
                        [tableCols]="columns().length"

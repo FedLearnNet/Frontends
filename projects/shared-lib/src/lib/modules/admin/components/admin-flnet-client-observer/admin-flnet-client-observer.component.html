@@ -41,14 +41,18 @@
         @if (clients().length === 0) {
           <p class="empty-text">No clients currently connected.</p>
         } @else {
-          <mat-chip-set>
+          <div class="client-list">
             @for (clientId of clients(); track clientId) {
-              <mat-chip>
-                <mat-icon matChipAvatar>device_hub</mat-icon>
-                {{ clientId }}
-              </mat-chip>
+              <section class="client">
+                <header class="client-header">
+                  <mat-icon>device_hub</mat-icon>
+                  <span class="client-id monospace">{{ clientId }}</span>
+                  <lib-status-badge text="Connected" type="SUCCESS" size="SMALL" [animate]="false"></lib-status-badge>
+                </header>
+                <lib-system-info [info]="systems()[clientId]" [runtime]="systems()[clientId]" />
+              </section>
             }
-          </mat-chip-set>
+          </div>
         }
       </mat-card>
 

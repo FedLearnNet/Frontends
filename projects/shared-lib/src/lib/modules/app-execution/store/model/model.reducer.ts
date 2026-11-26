@@ -64,7 +64,7 @@ export const modelReducer = createReducer(
     })),
     on(ModelActions.loadSubModelForRunFailure, (state, {error}): ModelState => ({...state, loading: false, error})),
 
-    on(ModelActions.loadModelVersionForExperiment, (state): ModelState => ({...state, loading: true, error: null})),
+    on(ModelActions.loadModelVersionForExperiment, (state): ModelState => ({...state, modelVersionForExperiment: null, loading: true, error: null})),
     on(ModelActions.loadModelVersionForExperimentSuccess, (state, {version}): ModelState => ({
       ...state,
       modelVersionForExperiment: version,
@@ -83,7 +83,7 @@ export const modelReducer = createReducer(
       loading: false
     })),
     on(ModelActions.selectSubModelFailure, (state, {error}): ModelState => ({...state, loading: false, error})),
-    on(DataAnalysisActions.addExperimentResults, (state): ModelState => ({
+    on(DataAnalysisActions.runResult, (state): ModelState => ({
       ...state,
       detail: null,
     })),

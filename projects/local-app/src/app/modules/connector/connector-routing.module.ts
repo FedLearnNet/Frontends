@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
+import {cohortRouteResources} from '@local-app/cohort/services/cohort-route-resources';
 import {ConnectorComponent} from "./connector.component";
 import {ManageConnectorComponent} from "./components/manage-connector/manage-connector.component";
 import {ListConnectorComponent} from "./components/list-connector/list-connector.component";
@@ -8,10 +9,13 @@ import {connectorAndFileResolver, connectorResolver} from "./services/connector-
 import {ConnectorManagementMode} from "./enum/connector-managment-mode";
 import {RunConnectorViewComponent} from "./components/run-connector/run-connector.component";
 import { runResolver } from "./services/run-resolver.service";
-import {cohortResolver} from "@local-app/cohort/services/cohort-resolver.service";
 import {ConnectorFileListComponent} from './components/file-list/connector-file-list.component';
 import {ConnectorFileDetailComponent} from './components/file-detail/connector-file-detail.component';
 import {connectorFileDetailResolver, connectorFilesResolver} from './services/connector-file-resolver.service';
+import {CustomTransformerListComponent} from './components/custom-transformer-list/custom-transformer-list.component';
+import {
+  CustomTransformerDetailComponent
+} from './components/custom-transformer-detail/custom-transformer-detail.component';
 
 const routes: Routes = [
   {
@@ -21,11 +25,13 @@ const routes: Routes = [
       {
         path: '',
         component: ListConnectorComponent,
+        resources: cohortRouteResources,
         pathMatch: 'full',
       },
       {
         path: 'new',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {},
         data: {
           breadcrumb: 'New',
@@ -35,8 +41,8 @@ const routes: Routes = [
       {
         path: 'new/:connector-id',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {
-          cohort: cohortResolver,
           connector: connectorAndFileResolver,
         },
         data: {
@@ -65,8 +71,23 @@ const routes: Routes = [
         },
       },
       {
+        path: 'custom',
+        component: CustomTransformerListComponent,
+        data: {
+          breadcrumb: 'Custom transformers',
+        },
+      },
+      {
+        path: 'custom/:customId',
+        component: CustomTransformerDetailComponent,
+        data: {
+          breadcrumb: 'Custom transformer',
+        },
+      },
+      {
         path: 'edit/:connector-id',
         component: ManageConnectorComponent,
+        resources: cohortRouteResources,
         resolve: {
           connector: connectorAndFileResolver,
         },
@@ -84,6 +105,7 @@ const routes: Routes = [
             path: '',
             pathMatch: 'full',
             component: ViewConnectorComponent,
+            resources: cohortRouteResources,
             resolve: {
               connector: connectorResolver,
             },
@@ -91,6 +113,7 @@ const routes: Routes = [
           {
             path: 'run/:run-id',
             component: RunConnectorViewComponent,
+            resources: cohortRouteResources,
             // `connector` is inherited from the componentless parent route.
             resolve: {
               run: runResolver,

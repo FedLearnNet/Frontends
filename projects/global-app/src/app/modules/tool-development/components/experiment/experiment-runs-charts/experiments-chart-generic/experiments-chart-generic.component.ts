@@ -26,7 +26,7 @@ import {MatCardModule} from "@angular/material/card";
 import {RunMessageMetricDTO} from "@shared-lib/modules/experiments/dto/log";
 import {getHyperParams} from "../experiment-runs-charts-helper";
 import {XAXisOption, YAXisOption} from "echarts/types/dist/shared";
-import {ExperimentRunDTO} from "@shared-lib/modules/app-execution/dto/experiment";
+import {TestAttemptDTO, trialColorOf, trialNameOf} from "../../../../dto/test-run";
 import {ParallelChart} from "echarts/charts";
 import {TitleComponent, TooltipComponent} from "echarts/components";
 import {CanvasRenderer} from "echarts/renderers";
@@ -47,7 +47,7 @@ export class ExperimentsChartGenericComponent implements OnInit, OnChanges {
   private readonly changeDetectorRef: ChangeDetectorRef = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
 
-  readonly experimentRuns = input<ExperimentRunDTO[]>([]);
+  readonly experimentRuns = input<TestAttemptDTO[]>([]);
 
   @Input() config: ExperimentDiagramConfigDTO;
 
@@ -73,8 +73,8 @@ export class ExperimentsChartGenericComponent implements OnInit, OnChanges {
     }
   }
 
-  getMetricForHyper(run: ExperimentRunDTO, hyperParamName: string, metric: string, mode: string, metricFirst?: boolean): (number | string)[] {
-    const hyperParam = run.hyperParams[hyperParamName];
+  getMetricForHyper(run: TestAttemptDTO, hyperParamName: string, metric: string, mode: string, metricFirst?: boolean): (number | string)[] {
+    const hyperParam = (run.params ?? {})[hyperParamName] as string | number;
     const metrics: RunMessageMetricDTO[] = run.metrics
       .filter((m: RunMessageMetricDTO) => m.metric === metric);
     const metricValues: number[] = metrics.map((m: RunMessageMetricDTO) => +m.value);
@@ -97,7 +97,7 @@ export class ExperimentsChartGenericComponent implements OnInit, OnChanges {
     return [hyperParam, metricValue];
   }
 
-  getMetricForRun(run: ExperimentRunDTO, metric: string, mode: string): (number | string)[] {
+  getMetricForRun(run: TestAttemptDTO, metric: string, mode: string): (number | string)[] {
     const metrics: RunMessageMetricDTO[] = run.metrics
       .filter((m: RunMessageMetricDTO) => m.metric === metric);
     const metricValues: number[] = metrics.map((m: RunMessageMetricDTO) => +m.value);
@@ -165,7 +165,7 @@ export class ExperimentsChartGenericComponent implements OnInit, OnChanges {
             data: seriesData,
             type: this.config.seriesType,
             lineStyle: {
-              color: run.color
+              color: trialColorOf(run)
             }
           });
         } else {
@@ -221,7 +221,7 @@ export class ExperimentsChartGenericComponent implements OnInit, OnChanges {
         return {
           name: 'Run',
           type: 'category',
-          data: this.experimentRuns().map(run => run.name)
+          data: this.experimentRuns().map(run => trialNameOf(run))
         };
       }
 

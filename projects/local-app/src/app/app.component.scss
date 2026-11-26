@@ -34,8 +34,32 @@
   .topbar-left {
     display: flex;
     align-items: center;
+    gap: 8px;
     min-width: 0;
     flex: 1;
+  }
+
+  // Only on a narrow screen, where the closed menu is hidden completely
+  .menu-toggle {
+    display: none;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    @media (max-width: 768px) {
+      display: inline-flex;
+    }
   }
 
   .topbar-right {

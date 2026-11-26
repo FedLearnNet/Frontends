@@ -2,6 +2,11 @@ import {CdkDragDrop, DragDropModule, moveItemInArray} from "@angular/cdk/drag-dr
 import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {Observable, of, tap} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
+import {Actions} from '@ngrx/effects';
+import {UnsavedChangesService} from '@shared-lib/services/unsaved-changes.service';
+import {dispatchAndAwait} from '@shared-lib/utils/dispatch-and-await';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {MatCardModule} from "@angular/material/card";
 import {MatExpansionModule} from "@angular/material/expansion";
@@ -9,7 +14,8 @@ import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
 import {MatStepperModule} from "@angular/material/stepper";
 import {QueryDTO} from "@global-app/find-data/dto/query";
-import {isLang2Group, Lang2Leaf} from "@global-app/find-data/dto/lang2-query";
+import {isQueryGroup, QueryLeafDTO} from "@global-app/find-data/dto/query-item";
+import {operatorSpelling} from "@global-app/find-data/helpers/query-tree.rules";
 import {collectLeaves} from "@global-app/find-data/helpers/query-tree.serializer";
 import {DataStatisticsResponseDTO, StatisticsColumnProfile} from "@global-app/find-data/dto/query-statistics";
 import {QueryStatisticsResponseService} from "@global-app/find-data/services/query-statistics-response.service";
@@ -51,7 +57,6 @@ import {
   normalizeExportFeature,
   toSelectionKey
 } from "@shared-lib/modules/data-modeler/utils/patient-export-config.util";
-import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {OntologyService} from "@global-app/schema/services/ontology.service";
@@ -74,7 +79,6 @@ import {forkJoin} from "rxjs";
     DataExportConfigComponent,
     DatasetFeatureCardComponent,
     DatasetPreviewComponent,
-    HeaderComponent,
     PageWrapperComponent,
     BtnComponent
   ],
@@ -84,6 +88,8 @@ import {forkJoin} from "rxjs";
 })
 export class DatasetBuilderPageComponent {
   private readonly store = inject(Store);
+  private readonly actions$ = inject(Actions);
+  private readonly translate = inject(TranslateService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly queryService = inject(QueryService);
   private readonly dataTypeService = inject(DataTypeService);
@@ -211,6 +217,16 @@ export class DatasetBuilderPageComponent {
     return `${query.result} matching patients`;
   });
 
+  readonly hasUnsavedChanges = computed(() => {
+    const project = this.project();
+    return !!project && JSON.stringify(this.exportConfig()) !== JSON.stringify(project.exportConfig ?? {});
+  });
+
+  private readonly unsavedChanges = inject(UnsavedChangesService).register({
+    hasUnsavedChanges: () => this.hasUnsavedChanges(),
+    save: () => this.saveDesign$(),
+  });
+
   private readonly syncProjectConfigEffect = effect(() => {
     const project = this.project();
     if (!project) {
@@ -247,23 +263,23 @@ export class DatasetBuilderPageComponent {
 
   private readonly loadSelectionOptionsEffect = effect((onCleanup) => {
     const query = this.query();
-    const leaves = query?.query && isLang2Group(query.query) ? collectLeaves(query.query) : [];
+    const leaves = query?.query && isQueryGroup(query.query) ? collectLeaves(query.query) : [];
     if (leaves.length === 0) {
       this.rawSelectionOptions.set([]);
       return;
     }
 
     this.dataSelectionsLoading.set(true);
-    const requestedSelectionKeys = new Map<string, Lang2Leaf>();
+    const requestedSelectionKeys = new Map<string, QueryLeafDTO>();
     const ontologyIds = new Set<string>();
 
     for (const item of leaves) {
       requestedSelectionKeys.set(toSelectionKey({
-        globalOntologyId: item.ontology_id,
-        globalDataTypeId: item.data_type_id,
+        globalOntologyId: item.ontologyId,
+        globalDataTypeId: item.dataTypeId,
       }), item);
-      if (item.ontology_id) {
-        ontologyIds.add(item.ontology_id);
+      if (item.ontologyId) {
+        ontologyIds.add(item.ontologyId);
       }
     }
 
@@ -490,9 +506,13 @@ export class DatasetBuilderPageComponent {
   }
 
   saveDesign(): void {
+    this.saveDesign$().subscribe();
+  }
+
+  private saveDesign$(): Observable<boolean> {
     const project = this.project();
     if (!project) {
-      return;
+      return of(false);
     }
 
     const exportConfig = {
@@ -505,14 +525,20 @@ export class DatasetBuilderPageComponent {
     this.exportConfig.set(exportConfig);
     this.datasetFeatures.set(exportConfig.features ?? []);
 
-    this.store.dispatch(ProjectActions.update({
-      project: {
-        ...project,
-        exportConfig,
+    return dispatchAndAwait(
+      this.store,
+      this.actions$,
+      ProjectActions.update({project: {...project, exportConfig}}),
+      [ProjectActions.updateSuccess],
+      [ProjectActions.updateFailure],
+    ).pipe(tap(ok => {
+      if (ok) {
+        this.snackBar.open(
+          this.translate.instant('SUCCESS.DATASET_DESIGN_SAVED'),
+          this.translate.instant('BUTTON.CLOSE'),
+          {duration: 3500});
       }
     }));
-
-    this.snackBar.open('Dataset design saved to the project.', 'Close', {duration: 3500});
   }
 
   refreshPreview(): void {
@@ -653,7 +679,7 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private buildSelectionOptions(pairs: OntologyDataTypeDTO[], requestedSelectionKeys: Map<string, Lang2Leaf>): DatasetSelectionOption[] {
+  private buildSelectionOptions(pairs: OntologyDataTypeDTO[], requestedSelectionKeys: Map<string, QueryLeafDTO>): DatasetSelectionOption[] {
     const options = new Map<string, DatasetSelectionOption>();
 
     for (const {ontology, dataType, subscriptionsCount} of pairs) {
@@ -679,7 +705,7 @@ export class DatasetBuilderPageComponent {
 
       const queryItem = requestedSelectionKeys.get(key);
       const ontologyQueryItem = queryItem ?? Array.from(requestedSelectionKeys.values()).find(
-        item => item.ontology_id === ontologyId
+        item => item.ontologyId === ontologyId
       );
 
       options.set(key, {
@@ -841,15 +867,16 @@ export class DatasetBuilderPageComponent {
     }
   }
 
-  private formatQuerySummary(leaf: Lang2Leaf): string {
+  private formatQuerySummary(leaf: QueryLeafDTO): string {
     return this.formatLeafOperator(leaf);
   }
 
-  private formatLeafOperator(leaf: Lang2Leaf): string {
+  private formatLeafOperator(leaf: QueryLeafDTO): string {
+    const operator = operatorSpelling(leaf.operator);
     if (leaf.value == null || leaf.value === '') {
-      return leaf.operator;
+      return operator;
     }
-    return `${leaf.operator}: ${leaf.value}`;
+    return `${operator}: ${leaf.value}`;
   }
 
   private averageMissingRate(profiles: StatisticsColumnProfile[]): number | null {

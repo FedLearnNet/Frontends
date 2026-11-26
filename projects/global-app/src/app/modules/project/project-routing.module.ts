@@ -10,12 +10,10 @@ import {
   DetailLocalExperimentComponent
 } from "@global-app/project/components/runs/detail-local-experiment/detail-local-experiment.component";
 import {
-  projectFedExperimentResolver,
-  projectLocalExperimentResolver
+  projectRunResolver
 } from "@global-app/project/services/project-experiment-resolver";
-import {
-  DatasetBuilderPageComponent
-} from "@global-app/project/components/dataset-builder-page/dataset-builder-page.component";
+
+import {unsavedChangesGuard} from "@shared-lib/services/unsaved-changes.service";
 
 const routes: Routes = [
   {
@@ -35,11 +33,8 @@ const routes: Routes = [
           {
             path: '',
             component: DetailProjectComponent,
+            canDeactivate: [unsavedChangesGuard],
             pathMatch: 'full'
-          },
-          {
-            path: 'dataset-builder',
-            component: DatasetBuilderPageComponent,
           },
           {
             path: 'experiments',
@@ -47,15 +42,25 @@ const routes: Routes = [
               {
                 path: 'federated/:experiment-id',
                 component: DetailFederatedExperimentComponent,
+                data: {kind: 'federated'},
                 resolve: {
-                  fedExperiment: projectFedExperimentResolver
+                  run: projectRunResolver
+                }
+              },
+              {
+                path: 'tre/:experiment-id',
+                component: DetailFederatedExperimentComponent,
+                data: {kind: 'tre'},
+                resolve: {
+                  run: projectRunResolver
                 }
               },
               {
                 path: 'local/:experiment-id',
                 component: DetailLocalExperimentComponent,
+                data: {kind: 'local'},
                 resolve: {
-                  localExperiment: projectLocalExperimentResolver
+                  run: projectRunResolver
                 }
               }
             ]

@@ -7,18 +7,19 @@ import {RouterModule} from "@angular/router";
 import {MatDialog} from "@angular/material/dialog";
 import {ExperimentService} from "../../service/experiment-run.service";
 import {ControllerSocketService} from "../../service/testembed-socket.service";
-import {RunStatusTypes} from "../../dto/test-run";
+import {RunStatusTypes, TestRunDTO} from "../../dto/test-run";
 import {ExperimentCreateDialogComponent} from "./experiment-create-dialog/experiment-create-dialog.component";
-import {ExperimentDTO} from "@shared-lib/modules/app-execution/dto/experiment";
 import {TranslatePipe} from "@ngx-translate/core";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 
 
+import {AppRunEngineBadgeComponent} from "../app-runs/components/app-run-engine-badge/app-run-engine-badge.component";
 @Component({
   selector: 'app-experiment',
   imports: [CommonModule,
+    AppRunEngineBadgeComponent,
     MatTableModule,
     MatProgressSpinnerModule,
     RouterModule, TranslatePipe, StatusBadgeComponent, BtnComponent,
@@ -36,8 +37,8 @@ export class ExperimentComponent implements OnInit {
   readonly appRunning = input<boolean>(false);
   readonly datafiles = input<string[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'name', 'startTime', 'lastUpdate', 'appVersion'];
-  dataSource: MatTableDataSource<ExperimentDTO> = new MatTableDataSource();
+  displayedColumns: string[] = ['position', 'status', 'engine', 'name', 'startTime', 'lastUpdate', 'appVersion'];
+  dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {
     const app = this.app();
@@ -45,11 +46,12 @@ export class ExperimentComponent implements OnInit {
       this.experimentService.getExperiments(app.id).subscribe((runs) => {
         this.dataSource.data = runs;
       });
+      this.runTestEmbedService.getExperimentUpdate$().subscribe((run) => this.updateOrAddRun(run));
     }
   }
 
-  updateOrAddRun(run: ExperimentDTO): void {
-    const data: ExperimentDTO[] = this.dataSource.data;
+  updateOrAddRun(run: TestRunDTO): void {
+    const data: TestRunDTO[] = this.dataSource.data;
     if (data.find((r) => r.id === run.id) === undefined) {
       this.dataSource.data = [run, ...data];
     } else {
@@ -62,16 +64,20 @@ export class ExperimentComponent implements OnInit {
     }
   }
 
-  isRunError(dto: ExperimentDTO): boolean {
+  isRunError(dto: TestRunDTO): boolean {
     return dto.status && dto.status.toLowerCase() === RunStatusTypes.ERROR.toLowerCase();
   }
 
-  isRunSuccess(dto: ExperimentDTO): boolean {
+  isRunSuccess(dto: TestRunDTO): boolean {
     return dto.status && dto.status.toLowerCase() === RunStatusTypes.FINISHED.toLowerCase()
   }
 
   addNewExperiment(): void {
     const dialogRef = this.dialog.open(ExperimentCreateDialogComponent, {
+      width: '720px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
       data: {
         app: this.app(),
         datafiles: this.datafiles()

@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, Component, computed, inject, signal,} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal,} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, ReactiveFormsModule, Validators,} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef,} from '@angular/material/dialog';
@@ -8,6 +9,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatExpansionModule} from '@angular/material/expansion';
 import {AppDetailDto} from '@shared-lib/modules/store/dto/app-detail';
 import {
   AppRunHyperparameterComponent
@@ -15,12 +17,17 @@ import {
 import {map, Observable} from "rxjs";
 import {startWith} from "rxjs/operators";
 import {FederatedParticipantConfigDTO, FLNetParticipantRole} from "../../../../dto/federated-test-run";
+import {FileService} from '@shared-lib/modules/files/store/file.service';
+import {FileDTO} from '@shared-lib/modules/files/dto/file';
+import {UploadProgress} from '@shared-lib/modules/files/model/file-response';
+import {UploadProgressComponent} from '@shared-lib/modules/files/components/upload-progress/upload-progress.component';
 
 
 export interface AppRunFederatedTestConfigDialogData {
   app: AppDetailDto;
   datafiles?: string[];
   value?: FederatedParticipantConfigDTO | null;
+  builtImage?: boolean;
 }
 
 @Component({
@@ -35,7 +42,9 @@ export interface AppRunFederatedTestConfigDialogData {
     MatButtonModule,
     MatIconModule,
     MatAutocompleteModule,
+    MatExpansionModule,
     AppRunHyperparameterComponent,
+    UploadProgressComponent,
   ],
   templateUrl: './app-run-federated-test-config-dialog.component.html',
   styleUrl: './app-run-federated-test-config-dialog.component.scss',
@@ -50,6 +59,12 @@ export class AppRunFederatedTestConfigDialogComponent {
     >
   );
   private readonly data = inject<AppRunFederatedTestConfigDialogData>(MAT_DIALOG_DATA);
+  private readonly fileService = inject(FileService);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly builtImage = this.data.builtImage;
+  protected readonly files = signal<FileDTO[]>([]);
+  protected readonly uploads = signal<Record<string, UploadProgress>>({});
+  protected readonly filesFailed = signal(false);
 
   protected readonly initialValue = signal<FederatedParticipantConfigDTO | null>(
     this.data?.value ?? null
@@ -93,6 +108,8 @@ export class AppRunFederatedTestConfigDialogComponent {
   });
 
   constructor() {
+    this.fileService.listFiles().pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({next: files => this.files.set(files), error: () => this.filesFailed.set(true)});
     for (const input of this.app.appConfig.input ?? []) {
       const key = input.variableName ?? input.name;
       const control = this.fb.nonNullable.control(
@@ -128,14 +145,15 @@ export class AppRunFederatedTestConfigDialogComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid || !this.hyperParamsValid) {
+    const client = this.form.controls.role.value === FLNetParticipantRole.CLIENT;
+    if (this.form.invalid || (client && !this.hyperParamsValid) || this.uploading()) {
       this.form.markAllAsTouched();
       Object.values(this.dataInputControls).forEach(control => control.markAsTouched());
       return;
     }
 
     const hasInvalidDataInput = Object.values(this.dataInputControls).some(control => control.invalid);
-    if (hasInvalidDataInput) {
+    if (client && hasInvalidDataInput) {
       Object.values(this.dataInputControls).forEach(control => control.markAsTouched());
       return;
     }
@@ -165,6 +183,44 @@ export class AppRunFederatedTestConfigDialogComponent {
 
   protected getDataControl(name: string): FormControl<string> {
     return this.dataInputControls[name];
+  }
+
+  protected uploading(): boolean {
+    return Object.values(this.uploads()).some(upload => upload.inProgress);
+  }
+
+  protected inputsValid(): boolean {
+    return Object.values(this.dataInputControls).every(control => control.valid);
+  }
+
+  protected fileUrl(file: FileDTO): string {
+    return `${file.downloadUrl?.replace(/\/$/, '')}/download?secret=${encodeURIComponent(file.secret ?? '')}`;
+  }
+
+  protected readonly displayFile = (value: string): string =>
+    this.files().find(file => this.fileUrl(file) === value)?.fileName ?? value;
+
+  protected uploadFile(key: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || this.uploading()) return;
+    this.dataInputControls[key].setValue('');
+    this.dataInputControls[key].disable();
+    this.uploads.update(uploads => ({...uploads, [key]: {progress: 0, inProgress: true}}));
+    this.fileService.upload(file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next: progress => {
+      this.uploads.update(uploads => ({...uploads, [key]: progress}));
+      if (!progress.inProgress) this.dataInputControls[key].enable();
+      if (progress.result) {
+        this.files.update(files => [progress.result!, ...files.filter(f => f.id !== progress.result!.id)]);
+        this.dataInputControls[key].setValue(this.fileUrl(progress.result));
+      }
+    }, error: () => {
+      this.dataInputControls[key].enable();
+      this.uploads.update(uploads => ({...uploads, [key]: {
+        progress: 0, inProgress: false, error: 'Upload failed. Please try again.',
+      }}));
+    }});
   }
 
   private normalizeOptional(value: string): string | undefined {

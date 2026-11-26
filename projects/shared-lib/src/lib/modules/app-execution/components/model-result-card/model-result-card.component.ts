@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, input, linkedSignal, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, signal, ViewChild} from '@angular/core';
 import {
   AppRunOutputComponent
 } from "@shared-lib/modules/app-execution/components/app-run-output/app-run-output.component";
@@ -7,11 +7,15 @@ import {MatIconButton} from "@angular/material/button";
 import {MatToolbar} from "@angular/material/toolbar";
 import {MatIconModule} from "@angular/material/icon";
 import {RunType} from "../../../../../../../global-app/src/app/modules/tool-development/dto/socket";
-import {DataAnalysisResultDTO, DataAnalysisRunModesEnum} from "@shared-lib/modules/app-execution/dto/prediction";
-import {TranslatePipe} from "@ngx-translate/core";
+import {DataAnalysisRunModesEnum} from "@shared-lib/modules/app-execution/dto/prediction";
 import {
-  DownloadService
-} from "../../../../../../../global-app/src/app/modules/tool-development/service/download.service";
+  currentStep,
+  DataAnalysisAttemptDTO,
+  DataAnalysisRunDTO,
+  displayedAttempt,
+  errorOf
+} from "@shared-lib/modules/app-execution/dto/execution-run";
+import {TranslatePipe} from "@ngx-translate/core";
 import {MatTooltip} from "@angular/material/tooltip";
 import {
   AppRunParamListComponent
@@ -32,7 +36,7 @@ import {
 import {DataAnalysisResultAnalyzerDialogData} from "@shared-lib/modules/app-execution/model/data-analyzer";
 import {
   AiTaskExecutionInfoDialogComponent,
-  TaskExecutionInfoDialogData
+  taskExecutionInfoOf
 } from "@shared-lib/modules/app-execution/components/ai-task-execution-info-dialog/ai-task-execution-info-dialog.component";
 import {BadgeComponent} from "@shared-lib/components/badge/badge.component";
 import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-analysis/data-analysis.actions";
@@ -56,38 +60,57 @@ import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-
   styleUrl: './model-result-card.component.scss'
 })
 export class ModelResultCardComponent {
-  private readonly downloadService: DownloadService = inject(DownloadService);
   private readonly dialog: MatDialog = inject(MatDialog);
   private readonly store: Store = inject(Store);
-  prediction = input.required<DataAnalysisResultDTO>();
+  run = input.required<DataAnalysisRunDTO>();
 
   runType: RunType = RunType.EXPERIMENT_RUN;
   @ViewChild('result', {static: true}) topEl!: ElementRef<HTMLElement>;
 
   currentView = signal<number>(0);
 
-  isError = linkedSignal(() => {
-    return this.prediction().status.toLowerCase() === RunStatusTypes.ERROR.toLowerCase();
+  isWorkflow = computed(() => this.run().workflowId != null);
+  step = computed(() => currentStep(this.run()));
+  attempt = computed(() => {
+    const step = this.step();
+    return step ? displayedAttempt(step) : undefined;
   });
+  stepPosition = computed(() => {
+    const step = this.step();
+    return step ? this.run().steps.indexOf(step) + 1 : 0;
+  });
+  error = computed(() => errorOf(this.run()));
+  isError = computed(() => this.run().status === RunStatusTypes.ERROR);
+
+  // A workflow shows what all its steps wrote, the inputs the run was started with.
+  outputData = computed(() => Object.assign({}, ...this.attempts().map(attempt => attempt.outputData ?? {})));
+  outputFiles = computed(() => this.attempts().flatMap(attempt => attempt.outputFiles ?? []));
+  inputs = computed(() => this.run().steps[0]?.inputs ?? {});
+  inputFiles = computed(() => {
+    const first = this.run().steps[0];
+    return (first && displayedAttempt(first)?.inputFiles) ?? [];
+  });
+  hyperParams = computed(() => this.attempt()?.params ?? {});
 
   get appId(): number {
-    return this.prediction().modelId!;
+    return this.step()?.modelId ?? 0;
   }
 
-  get runId(): number {
-    return this.prediction().id;
+  private attempts(): DataAnalysisAttemptDTO[] {
+    return this.run().steps
+      .map(step => displayedAttempt(step))
+      .filter((attempt): attempt is DataAnalysisAttemptDTO => !!attempt);
   }
 
   downloadOutput(): void {
-    const pred = this.prediction();
-    if (pred.dataAnalysisId && pred.containerId) {
-      this.store.dispatch(DataAnalysisActions.downloadResult({
-        containerId: pred.containerId,
-        mode: pred.runMode
-      }));
-    } else {
-      this.downloadService.downloadZIP(this.appId, this.runId, RunType.EXPERIMENT_RUN).subscribe();
+    const containerId = this.attempt()?.containerId;
+    if (!containerId) {
+      return;
     }
+    this.store.dispatch(DataAnalysisActions.downloadResult({
+      containerId,
+      mode: this.isWorkflow() ? DataAnalysisRunModesEnum.WORKFLOW : DataAnalysisRunModesEnum.PREDICTION
+    }));
   }
 
   showInput(): void {
@@ -96,22 +119,16 @@ export class ModelResultCardComponent {
   }
 
   showWorkflowDetail(): void {
-    const pred = this.prediction();
-    if (pred.runMode === DataAnalysisRunModesEnum.PREDICTION) {
-      return;
-    }
-    if (pred.currentWorkflowStepId === undefined ||
-      pred.workflowRunId === undefined ||
-      pred.workflowId === undefined
-    ) {
+    const run = this.run();
+    if (run.workflowId == null || run.dataAnalysisId == null) {
       return;
     }
     const data: DataAnalysisWorkflowDetailDialogData = {
-      experimentId: pred.workflowRunId,
-      dataAnalysisId: pred.dataAnalysisId,
-      workflowId: pred.workflowId
+      experimentId: run.id,
+      dataAnalysisId: run.dataAnalysisId,
+      workflowId: run.workflowId
     };
-    this.store.dispatch(loadWorkflow({id: pred.workflowId}));
+    this.store.dispatch(loadWorkflow({id: run.workflowId}));
     this.dialog.open(DataAnalysisWorkflowDetailDialogComponent, {
       height: '80vh',
       width: '90vw',
@@ -122,12 +139,7 @@ export class ModelResultCardComponent {
   }
 
   downloadWorkflowDetail(): void {
-    const pred = this.prediction();
-    const experimentId = pred.workflowRunId;
-    if(!experimentId) {
-      return;
-    }
-    this.store.dispatch(DataAnalysisActions.downloadWholeWorkflow({experimentId}));
+    this.store.dispatch(DataAnalysisActions.downloadWholeWorkflow({experimentId: this.run().id}));
   }
 
   showOutput(): void {
@@ -170,11 +182,10 @@ export class ModelResultCardComponent {
       width: '90vw',
       maxWidth: '100vw',
       autoFocus: false,
-      data: this.prediction() as TaskExecutionInfoDialogData,
+      data: taskExecutionInfoOf(this.run()),
     });
 
   }
 
-  protected readonly DataAnalysisRunModesEnum = DataAnalysisRunModesEnum;
   protected readonly RunStatusTypes = RunStatusTypes;
 }

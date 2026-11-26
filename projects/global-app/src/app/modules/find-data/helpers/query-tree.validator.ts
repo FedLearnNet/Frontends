@@ -1,5 +1,5 @@
 import {QueryOperatorTypes} from '@global-app/find-data/dto/query';
-import {isLang2Group} from '@global-app/find-data/dto/lang2-query';
+import {isQueryGroup} from '@global-app/find-data/dto/query-item';
 import {
   IntervalPart,
   QueryGroupNode,
@@ -49,7 +49,7 @@ function validateGroup(group: QueryGroupNode, path: string): QueryTreeIssue[] {
   });
 
   group.relations.forEach((relation, index) => {
-    const relationPath = `${path}.temporal_relations[${index}]`;
+    const relationPath = `${path}.temporalRelations[${index}]`;
     if (relation.source === null || relation.target === null) {
       issues.push({path: relationPath, code: 'relation-endpoint'});
       return;
@@ -87,9 +87,6 @@ function validateLeaf(leaf: QueryLeafNode, path: string): QueryTreeIssue[] {
   }
   if (leaf.operator && TEXT_OPERATORS.has(leaf.operator) && leaf.catalogType !== '' && NON_TEXT_CATALOG_TYPES.has(leaf.catalogType)) {
     issues.push({path, code: 'text-operator-type'});
-  }
-  if (leaf.datatypeHint === 'Integer' && leaf.value.trim() !== '' && !/^-?\d+$/.test(leaf.value.trim())) {
-    issues.push({path, code: 'integer-value'});
   }
 
   if (isChangeOperator(leaf.operator)) {
@@ -196,23 +193,23 @@ function isNonNegativeInteger(value: number): boolean {
   return Number.isInteger(value) && value >= 0;
 }
 
-export function groupCarriesLeafFields(group: Lang2GroupShape): boolean {
-  return isLang2Group(group) && (
-    'ontology_id' in group
-    || 'operator' in group
-    || 'value' in group
-    || 'value_mode' in group
-    || 'time_filter' in group
-    || 'time_aggregation_method' in group
-    || 'value_aggregation_method' in group
-    || 'at_least' in group
-    || 'at_most' in group
-    || 'datatype' in group
-    || 'scale' in group
-  );
+export function groupCarriesLeafFields(group: unknown): boolean {
+  return isQueryGroup(group) && LEAF_FIELDS.some(field => field in group);
 }
 
-interface Lang2GroupShape {
-  connecting_operator?: string;
-  conditions?: unknown[];
-}
+const LEAF_FIELDS = [
+  'ontologyId',
+  'dataTypeId',
+  'datatype',
+  'operator',
+  'value',
+  'valueMode',
+  'deltaInterval',
+  'timeFilter',
+  'timeAggregationMethod',
+  'timeWindow',
+  'timeWindowCount',
+  'valueAggregationMethod',
+  'atLeast',
+  'atMost',
+];

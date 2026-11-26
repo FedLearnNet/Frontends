@@ -23,10 +23,18 @@
             [description]="'DIALOG.TRANSFORMER_MANAGER.APP_TOOLS_DESCRIPTION' | translate"
             [selected]="source() === 'tools'"
             (clicked)="onSourceChange('tools')"/>
+
+          <lib-select-btn
+            size="COMPACT"
+            icon="code"
+            [title]="'DIALOG.TRANSFORMER_MANAGER.CUSTOM_CODE' | translate"
+            [description]="'DIALOG.TRANSFORMER_MANAGER.CUSTOM_CODE_DESCRIPTION' | translate"
+            [selected]="source() === 'code'"
+            (clicked)="onSourceChange('code')"/>
         </div>
       </div>
 
-      @if (!isToolsTransformer()) {
+      @if (source() === 'builtin') {
         <mat-chip-listbox
           class="scope-filter"
           [attr.aria-label]="'DIALOG.TRANSFORMER_MANAGER.FILTER_BY_SCOPE' | translate"
@@ -87,7 +95,7 @@
             </div>
           }
         </div>
-      } @else {
+      } @else if (isToolsTransformer()) {
         <div class="picker-section">
           <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.INSTALLED_APPS' | translate }}</span>
 
@@ -95,6 +103,9 @@
             <div class="loading-state">
               <mat-spinner diameter="28"></mat-spinner>
             </div>
+          } @else if (storeUnavailable() && !storeTools().length) {
+            <lib-badge iconName="cloud_off" color="ORANGE" [border]="true" [wrap]="true"
+                       [text]="'STORE_UNAVAILABLE' | translate"/>
           } @else {
             <div class="tool-list">
               @for (item of storeTools(); track item.app!.id) {
@@ -112,9 +123,57 @@
             </div>
           }
 
+          @if (readyCustomFunctions().length) {
+            <span class="section-label section-label--spaced">{{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}</span>
+            <div class="tool-list">
+              @for (fn of readyCustomFunctions(); track fn.appImage) {
+                <app-transformer-tool-list-item
+                  [function]="fn"
+                  [disabled]="isPatientModeUnavailable(fn.mode)"
+                  (activated)="selectCustomTool(fn)"
+                />
+              }
+            </div>
+          }
+
           <button type="button" class="marketplace-banner" (click)="showTools()">
             <mat-icon>storefront</mat-icon>
             <span>{{ 'DIALOG.TRANSFORMER_MANAGER.BROWSE_MARKETPLACE' | translate }}</span>
+            <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
+          </button>
+        </div>
+      } @else if (editing()) {
+        @if (customs().length) {
+          <button type="button" class="back-link" (click)="editing.set(false)">
+            <mat-icon>arrow_back</mat-icon>
+            {{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}
+          </button>
+        }
+        <app-code-transformer
+          [columns]="columns()"
+          [rows]="rows"
+          [schema]="schema"
+          [transformer]="editingTransformer()"
+          (saved)="onCustomSaved($event)"/>
+      } @else {
+        <div class="picker-section">
+          <span class="section-label">{{ 'DIALOG.TRANSFORMER_MANAGER.CUSTOM_TRANSFORMERS' | translate }}</span>
+          <div class="tool-list">
+            @for (fn of customFunctions(); track fn.methodName + $index) {
+              <app-transformer-tool-list-item
+                [function]="fn"
+                [selected]="isFunctionSelected(fn)"
+                [disabled]="!fn.appImage || isPatientModeUnavailable(fn.mode)"
+                [disabledReason]="!fn.appImage
+                  ? ('DIALOG.TRANSFORMER_MANAGER.CUSTOM_NOT_BUILT' | translate)
+                  : isPatientModeUnavailable(fn.mode) ? ('DIALOG.TRANSFORMER_MANAGER.PATIENT_ID_REQUIRED' | translate) : ''"
+                (activated)="selectFunction(fn)"
+              />
+            }
+          </div>
+          <button type="button" class="marketplace-banner" (click)="newCustom()">
+            <mat-icon>add</mat-icon>
+            <span>{{ 'DIALOG.TRANSFORMER_MANAGER.NEW_CUSTOM' | translate }}</span>
             <mat-icon class="marketplace-banner__chevron">chevron_right</mat-icon>
           </button>
         </div>
@@ -137,6 +196,16 @@
             <p class="rail-head__description">
               {{ fn.description || ('DIALOG.TRANSFORMER_MANAGER.NO_DESCRIPTION' | translate) }}
             </p>
+            @if (selectedCustom(); as custom) {
+              <div class="rail-head__actions">
+                <lib-btn type="CUSTOM" variant="SECONDARY" size="SMALL" icon="code"
+                         [label]="'DIALOG.TRANSFORMER_MANAGER.EDIT_CODE' | translate"
+                         (clicked)="editCustom(custom)"/>
+                <lib-btn type="CUSTOM" variant="GHOST" size="SMALL" icon="open_in_new"
+                         [label]="'DIALOG.TRANSFORMER_MANAGER.OPEN_DETAILS' | translate"
+                         (clicked)="openDetails(custom)"/>
+              </div>
+            }
           </div>
 
           <div class="rail-section scope-card">
@@ -182,6 +251,10 @@
               <p class="rail-head__description">{{ tool.shortDescription }}</p>
             }
           </div>
+
+          <lib-network-access-warning [access]="selectedToolNetworkAccess()">
+            <p>{{ 'NETWORK_ACCESS_WARNING.ADD' | translate }}</p>
+          </lib-network-access-warning>
 
           @if (tool.longDescription) {
             <div class="rail-section markdown-card">

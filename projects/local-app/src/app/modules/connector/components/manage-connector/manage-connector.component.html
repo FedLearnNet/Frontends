@@ -6,10 +6,15 @@
                              [data]="card"
                              [selected]="card.index === currentStep().index"/>
       }
+      @if (!canShowDownstreamSteps()) {
+        @for (card of upcomingCards(); track card.step) {
+          <app-connector-cards [data]="card" [selected]="false"/>
+        }
+      }
       <mat-divider class="divider-mb"/>
 
       <div class="drop-list">
-        @if (canShowDownstreamSteps() && transformCards().length === 0) {
+        @if (canShowDownstreamSteps() && transformCards().length === 0 && !aiMode()) {
           <app-connector-cards [data]="transformerPlaceholderCard()"
                                [selected]="false"/>
         }
@@ -34,7 +39,8 @@
           </div>
         </div>
 
-        @if (canShowDownstreamSteps()) {
+        <!-- In AI mode the assistant does this step; the banner at the top starts it -->
+        @if (canShowDownstreamSteps() && !aiMode()) {
           <div class="drop-list-add">
             <lib-btn
               type="CUSTOM"
@@ -67,7 +73,27 @@
         </div>
       }
 
-      @if (currentStep(); as step) {
+      @if (aiMode() && !assistantConnector()) {
+        <div class="ai-mode-banner">
+          <span class="ai-mode-banner__icon"><mat-icon>auto_awesome</mat-icon></span>
+          <div class="ai-mode-banner__text">
+            <strong>{{ 'AI_MODE.TITLE' | translate }}</strong>
+            <span>{{ (isFileReady() ? 'AI_MODE.READY' : 'AI_MODE.CHOOSE_FILE') | translate }}</span>
+          </div>
+          @if (isFileReady()) {
+            <lib-btn type="CUSTOM" variant="PRIMARY" icon="auto_awesome"
+                     [label]="'BUTTON.LET_AI_SUGGEST' | translate"
+                     (clicked)="openTransformerAssistant()"/>
+          }
+        </div>
+      }
+
+      @if (assistantConnector(); as connector) {
+        <app-transformer-assistant [connector]="connector"
+                                   [sampleRows]="getLatestData()"
+                                   (applied)="onAssistantApplied($event)"
+                                   (cancelled)="onAssistantCancelled()"/>
+      } @else if (currentStep(); as step) {
         @if (step.type === 'CONFIG') {
           <app-connector-step-config #configComponent
                                      [cohortId]="cohortId()"
@@ -107,6 +133,7 @@
                   [stepIndex]="stage.stepIndex"
                   [transformer]="getTransformer()"
                   [stage]="stage"
+                  [previewRows]="previewRows()"
                   (finished)="applyTransform()"
                   (openBlockingStep)="openTransformStep($event)"/>
               }
@@ -125,6 +152,8 @@
                                  [loading]="step.previewRunning ?? false"
                                  [headerAction]="false"
                                  [renewColumns]="true"
+                                 [previewRows]="previewRows()"
+                                 (previewRowsChange)="changePreviewRows($event)"
                                  [calledColumns]="getTransformedColumns()"/>
             } @else {
               <lib-skeleton-loader></lib-skeleton-loader>
@@ -133,7 +162,9 @@
         }
 
         @if (step.type === 'MAPPING') {
+          @if (cohort(); as cohortDetail) {
           <app-edit-mapper
+            [routeCohort]="cohortDetail"
             [columns]="getMapperColumns()"
             [inputData]="getLatestData()"
             [validationConfig]="config()"
@@ -142,12 +173,17 @@
             [config]="config().schemaMapping"
             (configChange)="onMappingChange($event)"
             (cardDetail)="onMappingCardContentChange($event)"/>
+          } @else if (cohortResource().error(); as error) {
+            <lib-error-card [errorObject]="error"/>
+          } @else {
+            <lib-skeleton-loader/>
+          }
         }
       }
     </mat-drawer-content>
   </mat-drawer-container>
 
-  @if (toolbarManagement.showToolbar) {
+  @if (toolbarManagement.showToolbar && !assistantConnector()) {
     <mat-toolbar class="connector-toolbar">
       @if (!config().id) {
         <lib-btn
@@ -181,7 +217,11 @@
           [disabled]="!!patientIdTransformerConflict"
           (clicked)="saveConfig()"/>
       }
-      @if (hasContinue()) {
+      @if (hasContinue() && aiMode() && isHeaderStep()) {
+        <lib-btn type="CUSTOM" variant="PRIMARY" icon="auto_awesome"
+                 [label]="'BUTTON.CONTINUE_WITH_AI' | translate"
+                 (clicked)="onContinueClick()"/>
+      } @else if (hasContinue()) {
         <lib-btn type="CONTINUE" variant="PRIMARY" (clicked)="onContinueClick()"/>
       } @else {
         <lib-btn

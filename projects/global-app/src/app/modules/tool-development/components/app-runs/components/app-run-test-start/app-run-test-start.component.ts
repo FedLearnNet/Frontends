@@ -1,4 +1,5 @@
 import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
 import {CommonModule} from "@angular/common";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
@@ -8,8 +9,7 @@ import {
   MAT_DIALOG_DATA,
   MatDialogActions,
   MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle
+  MatDialogRef
 } from "@angular/material/dialog";
 import {
   AppRunHyperparameterComponent
@@ -27,6 +27,8 @@ import {ProjectDto} from "@global-app/project/dto/project";
 import {ProjectService} from "@global-app/project/services/project-service";
 import {TranslatePipe} from "@ngx-translate/core";
 import {HintCardComponent} from "@shared-lib/components/hint-card/hint-card.component";
+import {CloseableDialogTitleComponent} from '@shared-lib/components/closeable-dialog-title/closeable-dialog-title.component';
+import {InfoCardComponent} from '@shared-lib/components/info-card/info-card.component';
 
 interface AppRunTestStartDialogData {
   app: AppDetailDto;
@@ -35,13 +37,13 @@ interface AppRunTestStartDialogData {
 
 @Component({
   selector: 'app-app-run-test-start',
-  imports: [CommonModule,
+  imports: [RunExecutionHelpComponent, CommonModule,
+    CloseableDialogTitleComponent, InfoCardComponent,
     MatFormFieldModule,
     ReactiveFormsModule,
     MatInputModule,
     FormsModule,
     MatButtonModule,
-    MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
     AppRunHyperparameterComponent,

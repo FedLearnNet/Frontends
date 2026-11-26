@@ -1,0 +1,245 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  --line: var(--mat-sys-outline-variant, #e5e7eb);
+  --soft: var(--mat-sys-surface-container-low, #f7f7f9);
+  --accent: var(--mat-sys-primary, #000068);
+  --muted: var(--mat-sys-on-surface-variant, #6b7280);
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+.mono,
+code,
+pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--mat-sys-surface, #fff);
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+  }
+
+  &__icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+  }
+
+  &__title {
+    flex: 1;
+    min-width: 200px;
+
+    h3 {
+      margin: 0 0 2px;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+  }
+
+  &__text {
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  @media (max-width: 600px) {
+    padding: 16px;
+  }
+}
+
+.chips,
+.actions,
+.env {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actions {
+  gap: 8px;
+}
+
+.chip {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &--on {
+    background: color-mix(in srgb, #16a34a 12%, transparent);
+    color: #15803d;
+  }
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 24px;
+  margin: 0;
+
+  dt {
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  dd {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+  }
+}
+
+.file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  > mat-icon {
+    color: var(--accent);
+  }
+
+  &__info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__name {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.code {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px 4px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--soft);
+    font-size: .8rem;
+  }
+
+  &__actions {
+    display: flex;
+  }
+
+  &__body {
+    max-height: 420px;
+    margin: 0;
+    padding: 16px;
+    overflow: auto;
+    font-size: .8rem;
+    line-height: 1.6;
+  }
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.step {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  &__no {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--mat-sys-on-primary, #fff);
+    font-size: .75rem;
+    font-weight: 600;
+  }
+
+  &__cmd {
+    margin: 0;
+    padding: 8px 12px;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: var(--soft);
+    font-size: .8rem;
+  }
+}
+
+.env code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--soft);
+  font-size: .75rem;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 32px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  text-align: center;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  p {
+    margin: 0;
+  }
+}

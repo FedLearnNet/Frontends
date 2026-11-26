@@ -7,7 +7,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {Router} from "@angular/router";
 import {AppDetailDto} from "@shared-lib/modules/store/dto/app-detail";
 import {FederatedRunService} from "../../../../service/federated-run.service";
-import {FederatedTestRunDTO} from "../../../../dto/federated-test-run";
+import {participantsOf, TestRunDTO} from "../../../../dto/test-run";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {ControllerSocketService} from "../../../../service/testembed-socket.service";
 import {TranslatePipe} from "@ngx-translate/core";
@@ -16,13 +16,17 @@ import {runStatusToBadgeStatus} from "@shared-lib/utils/badge-status.helper";
 import {
   AppRunFederatedTestStartComponent
 } from "../app-run-federated-test-start/app-run-federated-test-start.component";
-import {LocalFiles} from "@shared-lib/modules/files/dto/file";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
-import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {ActionCardButtonComponent} from "@shared-lib/components/action-card-button/action-card-button.component";
+import {EmptyStateComponent} from "@shared-lib/modules/app-execution/components/empty-state/empty-state.component";
+import {RunExecutionHelpComponent} from '@shared-lib/modules/app-execution/components/run-execution-help/run-execution-help.component';
+import {errorOf} from "@shared-lib/modules/app-execution/dto/execution-run";
 
+import {AppRunEngineBadgeComponent} from "../app-run-engine-badge/app-run-engine-badge.component";
 @Component({
   selector: 'app-app-run-federated-test',
   imports: [
+    AppRunEngineBadgeComponent,
     CommonModule,
     MatButtonModule,
     MatTableModule,
@@ -31,7 +35,9 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     TranslatePipe,
     StatusBadgeComponent,
     TimeBadgeComponent,
-    BtnComponent,
+    ActionCardButtonComponent,
+    EmptyStateComponent,
+    RunExecutionHelpComponent,
   ],
   templateUrl: './app-run-federated-test.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -45,10 +51,10 @@ export class AppRunFederatedTestComponent implements OnInit {
 
   readonly app = input<AppDetailDto>();
   readonly appRunning = input<boolean>(false);
-  readonly localFiles = input<LocalFiles[]>([]);
+  readonly datafiles = input<string[]>([]);
 
-  displayedColumns: string[] = ['position', 'status', 'participants', 'error', 'startTime'];
-  dataSource: MatTableDataSource<FederatedTestRunDTO> = new MatTableDataSource();
+  displayedColumns: string[] = ['position', 'status', 'engine', 'participants', 'error', 'startTime'];
+  dataSource: MatTableDataSource<TestRunDTO> = new MatTableDataSource();
 
   ngOnInit() {
     const app = this.app();
@@ -58,35 +64,34 @@ export class AppRunFederatedTestComponent implements OnInit {
       this.dataSource.data = runs;
     });
 
-    this.socketService.getFederatedRunCreated$().subscribe((run) => this.updateOrAddRun(run));
     this.socketService.getFederatedRunUpdate$().subscribe((run) => this.updateOrAddRun(run));
   }
 
-  updateOrAddRun(run: FederatedTestRunDTO): void {
+  // Every update carries the whole run.
+  updateOrAddRun(run: TestRunDTO): void {
     const data = this.dataSource.data;
     const existing = data.find((r) => r.id === run.id);
     if (existing === undefined) {
       this.dataSource.data = [run, ...data];
     } else {
-      this.dataSource.data = data.map((r) => r.id === run.id ? {...r, ...run} : r);
+      this.dataSource.data = data.map((r) => r.id === run.id ? run : r);
     }
   }
 
-  participantCount(run: FederatedTestRunDTO): number {
-    return run.participants?.length ?? 0;
+  participantCount(run: TestRunDTO): number {
+    return participantsOf(run).length;
   }
 
-  addNewFederatedTest(): void {
+  addNewFederatedTest(builtImage = true): void {
     const dialogRef = this.dialog.open(AppRunFederatedTestStartComponent, {
-      minHeight: '500px',
-      minWidth: '700px',
-      width: '65vw',
+      width: '960px',
       maxWidth: '95vw',
       maxHeight: '95vh',
       autoFocus: false,
       data: {
         app: this.app(),
-        datafiles: this.localFiles().map(file => file.path),
+        builtImage,
+        datafiles: builtImage ? [] : this.datafiles(),
       },
     });
 
@@ -94,11 +99,12 @@ export class AppRunFederatedTestComponent implements OnInit {
     });
   }
 
-  showDetail(run: FederatedTestRunDTO): void {
+  showDetail(run: TestRunDTO): void {
     const appId = this.app()?.id;
     if (!appId) return;
     this.router.navigate(['/app', appId, 'test', 'federated', run.id]);
   }
 
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly errorOf = errorOf;
 }

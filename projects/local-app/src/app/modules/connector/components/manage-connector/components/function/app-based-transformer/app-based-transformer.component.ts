@@ -14,6 +14,7 @@ import {
 import {ConnectorAppBasedTransformerService} from '../../../../../services/connector-app-based-transformer.service';
 import {ConnectorPreviewService} from '../../../../../services/connector-preview.service';
 import {AppTransformerPreviewStreamDTO} from '../../../../../dto/connector-app-based-transformer';
+import {lastLogOf} from '@shared-lib/modules/app-execution/dto/execution-run';
 import {FunctionsDetailDTO} from '../../../../../dto/function';
 import {PreviewStageDTO} from '../../../../../dto/preview';
 import {ConnectorDTO} from '../../../../../dto/connector';
@@ -46,6 +47,8 @@ export class AppBasedTransformerComponent implements OnDestroy {
   stepIndex = input.required<number>();
   transformer = input<FunctionsDetailDTO | undefined>();
   stage = input<PreviewStageDTO | undefined>();
+  /** Same row count as the grid, so the step result matches its preview. */
+  previewRows = input<number | undefined>(undefined);
 
   finished = output<void>();
 
@@ -74,7 +77,7 @@ export class AppBasedTransformerComponent implements OnDestroy {
   readonly hasResult = computed(() => !!this.stage() && !this.stage()!.requiresRun);
 
   readonly awaitingRun = computed(() => !this.hasResult() || this.blockedByStep() !== null);
-  readonly lastLog = computed(() => this.last()?.lastLog ?? null);
+  readonly lastLog = computed(() => { const last = this.last(); return last ? lastLogOf(last) : null; });
   readonly badge = computed<StatusBadeType>(() => {
     switch (this.last()?.status) {
       case RunStatusTypes.ERROR:
@@ -108,15 +111,15 @@ export class AppBasedTransformerComponent implements OnDestroy {
     this.running.set(true);
 
     const request = {
-      config: this.previewService.buildConfigDTO(this.config(), this.transformers(), this.cohortId()),
+      config: this.previewService.buildConfigDTO(this.config(), this.transformers(), this.cohortId(), this.previewRows()),
       stepIndex: this.stepIndex(),
     };
 
     this.subscription = this.transformerService.runStep(request).subscribe({
       next: message => {
         this.last.set(message);
-        if (message.lastError) {
-          this.error.set(message.lastError);
+        if (message.failure?.message) {
+          this.error.set(message.failure.message);
         }
       },
       error: err => {

@@ -45,17 +45,16 @@ export class ConnectorPreviewService {
   private readonly path = 'connectors'
 
 
-  buildConfigDTO(config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): ConnectorConfigDTO {
+  buildConfigDTO(config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number,
+                 previewRows?: number): ConnectorConfigDTO {
     config.transformer = Array.from(transformers.values());
 
-    return configToConnectorConfigDTO({
-      ...config,
-      cohortId,
-    });
+    return {...configToConnectorConfigDTO({...config, cohortId}), previewRows};
   }
 
-  preview(transFormerCards: ConnectorCard[], config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number): Observable<PreviewResult> {
-    const dto = this.buildConfigDTO(config, transformers, cohortId);
+  preview(transFormerCards: ConnectorCard[], config: ConnectorDTO, transformers: Map<string, FunctionsDetailDTO>, cohortId: number,
+          previewRows?: number): Observable<PreviewResult> {
+    const dto = this.buildConfigDTO(config, transformers, cohortId, previewRows);
     const headers = new HttpHeaders().set(SKIP_LOADING, 'true');
 
     return this.apiService.post<PreviewResponseDTO>(`${this.getBaseUrl()}/preview`, dto, headers).pipe(

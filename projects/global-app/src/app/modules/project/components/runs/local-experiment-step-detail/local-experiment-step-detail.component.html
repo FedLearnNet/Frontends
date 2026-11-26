@@ -1,15 +1,15 @@
-@if (detail(); as detail) {
-  <lib-status-title [type]="runStatusToBadgeStatus(detail.stepStatus!)">
-    #{{ this.node.nodeId }} {{ name }}
+@if (step(); as step) {
+  <lib-status-title [type]="runStatusToBadgeStatus(step.status)">
+    #{{ node.nodeId }} {{ name }}
   </lib-status-title>
   <mat-dialog-content>
     @if (experimentData(); as data) {
-      <lib-experiment-workflow-node-detail [experimentData]="data!"
-        [hideMetric]="isTestExperiment()"
-        [hideOutput]="isTestExperiment()"
-        [hideInput]="isTestExperiment()" />
+      <lib-experiment-workflow-node-detail [experimentData]="data"
+                                           [hideMetric]="isTest()"
+                                           [hideOutput]="isTest()"
+                                           [hideInput]="isTest()"/>
     } @else {
-      <p>loading</p>
+      <p>{{ 'NO_RESULT' | translate }}</p>
     }
   </mat-dialog-content>
   <mat-dialog-actions align="end">

@@ -5,13 +5,16 @@
     <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
       <mat-tab label="Overview">
         <lib-run-performance [meta]="run.meta"/>
-        <lib-run-hyper-params [hyperParams]="run.hyperParams"></lib-run-hyper-params>
+        <lib-run-hyper-params [hyperParams]="$any(run.params ?? {})"></lib-run-hyper-params>
       </mat-tab>
       <mat-tab label="Output">
+        @for (output of run.outputFiles ?? []; track output.id) {
+          <lib-file-detail-card [file]="output.file"/>
+        }
         <lib-app-run-output [appId]="app!.id"
                             [runId]="run.id"
                             [runType]="getRunType()"
-                            [outputData]="run.outputData"
+                            [outputData]="$any(run.outputData)"
         />
       </mat-tab>
       <mat-tab label="Metric">
@@ -27,11 +30,7 @@
         }
       </mat-tab>
       <mat-tab label="Logs">
-        @if (logs$ | async; as logs) {
-          <app-app-log-table [logs]="logs"/>
-        } @else {
-          <lib-skeleton-loader [variant]="'list'"/>
-        }
+        <app-app-log-table [logs]="run.logs ?? []"/>
       </mat-tab>
       <mat-tab label="Model">
         @if (model$ | async; as model) {

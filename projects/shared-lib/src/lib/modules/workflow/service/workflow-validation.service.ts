@@ -21,7 +21,8 @@ export type WorkflowValidationErrorCode =
   | 'NODE.REQUIRED_INPUT.NOT_CONNECTED'
   | 'CONNECTION.NODE.NOT_FOUND'
   | 'CONNECTION.CONFIG.NOT_FOUND'
-  | 'CONNECTION.DUPLICATE';
+  | 'CONNECTION.DUPLICATE'
+  | 'TRE.TOOL';
 
 export interface WorkflowValidationError {
   code: WorkflowValidationErrorCode;

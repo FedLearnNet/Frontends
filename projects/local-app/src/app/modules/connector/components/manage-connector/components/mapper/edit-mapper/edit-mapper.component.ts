@@ -1,3 +1,5 @@
+import {CohortDetailDto} from '@local-app/cohort/models';
+import {withUniquePatientIdNode} from '@local-app/utils/constants/unique-patient-id-node';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,17 +21,14 @@ import {FunctionsDetailDTO} from "../../../../../dto/function";
 import {ConnectorMappingConfig} from "../../../../../models/connector-model";
 import {ConnectorMappingElement} from "../../../../../models/connector-preview";
 import {getArrayOrString, isArray, ListViewComponentDialogComponent} from "../../table/list-view/list-view.component";
-import {ActivatedRoute, Data} from "@angular/router";
-import {CohortDetailDto} from '@local-app/cohort/models';
+import {ActivatedRoute} from "@angular/router";
 import {
   TimeSeriesMappingDialogComponent,
   TimeSeriesMappingDialogComponentData,
   TimeSeriesMappingDialogComponentResult
 } from '../time-series-mapping-dialog/time-series-mapping-dialog.component';
-import {toSignal} from "@angular/core/rxjs-interop";
-import {map, Subscription} from "rxjs";
+import {Subscription} from "rxjs";
 import {isAttributeNode, SchemaNodeNestedDto} from "@local-app/cohort/dto/schema";
-import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-id-node';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {MatToolbar} from '@angular/material/toolbar';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
@@ -50,7 +49,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
 import {ConnectorPreviewMapperComponent} from '../preview-mapper/preview-mapper.component';
-import {TranslatePipe} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 import {MAPPING_PREVIEW_FRAGMENT} from '../../../../../constansts/mapping.constants';
 import {
   PreviewValidationRequestDTO,
@@ -70,7 +69,6 @@ import {SkeletonLoaderComponent} from '@shared-lib/components/skeleton-loader/sk
 import {ConnectorDTO, ConnectorMappingDTO} from '../../../../../dto/connector';
 import {configToConnectorDTO} from '../../../../../models/connector-config';
 
-type RouteData = Data & { breadcrumb: string | any, cohort: CohortDetailDto }
 
 function isPendingResult(result: PreviewValidationResponseDTO): boolean {
   return result.checks.length === 0 && result.warnings === null;
@@ -85,6 +83,7 @@ function isPendingResult(result: PreviewValidationResponseDTO): boolean {
 })
 export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   private readonly dialog: MatDialog = inject(MatDialog);
+  private readonly translate: TranslateService = inject(TranslateService);
   private readonly connectorPreviewService: ConnectorPreviewService = inject(ConnectorPreviewService);
   private readonly activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
@@ -158,28 +157,12 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   });
 
   //TODO BIG TODO WE NEED TO MAKE THIS AT SUB TIME
-  readonly cohort = toSignal(
-    this.activatedRoute.data.pipe(
-      map((d: Data) => {
-        const rd = d as RouteData;
-        const uniquePatientIdNode: SchemaNodeNestedDto = UNIQUE_PATIENT_ID_NODE;
-
-        const exists = rd.cohort.schemaRoot.childNodes
-          .some(child => child.globalId === uniquePatientIdNode.globalId);
-
-        if (!exists) {
-          rd.cohort.schemaRoot.childNodes.push(uniquePatientIdNode);
-        }
-
-        return rd.cohort;
-      })
-    ),
-    {initialValue: undefined}
-  );
+  readonly routeCohort = input.required<CohortDetailDto>();
+  readonly cohort = computed(() => withUniquePatientIdNode(this.routeCohort()));
 
   private readonly flattenedSchemaFields = computed(() => {
     const cohort = this.cohort();
-    if (!cohort?.schemaRoot?.childNodes?.length) {
+    if (!cohort.schemaRoot?.childNodes?.length) {
       return [];
     }
 
@@ -444,7 +427,7 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   private buildPreviewValidationRequest(): PreviewValidationRequestDTO | undefined {
     const cohort = this.cohort();
     const validationConfig = this.validationConfig();
-    if (!cohort || !validationConfig?.inputConfig) return undefined;
+    if (!validationConfig?.inputConfig) return undefined;
 
     const connector = configToConnectorDTO({
       ...validationConfig,
@@ -881,6 +864,17 @@ export class ConnectorEditMapperComponent implements OnInit, OnDestroy {
   getValidationSummary(element: ConnectorMappingElement) {
     return element.validationSummary
       ?? this.findValueMappingForValueColumn(element.column)?.validationSummary;
+  }
+
+  /** Why a column is flagged, e.g. its first rejected value, for the tooltip of its warning icon. */
+  getValidationTooltip(element: ConnectorMappingElement): string {
+    if (!this.isElementMapped(element)) {
+      return this.translate.instant('DIALOG.MAPPER.NOT_MAPPED');
+    }
+    const message = this.getValidationMessage(element);
+    return message && message !== 'Invalid'
+      ? message
+      : this.translate.instant('DIALOG.MAPPER.VIEW_VALIDATION_DETAILS');
   }
 
   getValidationMessage(element: ConnectorMappingElement): string {

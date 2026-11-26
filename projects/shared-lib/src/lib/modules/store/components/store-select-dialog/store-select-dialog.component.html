@@ -1,9 +1,9 @@
 @if (data?.allowMaximize) {
   <lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
-                              [title]="('MENU.SELECT_APP' | translate)"/>
+                              [title]="((data?.title ?? 'MENU.SELECT_APP') | translate)"/>
 } @else {
   <mat-toolbar>
-    <h3>{{ 'MENU.SELECT_APP' | translate }}</h3>
+    <h3>{{ (data?.title ?? 'MENU.SELECT_APP') | translate }}</h3>
     <span class="spacer"></span>
     <button mat-icon-button aria-label="Close store" (click)="onNoClick()">
       <mat-icon>close</mat-icon>

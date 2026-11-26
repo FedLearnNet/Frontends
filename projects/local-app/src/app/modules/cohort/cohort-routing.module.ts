@@ -3,8 +3,9 @@ import {RouterModule, Routes} from '@angular/router';
 import {CohortComponent} from './cohort.component';
 import {CohortCreateComponent} from './components/cohort-create/cohort-create.component';
 import {CohortDashboardComponent} from './components/cohort-dashboard/cohort-dashboard.component';
+import {cohortBreadcrumb, cohortRouteResources} from '@local-app/cohort/services/cohort-route-resources';
 import {CohortOverviewComponent} from './components/cohort-overview/cohort-overview.component';
-import {cohortListResolver, cohortResolver} from '@local-app/cohort/services/cohort-resolver.service';
+import {cohortListResolver} from '@local-app/cohort/services/cohort-resolver.service';
 import {schemaHeadListResolver} from '@local-app/cohort/services/schema-resolver.service';
 import {cohortDataListResolver} from '@local-app/cohort/services/cohort-data-resolver.service';
 import {PatientDetailComponent} from "../patient/components/patient-detail/patient-detail.component";
@@ -31,17 +32,18 @@ const routes: Routes = [
       },
       {
         path: ':cohortId',
-        resolve: {cohort: cohortResolver},
-        data: {breadcrumb: (data: any) => data.cohort.name},
+        data: {breadcrumb: cohortBreadcrumb},
         children: [
           {
             path: '',
             component: CohortOverviewComponent,
+            resources: cohortRouteResources,
             resolve: {allData: cohortDataListResolver},
           },
           {
             path: 'patient/new',
             component: PatientFormComponent,
+            resources: cohortRouteResources,
             canDeactivate: [patientUnsavedChangesGuard],
             data: {
               breadcrumb: 'Add Patient',
@@ -51,6 +53,7 @@ const routes: Routes = [
           {
             path: 'patient/:patientId',
             component: PatientDetailComponent,
+            resources: cohortRouteResources,
             resolve: {patient: patientResolver},
             canDeactivate: [patientUnsavedChangesGuard],
             data: {

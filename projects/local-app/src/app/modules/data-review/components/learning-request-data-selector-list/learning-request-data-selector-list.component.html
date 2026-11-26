@@ -1,6 +1,11 @@
 <lib-closeable-dialog-title (maximizedChanged)="toggleMaximize($event)"
                             [title]="'LEARNING_REQUEST_SELECTION' | translate"/>
 <mat-dialog-content class="content">
+  <lib-network-access-warning [access]="networkAccess()">
+    @if (data.request.status === TrainingStatusPending) {
+      <p>{{ 'NETWORK_ACCESS_WARNING.ACCEPT' | translate }}</p>
+    }
+  </lib-network-access-warning>
   <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
     <mat-tab label="Overview">
       <div class="content-wrapper">

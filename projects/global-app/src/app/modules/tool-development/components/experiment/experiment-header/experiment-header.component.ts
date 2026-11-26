@@ -5,9 +5,8 @@ import {MatCardModule} from '@angular/material/card';
 import {MatChipsModule} from '@angular/material/chips';
 
 import {AppDetailDto} from '@shared-lib/modules/store/dto/app-detail';
-import {ExperimentDetailDTO, ExperimentRunDTO} from '@shared-lib/modules/app-execution/dto/experiment';
 import {ModelVersionDto} from '@shared-lib/modules/app-execution/dto/model';
-import {RunStatusTypes} from '../../../dto/test-run';
+import {RunStatusTypes, TestAttemptDTO, TestRunDTO, testStepOf, trialNameOf, trialsOf} from '../../../dto/test-run';
 import {ErrorCardComponent} from "@shared-lib/components/error-card/error-card.component";
 import {KvComponent} from "@shared-lib/components/kv/kv.component";
 import {StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
@@ -31,30 +30,38 @@ export class ExperimentHeaderComponent {
   private readonly location: Location = inject(Location);
 
   app = input<AppDetailDto | undefined>(undefined);
-  experiment = input<ExperimentDetailDTO | undefined>(undefined);
-  run = input<ExperimentRunDTO | undefined>(undefined);
+  experiment = input<TestRunDTO | undefined>(undefined);
+  // A trial of the experiment, shown on its detail.
+  run = input<TestAttemptDTO | undefined>(undefined);
   model = input<ModelVersionDto | undefined>(undefined);
 
-  totalRuns = computed(() => this.experiment()?.runs?.length ?? 0);
+  private readonly trials = computed(() => {
+    const experiment = this.experiment();
+    return experiment ? trialsOf(experiment) : [];
+  });
+
+  totalRuns = computed(() => this.trials().length);
 
   passedRuns = computed(() => {
-    const runs = this.experiment()?.runs ?? [];
+    const runs = this.trials();
     const finished = RunStatusTypes.FINISHED.toLowerCase();
     return runs.filter(r => (r.status ?? '').toLowerCase() === finished).length;
   });
 
   failedRuns = computed(() => {
-    const runs = this.experiment()?.runs ?? [];
+    const runs = this.trials();
     const error = RunStatusTypes.ERROR.toLowerCase();
     return runs.filter(r => (r.status ?? '').toLowerCase() === error).length;
   });
 
   getInputNames(): string[] {
-    const paths = this.experiment()?.inputFilePaths;
+    const experiment = this.experiment();
+    const paths = experiment ? testStepOf(experiment)?.inputFilePaths : undefined;
     return paths ? Object.keys(paths) : [];
   }
 
   protected readonly runStatusToBadgeStatus = runStatusToBadgeStatus;
+  protected readonly trialNameOf = trialNameOf;
 
   onGoBack(): void {
     this.location.back();

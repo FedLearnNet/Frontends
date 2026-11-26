@@ -22,10 +22,13 @@ import {CohortDetailDto} from '@local-app/cohort/models';
 import {MatCardModule} from '@angular/material/card';
 import {Router} from '@angular/router';
 import {MAPPING_PREVIEW_FRAGMENT} from '../../../../constansts/mapping.constants';
-import {UNIQUE_PATIENT_ID_NODE} from '@local-app/utils/constants/unique-patient-id-node';
+import {withUniquePatientIdNode} from '@local-app/utils/constants/unique-patient-id-node';
 import {connectorFilesDetailToFileInfo, isFileUploadSettings} from "../../../../helper/connector-config-helper";
 import {ConnectorMappingConfig} from "../../../../models/connector-model";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
+import {NetworkAccessWarningComponent} from "@shared-lib/components/network-access-warning/network-access-warning.component";
+import {NetworkAccess, NO_NETWORK_ACCESS} from "@shared-lib/modules/store/model/network-access";
+import {ConnectorNetworkAccessService} from "../../../../services/connector-network-access.service";
 
 @Component({
   selector: 'app-run-dialog',
@@ -44,6 +47,7 @@ import {BtnComponent} from "@shared-lib/components/btn/btn.component";
     TranslatePipe,
     MatCardModule,
     BtnComponent,
+    NetworkAccessWarningComponent,
   ]
 })
 export class ConnectorRunDialogComponent implements OnInit {
@@ -53,10 +57,12 @@ export class ConnectorRunDialogComponent implements OnInit {
   runInProgress = signal<boolean>(false);
   connector = signal<ConnectorDTO>({} as ConnectorDTO);
   cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  networkAccess = signal<NetworkAccess>(NO_NETWORK_ACCESS);
 
   private readonly router = inject(Router);
   private readonly uploadService = inject(ConnectorUploadService);
   private readonly connectorRunService = inject(ConnectorRunService);
+  private readonly networkAccessService = inject(ConnectorNetworkAccessService);
 
   public readonly dialogRef = inject(MatDialogRef<ConnectorRunDialogComponent, boolean>);
   public readonly data = inject<{ cohort: CohortDetailDto; connector: ConnectorDTO }>(MAT_DIALOG_DATA);
@@ -85,22 +91,10 @@ export class ConnectorRunDialogComponent implements OnInit {
   ngOnInit(): void {
     this.connector.set(this.data.connector);
 
-    const cohort = this.data.cohort;
-    const existingChildren = cohort.schemaRoot.childNodes ?? [];
-
-    const hasUniquePatientNode = existingChildren.some(
-      node => node.globalId === UNIQUE_PATIENT_ID_NODE.globalId
-    );
-
-    this.cohort.set({
-      ...cohort,
-      schemaRoot: {
-        ...cohort.schemaRoot,
-        childNodes: hasUniquePatientNode
-          ? existingChildren
-          : [...existingChildren, UNIQUE_PATIENT_ID_NODE]
-      }
-    });
+    this.cohort.set(withUniquePatientIdNode(this.data.cohort));
+    this.networkAccessService.load(this.data.connector)
+      .pipe(take(1))
+      .subscribe(access => this.networkAccess.set(access));
 
     const inputConfig = this.connector().inputConfig;
     if (inputConfig && isFileUploadSettings(inputConfig)) {

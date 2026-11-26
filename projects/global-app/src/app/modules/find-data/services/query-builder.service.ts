@@ -7,8 +7,8 @@ import {isNotEmpty} from '@shared-lib/utils';
 import {map} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {QueryDTO} from "@global-app/find-data/dto/query";
-import {isLang2Group} from "@global-app/find-data/dto/lang2-query";
-import {formatLang2Query} from "@global-app/find-data/helpers/query-tree.serializer";
+import {isQueryGroup} from "@global-app/find-data/dto/query-item";
+import {formatQueryGroup} from "@global-app/find-data/helpers/query-tree.serializer";
 import {TranslateService} from '@ngx-translate/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {ApiService} from "@shared-lib/services/api.service";
@@ -73,14 +73,14 @@ export class QueryBuilderService {
   }
 
   getFormattedQueryString(queryDTO: QueryDTO, queryConfigs: QueryConfig[]): string {
-    if (!isLang2Group(queryDTO?.query)) {
+    if (!isQueryGroup(queryDTO?.query)) {
       return '';
     }
 
-    return formatLang2Query(queryDTO.query, leaf => {
-      const columnName = queryConfigs.find(queryConfig => queryConfig.ontology.id === leaf.ontology_id
-        && queryConfig.dataType.id === leaf.data_type_id)?.name;
-      return columnName || leaf.ontology_id;
+    return formatQueryGroup(queryDTO.query, leaf => {
+      const columnName = queryConfigs.find(queryConfig => queryConfig.ontology.id === leaf.ontologyId
+        && queryConfig.dataType.id === leaf.dataTypeId)?.name;
+      return columnName || leaf.ontologyId;
     });
   }
 

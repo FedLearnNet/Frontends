@@ -13,9 +13,9 @@
         />
       }
 
-      @if (isPrediction(mw)) {
+      @if (isRun(mw)) {
         <div class="prediction-group">
-          <lib-model-result-card [prediction]="getAsPrediction(mw)"/>
+          <lib-model-result-card [run]="getAsRun(mw)"/>
         </div>
       }
     }

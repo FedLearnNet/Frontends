@@ -14,9 +14,9 @@ import {
   APP_EXPORT_STATUS_TEXT
 } from "@shared-lib/modules/data-modeler/utils/app-export-status.util";
 import {
-  PatientToolRunOutputDTO,
   PatientToolRunStatus
 } from "../../../../../../../local-app/src/app/modules/patient/dto/patient-tool-run";
+import {ExecutionFileDTO} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 /** The phases an app-based export passes through. */
 const STEPS = ['Prepare data', 'Start app', 'Run app', 'Outputs'];
@@ -45,7 +45,7 @@ export class AppExportRunCardComponent {
   progress = input<number | null>(null);
   error = input<string | null>(null);
   logs = input<RunMessageLogDTO[]>([]);
-  outputs = input<PatientToolRunOutputDTO[]>([]);
+  outputs = input<ExecutionFileDTO[]>([]);
   startedAt = input<Date | null>(null);
   endedAt = input<Date | null>(null);
   running = input<boolean>(false);
@@ -97,16 +97,20 @@ export class AppExportRunCardComponent {
     return progress !== null && progress > 0 && progress < 1;
   });
 
-  outputIcon(output: PatientToolRunOutputDTO): string {
-    switch (output.type) {
-      case 'HTML':
+  outputIcon(output: ExecutionFileDTO): string {
+    const extension = output.file?.fileName?.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'html':
         return 'insert_chart';
-      case 'CSV':
-      case 'TSV':
+      case 'csv':
+      case 'tsv':
         return 'table_chart';
-      case 'IMAGE':
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+      case 'svg':
         return 'image';
-      case 'JSON':
+      case 'json':
         return 'data_object';
       default:
         return 'description';

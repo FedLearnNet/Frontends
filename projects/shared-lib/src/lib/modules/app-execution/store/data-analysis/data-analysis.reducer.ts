@@ -1,11 +1,11 @@
 import {createFeature, createReducer, on} from "@ngrx/store";
 import {DataAnalysisActions} from "@shared-lib/modules/app-execution/store/data-analysis/data-analysis.actions";
 import {
-  getExecutionPredictionKey,
   getInitialDataAnalysisState,
   patchSelectedAnalysisState,
   removeRunFromExecution,
   removeRunFromSelectedAnalysis,
+  upsertExecutionRun,
   upsertResultAnalysisEntity,
   upsertSelectedAnalysisMessage
 } from "@shared-lib/modules/app-execution/store/data-analysis/data-analysis-reducer.helper";
@@ -19,7 +19,7 @@ import {ModelWorkflowChatMessageType} from "@shared-lib/modules/app-execution/dt
 import {DataAnalysisFileDTO} from "@shared-lib/modules/app-execution/dto/model-workflow-file";
 import {ModelWorkflowUploadFileResponse} from "@shared-lib/modules/app-execution/model/model-workflow-file";
 import {FileContentDTO} from "@shared-lib/modules/files/dto/file";
-import {DataAnalysisPredictionDTO} from "@shared-lib/modules/app-execution/dto/prediction";
+import {DataAnalysisRunDTO, isFinalStatus} from "@shared-lib/modules/app-execution/dto/execution-run";
 
 export const featureKey = 'DataAnalysis';
 
@@ -40,8 +40,8 @@ export interface DataAnalysisFileState {
 
 
 export interface ExecutionState {
-  predictions: DataAnalysisPredictionDTO[];
-  lastPrediction: DataAnalysisPredictionDTO | null;
+  runs: DataAnalysisRunDTO[];
+  lastRun: DataAnalysisRunDTO | null;
   running: boolean;
   error: any;
 }
@@ -54,7 +54,7 @@ export interface DataAnalysisState {
   //files
   file: DataAnalysisFileState;
 
-  //predictions
+  //runs
   execution: ExecutionState;
 
   //global
@@ -77,8 +77,8 @@ const initialState: DataAnalysisState = {
     loading: false,
   },
   execution: {
-    predictions: [],
-    lastPrediction: null,
+    runs: [],
+    lastRun: null,
     running: false,
     error: null,
   },
@@ -220,32 +220,6 @@ export const dataAnalysisFeature = createFeature({
     /************************************
      *       Delete Runs                 *
      ************************************/
-    on(DataAnalysisActions.deleteWorkflowRun, (state, {dataAnalysisId}): DataAnalysisState =>
-      patchSelectedAnalysisState(state, dataAnalysisId, {
-        loading: true,
-        loaded: false,
-        error: null,
-      })
-    ),
-    on(DataAnalysisActions.deleteWorkflowRunSuccess, (state, {dataAnalysisId, workflowId, id}): DataAnalysisState =>
-      patchSelectedAnalysisState(
-        removeRunFromSelectedAnalysis(state, dataAnalysisId, id, workflowId),
-        dataAnalysisId,
-        {
-          loading: false,
-          loaded: true,
-          error: null,
-        }
-      )
-    ),
-    on(DataAnalysisActions.deleteWorkflowRunFailure, (state, {dataAnalysisId, error}): DataAnalysisState =>
-      patchSelectedAnalysisState(state, dataAnalysisId, {
-        loading: false,
-        loaded: true,
-        error,
-      })
-    ),
-
     on(DataAnalysisActions.deleteRun, (state, {dataAnalysisId}): DataAnalysisState =>
       patchSelectedAnalysisState(state, dataAnalysisId, {
         loading: true,
@@ -300,16 +274,11 @@ export const dataAnalysisFeature = createFeature({
         selectedToolHyperParams: null
       } : null,
     })),
-    on(DataAnalysisActions.addExperimentResults, (state, {prediction}): DataAnalysisState => {
+    on(DataAnalysisActions.runResult, (state, {run}): DataAnalysisState => {
       const selected = state.selectedAnalysis;
       if (!selected?.detail) return state;
-      const isWorkflow = prediction.workflowId != null;
-      const wrapper = {
-        type: isWorkflow ? ModelWorkflowChatMessageType.WORKFLOW_PREDICTION : ModelWorkflowChatMessageType.PREDICTION,
-        message: prediction,
-      };
 
-      return upsertSelectedAnalysisMessage(state, selected.id, wrapper);
+      return upsertSelectedAnalysisMessage(state, selected.id, {type: ModelWorkflowChatMessageType.RUN, message: run});
     }),
     on(DataAnalysisActions.addDataAnalysisMessage, (state, {wrapper}): DataAnalysisState => {
       const selected = state.selectedAnalysis;
@@ -532,7 +501,7 @@ export const dataAnalysisFeature = createFeature({
     /************************************
      *       execution                   *
      ************************************/
-    on(DataAnalysisActions.startWorkflowRun, (state): DataAnalysisState => ({
+    on(DataAnalysisActions.startAnalysisRun, (state): DataAnalysisState => ({
       ...state,
       selectedAnalysis: state.selectedAnalysis ? {
         ...state.selectedAnalysis,
@@ -544,7 +513,7 @@ export const dataAnalysisFeature = createFeature({
       execution: {
         ...state.execution,
         running: true,
-        lastPrediction: null,
+        lastRun: null,
         error: null,
       }
     })),
@@ -560,29 +529,12 @@ export const dataAnalysisFeature = createFeature({
       execution: {
         ...state.execution,
         running: true,
-        lastPrediction: null,
+        lastRun: null,
         error: null,
       }
     })),
 
-    on(DataAnalysisActions.runProgress, (state, {prediction}): DataAnalysisState => {
-      const predictionKey = getExecutionPredictionKey(prediction);
-      const idx = predictionKey == null
-        ? -1
-        : state.execution.predictions.findIndex((p) => getExecutionPredictionKey(p) === predictionKey);
-
-      const nextPredictions = idx >= 0
-        ? [...state.execution.predictions.slice(0, idx), prediction, ...state.execution.predictions.slice(idx + 1)]
-        : [...state.execution.predictions, prediction];
-      return {
-        ...state,
-        execution: {
-          ...state.execution,
-          predictions: nextPredictions,
-          lastPrediction: prediction,
-        }
-      };
-    }),
+    on(DataAnalysisActions.runProgress, (state, {run}): DataAnalysisState => upsertExecutionRun(state, run)),
     on(DataAnalysisActions.runError, (state, {error}): DataAnalysisState => ({
       ...state,
       execution: {
@@ -602,61 +554,24 @@ export const dataAnalysisFeature = createFeature({
       execution: {
         ...state.execution,
         running: false,
-        lastPrediction: null,
+        lastRun: null,
       }
     })),
-    on(DataAnalysisActions.addExperimentResults, (state): DataAnalysisState => ({
+    on(DataAnalysisActions.runResult, (state): DataAnalysisState => ({
       ...state,
       execution: {
         ...state.execution,
         error: null,
       }
     })),
-    on(DataAnalysisActions.startRunUpdates, (state, {prediction}): DataAnalysisState => {
-      const predictionKey = getExecutionPredictionKey(prediction);
-      const idx = predictionKey == null
-        ? -1
-        : state.execution.predictions.findIndex((p) => getExecutionPredictionKey(p) === predictionKey);
-
-      const nextPredictions =
-        predictionKey == null
-          ? state.execution.predictions
-          : (idx >= 0
-            ? [...state.execution.predictions.slice(0, idx), prediction, ...state.execution.predictions.slice(idx + 1)]
-            : [...state.execution.predictions, prediction]);
-
-      const isFinished = String((prediction as any)?.status ?? '').toUpperCase() === 'FINISHED';
-
+    on(DataAnalysisActions.followRun, (state, {run}): DataAnalysisState => {
+      const next = upsertExecutionRun(state, run);
       return {
-        ...state,
+        ...next,
         execution: {
-          ...state.execution,
-          running: !isFinished,
+          ...next.execution,
+          running: !isFinalStatus(run.status),
           error: null,
-          lastPrediction: prediction,
-          predictions: nextPredictions,
-        }
-      };
-    }),
-    on(DataAnalysisActions.startWorkflowRunUpdates, (state, {prediction}): DataAnalysisState => {
-      const predictionKey = getExecutionPredictionKey(prediction);
-      const idx = predictionKey == null
-        ? -1
-        : state.execution.predictions.findIndex((p) => getExecutionPredictionKey(p) === predictionKey);
-      const nextPredictions = predictionKey == null
-        ? state.execution.predictions
-        : (idx >= 0
-          ? [...state.execution.predictions.slice(0, idx), prediction, ...state.execution.predictions.slice(idx + 1)]
-          : [...state.execution.predictions, prediction]);
-
-      return {
-        ...state,
-        execution: {
-          ...state.execution,
-          running: true,
-          error: null,
-          lastPrediction: prediction,
-          predictions: nextPredictions,
         }
       };
     }),

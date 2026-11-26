@@ -42,6 +42,11 @@ const routes: Routes = [
         component: MetricsGridComponent,
         data: {breadcrumb: 'Metrics Requests'},
       },
+      {
+        path: 'outputs',
+        component: MetricsGridComponent,
+        data: {breadcrumb: 'Output Requests', type: 'OUTPUTS'},
+      },
     ],
   }
 ]

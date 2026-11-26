@@ -1,4 +1,4 @@
-import {Component, effect, inject, input, model, output, untracked, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, effect, inject, input, model, output, untracked, ChangeDetectionStrategy} from '@angular/core';
 import {DataSource} from "@angular/cdk/collections";
 import {Observable, ReplaySubject} from "rxjs";
 import {MatDialog} from "@angular/material/dialog";
@@ -8,6 +8,10 @@ import {MatTableModule} from '@angular/material/table';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from "@angular/material/button";
 import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/skeleton-loader.component";
+import {MatFormField, MatLabel} from "@angular/material/form-field";
+import {MatOption, MatSelect} from "@angular/material/select";
+import {TranslatePipe} from "@ngx-translate/core";
+import {PREVIEW_ROW_OPTIONS} from "../../../../../dto/preview";
 
 @Component({
   selector: 'app-dynamic-table',
@@ -18,11 +22,17 @@ import {SkeletonLoaderComponent} from "@shared-lib/components/skeleton-loader/sk
     MatTableModule,
     MatIcon,
     MatIconButton,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    TranslatePipe
   ]
 })
 export class ConnectorDynamicTableComponent {
   dialog = inject(MatDialog);
+  readonly previewRowOptions = PREVIEW_ROW_OPTIONS;
 
   readonly data = input<any[]>([]);
   readonly calledColumns = input<string[]>([]);
@@ -30,11 +40,16 @@ export class ConnectorDynamicTableComponent {
   readonly renewColumns = input<boolean>(false);
   readonly dataColumns = input<string[] | undefined>(undefined);
   readonly loading = input<boolean | undefined>(false);
+  /** Set for preview grids: shows the row-count selector. */
+  readonly previewRows = input<number | undefined>(undefined);
+  readonly showPreviewControls = computed(() => this.previewRows() !== undefined);
 
   readonly columns = model<string[]>([]);
   readonly renamedColumns = model<string[] | undefined>(undefined);
   readonly deletedColumns = model<boolean[] | undefined>(undefined);
   readonly hideDeleted = model<boolean>(false);
+
+  readonly previewRowsChange = output<number>();
 
   readonly headerClicked = output<{
     columnName: string;

@@ -13,6 +13,8 @@ export interface ClientConfigDTO {
 
 
 export interface ExperimentDiagramConfigDTO {
+  // The workflow node of the tool it charts; null for an experiment of a single app.
+  workflowNodeId?: number | null;
     name: string;
     dataAggregatorType?: 'max' | 'min' | 'avg' | 'all';
     xAxisHeader: string;

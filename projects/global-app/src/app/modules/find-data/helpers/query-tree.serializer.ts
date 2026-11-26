@@ -1,20 +1,22 @@
 import {QueryConfig} from '@global-app/find-data/models';
 import {DataTypes} from '@global-app/schema/dto/datatype';
+import {QueryOperatorTypes} from '@global-app/find-data/dto/query';
 import {
-  DatatypeHint,
-  isLang2Group,
-  Lang2Group,
-  Lang2Leaf,
-  Lang2Node,
-  Lang2Operator,
-  Lang2TemporalRelation,
-  Lang2TimeFilter,
-} from '@global-app/find-data/dto/lang2-query';
+  IntervalPartDTO,
+  IntervalUnitDTO,
+  isQueryGroup,
+  QueryGroupDTO,
+  QueryLeafDTO,
+  QueryNodeDTO,
+  TemporalRelationDTO,
+  TemporalRelationship,
+  TimeAggregationMethod,
+  TimeFilterDTO,
+} from '@global-app/find-data/dto/query-item';
 import {
   createEmptyGroup,
   createEmptyLeaf,
   createQueryNodeId,
-  DatatypeHintValue,
   IntervalPart,
   IntervalUnit,
   QueryGroupNode,
@@ -24,22 +26,7 @@ import {
   TemporalRelationDraft,
   TimeAggregation,
 } from '@global-app/find-data/models/query-tree';
-import {fromWireOperator, operatorHasValue, relationNeedsInterval, toWireOperator} from '@global-app/find-data/helpers/query-tree.rules';
-
-const INTERVAL_UNITS: Record<string, IntervalUnit> = {
-  minute: 'minutes',
-  minutes: 'minutes',
-  hour: 'hours',
-  hours: 'hours',
-  day: 'days',
-  days: 'days',
-  week: 'weeks',
-  weeks: 'weeks',
-  month: 'months',
-  months: 'months',
-  year: 'years',
-  years: 'years',
-};
+import {operatorHasValue, operatorSpelling, relationNeedsInterval} from '@global-app/find-data/helpers/query-tree.rules';
 
 const UNIT_LABEL: Record<IntervalUnit, { one: string; many: string }> = {
   minutes: {one: 'minute', many: 'minutes'},
@@ -50,13 +37,51 @@ const UNIT_LABEL: Record<IntervalUnit, { one: string; many: string }> = {
   years: {one: 'year', many: 'years'},
 };
 
-const COMPARISON_OPERATORS = new Set<Lang2Operator>(['=', '!=', '>', '<', '>=', '<=']);
-const NUMERIC_PATTERN = /^-?\d+(\.\d+)?$/;
-const INTEGER_PATTERN = /^-?\d+$/;
+const UNIT_TO_WIRE: Record<IntervalUnit, IntervalUnitDTO> = {
+  minutes: 'MINUTES',
+  hours: 'HOURS',
+  days: 'DAYS',
+  weeks: 'WEEKS',
+  months: 'MONTHS',
+  years: 'YEARS',
+};
 
-export function serializeQueryTree(group: QueryGroupNode): Lang2Group {
-  const wire: Lang2Group = {
-    connecting_operator: group.connectingOperator,
+const TIME_AGGREGATION_TO_WIRE: Record<TimeAggregation, TimeAggregationMethod> = {
+  None: 'NONE',
+  first: 'FIRST',
+  last: 'LAST',
+  within: 'WITHIN',
+  within_at_least: 'WITHIN_AT_LEAST',
+  within_at_most: 'WITHIN_AT_MOST',
+};
+
+const RELATION_TO_WIRE: Record<RelationKind, TemporalRelationship> = {
+  within: 'WITHIN',
+  in_the_following: 'IN_THE_FOLLOWING',
+  same_time: 'SAME_TIME',
+  anytime_after: 'ANYTIME_AFTER',
+  same_visit: 'SAME_VISIT',
+  same_group: 'SAME_GROUP',
+};
+
+const UNIT_FROM_WIRE = invert(UNIT_TO_WIRE);
+const TIME_AGGREGATION_FROM_WIRE = invert(TIME_AGGREGATION_TO_WIRE);
+const RELATION_FROM_WIRE = invert(RELATION_TO_WIRE);
+
+const OPERATORS = new Set<string>(Object.values(QueryOperatorTypes));
+const COMPARISON_OPERATORS = new Set<QueryOperatorTypes>([
+  QueryOperatorTypes.EQUAL,
+  QueryOperatorTypes.NOT_EQUAL,
+  QueryOperatorTypes.BIGGER,
+  QueryOperatorTypes.SMALLER,
+  QueryOperatorTypes.BIGGER_EQUAL,
+  QueryOperatorTypes.SMALLER_EQUAL,
+]);
+const NUMERIC_PATTERN = /^-?\d+(\.\d+)?$/;
+
+export function serializeQueryTree(group: QueryGroupNode): QueryGroupDTO {
+  const wire: QueryGroupDTO = {
+    connectingOperator: group.connectingOperator,
     conditions: group.children.map(serializeNode),
   };
   const relations = group.relations
@@ -64,32 +89,32 @@ export function serializeQueryTree(group: QueryGroupNode): Lang2Group {
     .map(serializeRelation);
 
   if (relations.length) {
-    wire.temporal_relations = relations;
+    wire.temporalRelations = relations;
   }
 
   return wire;
 }
 
 export function hydrateQueryTree(query: unknown, configs: QueryConfig[] = []): QueryGroupNode {
-  if (!isLang2Group(query)) {
+  if (!isQueryGroup(query)) {
     return createEmptyGroup();
   }
 
   return parseGroup(query, configs);
 }
 
-export function formatLang2Query(
-  group: Lang2Group,
-  labelFor: (leaf: Lang2Leaf) => string = leaf => leaf.ontology_id,
+export function formatQueryGroup(
+  group: QueryGroupDTO,
+  labelFor: (leaf: QueryLeafDTO) => string = leaf => leaf.ontologyId,
 ): string {
-  const joiner = group.connecting_operator === '$or' ? ' OR ' : ' AND ';
+  const joiner = group.connectingOperator === 'OR' ? ' OR ' : ' AND ';
   return group.conditions.map(condition => {
-    if (isLang2Group(condition)) {
-      return `(${formatLang2Query(condition, labelFor)})`;
+    if (isQueryGroup(condition)) {
+      return `(${formatQueryGroup(condition, labelFor)})`;
     }
 
     const value = condition.value === undefined || condition.value === '' ? '' : ` ${condition.value}`;
-    return `${labelFor(condition)} ${condition.operator}${value}`;
+    return `${labelFor(condition)} ${operatorSpelling(condition.operator)}${value}`;
   }).join(joiner);
 }
 
@@ -106,7 +131,7 @@ export function describeQueryGroup(
   group: QueryGroupNode,
   labelFor: (leaf: QueryLeafNode) => string = leaf => leaf.catalogName || leaf.ontologyId || '…',
 ): string {
-  const joiner = group.connectingOperator === '$or' ? ' OR ' : ' AND ';
+  const joiner = group.connectingOperator === 'OR' ? ' OR ' : ' AND ';
   const body = group.children
     .map(child => child.kind === 'group' ? `(${describeQueryGroup(child, labelFor)})` : describeLeaf(child, labelFor))
     .join(joiner) || '…';
@@ -126,7 +151,7 @@ function describeLeaf(leaf: QueryLeafNode, labelFor: (leaf: QueryLeafNode) => st
   if (!leaf.operator) {
     return name || '…';
   }
-  const operator = toWireOperator(leaf.operator);
+  const operator = operatorSpelling(leaf.operator);
   const value = operatorHasValue(leaf.operator) && leaf.value !== '' ? ` ${leaf.value}` : '';
   const details = leafDetails(leaf);
   const sentence = `${name} ${operator}${value}`.trim();
@@ -191,14 +216,14 @@ function describeRelation(relation: TemporalRelationDraft): string {
   return `${source} ${phrase} ${target}${bounds.length ? ` (${bounds.join(', ')})` : ''}`;
 }
 
-export function collectOntologyIds(group: Lang2Group): string[] {
-  return [...new Set(collectLeaves(group).map(leaf => leaf.ontology_id).filter(Boolean))];
+export function collectOntologyIds(group: QueryGroupDTO): string[] {
+  return [...new Set(collectLeaves(group).map(leaf => leaf.ontologyId).filter(Boolean))];
 }
 
-export function collectLeaves(group: Lang2Group): Lang2Leaf[] {
-  const leaves: Lang2Leaf[] = [];
+export function collectLeaves(group: QueryGroupDTO): QueryLeafDTO[] {
+  const leaves: QueryLeafDTO[] = [];
   walk(group, node => {
-    if (!isLang2Group(node)) {
+    if (!isQueryGroup(node)) {
       leaves.push(node);
     }
   });
@@ -207,7 +232,7 @@ export function collectLeaves(group: Lang2Group): Lang2Leaf[] {
 
 export function formatInterval(parts: IntervalPart[]): string {
   return parts
-    .filter(part => part.count !== null && part.count > 0 && INTERVAL_UNITS[part.unit])
+    .filter(part => part.count !== null && part.count > 0 && UNIT_LABEL[part.unit])
     .map(part => {
       const count = part.count as number;
       const label = count === 1 ? UNIT_LABEL[part.unit].one : UNIT_LABEL[part.unit].many;
@@ -216,52 +241,58 @@ export function formatInterval(parts: IntervalPart[]): string {
     .join(' ');
 }
 
-export function parseInterval(text: string): IntervalPart[] {
-  return [...text.matchAll(/(\d+)\s+(minute|hour|day|week|month|year)s?/gi)].flatMap(match => {
-    const unit = INTERVAL_UNITS[match[2].toLowerCase()];
-    if (!unit) {
-      return [];
-    }
-    return [{count: Number(match[1]), unit}];
-  });
-}
-
-function serializeNode(node: QueryNode): Lang2Node {
+function serializeNode(node: QueryNode): QueryNodeDTO {
   return node.kind === 'group' ? serializeQueryTree(node) : serializeLeaf(node);
 }
 
-function serializeLeaf(leaf: QueryLeafNode): Lang2Leaf {
-  const operator = leaf.operator ? toWireOperator(leaf.operator) : '=';
-  const wire: Lang2Leaf = {
-    ontology_id: leaf.ontologyId,
-    data_type_id: leaf.dataTypeId,
+function serializeLeaf(leaf: QueryLeafNode): QueryLeafDTO {
+  const operator = leaf.operator || QueryOperatorTypes.EQUAL;
+  const wire: QueryLeafDTO = {
+    ontologyId: leaf.ontologyId,
+    dataTypeId: leaf.dataTypeId,
     operator,
-    value_mode: serializeValueMode(leaf),
-    time_aggregation_method: serializeTimeAggregation(leaf),
-    value_aggregation_method: leaf.valueAggregation,
   };
   const value = serializeValue(leaf, operator);
   if (value !== undefined) {
     wire.value = value;
   }
-  if (leaf.datatypeHint) {
-    wire.datatype = leaf.datatypeHint;
+  if (leaf.valueMode === 'delta') {
+    wire.valueMode = 'DELTA';
+    const deltaInterval = serializeInterval(leaf.deltaInterval);
+    if (deltaInterval.length) {
+      wire.deltaInterval = deltaInterval;
+    }
   }
   const timeFilter = serializeTimeFilter(leaf);
   if (timeFilter) {
-    wire.time_filter = timeFilter;
+    wire.timeFilter = timeFilter;
+  }
+  if (leaf.timeAggregation !== 'None') {
+    wire.timeAggregationMethod = TIME_AGGREGATION_TO_WIRE[leaf.timeAggregation];
+  }
+  if (isWindowAggregation(leaf.timeAggregation)) {
+    const timeWindow = serializeInterval(leaf.timeWindow);
+    if (timeWindow.length) {
+      wire.timeWindow = timeWindow;
+    }
+  }
+  if (isCountAggregation(leaf.timeAggregation) && leaf.timeWindowCount !== null) {
+    wire.timeWindowCount = leaf.timeWindowCount;
+  }
+  if (leaf.valueAggregation === 'average') {
+    wire.valueAggregationMethod = 'AVERAGE';
   }
   if (leaf.atLeast !== null) {
-    wire.at_least = leaf.atLeast;
+    wire.atLeast = leaf.atLeast;
   }
   if (leaf.atMost !== null) {
-    wire.at_most = leaf.atMost;
+    wire.atMost = leaf.atMost;
   }
   return wire;
 }
 
-function serializeValue(leaf: QueryLeafNode, operator: Lang2Operator): string | number | undefined {
-  if (!operatorHasWireValue(operator)) {
+function serializeValue(leaf: QueryLeafNode, operator: QueryOperatorTypes): string | number | undefined {
+  if (!operatorHasValue(operator)) {
     return undefined;
   }
 
@@ -269,56 +300,31 @@ function serializeValue(leaf: QueryLeafNode, operator: Lang2Operator): string | 
   if (raw === '') {
     return undefined;
   }
-  if (operator === 'in' || operator === '!in') {
+  if (operator === QueryOperatorTypes.IN || operator === QueryOperatorTypes.NOT_IN) {
     return raw;
-  }
-  if (leaf.datatypeHint === 'String' || leaf.datatypeHint === 'Boolean') {
-    return raw;
-  }
-  if (leaf.datatypeHint === 'Integer' && INTEGER_PATTERN.test(raw)) {
-    return Number(raw);
-  }
-  if (leaf.datatypeHint === 'Float' && NUMERIC_PATTERN.test(raw)) {
-    return Number(raw);
   }
   const numericCatalog = leaf.catalogType === DataTypes.INT || leaf.catalogType === DataTypes.FLOAT;
-  if ((numericCatalog || COMPARISON_OPERATORS.has(operator)) && NUMERIC_PATTERN.test(raw) && leaf.datatypeHint === '') {
+  if ((numericCatalog || COMPARISON_OPERATORS.has(operator)) && NUMERIC_PATTERN.test(raw)) {
     return Number(raw);
   }
   return raw;
 }
 
-function serializeValueMode(leaf: QueryLeafNode): string {
-  if (leaf.valueMode === 'absolute') {
-    return 'absolute';
-  }
-  const interval = formatInterval(leaf.deltaInterval);
-  return interval ? `delta ${interval}` : 'delta';
+// parts without a positive count are dropped
+function serializeInterval(parts: IntervalPart[]): IntervalPartDTO[] {
+  return parts
+    .filter(part => part.count !== null && part.count > 0)
+    .map(part => ({count: part.count as number, unit: UNIT_TO_WIRE[part.unit]}));
 }
 
-function serializeTimeAggregation(leaf: QueryLeafNode): string {
-  if (leaf.timeAggregation === 'None' || leaf.timeAggregation === 'first' || leaf.timeAggregation === 'last') {
-    return leaf.timeAggregation;
-  }
-
-  const interval = formatInterval(leaf.timeWindow);
-  if (leaf.timeAggregation === 'within') {
-    return interval ? `within ${interval}` : 'within';
-  }
-
-  const count = leaf.timeWindowCount ?? '';
-  const bound = leaf.timeAggregation === 'within_at_least' ? 'at least' : 'at most';
-  return interval ? `within ${interval} ${bound} ${count} times` : `within ${bound} ${count} times`;
-}
-
-function serializeTimeFilter(leaf: QueryLeafNode): Lang2TimeFilter | undefined {
+function serializeTimeFilter(leaf: QueryLeafNode): TimeFilterDTO | undefined {
   const after = leaf.timeAfter.trim();
   const before = leaf.timeBefore.trim();
   if (!after && !before) {
     return undefined;
   }
 
-  const filter: Lang2TimeFilter = {};
+  const filter: TimeFilterDTO = {};
   if (after) {
     filter.after = after;
   }
@@ -328,194 +334,118 @@ function serializeTimeFilter(leaf: QueryLeafNode): Lang2TimeFilter | undefined {
   return filter;
 }
 
-function serializeRelation(relation: TemporalRelationDraft): Lang2TemporalRelation {
-  const wire: Lang2TemporalRelation = {
-    source_condition: relation.source as number,
-    target_condition: relation.target as number,
-    relationship: serializeRelationship(relation),
+function serializeRelation(relation: TemporalRelationDraft): TemporalRelationDTO {
+  const wire: TemporalRelationDTO = {
+    sourceCondition: relation.source as number,
+    targetCondition: relation.target as number,
+    relationship: RELATION_TO_WIRE[relation.kind],
   };
+  if (relationNeedsInterval(relation.kind)) {
+    const interval = serializeInterval(relation.interval);
+    if (interval.length) {
+      wire.interval = interval;
+    }
+  }
   if (relation.atLeast !== null) {
-    wire.at_least = relation.atLeast;
+    wire.atLeast = relation.atLeast;
   }
   if (relation.atMost !== null) {
-    wire.at_most = relation.atMost;
+    wire.atMost = relation.atMost;
   }
   return wire;
 }
 
-function serializeRelationship(relation: TemporalRelationDraft): string {
-  const interval = formatInterval(relation.interval);
-  switch (relation.kind) {
-    case 'within':
-      return interval ? `within ${interval}` : 'within';
-    case 'in_the_following':
-      return interval ? `in the following ${interval}` : 'in the following';
-    case 'same_time':
-      return 'same time';
-    case 'anytime_after':
-      return 'anytime after';
-    case 'same_visit':
-      return 'same visit';
-    case 'same_group':
-      return 'same group';
-  }
-}
-
-function parseGroup(group: Lang2Group, configs: QueryConfig[]): QueryGroupNode {
+function parseGroup(group: QueryGroupDTO, configs: QueryConfig[]): QueryGroupNode {
   return {
     kind: 'group',
     id: createQueryNodeId(),
-    connectingOperator: group.connecting_operator,
+    connectingOperator: group.connectingOperator,
     children: group.conditions.map(condition => parseNode(condition, configs)),
-    relations: (group.temporal_relations ?? []).map(parseRelation),
+    relations: (group.temporalRelations ?? []).map(parseRelation),
     collapsed: false,
   };
 }
 
-function parseNode(node: Lang2Node, configs: QueryConfig[]): QueryNode {
-  return isLang2Group(node) ? parseGroup(node, configs) : parseLeaf(node, configs);
+function parseNode(node: QueryNodeDTO, configs: QueryConfig[]): QueryNode {
+  return isQueryGroup(node) ? parseGroup(node, configs) : parseLeaf(node, configs);
 }
 
-function parseLeaf(leaf: Lang2Leaf, configs: QueryConfig[]): QueryLeafNode {
+function parseLeaf(leaf: QueryLeafDTO, configs: QueryConfig[]): QueryLeafNode {
   const config = configs.find(item =>
-    item.ontology.id === leaf.ontology_id && item.dataType.id === leaf.data_type_id
+    item.ontology.id === leaf.ontologyId && item.dataType.id === leaf.dataTypeId
   );
-  const valueMode = parseValueMode(leaf.value_mode);
-  const timeAggregation = parseTimeAggregation(leaf.time_aggregation_method);
-  const timeFilter = parseTimeFilter(leaf.time_filter);
+  const timeAggregation = TIME_AGGREGATION_FROM_WIRE[leaf.timeAggregationMethod ?? 'NONE'] ?? 'None';
+  const deltaInterval = leaf.valueMode === 'DELTA' ? parseInterval(leaf.deltaInterval) : [];
+  const after = leaf.timeFilter?.after ?? '';
+  const before = leaf.timeFilter?.before ?? '';
   const draft = createEmptyLeaf();
 
   return {
     ...draft,
     catalogName: config?.name ?? '',
-    ontologyId: leaf.ontology_id ?? '',
-    dataTypeId: leaf.data_type_id ?? '',
+    ontologyId: leaf.ontologyId ?? '',
+    dataTypeId: leaf.dataTypeId ?? '',
     catalogType: config?.dataType.type ?? '',
-    operator: fromWireOperator(leaf.operator),
+    operator: parseOperator(leaf.operator),
     value: leaf.value === undefined || leaf.value === null ? '' : `${leaf.value}`,
-    datatypeHint: parseDatatypeHint(leaf.datatype),
-    valueMode: valueMode.mode,
-    deltaWindow: valueMode.interval.length > 0,
-    deltaInterval: valueMode.interval,
-    timeFilterChoice: timeFilter.after && timeFilter.before
-      ? 'between'
-      : timeFilter.after
-        ? 'after'
-        : timeFilter.before
-          ? 'before'
-          : 'anytime',
-    timeAfter: timeFilter.after,
-    timeBefore: timeFilter.before,
-    timeAggregation: timeAggregation.method,
-    timeWindow: timeAggregation.window,
-    timeWindowCount: timeAggregation.count,
-    valueAggregation: leaf.value_aggregation_method === 'average' ? 'average' : 'None',
-    atLeast: optionalCount(leaf.at_least),
-    atMost: optionalCount(leaf.at_most),
+    valueMode: leaf.valueMode === 'DELTA' ? 'delta' : 'absolute',
+    deltaWindow: deltaInterval.length > 0,
+    deltaInterval,
+    timeFilterChoice: after && before ? 'between' : after ? 'after' : before ? 'before' : 'anytime',
+    timeAfter: after,
+    timeBefore: before,
+    timeAggregation,
+    timeWindow: isWindowAggregation(timeAggregation) ? parseInterval(leaf.timeWindow) : [],
+    timeWindowCount: isCountAggregation(timeAggregation) ? optionalCount(leaf.timeWindowCount) : null,
+    valueAggregation: leaf.valueAggregationMethod === 'AVERAGE' ? 'average' : 'None',
+    atLeast: optionalCount(leaf.atLeast),
+    atMost: optionalCount(leaf.atMost),
   };
 }
 
-function parseRelation(relation: Lang2TemporalRelation): TemporalRelationDraft {
-  const parsed = parseRelationship(relation.relationship);
+function parseRelation(relation: TemporalRelationDTO): TemporalRelationDraft {
+  const kind = RELATION_FROM_WIRE[relation.relationship] ?? 'same_group';
   return {
     id: createQueryNodeId(),
-    source: relation.source_condition,
-    target: relation.target_condition,
-    kind: parsed.kind,
-    interval: parsed.interval,
-    atLeast: optionalCount(relation.at_least),
-    atMost: optionalCount(relation.at_most),
+    source: relation.sourceCondition,
+    target: relation.targetCondition,
+    kind,
+    interval: relationNeedsInterval(kind) ? parseInterval(relation.interval) : [],
+    atLeast: optionalCount(relation.atLeast),
+    atMost: optionalCount(relation.atMost),
   };
 }
 
-function parseValueMode(value: string | undefined): { mode: 'absolute' | 'delta'; interval: IntervalPart[] } {
-  if (!value || value === 'absolute') {
-    return {mode: 'absolute', interval: []};
-  }
-  if (value === 'delta') {
-    return {mode: 'delta', interval: []};
-  }
-  if (value.startsWith('delta ')) {
-    return {mode: 'delta', interval: parseInterval(value.slice('delta '.length))};
-  }
-  return {mode: 'absolute', interval: []};
+function parseInterval(parts: IntervalPartDTO[] | undefined): IntervalPart[] {
+  return (parts ?? []).flatMap(part => {
+    const unit = UNIT_FROM_WIRE[part?.unit];
+    return unit ? [{count: optionalCount(part.count), unit}] : [];
+  });
 }
 
-function parseTimeAggregation(value: string | undefined): { method: TimeAggregation; window: IntervalPart[]; count: number | null } {
-  if (!value || value === 'None') {
-    return {method: 'None', window: [], count: null};
-  }
-  if (value === 'first' || value === 'last') {
-    return {method: value, window: [], count: null};
-  }
-
-  const bounded = value.match(/^within (.+) at (least|most) (\d+) times$/);
-  if (bounded) {
-    return {
-      method: bounded[2] === 'least' ? 'within_at_least' : 'within_at_most',
-      window: parseInterval(bounded[1]),
-      count: Number(bounded[3]),
-    };
-  }
-
-  const within = value.match(/^within (.+)$/);
-  if (within) {
-    return {method: 'within', window: parseInterval(within[1]), count: null};
-  }
-
-  return {method: 'None', window: [], count: null};
-}
-
-function parseTimeFilter(value: Lang2Leaf['time_filter']): { after: string; before: string } {
-  if (!value || value === 'anytime' || typeof value === 'string') {
-    return {after: '', before: ''};
-  }
-  return {
-    after: value.after ?? '',
-    before: value.before ?? '',
-  };
-}
-
-function parseRelationship(value: string): { kind: RelationKind; interval: IntervalPart[] } {
-  if (value === 'same time') {
-    return {kind: 'same_time', interval: []};
-  }
-  if (value === 'anytime after') {
-    return {kind: 'anytime_after', interval: []};
-  }
-  if (value === 'same visit') {
-    return {kind: 'same_visit', interval: []};
-  }
-  if (value === 'same group') {
-    return {kind: 'same_group', interval: []};
-  }
-  if (value.startsWith('in the following ')) {
-    return {kind: 'in_the_following', interval: parseInterval(value.slice('in the following '.length))};
-  }
-  if (value.startsWith('within ')) {
-    return {kind: 'within', interval: parseInterval(value.slice('within '.length))};
-  }
-  return {kind: 'same_group', interval: []};
-}
-
-function parseDatatypeHint(value: unknown): DatatypeHintValue {
-  if (value === 'String' || value === 'Integer' || value === 'Float' || value === 'Boolean') {
-    return value as DatatypeHint;
-  }
-  return '';
+function parseOperator(value: unknown): QueryOperatorTypes | '' {
+  return typeof value === 'string' && OPERATORS.has(value) ? value as QueryOperatorTypes : '';
 }
 
 function optionalCount(value: unknown): number | null {
   return typeof value === 'number' ? value : null;
 }
 
-function operatorHasWireValue(operator: Lang2Operator): boolean {
-  return operator !== 'exists' && operator !== '!exists' && operator !== 'has_changed';
+function isWindowAggregation(method: TimeAggregation): boolean {
+  return method === 'within' || isCountAggregation(method);
 }
 
-function walk(node: Lang2Node, visit: (node: Lang2Node) => void): void {
+function isCountAggregation(method: TimeAggregation): boolean {
+  return method === 'within_at_least' || method === 'within_at_most';
+}
+
+function invert<K extends string, V extends string>(record: Record<K, V>): Record<V, K> {
+  return Object.fromEntries(Object.entries(record).map(([key, value]) => [value, key])) as Record<V, K>;
+}
+
+function walk(node: QueryNodeDTO, visit: (node: QueryNodeDTO) => void): void {
   visit(node);
-  if (isLang2Group(node)) {
+  if (isQueryGroup(node)) {
     node.conditions.forEach(condition => walk(condition, visit));
   }
 }

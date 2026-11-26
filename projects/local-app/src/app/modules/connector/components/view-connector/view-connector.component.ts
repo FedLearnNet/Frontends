@@ -1,4 +1,5 @@
-import {Component, inject, input, OnDestroy, OnInit, signal, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, signal} from '@angular/core';
+import {CohortResource} from '@local-app/cohort/services/cohort-route-resources';
 import {ActivatedRoute, Data, Router} from "@angular/router";
 import {ConnectorService} from "../../services/connector-crud.service";
 import {configToConnectorDTO} from "../../models/connector-config";
@@ -37,22 +38,24 @@ import {
   ConnectorJsonEditorDialogComponent,
   EditConnectorJsonEditorData
 } from "../manage-connector/components/connector-json-editor-dialog/connector-json-editor-dialog.component";
-import {CohortDetailDto} from '@local-app/cohort/models';
 import {StatusBadeType, StatusBadgeComponent} from "@shared-lib/components/status-badge/status-badge.component";
 import {TimeBadgeComponent} from "@shared-lib/components/time-badge/time-badge.component";
 import {HeaderComponent} from "@shared-lib/components/header/header.component";
 import {PageWrapperComponent} from "@shared-lib/components/page-wrapper/page-wrapper.component";
 import {BtnComponent} from "@shared-lib/components/btn/btn.component";
 import {getCleanConnectorConfig} from '../../helper/connector-config-helper';
+import {NetworkAccessWarningComponent} from "@shared-lib/components/network-access-warning/network-access-warning.component";
+import {NetworkAccess, NO_NETWORK_ACCESS} from "@shared-lib/modules/store/model/network-access";
+import {ConnectorNetworkAccessService} from "../../services/connector-network-access.service";
 
-type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO, cohort: CohortDetailDto }
+type RouteData = Data & { breadcrumb: string | any, connector: ConnectorDTO }
 
 @Component({
   selector: 'app-view-connector',
   templateUrl: './view-connector.component.html',
   styleUrl: './view-connector.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatButton, MatTooltip, MatIcon, MatMenu, MatMenuItem, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, MatSlideToggle, MatSelect, MatOption, BtnComponent]
+  imports: [MatButton, MatTooltip, MatIcon, MatMenu, MatMenuItem, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatSuffix, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatPaginator, TranslatePipe, StatusBadgeComponent, TimeBadgeComponent, HeaderComponent, PageWrapperComponent, MatSlideToggle, MatSelect, MatOption, BtnComponent, NetworkAccessWarningComponent]
 })
 export class ViewConnectorComponent implements OnInit, OnDestroy {
   private static readonly REFRESH_PERIOD = 5000;
@@ -60,7 +63,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
 
   readonly cohortId = input<string | null>();
 
-  private readonly cohort = signal<CohortDetailDto>({} as CohortDetailDto);
+  readonly cohortResource = input.required<CohortResource>();
+  readonly cohort = computed(() => this.cohortResource().hasValue() ? this.cohortResource().value() : undefined);
 
   connector?: ConnectorDTO;
   availableTriggerConnectors: ConnectorDTO[] = [];
@@ -68,6 +72,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   showAutomationSettings = false;
   showCronHelp = false;
   runs: ConnectorRunDTO[] = [];
+  readonly networkAccess = signal<NetworkAccess>(NO_NETWORK_ACCESS);
 
   editBackup: Record<string, unknown> = {};
   editModes: Record<string, boolean> = {
@@ -88,6 +93,7 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   private connectorService = inject(ConnectorService);
   private translateService = inject(TranslateService);
   private connectorRunService = inject(ConnectorRunService);
+  private networkAccessService = inject(ConnectorNetworkAccessService);
 
   get baseRoute(): string {
     return `cohort/${this.cohortId()}/connector`;
@@ -97,15 +103,21 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
     this.activatedRoute.data.subscribe(data => {
       const routeData = data as RouteData;
       this.connector = routeData.connector;
+      this.loadNetworkAccess();
       this.loadRuns();
-      this.loadTriggerConnectors(routeData.cohort?.id);
-
-      this.cohort.set(routeData.cohort);
+      this.loadTriggerConnectors(this.connector?.cohortId ?? undefined);
     });
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+  }
+
+  private loadNetworkAccess(): void {
+    this.networkAccess.set(NO_NETWORK_ACCESS);
+    if (!this.connector) return;
+    this.networkAccessService.load(this.connector)
+      .subscribe(access => this.networkAccess.set(access));
   }
 
   loadRuns(): void {
@@ -138,7 +150,8 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   save(field: string): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     this.connectorService.patch(configToConnectorDTO(this.connector)).subscribe((connector) => {
       this.connector = {
@@ -235,11 +248,12 @@ export class ViewConnectorComponent implements OnInit, OnDestroy {
   }
 
   onRunClick(): void {
-    if (!this.connector) return;
+    const cohort = this.cohort();
+    if (!this.connector || !cohort) return;
 
     const dialogRef = this.dialog.open(ConnectorRunDialogComponent, {
       data: {
-        cohort: this.cohort(),
+        cohort,
         connector: this.connector,
       },
     });

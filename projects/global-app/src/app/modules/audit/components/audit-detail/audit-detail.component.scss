@@ -20,6 +20,10 @@
   gap: 14px;
 }
 
+.llm-grid {
+  padding: 0 clamp(12px, 2.4vw, 20px);
+}
+
 @media (max-width: 980px) {
   .grid {
     grid-template-columns: 1fr;

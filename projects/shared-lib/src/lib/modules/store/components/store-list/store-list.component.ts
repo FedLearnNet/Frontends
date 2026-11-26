@@ -71,8 +71,11 @@ export class StoreListComponent implements OnInit {
     const appTypeFilters = storeConfig && storeConfig.prefilter ?
       storeConfig.prefilter.appType.map(f => f as string) : undefined;
 
-    if (this.storeItems().length === 0) {
-      this.store.dispatch(StoreActions.loadList({params: {page: 0, appTypes: appTypeFilters, hideWorkflow}}));
+    // a configured list must not show items loaded for another config
+    if (storeConfig || this.storeItems().length === 0) {
+      this.store.dispatch(StoreActions.loadList({
+        params: {page: 0, appTypes: appTypeFilters, hideWorkflow, onlyWithImage: storeConfig?.onlyWithImage}
+      }));
     }
   }
 

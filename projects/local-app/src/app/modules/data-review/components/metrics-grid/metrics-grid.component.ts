@@ -14,7 +14,8 @@ import {StatusBadgeComponent} from '@shared-lib/components/status-badge/status-b
 import {BadgeComponent} from '@shared-lib/components/badge/badge.component';
 import {ResponsiveService} from '@shared-lib/services/responsive.service';
 import {FederatedLearningRequestStatus} from '@local-app/data-review/dto/federated-learning-request';
-import {RequestRunMetricsDto} from '@local-app/data-review/dto/request-run-metrics';
+import {RequestRunMetricsDto, RunMetricsRequestType} from '@local-app/data-review/dto/request-run-metrics';
+import {ActivatedRoute} from '@angular/router';
 import {RunMetricsRequestService} from '@local-app/data-review/services/run-metrics-request.service';
 import {
   MetricsRequestDetailComponent
@@ -43,6 +44,8 @@ export class MetricsGridComponent implements OnInit {
   private readonly responsiveService = inject(ResponsiveService);
   private readonly metricsRequestService = inject(RunMetricsRequestService);
   private readonly destroyRef = inject(DestroyRef);
+  // The route of the output requests lists those, any other place the metrics requests.
+  private readonly type: RunMetricsRequestType = inject(ActivatedRoute).snapshot.data['type'] ?? 'METRICS';
 
   readonly INIT_PAGE_SIZE = 20;
 
@@ -57,7 +60,10 @@ export class MetricsGridComponent implements OnInit {
   readonly currentPage = signal(0);
   readonly currentPageSize = signal(this.INIT_PAGE_SIZE);
 
-  displayedColumns: string[] = ['experiment', 'project', 'metrics', 'status', 'date'];
+  readonly isOutputs = this.type === 'OUTPUTS';
+  displayedColumns: string[] = this.isOutputs
+    ? ['experiment', 'project', 'status', 'date']
+    : ['experiment', 'project', 'metrics', 'status', 'date'];
 
   protected readonly FederatedLearningRequestStatus = FederatedLearningRequestStatus;
 
@@ -109,7 +115,7 @@ export class MetricsGridComponent implements OnInit {
     this.currentPage.set(nextPage);
     this.currentPageSize.set(pageSize);
 
-    this.metricsRequestService.getAllRequests(nextPage, pageSize, FederatedLearningRequestStatus.PENDING)
+    this.metricsRequestService.getAllRequests(nextPage, pageSize, FederatedLearningRequestStatus.PENDING, this.type)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => this.applyPage(response.results ?? [], response.totalCount),

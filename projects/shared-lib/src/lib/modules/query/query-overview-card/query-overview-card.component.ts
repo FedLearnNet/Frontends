@@ -2,19 +2,14 @@ import {Component, computed, input, ChangeDetectionStrategy} from '@angular/core
 import {DatePipe, UpperCasePipe} from "@angular/common";
 import {TranslatePipe} from "@ngx-translate/core";
 import {LocalQueryDto} from "../../../../../../local-app/src/app/modules/logs/dto/query";
-import {
-  EnhancedQueryItemDTO,
-  QueryDetailDTO,
-  QueryItemDTO,
-  QueryOperatorDTO,
-  QueryOperatorTypes
-} from "@global-app/find-data/dto/query";
-import {isLang2Group} from "@global-app/find-data/dto/lang2-query";
-import {formatLang2Query} from "@global-app/find-data/helpers/query-tree.serializer";
+import {EnhancedQueryItemDTO, QueryDetailDTO} from "@global-app/find-data/dto/query";
+import {isQueryGroup} from "@global-app/find-data/dto/query-item";
+import {operatorHasValue} from "@global-app/find-data/helpers/query-tree.rules";
+import {formatQueryGroup} from "@global-app/find-data/helpers/query-tree.serializer";
 import {parseValue, prettifyOperator} from "../../../../../../local-app/src/app/modules/logs/helper/query.helper";
 
 type QueryCardDto = LocalQueryDto | QueryDetailDTO;
-type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemDTO | QueryItemDTO;
+type QueryCardItem = LocalQueryDto['enhancedQuery'][number] | EnhancedQueryItemDTO;
 type QueryCondition = { operator: string; value: string };
 type QueryGroup = { labels: string[]; conditions: QueryCondition[] };
 
@@ -35,34 +30,30 @@ export class QueryOverviewCardComponent {
 
   readonly summary = computed(() => {
     const query = this.query();
-    if (query.enhancedQuery?.length || Array.isArray(query.query) || !isLang2Group(query.query)) {
+    if (query.enhancedQuery?.length || !isQueryGroup(query.query)) {
       return null;
     }
-    return formatLang2Query(query.query, leaf =>
-      [leaf.ontology_id, leaf.data_type_id].filter(Boolean).join(' / ')
+    return formatQueryGroup(query.query, leaf =>
+      [leaf.ontologyId, leaf.dataTypeId].filter(Boolean).join(' / ')
     );
   });
 
   readonly items = computed<QueryCardItem[]>(() => {
     const query = this.query();
-    if (query.enhancedQuery?.length) {
-      return query.enhancedQuery;
-    }
-    return Array.isArray(query.query) ? query.query : [];
+    return query.enhancedQuery ?? [];
   });
 
   readonly groups = computed<QueryGroup[]>(() => this.items().map(g => {
     const labels = this.getGroupLabels(g);
     return {
       labels: labels.length ? labels : [''],
-      conditions: (g.operator ?? []).map(op => this.toCondition(op)),
+      conditions: g.operator ? [this.toCondition(g)] : [],
     };
   }));
 
-  private toCondition(op: QueryOperatorDTO): QueryCondition {
-    const norm = op.operator as QueryOperatorTypes | string;
-    const isExists = norm === QueryOperatorTypes.EXISTS || norm === 'exists';
-    return {operator: prettifyOperator(norm), value: isExists ? '' : parseValue(op.value)};
+  private toCondition(item: QueryCardItem): QueryCondition {
+    const value = operatorHasValue(item.operator) && item.value != null ? parseValue(`${item.value}`) : '';
+    return {operator: prettifyOperator(item.operator), value};
   }
 
   private getGroupLabels(group: QueryCardItem): string[] {
