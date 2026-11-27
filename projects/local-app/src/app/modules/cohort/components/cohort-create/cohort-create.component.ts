@@ -67,12 +67,6 @@ export class CohortCreateComponent {
       .sort((a, b) => a.name.localeCompare(b.name));
   });
 
-  // schema names start with their release, e.g. 2026-07_mimic_iv_v2
-  labelOf(name: string): { date?: string; title: string } {
-    const match = /^(\d{4}-\d{2})[_-]?(.+)$/.exec(name);
-    return {date: match?.[1], title: (match?.[2] ?? name).replace(/_/g, ' ')};
-  }
-
   selectSource(source: CohortSource): void {
     this.router.navigate([], {
       relativeTo: this.route,
