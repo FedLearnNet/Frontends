@@ -56,7 +56,7 @@ const routes: Routes = [
             data: {breadcrumb: 'Create'},
           },
           {
-            path: ':datatypeId',
+            path: ':dataTypeId',
             pathMatch: 'full',
             component: DetailDatatypeComponent,
             data: {breadcrumb: 'Datatype'},
