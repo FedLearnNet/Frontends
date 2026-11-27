@@ -1,0 +1,810 @@
+// Same palette as the federated-flow figure; red marks what goes wrong, green how FL-Net solves it.
+:host {
+  --bx-fg: #1f2733;
+  --bx-muted: #5c6675;
+  --bx-line: rgba(2, 6, 23, 0.12);
+  --bx-agg: #3f6391;
+  --bx-card: #9fb0da;
+  --bx-bad: #c62828;
+  --bx-bad-soft: #fcebeb;
+  --bx-good: #2e7d32;
+  --bx-good-soft: #e8f3e8;
+
+  display: block;
+}
+
+.bx {
+  --padX: clamp(18px, 3.6vw, 40px);
+  --state: var(--bx-bad);
+  --state-soft: var(--bx-bad-soft);
+  max-width: 1200px;
+  margin: clamp(28px, 4vw, 48px) auto 0;
+  padding: 0 var(--padX);
+  color: var(--bx-fg);
+
+  &--solution {
+    --state: var(--bx-good);
+    --state-soft: var(--bx-good-soft);
+  }
+
+  &__head {
+    margin-bottom: 14px;
+
+    h2 {
+      margin: 0 0 4px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: var(--bx-muted);
+    }
+  }
+
+  &__tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+
+    @media (max-width: 760px) {
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+  }
+
+  &__tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    flex: none;
+    padding: 10px 12px;
+    border: 1px solid var(--bx-line);
+    border-radius: 12px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 200ms, background 200ms;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--bx-agg);
+    }
+
+    &.active {
+      border-color: #1f2733;
+      background: #1f2733;
+      color: #fff;
+    }
+  }
+
+  &__tab-id {
+    font-weight: 700;
+    font-size: 13px;
+
+    &.solved {
+      color: var(--bx-good);
+    }
+  }
+
+  &__tab.active &__tab-id.solved {
+    color: #9be09f;
+  }
+
+  &__tab-label {
+    font-size: 13px;
+  }
+
+  &__card {
+    padding: clamp(12px, 2vw, 22px);
+    border: 1px solid var(--bx-line);
+    border-radius: 16px;
+    background: #fff;
+  }
+
+  &__title {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    // Wraps the status pill onto its own line on phones instead of squeezing the title.
+    > div {
+      flex: 1 1 240px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 2px 0 0;
+      color: var(--bx-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 760px) {
+      flex-wrap: wrap;
+    }
+  }
+
+  &__badge {
+    flex: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #2a2e35;
+    color: #fff;
+    font-weight: 700;
+    transition: background 300ms;
+  }
+
+  &--solution &__badge {
+    background: var(--bx-good);
+  }
+
+  &__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+    padding: 6px 12px;
+    border: 1.5px solid var(--state);
+    border-radius: 8px;
+    color: var(--state);
+    background: #fff;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  &__status-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--state);
+    color: #fff;
+    font-size: 12px;
+  }
+
+  // The figure needs the full width; the findings follow as a row, like the slides' side panel.
+  &__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  &__figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: inherit;
+    animation: bx-scene 350ms ease-out both;
+  }
+
+  &__notes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--state-soft);
+    transition: background 300ms;
+
+    ol {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  &__cta,
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  &__cta {
+    border: 1px solid var(--bx-good);
+    background: var(--bx-good);
+    color: #fff;
+
+    &:hover,
+    &:focus-visible {
+      background: #256a29;
+    }
+  }
+
+  &__back {
+    border: 1px solid var(--bx-line);
+    background: #fff;
+    color: inherit;
+  }
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  animation: bx-rise 350ms ease-out calc(var(--i) * 140ms + 150ms) both;
+
+  &.sel {
+    border-color: var(--state);
+    background: rgba(255, 255, 255, 0.7);
+  }
+
+  &__pin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--state);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.proof {
+  margin: auto 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--bx-good);
+  background: #fff;
+  font-size: 14px;
+  animation: bx-rise 350ms ease-out 500ms both;
+
+  strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--bx-good);
+  }
+}
+
+// ---- Figure ---------------------------------------------------------------------------------
+
+svg text {
+  fill: var(--bx-fg);
+  font-size: 13px;
+}
+
+.arrowhead {
+  fill: var(--bx-card);
+}
+
+.fade {
+  transition: opacity 350ms;
+
+  &.dim {
+    opacity: 0.28;
+  }
+}
+
+.num {
+  circle {
+    fill: #111;
+  }
+
+  text {
+    fill: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+}
+
+.agg {
+  &__bar {
+    fill: var(--bx-agg);
+  }
+
+  &__title {
+    fill: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+
+  &__formula {
+    fill: #fff !important;
+  }
+
+  &__bad {
+    fill: #ffd0d0 !important;
+    font-weight: 700;
+  }
+}
+
+.agg__icon {
+  line {
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+
+  circle {
+    fill: var(--bx-agg);
+    stroke: #fff;
+    stroke-width: 2;
+  }
+}
+
+.query {
+  rect {
+    fill: #fff;
+  }
+
+  text {
+    fill: var(--bx-bad) !important;
+    font-size: 12px !important;
+    text-anchor: middle;
+  }
+
+  &__line {
+    fill: #fff !important;
+    text-anchor: start !important;
+  }
+}
+
+.site {
+  --tone: #a79fd6;
+  --tone-soft: #f7f6fc;
+  --tone-dark: #5b4fa8;
+
+  &[data-tone='green'] {
+    --tone: #9ccc98;
+    --tone-soft: #f3f9f2;
+    --tone-dark: #3d7d3a;
+  }
+
+  &__box {
+    fill: var(--tone-soft);
+    stroke: var(--tone);
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+  }
+
+  &__icon rect {
+    fill: var(--tone-dark);
+  }
+
+  &__cross {
+    fill: #fff;
+  }
+
+  &__h {
+    fill: var(--tone-dark) !important;
+    font-size: 9px !important;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__name {
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+}
+
+.link {
+  stroke: var(--bx-card);
+  stroke-width: 2.5;
+
+  &--down {
+    stroke: var(--bx-agg);
+  }
+
+  &--platform {
+    stroke: var(--bx-agg);
+    stroke-width: 2;
+  }
+}
+
+.pill {
+  rect {
+    fill: #fff;
+    stroke: var(--tone, var(--bx-card));
+    stroke-width: 2;
+  }
+
+  text {
+    text-anchor: middle;
+  }
+
+  &--solution rect {
+    stroke: #a79fd6;
+  }
+}
+
+.lock {
+  circle {
+    fill: #fff;
+    stroke: var(--tone, #a79fd6);
+    stroke-width: 2;
+  }
+
+  &__shackle {
+    fill: none;
+    stroke: var(--tone-dark, #5b4fa8);
+    stroke-width: 1.8;
+  }
+
+  &__body {
+    fill: var(--tone-dark, #5b4fa8);
+  }
+
+  &--open {
+    circle {
+      stroke: var(--bx-bad);
+    }
+
+    .lock__shackle {
+      stroke: var(--bx-bad);
+    }
+
+    .lock__body {
+      fill: var(--bx-bad);
+    }
+  }
+}
+
+.card {
+  &__box {
+    fill: #fff;
+    stroke: var(--bx-card);
+    stroke-width: 2;
+  }
+
+  &__label {
+    fill: var(--bx-muted) !important;
+    paint-order: stroke;
+    stroke: var(--tone-soft, #fff);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+  }
+
+  &__strong {
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__text {
+    text-anchor: middle;
+  }
+
+  &__muted {
+    fill: var(--bx-muted) !important;
+    text-anchor: middle;
+  }
+
+  &__small {
+    fill: var(--bx-muted) !important;
+    font-size: 11px !important;
+  }
+}
+
+.bad {
+  fill: var(--bx-bad) !important;
+  font-size: 12px !important;
+
+  &--center {
+    text-anchor: middle;
+  }
+}
+
+.good--light {
+  fill: #b9f0bc !important;
+  font-size: 11px !important;
+}
+
+.db {
+  path,
+  ellipse {
+    fill: #3c5f7d;
+  }
+
+  &--muted path,
+  &--muted ellipse {
+    fill: #8aa0b4;
+  }
+
+  &__band {
+    fill: none !important;
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+}
+
+.check {
+  fill: #2f8fdd;
+  stroke: #fff;
+  stroke-width: 2;
+
+  &__mark {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+  }
+}
+
+.nn {
+  &__edge {
+    stroke: #b7c0cc;
+    stroke-width: 0.8;
+  }
+
+  &__node {
+    fill: #1f86b5;
+
+    &[data-kind='in'] {
+      fill: #d0415d;
+    }
+
+    &[data-kind='out'] {
+      fill: #f0b43c;
+    }
+  }
+}
+
+.loss {
+  fill: none;
+  stroke: #2f7de1;
+  stroke-width: 2.5;
+
+  &__area {
+    fill: #eaf2fc;
+  }
+}
+
+.stays {
+  rect {
+    fill: #fff;
+    stroke: var(--tone);
+    stroke-width: 2;
+  }
+
+  text {
+    text-anchor: middle;
+  }
+}
+
+.platform {
+  fill: #fff;
+  stroke: var(--bx-agg);
+  stroke-width: 2.5;
+
+  &__name {
+    font-weight: 700;
+    text-anchor: middle;
+  }
+}
+
+.platform__name--start {
+  text-anchor: start;
+}
+
+.octopus {
+  path {
+    fill: none;
+    stroke: #1c3b64;
+    stroke-width: 5;
+    stroke-linecap: round;
+  }
+
+  circle {
+    fill: #1c3b64;
+  }
+
+  &__eye {
+    fill: #5ec3ee !important;
+  }
+
+  &__pupil {
+    fill: #1c3b64 !important;
+  }
+}
+
+.item {
+  &__label {
+    fill: var(--bx-agg) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__agg {
+    fill: var(--bx-agg);
+  }
+
+  &__agg-label {
+    fill: #fff !important;
+    font-weight: 700;
+  }
+}
+
+.ico {
+  stroke: #1f2733;
+  stroke-width: 0.8;
+
+  &--onto {
+    fill: #dcefd4;
+  }
+
+  &--dt {
+    fill: #fbf0c9;
+  }
+
+  &--schema {
+    fill: #d4d9ef;
+  }
+
+  &--node {
+    fill: #7bb3e6;
+    stroke: var(--bx-agg);
+  }
+
+  &__line {
+    fill: none;
+    stroke: #1f2733;
+    stroke-width: 1;
+  }
+
+  &__stroke {
+    fill: none;
+    stroke: var(--bx-agg);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.gear {
+  fill: none;
+  stroke: var(--bx-agg);
+  stroke-width: 6;
+  stroke-dasharray: 4.3 4.3;
+
+  &__hole {
+    fill: #fff;
+    stroke: var(--bx-agg);
+    stroke-width: 3;
+  }
+}
+
+.tag {
+  rect {
+    fill: var(--bx-good-soft);
+    stroke: var(--bx-good);
+    stroke-width: 1.5;
+  }
+
+  text {
+    fill: var(--bx-good) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+  }
+
+  &__center {
+    text-anchor: middle;
+  }
+
+  animation: bx-rise 350ms ease-out 250ms both;
+}
+
+.ghost {
+  rect {
+    fill: #fafbfd;
+    stroke: #cfd6e2;
+    stroke-width: 2;
+    stroke-dasharray: 4 4;
+  }
+
+  text {
+    fill: var(--bx-muted) !important;
+    font-size: 15px !important;
+    font-weight: 700;
+    text-anchor: middle;
+  }
+
+  &__sub {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+  }
+}
+
+// ---- Markers --------------------------------------------------------------------------------
+
+.mark {
+  cursor: pointer;
+  animation: bx-rise 350ms ease-out calc(var(--i) * 140ms + 150ms) both;
+
+  &__box {
+    fill: transparent;
+    stroke: var(--state);
+    stroke-width: 2.5;
+    stroke-dasharray: 5 4;
+    transition: stroke-width 200ms, fill 200ms;
+  }
+
+  &__pin {
+    circle {
+      fill: var(--state);
+      stroke: #fff;
+      stroke-width: 2;
+    }
+
+    text {
+      fill: #fff !important;
+      font-size: 12px !important;
+      font-weight: 700;
+      text-anchor: middle;
+    }
+  }
+
+  &.sel .mark__box {
+    stroke-width: 4;
+    fill: color-mix(in srgb, var(--state) 8%, transparent);
+  }
+}
+
+@keyframes bx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes bx-scene {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bx * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
