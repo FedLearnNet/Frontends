@@ -51,6 +51,8 @@ export interface SchemaRootNodeDto extends BaseDto {
 
   globalId: string;
   globalVersion: number;
+  globalCreatedAt: Date;
+  globalUpdatedAt: Date;
 
   nodeType: SchemaNodeTypeEnum; //will be always SchemaNodeTypeEnum.ROOT
   childNodes: SchemaNodeNestedDto[];

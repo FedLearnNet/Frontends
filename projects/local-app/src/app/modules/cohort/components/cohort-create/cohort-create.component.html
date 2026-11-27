@@ -55,20 +55,19 @@
 
         <div class="schemas">
           @for (schema of filteredSchemas(); track schema.globalId) {
-            @let label = labelOf(schema.name);
             <button type="button" class="schema" [title]="schema.name" (click)="openSchema(schema)">
               <span class="schema__head">
                 <span class="schema__avatar"><mat-icon>account_tree</mat-icon></span>
                 <span class="schema__meta">
-                  @if (label.date) {
-                    <span class="tag">{{ label.date }}</span>
+                  @if (schema.globalCreatedAt) {
+                    <span class="tag">{{ schema.globalCreatedAt }}</span>
                   }
                   @if (schema.globalVersion) {
                     <span class="tag">v{{ schema.globalVersion }}</span>
                   }
                 </span>
               </span>
-              <span class="schema__name">{{ label.title }}</span>
+              <span class="schema__name">{{ schema.name }}</span>
               <span class="schema__text">{{ schema.description || 'No description' }}</span>
               <span class="schema__foot">
                 Preview and use
