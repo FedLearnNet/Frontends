@@ -47,6 +47,9 @@
                 <header class="client-header">
                   <mat-icon>device_hub</mat-icon>
                   <span class="client-id monospace">{{ clientId }}</span>
+                  @if (systems()[clientId]?.flNetSoftwareVersion; as version) {
+                    <span class="monospace">FL-Net {{ version }}</span>
+                  }
                   <lib-status-badge text="Connected" type="SUCCESS" size="SMALL" [animate]="false"></lib-status-badge>
                 </header>
                 <lib-system-info [info]="systems()[clientId]" [runtime]="systems()[clientId]" />

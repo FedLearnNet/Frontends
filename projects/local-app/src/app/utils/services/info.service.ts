@@ -7,9 +7,9 @@ import {environment} from '@local-app/env/environment';
 export interface LocalInfoDTO {
   version: string;
 
-  // empty is Platform is not reachable
-  globalVersion?: string;
-  globalVersionNewer: boolean;
+  // empty if the Platform is not reachable
+  platformVersion?: string;
+  platformVersionNewer: boolean;
   globalWebUrl?: string;
 }
 

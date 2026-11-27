@@ -1,4 +1,15 @@
 {
+  "CONNECTOR_FILE_MISSING": {
+    "BADGE": "File missing",
+    "TITLE": "Source file missing",
+    "MESSAGE": "The file this connector used was deleted after a successful run. Upload a new file or choose one from the file library."
+  },
+  "CONNECTOR_FILE_STRUCTURE_CHANGED": "The file has other tables or columns than this connector was set up with. Check the headers and merge the tables again before mapping.",
+  "CONNECTOR_FILE_STRUCTURE_CHANGED_DIALOG": {
+    "TITLE": "File has a different structure",
+    "MESSAGE": "This file has other tables or columns than this connector was set up with. If you use it, the mapping and the merged headers will be removed and you will have to set them up again.",
+    "CONFIRM": "Use file and remove mapping"
+  },
   "DRY_RUN": "Dry run",
   "DRY_RUN_RESULTS_HINT": "Dry run: nothing was written to the cohort. The counts above show what a real run would change.",
   "CHECKING_PATIENT_CHANGES": "Checking patient changes (dry run)",

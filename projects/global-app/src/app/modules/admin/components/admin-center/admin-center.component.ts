@@ -37,6 +37,13 @@ export class AdminCenterComponent {
       description: 'Monitor live federated learning client connections and inspect sent and received messages.',
       icon: 'monitor_heart',
       routerLink: '/admin/observer',
+    },
+    {
+      id: 'maintenance',
+      title: 'Updates & backups',
+      description: 'Install another FL-Net version, roll back and back up databases, configuration and secrets.',
+      icon: 'system_update_alt',
+      routerLink: '/admin/maintenance'
     }
   ]);
 

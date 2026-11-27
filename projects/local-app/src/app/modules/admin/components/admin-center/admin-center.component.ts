@@ -128,6 +128,13 @@ export class AdminCenterComponent implements OnInit {
       icon: 'monitor_heart',
       routerLink: '/admin/health'
     },
+    {
+      id: 'maintenance',
+      title: 'Updates & backups',
+      description: 'Install another FL-Net version, roll back and back up databases, configuration and secrets.',
+      icon: 'system_update_alt',
+      routerLink: '/admin/maintenance'
+    },
     // Add more tiles here as your sub-dashboards grow
     // { id: 'users', title: 'Users', description: 'User provisioning', icon: 'group', routerLink: '/admin/users' },
   ]);

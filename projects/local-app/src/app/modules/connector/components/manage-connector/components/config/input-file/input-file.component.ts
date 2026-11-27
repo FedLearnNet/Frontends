@@ -12,14 +12,19 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {MatButton} from '@angular/material/button';
 import {RunNewFileComponent} from '../../../../run-connector/components/run-new-file/run-new-file.component';
 import {ConnectorFilesDTO, UploadInfoDTO} from '../../../../../dto/upload-info';
+import {catchError, filter, map, Observable, of, switchMap} from 'rxjs';
 import {
   connectorFilesDetailToFileInfo,
+  fileFitsConnector,
   fileTypeLabel,
   isFileUploadSettings
 } from "../../../../../helper/connector-config-helper";
 import {ConnectorDTO} from "../../../../../dto/connector";
 import {InputFileSelectDialogComponent} from "./components/input-file-select-dialog/input-file-select-dialog.component";
+import {ConfirmDialogComponent} from '@shared-lib/components/confirm-dialog/confirm-dialog.component';
+import {hasValidFileInfo} from '@shared-lib/utils';
 import {BadgeComponent} from '@shared-lib/components/badge/badge.component';
+import {InfoCardComponent} from '@shared-lib/components/info-card/info-card.component';
 import {KvComponent} from '@shared-lib/components/kv/kv.component';
 import {RouterLink} from "@angular/router";
 import {
@@ -33,7 +38,7 @@ import {
   templateUrl: './input-file.component.html',
   styleUrl: './input-file.component.scss',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [MatCard, MatIcon, MatTooltip, MatButton, RunNewFileComponent, MatCardFooter, TranslatePipe, BadgeComponent, KvComponent, RouterLink]
+  imports: [MatCard, MatIcon, MatTooltip, MatButton, RunNewFileComponent, MatCardFooter, TranslatePipe, BadgeComponent, InfoCardComponent, KvComponent, RouterLink]
 })
 export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, ConnectorStepConfig<ConnectorDTO> {
   private uploadService = inject(ConnectorUploadService);
@@ -55,10 +60,13 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
   readonly configChange = output<ConnectorDTO>();
 
   readonly save = output<ConnectorStepConfigChangeEmitter>();
-
+  readonly fileMissing = computed(() => {
+    const config = this.config().inputConfig;
+    return !!config && isFileUploadSettings(config) && !!config.fileId && config.fileExists === false;
+  });
   readonly hasNoFileUploaded = computed(() => {
     const config = this.config().inputConfig;
-    return isFileUploadSettings(config!) && !config.fileId && config.fileExists === false;
+    return !!config && isFileUploadSettings(config) && config.fileExists === false;
   });
 
   public settings: FileUploadSettings = {
@@ -180,28 +188,67 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
 
   private applyUploadedFile(result: InputFileUploadDialogResult): void {
     const uploadedFile = result.uploadedFile;
-    this.settings = {
-      ...this.settings,
-      ...result.settings,
-      file: null,
-      fileId: uploadedFile.id,
-      fileExists: true,
-    };
-    this.selectedFile.set(uploadedFile);
-    this.loadAvailableFiles();
-    this.cdr.detectChanges();
-
     const fileInfo = connectorFilesDetailToFileInfo(uploadedFile);
-    this.configChange.emit({
-      ...this.config(),
-      inputConfig: {...this.settings},
-      fileInfo,
-      uploadInfo: fileInfo,
+
+    this.confirmStructureChange(fileInfo).subscribe(() => {
+      this.settings = {
+        ...this.settings,
+        ...result.settings,
+        file: null,
+        fileId: uploadedFile.id,
+        fileExists: true,
+      };
+      this.selectedFile.set(uploadedFile);
+      this.loadAvailableFiles();
+      this.cdr.detectChanges();
+
+      this.applyConfig({
+        ...this.config(),
+        inputConfig: {...this.settings},
+        fileInfo,
+        uploadInfo: fileInfo,
+      });
     });
   }
 
+  /**
+   * Replacing a deleted file with one that has other tables or columns discards the connector's
+   * merge and mapping setup, so the user has to agree to that first. Emits once when the file may
+   * be used and never when the user backs out.
+   */
+  private confirmStructureChange(fileInfo: Record<string, UploadInfoDTO> | undefined): Observable<true> {
+    if (!this.replacesFileWithOtherStructure(fileInfo)) {
+      return of(true as const);
+    }
+    return this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: this.translate.instant('CONNECTOR_FILE_STRUCTURE_CHANGED_DIALOG.TITLE'),
+        message: this.translate.instant('CONNECTOR_FILE_STRUCTURE_CHANGED_DIALOG.MESSAGE'),
+        dismissButtonText: this.translate.instant('BUTTON.CANCEL'),
+        confirmButtonText: this.translate.instant('CONNECTOR_FILE_STRUCTURE_CHANGED_DIALOG.CONFIRM'),
+      },
+    }).afterClosed().pipe(
+      filter((confirmed?: boolean) => !!confirmed),
+      map(() => true as const),
+    );
+  }
+
+  private replacesFileWithOtherStructure(fileInfo: Record<string, UploadInfoDTO> | undefined): boolean {
+    const connector = this.config();
+    return this.hasNoFileUploaded()
+      && !!connector.id
+      && !!fileInfo
+      && hasValidFileInfo(fileInfo)
+      && !fileFitsConnector(connector, fileInfo);
+  }
+
+  private applyConfig(config: ConnectorDTO): void {
+    this.config.set(config);
+    this.configChange.emit(config);
+  }
+
   onContinueClick(): boolean {
-    if (!this.settings.fileId) {
+    if (!this.settings.fileId || this.settings.fileExists === false) {
       this.snackBar.open(
         this.translate.instant('WARNING.PLEASE_IMPORT_A_FILE'),
         this.translate.instant('BUTTON.CLOSE'), {
@@ -242,7 +289,7 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
       }
 
       const uploadSettings = selectedFile.uploadSettings;
-      this.settings = {
+      const nextSettings: FileUploadSettings = {
         ...this.settings,
         ...(uploadSettings ? {
           fileType: uploadSettings.fileType === 'MULTIPLE_CSV_ZIP' ? 'CSV' : uploadSettings.fileType,
@@ -256,14 +303,30 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
         fileId: selectedFile.id,
       };
 
-      this.configChange.emit({
-        ...this.config(),
-        inputConfig: {...this.settings},
+      this.loadFileInfo(selectedFile.id).pipe(
+        switchMap(fileInfo => this.confirmStructureChange(fileInfo).pipe(map(() => fileInfo))),
+      ).subscribe(fileInfo => {
+        this.settings = nextSettings;
+        this.selectedFile.set(selectedFile);
+        this.cdr.detectChanges();
+        this.applyConfig({
+          ...this.config(),
+          inputConfig: {...nextSettings},
+          ...(fileInfo ? {fileInfo, uploadInfo: fileInfo} : {}),
+        });
       });
-
-      this.selectedFile.set(selectedFile);
-      this.cdr.detectChanges();
     });
+  }
+
+  private loadFileInfo(fileId: number): Observable<Record<string, UploadInfoDTO> | undefined> {
+    const cohortId = this.getCohortId();
+    if (cohortId === undefined) {
+      return of(undefined);
+    }
+    return this.uploadService.getFileDetail(cohortId, fileId).pipe(
+      map(detail => connectorFilesDetailToFileInfo(detail)),
+      catchError(() => of(undefined)),
+    );
   }
 
   onUploadSucceeded(fileId: number): void {
@@ -294,7 +357,7 @@ export class ConnectorStepDataSourceInputFileConfigComponent implements OnInit, 
       });
     }
 
-    this.configChange.emit({
+    this.applyConfig({
       ...configTmp,
       fileInfo: updatedFileInfo,
     });
